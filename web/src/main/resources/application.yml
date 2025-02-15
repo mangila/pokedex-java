@@ -1,0 +1,4 @@
+# Spring
+spring:
+  application:
+    name: web-server
