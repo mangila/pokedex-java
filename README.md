@@ -2,8 +2,19 @@
 
 Maven multi-module project consuming PokeAPI
 
-# web
-Graphql server 
+## integration
 
-# scheduler
-Spring Scheduler that polls data from PokeAPI
+Integration layer - fetches data over http to PokeApi
+
+## model
+
+All models shared around the project
+
+## scheduler
+
+Spring Scheduler that fetches data from PokeApi put it on a Queue,
+polls and updates the database
+
+## web
+
+Graphql server 

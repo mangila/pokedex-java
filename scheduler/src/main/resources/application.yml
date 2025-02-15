@@ -1,0 +1,19 @@
+# Spring
+spring:
+  application:
+    name: scheduler
+  main:
+    keep-alive: true
+  threads:
+    virtual:
+      enabled: true
+  task:
+    scheduling:
+      pool:
+        size: 10
+  data:
+    redis:
+      host: "localhost"
+      port: 6379
+      client-type: jedis
+      client-name: "scheduler"
