@@ -13,6 +13,7 @@ import com.github.mangila.scheduler.service.QueueService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -53,10 +54,11 @@ public class PokemonTask implements CommandLineRunner {
      */
     @Scheduled(fixedRate = 5, initialDelay = 30, timeUnit = TimeUnit.SECONDS)
     public void pollPokemon() {
-        var speciesName = queueService.popNameQueue();
-        if (Objects.isNull(speciesName)) {
+        var optionalPokemonName = queueService.popNameQueue();
+        if (optionalPokemonName.isEmpty()) {
             return;
         }
+        var speciesName = optionalPokemonName.get();
         log.info("Processing - {}", speciesName.getName());
         var speciesResponse = pokeApiService.fetchPokemonSpecies(speciesName);
         var evolutionChain = pokeApiService.fetchEvolutionChain(speciesResponse.evolutionChain());
@@ -66,10 +68,12 @@ public class PokemonTask implements CommandLineRunner {
                 .toList();
         // Run side effect
         varieties.forEach(variety -> {
-            var id = new PokemonId(variety.id());
-            var name = new PokemonName(variety.name());
-            putOnImagesQueue(id, name, variety.sprites());
-            putOnAudiosQueue(id, name, variety.cries());
+            var idPair = Pair.of(
+                    new PokemonId(speciesResponse.id()),
+                    new PokemonId(variety.id()));
+            var varietyName = new PokemonName(variety.name());
+            putOnImagesQueue(idPair, varietyName, variety.sprites());
+            putOnAudiosQueue(idPair, varietyName, variety.cries());
         });
         mongoDbService.save(pokeApiMapper.ToDocument(
                 speciesResponse,
@@ -78,34 +82,50 @@ public class PokemonTask implements CommandLineRunner {
         ));
     }
 
-    private void putOnAudiosQueue(PokemonId id, PokemonName name, Cries cries) {
-        queueAudioIfNotNull(id, name, "legacy", cries.legacy());
-        queueAudioIfNotNull(id, name, "latest", cries.latest());
+    private void putOnAudiosQueue(Pair<PokemonId, PokemonId> idPair,
+                                  PokemonName name,
+                                  Cries cries) {
+        queueAudioIfNotNull(idPair, name, "legacy", cries.legacy());
+        queueAudioIfNotNull(idPair, name, "latest", cries.latest());
     }
 
-    private void queueAudioIfNotNull(PokemonId id,
+    private void queueAudioIfNotNull(Pair<PokemonId, PokemonId> idPair,
                                      PokemonName name,
                                      String description,
                                      URL url) {
         if (Objects.nonNull(url)) {
-            queueService.pushAudioQueue(new PokemonMedia(id, name, description, url));
+            var media = new PokemonMedia(
+                    idPair.getFirst(),
+                    idPair.getSecond(),
+                    name,
+                    description,
+                    url
+            );
+            queueService.pushAudioQueue(media);
         }
     }
 
 
-    private void putOnImagesQueue(PokemonId id,
+    private void putOnImagesQueue(Pair<PokemonId, PokemonId> idPair,
                                   PokemonName name,
                                   Sprites sprites) {
-        queueImageIfNotNull(id, name, "front-default", sprites.frontDefault());
-        queueImageIfNotNull(id, name, "back-default", sprites.backDefault());
+        queueImageIfNotNull(idPair, name, "front-default", sprites.frontDefault());
+        queueImageIfNotNull(idPair, name, "back-default", sprites.backDefault());
     }
 
-    private void queueImageIfNotNull(PokemonId id,
+    private void queueImageIfNotNull(Pair<PokemonId, PokemonId> idPair,
                                      PokemonName name,
                                      String description,
                                      URL url) {
         if (Objects.nonNull(url)) {
-            queueService.pushImageQueue(new PokemonMedia(id, name, description, url));
+            var media = new PokemonMedia(
+                    idPair.getFirst(),
+                    idPair.getSecond(),
+                    name,
+                    description,
+                    url
+            );
+            queueService.pushImageQueue(media);
         }
     }
 }

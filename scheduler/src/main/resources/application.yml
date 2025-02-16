@@ -4,6 +4,7 @@ spring:
     name: scheduler
   main:
     keep-alive: true
+    web-application-type: none
   threads:
     virtual:
       enabled: true

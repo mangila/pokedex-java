@@ -22,6 +22,10 @@ public record PokemonId(
         this(String.valueOf(id));
     }
 
+    public Integer toInteger() {
+        return Integer.valueOf(id);
+    }
+
     /**
      * Validate the Jakarta annotations
      */

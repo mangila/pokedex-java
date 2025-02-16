@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.net.URL;
 
 public record PokemonMedia(
-        PokemonId id,
+        PokemonId speciesId,
+        PokemonId varietyId,
         PokemonName name,
         String description,
         URL url

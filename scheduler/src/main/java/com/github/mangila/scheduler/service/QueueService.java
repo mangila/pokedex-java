@@ -7,6 +7,8 @@ import lombok.Locked;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class QueueService {
@@ -23,9 +25,11 @@ public class QueueService {
     }
 
     @Locked.Read
-    public PokemonName popNameQueue() {
-        return (PokemonName) redisTemplate.opsForSet()
-                .pop(POKEMON_NAME_QUEUE);
+    public Optional<PokemonName> popNameQueue() {
+        return Optional.ofNullable(
+                (PokemonName) redisTemplate.opsForSet()
+                        .pop(POKEMON_NAME_QUEUE)
+        );
     }
 
     @Locked.Write
@@ -35,9 +39,11 @@ public class QueueService {
     }
 
     @Locked.Read
-    public PokemonMedia popImageQueue() {
-        return (PokemonMedia) redisTemplate.opsForSet()
-                .pop(POKEMON_IMAGE_QUEUE);
+    public Optional<PokemonMedia> popImageQueue() {
+        return Optional.ofNullable(
+                (PokemonMedia) redisTemplate.opsForSet()
+                        .pop(POKEMON_IMAGE_QUEUE)
+        );
     }
 
     @Locked.Write
@@ -47,9 +53,11 @@ public class QueueService {
     }
 
     @Locked.Read
-    public PokemonMedia popAudioQueue() {
-        return (PokemonMedia) redisTemplate.opsForSet()
-                .pop(POKEMON_AUDIO_QUEUE);
+    public Optional<PokemonMedia> popAudioQueue() {
+        return Optional.ofNullable(
+                (PokemonMedia) redisTemplate.opsForSet()
+                        .pop(POKEMON_AUDIO_QUEUE)
+        );
     }
 
 }

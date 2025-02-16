@@ -14,6 +14,7 @@ class PokemonMediaTest {
     void Test() throws MalformedURLException {
         var media = new PokemonMedia(
                 new PokemonId(1),
+                new PokemonId(1),
                 new PokemonName("bulbasaur"),
                 "front-default",
                 new URL("https://picture.com/pic.png")
@@ -29,6 +30,7 @@ class PokemonMediaTest {
     @Test
     void fail() throws MalformedURLException {
         var media = new PokemonMedia(
+                new PokemonId(1),
                 new PokemonId(1),
                 new PokemonName("bulbasaur"),
                 "front-default",

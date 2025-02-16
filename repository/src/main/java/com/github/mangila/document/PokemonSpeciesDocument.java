@@ -1,9 +1,12 @@
 package com.github.mangila.document;
 
+import com.github.mangila.document.embedded.PokemonVarietyDocument;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.List;
 
 @Document("pokemon-species")
 @lombok.Data
@@ -13,4 +16,6 @@ public class PokemonSpeciesDocument {
     @Field("name")
     @Indexed(unique = true)
     private String name;
+    @Field("varieties")
+    private List<PokemonVarietyDocument> varieties;
 }
