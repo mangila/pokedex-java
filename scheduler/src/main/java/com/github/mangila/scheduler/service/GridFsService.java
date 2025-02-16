@@ -6,7 +6,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -16,14 +15,11 @@ import java.io.ByteArrayInputStream;
 public class GridFsService {
 
     private final GridFsTemplate gridFsTemplate;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final RestClient http;
 
     public GridFsService(GridFsTemplate gridFsTemplate,
-                         RedisTemplate<String, Object> redisTemplate,
                          @Qualifier("pokemon-media-client") RestClient http) {
         this.gridFsTemplate = gridFsTemplate;
-        this.redisTemplate = redisTemplate;
         this.http = http;
     }
 

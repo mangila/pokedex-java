@@ -24,7 +24,7 @@ public class AudioTask {
         if (Objects.isNull(audio)) {
             return;
         }
-        log.info("Processing - {}", audio.description());
+        log.info("Processing - {}", audio.buildFileName());
         var k = gridFsService.store(audio);
     }
 

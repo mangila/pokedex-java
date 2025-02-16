@@ -24,7 +24,7 @@ public class ImageTask {
         if (Objects.isNull(image)) {
             return;
         }
-        log.info("Processing - {}", image.description());
+        log.info("Processing - {}", image.buildFileName());
         var id = gridFsService.store(image);
     }
 }
