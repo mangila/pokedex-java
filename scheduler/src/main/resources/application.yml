@@ -13,7 +13,6 @@ spring:
         size: 10
   data:
     redis:
+      client-name: "scheduler"
       host: "localhost"
       port: 6379
-      client-type: jedis
-      client-name: "scheduler"
