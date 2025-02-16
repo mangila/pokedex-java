@@ -7,10 +7,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class RestClientConfig {
+public class PokeApiClientConfig {
 
-    @Bean("pokeApiRestClient")
-    public RestClient pokeApiRestClient() {
+    @Bean("poke-api-client")
+    public RestClient pokeApiClient() {
         return RestClient.builder()
                 .baseUrl("https://pokeapi.co/api/v2")
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)

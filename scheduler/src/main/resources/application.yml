@@ -16,3 +16,9 @@ spring:
       client-name: "scheduler"
       host: "localhost"
       port: 6379
+    mongodb:
+      uri: "mongodb://admin:password@localhost:27017"
+      database: "pokemon-db"
+      gridfs:
+        bucket: "pokemon"
+        database: "pokemon-db"

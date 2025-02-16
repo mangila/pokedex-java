@@ -20,6 +20,7 @@ public class CacheConfig {
     public static final String POKE_API_EVOLUTION_CHAIN = "evolution-chain";
     public static final String POKE_API_POKEMON = "pokemon";
     public static final String POKE_API_SPECIES = "species";
+    public static final String POKE_API_MEDIA = "pokemon-media";
 
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {

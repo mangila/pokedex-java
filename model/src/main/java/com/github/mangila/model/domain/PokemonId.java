@@ -6,20 +6,20 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.io.Serializable;
-
-@lombok.Getter
-@lombok.NoArgsConstructor
-public class PokemonName implements Serializable {
-    @NotNull(message = "Name cannot be null")
-    @NotEmpty(message = "Name cannot be empty")
-    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9-]+$", message = "Name not valid string")
-    String name;
-
-    public PokemonName(String name) {
-        this.name = name;
+public record PokemonId(
+        @NotNull(message = "Id cannot be null")
+        @NotEmpty(message = "Id cannot be empty")
+        @Size(min = 1, max = 5, message = "Id must be between 1 and 5 characters")
+        @Pattern(regexp = "^[0-9]+$", message = "Id not valid number")
+        String id
+) {
+    public PokemonId(String id) {
+        this.id = id;
         validate();
+    }
+
+    public PokemonId(Integer id) {
+        this(String.valueOf(id));
     }
 
     /**

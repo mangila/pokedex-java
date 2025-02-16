@@ -20,7 +20,7 @@ public class PokeApiService {
 
     private final PokeApiClient pokeApiClient;
 
-    @Cacheable(cacheNames = CacheConfig.POKE_API_GENERATION, key = "#generation.name()")
+    @Cacheable(value = CacheConfig.POKE_API_GENERATION, key = "#generation.name()")
     public GenerationResponse fetchGeneration(Generation generation) {
         return pokeApiClient.fetchGeneration(generation.getName());
     }

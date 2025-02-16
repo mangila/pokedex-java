@@ -13,7 +13,7 @@ public class PokeApiClient {
 
     private final RestClient http;
 
-    public PokeApiClient(@Qualifier("pokeApiRestClient") RestClient http) {
+    public PokeApiClient(@Qualifier("poke-api-client") RestClient http) {
         this.http = http;
     }
 
