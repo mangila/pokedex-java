@@ -8,11 +8,11 @@ import java.util.List;
 @lombok.Data
 public class PokemonVarietyDocument {
     @Field("variety_id")
-    @Indexed(unique = true)
+    @Indexed
     private Integer varietyId;
-    @Field("name")
-    @Indexed(unique = true)
-    private String name;
+    @Field("variety_name")
+    @Indexed
+    private String varietyName;
     @Field("images")
     private List<PokemonMediaDocument> images;
     @Field("audios")

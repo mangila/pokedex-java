@@ -14,7 +14,7 @@ public class PokemonSpeciesDocument {
     @Id
     private Integer id;
     @Field("name")
-    @Indexed(unique = true)
+    @Indexed
     private String name;
     @Field("varieties")
     private List<PokemonVarietyDocument> varieties;

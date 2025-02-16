@@ -6,9 +6,10 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @lombok.Data
 public class PokemonMediaDocument {
     @Field("media_id")
-    @Indexed(unique = true)
+    @Indexed
     private String mediaId;
     @Field("src")
+    @Indexed
     private String src;
     @Field("file_name")
     private String fileName;

@@ -31,7 +31,7 @@ public class PokeApiMapper {
                 .map(pokemonResponse -> {
                     var document = new PokemonVarietyDocument();
                     document.setVarietyId(pokemonResponse.id());
-                    document.setName(pokemonResponse.name());
+                    document.setVarietyName(pokemonResponse.name());
                     document.setImages(Collections.emptyList());
                     document.setAudios(Collections.emptyList());
                     return document;
