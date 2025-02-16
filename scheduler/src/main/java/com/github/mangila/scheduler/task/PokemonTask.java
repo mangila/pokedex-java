@@ -53,12 +53,12 @@ public class PokemonTask implements CommandLineRunner {
      */
     @Scheduled(fixedRate = 5, initialDelay = 30, timeUnit = TimeUnit.SECONDS)
     public void pollPokemon() {
-        var name = queueService.popNameQueue();
-        if (Objects.isNull(name)) {
+        var speciesName = queueService.popNameQueue();
+        if (Objects.isNull(speciesName)) {
             return;
         }
-        log.info("Processing - {}", name.getName());
-        var speciesResponse = pokeApiService.fetchPokemonSpecies(name);
+        log.info("Processing - {}", speciesName.getName());
+        var speciesResponse = pokeApiService.fetchPokemonSpecies(speciesName);
         var evolutionChain = pokeApiService.fetchEvolutionChain(speciesResponse.evolutionChain());
         var varieties = speciesResponse.varieties()
                 .stream()
@@ -67,6 +67,7 @@ public class PokemonTask implements CommandLineRunner {
         // Run side effect
         varieties.forEach(variety -> {
             var id = new PokemonId(variety.id());
+            var name = new PokemonName(variety.name());
             putOnImagesQueue(id, name, variety.sprites());
             putOnAudiosQueue(id, name, variety.cries());
         });
