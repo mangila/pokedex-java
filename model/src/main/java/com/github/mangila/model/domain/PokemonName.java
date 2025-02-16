@@ -6,11 +6,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.io.Serializable;
+
 @lombok.Getter
-public class PokemonName {
+@lombok.NoArgsConstructor
+public class PokemonName implements Serializable {
     @NotNull(message = "Name cannot be null")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9-]+$", message = "")
+    @Pattern(regexp = "^[A-Za-z0-9-]+$", message = "Name not valid string")
     String name;
 
     public PokemonName(String name) {
