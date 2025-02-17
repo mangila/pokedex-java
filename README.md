@@ -5,6 +5,7 @@ Maven multi-module project consuming and displaying PokeAPI data.
 * Redis for caching
 * Mongodb as database
 * Mongodb GridFS as media database
+* Minikube for k8s deployment
 
 ## file-server
 
