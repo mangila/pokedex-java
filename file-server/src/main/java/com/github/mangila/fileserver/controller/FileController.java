@@ -4,17 +4,13 @@ import com.github.mangila.fileserver.service.GridFsService;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.bson.types.ObjectId;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -25,11 +21,13 @@ import java.util.Objects;
 public class FileController {
 
     private final GridFsService gridFsService;
-
     @SneakyThrows({IOException.class})
-    @GetMapping(value = "{mediaId}")
-    public ResponseEntity<Resource> serveFile(@PathVariable ObjectId mediaId) {
-        var optionalResource = gridFsService.find(mediaId);
+    @GetMapping(value = "{fileName}")
+    public ResponseEntity<Resource> serveFile(
+            @PathVariable String fileName,
+            @RequestParam(name = "download", required = false) boolean download
+    ) {
+        var optionalResource = gridFsService.findByFileName(fileName);
         if (optionalResource.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -37,7 +35,7 @@ public class FileController {
         var fileInfo = resource.getGridFSFile();
         var stream = new InputStreamResource(resource.getInputStream());
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, buildContentDisposition(fileInfo.getFilename()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, buildContentDisposition(fileInfo.getFilename(), download))
                 .contentType(MediaType.parseMediaType(getContentType(fileInfo)))
                 .contentLength(fileInfo.getLength())
                 .lastModified(fileInfo.getUploadDate().getTime())
@@ -53,9 +51,10 @@ public class FileController {
         return MediaType.APPLICATION_OCTET_STREAM_VALUE;
     }
 
-    private static String buildContentDisposition(String filename) {
+    private static String buildContentDisposition(String filename, boolean isDownload) {
+        var contentDisposition = isDownload ? "attachment;" : "inline;";
         return new StringBuilder()
-                .append("inline;")
+                .append(contentDisposition)
                 .append(" ")
                 .append("filename=")
                 .append("\"")

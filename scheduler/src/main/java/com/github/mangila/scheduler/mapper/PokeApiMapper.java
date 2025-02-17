@@ -56,7 +56,7 @@ public class PokeApiMapper {
                 .host(fileServerProperties.getHost())
                 .port(fileServerProperties.getPort())
                 .path(fileServerProperties.getUri())
-                .build(mediaId);
+                .build(image.buildFileName());
         document.setSrc(UriEncoder.decode(src.toString()));
         return document;
     }

@@ -8,11 +8,16 @@ Maven multi-module project consuming and displaying PokeAPI data.
 
 ## file-server
 
-Spring Boot Web application, that serves files to consumer
+Spring Boot Web application - file-server to display or download images
+
+* api/v1/file/{fileName}?download=true|false
 
 ## graphql-server
 
 Spring Boot Web application, that serves the graphql endpoint
+
+* /api/v1/graphql
+* /graphiql
 
 ## integration
 
@@ -29,5 +34,6 @@ Database repository layer for MongoDb
 ## scheduler
 
 Spring Scheduler that fetches data from PokeAPI and inserts to Redis and MongoDb
+
 * Redis Set used a Queue
 * Redis String used as key and value cache

@@ -26,8 +26,8 @@ public class GridFsRepository {
         return gridFsTemplate.store(content, fileName, contentType);
     }
 
-    public Optional<GridFsResource> find(ObjectId mediaId) {
-        var q = new Query(Criteria.where("_id").is(mediaId));
+    public Optional<GridFsResource> findByFileName(String fileName) {
+        var q = new Query(Criteria.where("filename").is(fileName));
         var fileInfo = gridFsTemplate.findOne(q);
         if (Objects.nonNull(fileInfo)) {
             return Optional.of(gridFsTemplate.getResource(fileInfo));

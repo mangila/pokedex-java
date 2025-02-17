@@ -3,7 +3,7 @@ app:
     scheme: "http"
     host: "localhost"
     port: 8081
-    uri: "api/v1/file/{mediaId}"
+    uri: "api/v1/file/{fileName}"
 
 # Spring
 spring:
