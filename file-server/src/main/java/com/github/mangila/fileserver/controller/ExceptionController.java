@@ -10,20 +10,17 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import java.util.Map;
 
 @ControllerAdvice
-@Slf4j
 public class ExceptionController {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.error(e.getMessage(), e);
         return new ResponseEntity<>(
                 Map.of("message", e.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGlobalException(Exception e) {
-        log.error(e.getMessage(), e);
+    public ResponseEntity<Map<String, String>> handleGlobalException() {
         return new ResponseEntity<>(
                 Map.of("message", "something went wrong"),
                 HttpStatus.INTERNAL_SERVER_ERROR);
