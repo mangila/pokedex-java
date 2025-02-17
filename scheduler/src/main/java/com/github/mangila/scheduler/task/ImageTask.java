@@ -19,7 +19,7 @@ public class ImageTask {
     private final GridFsService gridFsService;
     private final MongoDbService mongoDbService;
 
-    @Scheduled(fixedRate = 2, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedRate = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void pollImage() {
         var optionalImage = queueService.popImageQueue();
         if (optionalImage.isEmpty()) {

@@ -1,4 +1,4 @@
-package com.github.mangila.document.embedded;
+package com.github.mangila.repository.document.embedded;
 
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Field;

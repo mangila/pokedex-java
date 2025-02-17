@@ -1,6 +1,6 @@
-package com.github.mangila.document;
+package com.github.mangila.repository.document;
 
-import com.github.mangila.document.embedded.PokemonVarietyDocument;
+import com.github.mangila.repository.document.embedded.PokemonVarietyDocument;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;

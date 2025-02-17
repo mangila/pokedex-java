@@ -1,3 +1,10 @@
+app:
+  file-server:
+    scheme: "http"
+    host: "localhost"
+    port: 8081
+    uri: "api/v1/file/{mediaId}"
+
 # Spring
 spring:
   application:

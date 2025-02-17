@@ -1,3 +1,15 @@
 # Server
 server:
   port: 8080
+
+# Spring
+spring:
+  application:
+    name: graphql-server
+  graphql:
+    graphiql:
+      enabled: true
+    cors:
+      allowed-origins: "*"
+      allowed-headers: "*"
+      allowed-methods: "*"

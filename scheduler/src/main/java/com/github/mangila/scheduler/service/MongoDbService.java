@@ -1,6 +1,6 @@
 package com.github.mangila.scheduler.service;
 
-import com.github.mangila.document.PokemonSpeciesDocument;
+import com.github.mangila.repository.document.PokemonSpeciesDocument;
 import com.github.mangila.model.domain.PokemonMedia;
 import com.github.mangila.repository.PokemonSpeciesRepository;
 import com.github.mangila.scheduler.mapper.PokeApiMapper;

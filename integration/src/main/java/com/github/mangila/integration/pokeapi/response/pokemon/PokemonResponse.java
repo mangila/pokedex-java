@@ -7,6 +7,8 @@ public record PokemonResponse(
         Integer id,
         @JsonProperty("name")
         String name,
+        @JsonProperty("is_default")
+        Boolean isDefault,
         @JsonProperty("sprites")
         Sprites sprites,
         @JsonProperty("cries")

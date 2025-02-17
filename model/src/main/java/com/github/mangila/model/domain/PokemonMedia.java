@@ -1,7 +1,5 @@
 package com.github.mangila.model.domain;
 
-import org.springframework.http.MediaType;
-
 import java.io.Serializable;
 import java.net.URL;
 
@@ -37,9 +35,8 @@ public record PokemonMedia(
     public String createContentType() {
         var extension = buildFileExtension();
         return switch (extension) {
-            case "jpg" -> MediaType.IMAGE_JPEG_VALUE;
-            case "png" -> MediaType.IMAGE_PNG_VALUE;
-            case "gif" -> MediaType.IMAGE_GIF_VALUE;
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
             case "ogg" -> "audio/ogg";
             default -> throw new IllegalArgumentException("Unknown extension: " + extension);
         };

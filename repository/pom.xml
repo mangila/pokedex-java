@@ -10,12 +10,9 @@
     </parent>
 
     <artifactId>repository</artifactId>
-
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>repository</name>
+    <description>Repository layer</description>
 
     <dependencies>
         <dependency>
