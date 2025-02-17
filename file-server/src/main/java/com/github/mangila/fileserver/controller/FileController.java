@@ -4,6 +4,7 @@ import com.github.mangila.fileserver.service.GridFsService;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.bson.types.ObjectId;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -27,11 +28,12 @@ public class FileController {
 
     @SneakyThrows({IOException.class})
     @GetMapping(value = "{mediaId}")
-    public ResponseEntity<Resource> serveFile(@PathVariable String mediaId) {
-        var resource = gridFsService.find(mediaId);
-        if (Objects.isNull(resource)) {
+    public ResponseEntity<Resource> serveFile(@PathVariable ObjectId mediaId) {
+        var optionalResource = gridFsService.find(mediaId);
+        if (optionalResource.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        var resource = optionalResource.get();
         var fileInfo = resource.getGridFSFile();
         var stream = new InputStreamResource(resource.getInputStream());
         return ResponseEntity.ok()

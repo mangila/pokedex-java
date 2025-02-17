@@ -5,6 +5,20 @@ server:
 # Spring
 spring:
   data:
+    redis:
+      client-name: "file-server"
+      host: "localhost"
+      port: 6379
+      client-type: jedis
+      connect-timeout: 30
+      jedis:
+        pool:
+          enabled: true
+          max-active: 20
+          max-idle: -1
+          max-wait: 30s
+          min-idle: 5
+          time-between-eviction-runs: 60m
     mongodb:
       uri: "mongodb://admin:password@localhost:27017"
       database: "pokemon-db"

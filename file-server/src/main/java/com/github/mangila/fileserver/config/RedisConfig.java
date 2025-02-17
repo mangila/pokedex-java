@@ -1,4 +1,4 @@
-package com.github.mangila.scheduler.config;
+package com.github.mangila.fileserver.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -18,10 +18,7 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
-    public static final String POKE_API_GENERATION = "generation";
-    public static final String POKE_API_EVOLUTION_CHAIN = "evolution-chain";
-    public static final String POKE_API_POKEMON = "pokemon";
-    public static final String POKE_API_SPECIES = "species";
+    public static final String FILE_SERVER = "media";
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
@@ -36,7 +33,7 @@ public class RedisConfig {
     public CacheManager cacheManager(JedisConnectionFactory jedisConnectionFactory) {
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofHours(1))
-                .disableCachingNullValues()
+                .prefixCacheNameWith("file-server:")
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 

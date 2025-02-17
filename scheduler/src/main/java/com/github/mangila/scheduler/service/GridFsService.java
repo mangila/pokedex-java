@@ -1,10 +1,8 @@
 package com.github.mangila.scheduler.service;
 
-import com.github.mangila.scheduler.config.RedisConfig;
 import com.github.mangila.model.domain.PokemonMedia;
 import com.github.mangila.repository.GridFsRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +13,6 @@ public class GridFsService {
 
     private final GridFsRepository gridFsRepository;
 
-    @Cacheable(value = RedisConfig.POKE_API_MEDIA, key = "#pokemonMedia.buildFileName()")
     public String store(PokemonMedia pokemonMedia, byte[] bytes) {
         var content = new ByteArrayInputStream(bytes);
         var id = gridFsRepository.store(content,

@@ -22,7 +22,7 @@ public class MongoDbService {
     }
 
     public void saveImageToVariety(String mediaId, PokemonMedia image) {
-        mongoTemplateRepository.saveAudioToVariety(
+        mongoTemplateRepository.saveImageToVariety(
                 Pair.of(image.speciesId(), image.varietyId()),
                 pokeApiMapper.ToImageDocument(mediaId, image)
         );
