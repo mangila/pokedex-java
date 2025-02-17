@@ -16,5 +16,4 @@ public class PokemonMediaClientConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .build();
     }
-
 }

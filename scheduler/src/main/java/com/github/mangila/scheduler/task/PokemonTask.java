@@ -52,7 +52,7 @@ public class PokemonTask implements CommandLineRunner {
      * Polls from Redis Set Queue and updates the database
      * Puts Sprites and Cries on Queue for a side effect
      */
-    @Scheduled(fixedRate = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
     public void pollPokemon() {
         var optionalPokemonName = queueService.popNameQueue();
         if (optionalPokemonName.isEmpty()) {
