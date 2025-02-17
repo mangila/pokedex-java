@@ -31,7 +31,7 @@ spring:
           enabled: true
           max-active: 20
           max-idle: -1
-          max-wait: 30000ms
+          max-wait: 30s
           min-idle: 5
           time-between-eviction-runs: 60m
     mongodb:
