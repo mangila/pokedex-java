@@ -10,9 +10,6 @@
     </parent>
 
     <artifactId>repository</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>repository</name>
-    <description>Repository layer</description>
 
     <dependencies>
         <dependency>
@@ -22,7 +19,7 @@
         <dependency>
             <groupId>com.github.mangila</groupId>
             <artifactId>model</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

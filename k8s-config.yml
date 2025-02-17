@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pokedex-config
+  namespace: pokedex
+data:
+  DATABASE_HOST: "mongodb-external.pokedex.svc.cluster.local"
+  DATABASE_PORT: "27017"
+  DATABASE_NAME: "pokemon-db"
+  DATABASE_USER: "admin"
+  CACHE_HOST: "redis-external.pokedex.svc.cluster.local"
+  CACHE_PORT: "6379"

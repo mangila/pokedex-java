@@ -1,0 +1,51 @@
+# DNS Record for localhost outside the k8s cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-external
+  namespace: pokedex
+spec:
+  type: ExternalName
+  externalName: "host.minikube.internal"
+---
+# DNS Record for localhost outside the k8s cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-external
+  namespace: pokedex
+spec:
+  type: ExternalName
+  externalName: "host.minikube.internal"
+---
+# Create NodePort service for graphql-server
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-server
+  namespace: pokedex
+spec:
+  selector:
+    app: graphql-server-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 30000
+  type: NodePort
+---
+# Create NodePort service for file-server
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-server
+  namespace: pokedex
+spec:
+  selector:
+    app: file-server-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+      nodePort: 30001
+  type: NodePort

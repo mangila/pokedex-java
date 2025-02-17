@@ -10,9 +10,6 @@
     </parent>
 
     <artifactId>integration</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>integration</name>
-    <description>Integration layer - integrates integrations!</description>
 
     <dependencies>
         <dependency>
