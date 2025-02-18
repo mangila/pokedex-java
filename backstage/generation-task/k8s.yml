@@ -1,0 +1,3 @@
+# This need only to run once to populate the Redis Queue
+apiVersion: batch/v1
+kind: Job

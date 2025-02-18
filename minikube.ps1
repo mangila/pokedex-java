@@ -1,5 +1,5 @@
 # Maven - clean and package
-cmd.exe /c mvnw.cmd clean package
+cmd.exe /c mvnw.cmd -f ./pom.xml clean package
 # Docker - build
 docker build -f ./scheduler/Dockerfile -t mangila/pokedex-scheduler:latest ./scheduler
 docker build -f ./graphql-server/Dockerfile -t mangila/pokedex-graphql-server:latest ./graphql-server
