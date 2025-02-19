@@ -3,9 +3,10 @@ FROM ghcr.io/graalvm/native-image-community:23 AS build
 WORKDIR /usr/src/app
 
 COPY . .
-RUN ./mvnw.sh clean install -DskipTests -pl shared -pl generation-task
-RUN ./mvnw.sh native:compile -Pnative -DskipTests -pl shared -pl generation-task
-
+# Compile modules with Spring Native Profile
+RUN ./mvnw.sh clean install -Pnative -DskipTests -pl shared -pl generation-task
+# Generate Native Image
+RUN ./mvnw.sh -o native:compile -Pnative -DskipTests -pl shared -pl generation-task
 
 FROM debian:bookworm-slim
 

@@ -3,9 +3,10 @@ FROM ghcr.io/graalvm/native-image-community:23 AS build
 WORKDIR /usr/src/app
 
 COPY . .
-RUN ./mvnw.sh clean install -U -pl shared -pl pokemon-task -DskipTests
-RUN ./mvnw.sh native:compile -Pnative -DskipTests -pl shared -pl pokemon-task
-
+# Compile modules with Spring Native Profile
+RUN ./mvnw.sh clean install -Pnative -DskipTests -pl shared -pl pokemon-task
+# Generate Native Image
+RUN ./mvnw.sh -o native:compile -Pnative -DskipTests -pl shared -pl pokemon-task
 
 FROM debian:bookworm-slim
 
