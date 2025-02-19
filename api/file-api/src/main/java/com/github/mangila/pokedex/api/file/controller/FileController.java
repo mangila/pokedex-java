@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.api.file.controller;
 
-import com.github.mangila.pokedex.api.shared.service.GridFsService;
+import com.github.mangila.pokedex.api.file.service.GridFsService;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Pattern;
 import lombok.SneakyThrows;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -17,7 +17,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("api/v1/file")
-@AllArgsConstructor
+@lombok.AllArgsConstructor
 public class FileController {
 
     private final GridFsService gridFsService;
@@ -25,7 +25,7 @@ public class FileController {
     @SneakyThrows({IOException.class})
     @GetMapping(value = "{fileName}")
     public ResponseEntity<Resource> serveFile(
-            @PathVariable String fileName,
+            @PathVariable @Pattern(regexp = "^.*-.*\\.(png|jpg|ogg)$") String fileName,
             @RequestParam(name = "download", required = false) boolean download
     ) {
         var optionalResource = gridFsService.findByFileName(fileName);

@@ -1,1 +1,21 @@
-spring.application.name=generation-task
+# Spring
+spring:
+  main:
+    web-application-type: none
+  application:
+    name: "generation-task"
+  data:
+    redis:
+      client-name: "generation-task"
+      host: "host.docker.internal"
+      port: 6379
+      connect-timeout: 30s
+      client-type: lettuce
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 20
+          max-idle: -1
+          max-wait: 30s
+          min-idle: 5
+          time-between-eviction-runs: 60m
