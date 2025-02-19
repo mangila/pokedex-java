@@ -3,8 +3,8 @@ FROM ghcr.io/graalvm/native-image-community:23 AS build
 WORKDIR /usr/src/app
 
 COPY . .
-RUN ./mvnw.sh clean install dependency:go-offline -DskipTests -pl shared -pl generation-task
-RUN ./mvnw.sh native:compile -Pnative -DskipTests dependency:go-offline -pl shared -pl generation-task
+RUN ./mvnw.sh clean install -DskipTests -pl shared -pl generation-task
+RUN ./mvnw.sh native:compile -Pnative -DskipTests -pl shared -pl generation-task
 
 
 FROM debian:bookworm-slim

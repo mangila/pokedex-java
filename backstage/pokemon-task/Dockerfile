@@ -12,7 +12,7 @@ FROM debian:bookworm-slim
 WORKDIR /app
 
 # Copy the native binary from the build stage
-COPY --from=build /usr/src/app/pokemon-task/target/pokemon-task /app/pokemon-task
+COPY --from=build /usr/src/app/pokemon-task/target/pokemon-task /app/task
 
 # Run the application
-CMD ["/app/pokemon-task"]
+CMD ["/app/task"]
