@@ -1,2 +1,18 @@
+# Create NodePort service for File Api
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-api
+  namespace: pokedex
+spec:
+  selector:
+    app: file-api-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+      nodePort: 30001
+  type: NodePort
+---
 apiVersion: v1
 kind: Pod
