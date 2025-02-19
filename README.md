@@ -6,35 +6,16 @@ Maven multi-module project consuming and displaying PokeAPI data.
 * Mongodb as database
 * Mongodb GridFS as media database
 * Minikube for k8s deployment
+* Native images for Tasks
 
-## file-server
+## Requirements
 
-Spring Boot Web application - file-server to display or download images
+* GraalVM for playing around with the Native images in backstage module
 
-* api/v1/file/{fileName}?download=true|false
+## api
 
-## graphql-server
+Contains the file-api server and graphql server
 
-Spring Boot Web application, that serves the graphql endpoint
+## backstage
 
-* /api/v1/graphql
-* /graphiql
-
-## integration
-
-Integration layer - fetches data over http to PokeApi
-
-## model
-
-Models shared around the project
-
-## repository
-
-Database repository layer for MongoDb
-
-## scheduler
-
-Spring Scheduler that fetches data from PokeAPI and inserts to Redis and MongoDb
-
-* Redis Set used a Queue
-* Redis String used as key and value cache
+Tasks that populates redis and mongodb with data
