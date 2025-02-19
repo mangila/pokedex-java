@@ -11,6 +11,7 @@ Maven multi-module project consuming and displaying PokeAPI data.
 ## Requirements
 
 * GraalVM for playing around with the Native images in backstage module
+* Minikube for playing around with the k8s deployment
 
 ## api
 
