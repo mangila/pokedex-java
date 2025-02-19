@@ -7,6 +7,6 @@ spring:
   data:
     redis:
       client-name: "generation-task"
-      host: "localhost" # "host.docker.internal"
+      host: "localhost"
       port: 6379
       client-type: lettuce

@@ -10,8 +10,9 @@
     <packaging>pom</packaging>
     <modules>
         <module>generation-task</module>
-        <module>shared</module>
         <module>pokemon-task</module>
+        <module>media-task</module>
+        <module>shared</module>
     </modules>
 
     <properties>

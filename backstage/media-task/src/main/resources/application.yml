@@ -3,18 +3,18 @@ spring:
   main:
     web-application-type: none
   application:
-    name: "pokemon-task"
+    name: "image-task"
   data:
     redis:
-      client-name: "pokemon-task"
+      client-name: "image-task"
       host: "localhost"
       port: 6379
       client-type: lettuce
       lettuce:
         pool:
           enabled: true
-          max-active: 20
-          max-idle: 8
+          max-active: 30
+          max-idle: 12
           min-idle: 8
           max-wait: -1ms
           time-between-eviction-runs: 60s

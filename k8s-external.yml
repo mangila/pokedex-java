@@ -1,1 +1,22 @@
-# k8s
+# External access for the k8s cluster to Redis
+# redis-external.pokedex.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-external
+  namespace: pokedex
+spec:
+  type: ExternalName
+  externalName: "host.minikube.internal"
+---
+# External access for the k8s cluster to MongoDb
+# mongodb-external.pokedex.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-external
+  namespace: pokedex
+spec:
+  type: ExternalName
+  externalName: "host.minikube.internal"
+---
