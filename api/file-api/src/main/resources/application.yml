@@ -1,0 +1,17 @@
+# Server
+server:
+  port: 8081
+# Spring
+spring:
+  application:
+    name: "file-api"
+  data:
+    mongodb:
+      database: "pokemon-db"
+      authentication-database: "admin"
+      host: "localhost"
+      username: "admin"
+      password: "password"
+      gridfs:
+        bucket: "pokemon"
+        database: "pokemon-db"
