@@ -15,7 +15,7 @@ public class PokeApiTemplateConfig {
                 .baseUrl("https://pokeapi.co/api/v2")
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(HttpHeaders.CACHE_CONTROL, "no-cache")
+                .defaultHeader(HttpHeaders.CACHE_CONTROL, "no-store")
                 .defaultHeader(HttpHeaders.USER_AGENT, "pokedex-spring-boot")
                 .build();
     }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Objects;
 
 @RestController
@@ -40,7 +41,7 @@ public class FileController {
                 .contentType(MediaType.parseMediaType(getContentType(fileInfo)))
                 .contentLength(fileInfo.getLength())
                 .lastModified(fileInfo.getUploadDate().getTime())
-                .cacheControl(CacheControl.noCache())
+                .cacheControl(download ? CacheControl.noStore() : CacheControl.maxAge(Duration.ofHours(1)))
                 .body(stream);
     }
 
