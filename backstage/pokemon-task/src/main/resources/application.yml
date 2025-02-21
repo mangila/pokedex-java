@@ -5,9 +5,3 @@ spring:
     lazy-initialization: true
   application:
     name: "pokemon-task"
-  data:
-    redis:
-      client-name: "pokemon-task"
-      host: "localhost"
-      port: 6379
-      client-type: lettuce

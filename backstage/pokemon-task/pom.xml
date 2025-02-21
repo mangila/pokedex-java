@@ -20,12 +20,6 @@
         </dependency>
         <dependency>
             <groupId>com.github.mangila.pokedex.backstage</groupId>
-            <artifactId>cache</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mangila.pokedex.backstage</groupId>
             <artifactId>model</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>

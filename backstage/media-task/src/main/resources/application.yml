@@ -5,9 +5,3 @@ spring:
     lazy-initialization: true
   application:
     name: "image-task"
-  data:
-    redis:
-      client-name: "image-task"
-      host: "localhost"
-      port: 6379
-      client-type: lettuce

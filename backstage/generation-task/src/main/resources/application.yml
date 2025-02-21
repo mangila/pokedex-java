@@ -5,9 +5,3 @@ spring:
     lazy-initialization: true
   application:
     name: "generation-task"
-  data:
-    redis:
-      client-name: "generation-task"
-      host: "localhost"
-      port: 6379
-      client-type: lettuce
