@@ -2,6 +2,7 @@
 spring:
   main:
     web-application-type: none
+    lazy-initialization: true
   application:
     name: "pokemon-task"
   data:
@@ -10,11 +11,3 @@ spring:
       host: "localhost"
       port: 6379
       client-type: lettuce
-      lettuce:
-        pool:
-          enabled: true
-          max-active: 20
-          max-idle: 8
-          min-idle: 8
-          max-wait: -1ms
-          time-between-eviction-runs: 60s

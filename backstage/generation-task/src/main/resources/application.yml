@@ -2,6 +2,7 @@
 spring:
   main:
     web-application-type: none
+    lazy-initialization: true
   application:
     name: "generation-task"
   data:

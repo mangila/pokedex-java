@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.pokemon;
 
-import com.github.mangila.pokedex.backstage.pokemon.task.PokemonTask;
+import com.github.mangila.pokedex.backstage.model.Task;
 import com.github.mangila.pokedex.backstage.shared.integration.response.generation.GenerationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,10 @@ import org.springframework.context.annotation.ComponentScan;
 public class PokemonTaskApplication {
 
     Logger log = LoggerFactory.getLogger(PokemonTaskApplication.class);
-    private final PokemonTask pokemonTask;
+    private final Task task;
 
-    public PokemonTaskApplication(PokemonTask pokemonTask) {
-        this.pokemonTask = pokemonTask;
+    public PokemonTaskApplication(Task pokemonTask) {
+        this.task = pokemonTask;
     }
 
     public static void main(String[] args) {
@@ -30,7 +30,7 @@ public class PokemonTaskApplication {
 
     @Bean
     public CommandLineRunner commandLineRunner() {
-        return args -> pokemonTask.run();
+        return task::run;
     }
 
     /**

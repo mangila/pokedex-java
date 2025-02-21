@@ -4,9 +4,9 @@ WORKDIR /usr/src/app
 
 COPY . .
 # Compile modules with Spring Native Profile
-RUN ./mvnw.sh clean install -Pnative -DskipTests -pl shared -pl media-task
+RUN ./mvnw.sh clean install -Pnative -DskipTests -pl cache -pl integration -pl model -pl media-task
 # Generate Native Image
-RUN ./mvnw.sh -o native:compile -Pnative -DskipTests -pl shared -pl media-task
+RUN ./mvnw.sh -o native:compile -Pnative -DskipTests -pl cache -pl integration -pl model -pl media-task
 
 FROM debian:bookworm-slim
 

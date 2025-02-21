@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.generation;
 
+import com.github.mangila.pokedex.backstage.model.Generation;
+import com.github.mangila.pokedex.backstage.model.Task;
 import com.github.mangila.pokedex.backstage.shared.integration.response.generation.GenerationResponse;
-import com.github.mangila.pokedex.backstage.shared.model.Generation;
-import com.github.mangila.pokedex.backstage.shared.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
@@ -17,11 +17,12 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({"com.github.mangila.pokedex.backstage"})
 @RegisterReflectionForBinding({GenerationResponse.class, Generation.class})
 public class GenerationTaskApplication {
-    Logger log = LoggerFactory.getLogger(GenerationTaskApplication.class);
-    private final Task generationTask;
+
+    private static final Logger log = LoggerFactory.getLogger(GenerationTaskApplication.class);
+    private final Task task;
 
     public GenerationTaskApplication(Task generationTask) {
-        this.generationTask = generationTask;
+        this.task = generationTask;
     }
 
     public static void main(String[] args) {
@@ -30,7 +31,7 @@ public class GenerationTaskApplication {
 
     @Bean
     public CommandLineRunner commandLineRunner() {
-        return args -> generationTask.run();
+        return task::run;
     }
 
     /**

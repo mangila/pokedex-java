@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.image;
 
-import com.github.mangila.pokedex.backstage.shared.model.Task;
+import com.github.mangila.pokedex.backstage.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -15,10 +15,10 @@ import org.springframework.context.annotation.ComponentScan;
 public class ImageTaskApplication {
 
     Logger log = LoggerFactory.getLogger(ImageTaskApplication.class);
-    private final Task imageTask;
+    private final Task task;
 
     public ImageTaskApplication(Task imageTask) {
-        this.imageTask = imageTask;
+        this.task = imageTask;
     }
 
     public static void main(String[] args) {
@@ -27,7 +27,7 @@ public class ImageTaskApplication {
 
     @Bean
     public CommandLineRunner commandLineRunner() {
-        return args -> imageTask.run();
+        return task::run;
     }
 
     /**
