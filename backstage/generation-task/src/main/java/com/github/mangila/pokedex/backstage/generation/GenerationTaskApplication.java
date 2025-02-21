@@ -15,7 +15,10 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan({"com.github.mangila.pokedex.backstage"})
-@RegisterReflectionForBinding({GenerationResponse.class, Generation.class})
+@RegisterReflectionForBinding({
+        GenerationResponse.class,
+        Generation.class
+})
 public class GenerationTaskApplication {
 
     private static final Logger log = LoggerFactory.getLogger(GenerationTaskApplication.class);

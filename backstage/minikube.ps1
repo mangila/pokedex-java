@@ -2,7 +2,7 @@ $generationTaskDir = "./generation-task"
 $pokemonTaskDir = "./pokemon-task"
 $mediaTaskDir = "./media-task"
 
-# Docker - build images - start build context from root, since we need shared module compiled
+# Docker - build images - start build context from root, since we need the shared modules compiled
 docker build -f ${generationTaskDir}/Dockerfile -t mangila/pokedex-generation-task:latest .
 docker build -f ${pokemonTaskDir}/Dockerfile -t mangila/pokedex-pokemon-task:latest .
 docker build -f ${mediaTaskDir}/Dockerfile -t mangila/pokedex-media-task:latest .

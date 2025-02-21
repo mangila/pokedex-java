@@ -20,6 +20,6 @@ public class PokemonTask implements Task {
     @Override
     public void run(String[] args) {
         var pokemonName = queueService.popAsString(RedisQueue.GENERATION_QUEUE.toString());
-        log.debug("Pokemon Name: {}", pokemonName);
+        log.info("Pokemon Name: {}", pokemonName);
     }
 }

@@ -10,7 +10,6 @@ public class ImageTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(ImageTask.class);
 
-
     @Override
     public void run(String[] args) {
         log.info("Starting Image Task");
