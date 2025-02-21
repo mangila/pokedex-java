@@ -13,9 +13,9 @@
         <module>pokemon-task</module>
         <module>media-task</module>
         <module>integration</module>
-        <module>db</module>
-        <module>cache</module>
         <module>model</module>
+        <module>redis-bouncer</module>
+        <module>mongodb-bouncer</module>
     </modules>
 
     <properties>

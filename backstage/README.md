@@ -24,21 +24,13 @@ Dockerfiles for the tasks has a graalvm image ready to compile
 
 # modules
 
-## cache
-
-* everything redis
-
-## db
-
-* everything mongodb
-
 ## generation-task
 
 * fetches the all the pokemons according to their Generation
 
 ## integration
 
-* everything third party api - PokeApi
+* everything third party api - PokeApi, bouncer clients
 
 ## media-task
 
@@ -51,4 +43,12 @@ Dockerfiles for the tasks has a graalvm image ready to compile
 ## pokemon-task
 
 * fetch Pokemon - update database - put images on Media queue
+
+## redis-bouncer
+
+* Redis bouncer service to handle connection pooling
+
+## mongodb-bouncer
+
+* Mongodb bouncer service to handle connection pooling
 

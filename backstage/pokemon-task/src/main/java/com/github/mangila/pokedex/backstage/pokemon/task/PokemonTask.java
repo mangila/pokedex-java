@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.backstage.pokemon.task;
 import com.github.mangila.pokedex.backstage.cache.config.RedisQueue;
 import com.github.mangila.pokedex.backstage.cache.service.QueueService;
 import com.github.mangila.pokedex.backstage.model.Task;
-import com.github.mangila.pokedex.backstage.shared.integration.PokeApiTemplate;
+import com.github.mangila.pokedex.backstage.shared.integration.pokeapi.PokeApiTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

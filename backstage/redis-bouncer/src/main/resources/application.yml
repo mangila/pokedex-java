@@ -1,0 +1,20 @@
+# Server
+server:
+  port: 8081
+# Spring
+spring:
+  application:
+    name: "redis-bouncer"
+  data:
+    redis:
+      client-type: lettuce
+      host: "localhost"
+      port: 6379
+      lettuce:
+        pool:
+          enabled: true
+          time-between-eviction-runs: 60s
+          max-wait: -1ms
+          min-idle: 0
+          max-idle: 8
+          max-active: 8

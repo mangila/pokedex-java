@@ -1,11 +1,8 @@
 package com.github.mangila.pokedex.backstage.generation;
 
-import com.github.mangila.pokedex.backstage.model.Generation;
 import com.github.mangila.pokedex.backstage.model.Task;
-import com.github.mangila.pokedex.backstage.shared.integration.response.generation.GenerationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeExceptionMapper;
 import org.springframework.boot.SpringApplication;
