@@ -1,6 +1,11 @@
 package com.github.mangila.pokedex.backstage.model;
 
 
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
+
+@RegisterReflectionForBinding(classes = {
+        Generation.class
+})
 public enum Generation {
 
     GENERATION_I("generation-i"),

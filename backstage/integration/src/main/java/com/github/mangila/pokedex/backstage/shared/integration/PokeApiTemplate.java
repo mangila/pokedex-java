@@ -2,8 +2,10 @@ package com.github.mangila.pokedex.backstage.shared.integration;
 
 import com.github.mangila.pokedex.backstage.shared.integration.response.evolutionchain.EvolutionChainResponse;
 import com.github.mangila.pokedex.backstage.shared.integration.response.generation.GenerationResponse;
+import com.github.mangila.pokedex.backstage.shared.integration.response.generation.Species;
 import com.github.mangila.pokedex.backstage.shared.integration.response.pokemon.PokemonResponse;
-import com.github.mangila.pokedex.backstage.shared.integration.response.species.SpeciesResponse;
+import com.github.mangila.pokedex.backstage.shared.integration.response.species.*;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -17,6 +19,10 @@ public class PokeApiTemplate {
         this.http = http;
     }
 
+    @RegisterReflectionForBinding(classes = {
+            GenerationResponse.class,
+            Species.class,
+    })
     public GenerationResponse fetchGeneration(String generation) {
         return http.get()
                 .uri(uriBuilder -> uriBuilder
@@ -26,6 +32,16 @@ public class PokeApiTemplate {
                 .body(GenerationResponse.class);
     }
 
+    @RegisterReflectionForBinding(classes = {
+            SpeciesResponse.class,
+            EvolutionChain.class,
+            FlavorTextEntries.class,
+            Genera.class,
+            Language.class,
+            Names.class,
+            Pokemon.class,
+            Varieties.class,
+    })
     public SpeciesResponse fetchSpecies(String name) {
         return http.get()
                 .uri(uriBuilder -> uriBuilder
@@ -35,6 +51,9 @@ public class PokeApiTemplate {
                 .body(SpeciesResponse.class);
     }
 
+    @RegisterReflectionForBinding(classes = {
+            EvolutionChainResponse.class,
+    })
     public EvolutionChainResponse fetchEvolutionChain(String evolutionChainId) {
         return http.get()
                 .uri(uriBuilder -> uriBuilder
@@ -44,6 +63,9 @@ public class PokeApiTemplate {
                 .body(EvolutionChainResponse.class);
     }
 
+    @RegisterReflectionForBinding(classes = {
+            PokemonResponse.class,
+    })
     public PokemonResponse fetchPokemon(String name) {
         return http.get()
                 .uri(uriBuilder -> uriBuilder

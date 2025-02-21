@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan({"com.github.mangila.pokedex.backstage"})
 public class ImageTaskApplication {
 
-    Logger log = LoggerFactory.getLogger(ImageTaskApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(ImageTaskApplication.class);
     private final Task task;
 
     public ImageTaskApplication(Task imageTask) {
