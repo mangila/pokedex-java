@@ -20,4 +20,4 @@ Contains the file-api server and graphql server
 
 ## backstage
 
-Tasks that populates redis and mongodb with data
+Tasks and middleware services that populates redis and mongodb with data

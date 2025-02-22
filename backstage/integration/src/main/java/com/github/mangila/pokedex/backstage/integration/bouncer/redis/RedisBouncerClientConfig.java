@@ -1,9 +1,10 @@
 package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.SimpleGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.SetGrpc;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.grpc.client.ChannelBuilderOptions;
 import org.springframework.grpc.client.GrpcChannelFactory;
 
 @Configuration
@@ -16,9 +17,11 @@ public class RedisBouncerClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "app.integration.bouncer.redis")
-    public SimpleGrpc.SimpleBlockingStub stub(GrpcChannelFactory channels) {
-        var channel = channels.createChannel(redisBouncerProps.getHost());
-        return SimpleGrpc.newBlockingStub(channel);
+    @ConditionalOnProperty(name = "app.integration.bouncer.redis", matchIfMissing = true)
+    public SetGrpc.SetBlockingStub stub(GrpcChannelFactory channels) {
+        var channel = channels.createChannel(
+                redisBouncerProps.getHost(),
+                ChannelBuilderOptions.defaults());
+        return SetGrpc.newBlockingStub(channel);
     }
 }

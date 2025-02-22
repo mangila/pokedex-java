@@ -17,7 +17,7 @@ public class PokeApiTemplateConfig {
     }
 
     @Bean("pokeApiClient")
-    @ConditionalOnProperty(name = "app.integration.pokeapi")
+    @ConditionalOnProperty(name = "app.integration.pokeapi", matchIfMissing = true)
     public RestClient pokeApiClient() {
         return RestClient.builder()
                 .baseUrl(pokeApiTemplateProps.getHost())
