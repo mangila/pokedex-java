@@ -10,10 +10,27 @@ option java_package = "com.github.mangila.pokedex.backstage.model.grpc";
 service Set {
 
   // Add to Redis Set
-  rpc Add(SetRequest) returns (google.protobuf.Empty){}
+  rpc Add(SetRequest) returns (google.protobuf.Int64Value){}
 
   // Pop from Set
   rpc Pop(SetRequest) returns (google.protobuf.StringValue){}
+}
+
+// Redis value Operations
+service Value {
+
+  // Set Redis Value
+  rpc Set(ValueRequest) returns (google.protobuf.Empty){}
+
+  // Get Redis Value
+  rpc Get(ValueRequest) returns (google.protobuf.StringValue){}
+
+}
+
+// Create new ValueRequest
+message ValueRequest {
+  string key = 1;
+  string data = 2;
 }
 
 // Create a new SetRequest

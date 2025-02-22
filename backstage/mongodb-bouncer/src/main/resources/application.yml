@@ -1,0 +1,11 @@
+# Spring
+spring:
+  main:
+    web-application-type: none
+  application:
+    name: "mongodb-bouncer"
+  grpc:
+    server:
+      port: 9090
+      reflection:
+        enabled: true

@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class GenerationTask implements Task {
@@ -39,18 +39,20 @@ public class GenerationTask implements Task {
                 .stream()
                 .map(Generation::getName)
                 .peek(generation -> log.info("Generation push to Queue: {}", generation))
-                .map(pokeApiTemplate::fetchGeneration)
+                .map(generationName -> {
+                    var cacheValue = redisBouncerClient.get(generationName, GenerationResponse.class);
+                    if (Objects.isNull(cacheValue)) {
+                        var response = pokeApiTemplate.fetchGeneration(generationName);
+                        redisBouncerClient.set(generationName, response.toJson(objectMapper));
+                        return response;
+                    }
+                    return cacheValue;
+                })
                 .map(GenerationResponse::pokemonSpecies)
                 .flatMap(List::stream)
                 .map(Species::name)
                 .map(PokemonName::new)
-                .map(pokemonName -> {
-                    try {
-                        return objectMapper.writeValueAsString(pokemonName);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(pokemonName -> pokemonName.toJson(objectMapper))
                 .forEach(json -> redisBouncerClient.add(RedisQueueName.GENERATION_QUEUE.toString(), json));
     }
 }

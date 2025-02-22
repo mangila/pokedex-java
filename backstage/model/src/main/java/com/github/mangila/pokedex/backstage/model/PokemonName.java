@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.backstage.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +23,14 @@ public class PokemonName implements Serializable {
     public PokemonName(String name) {
         this.name = name;
         validate();
+    }
+
+    public String toJson(ObjectMapper mapper) {
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

@@ -1,5 +1,7 @@
 # Spring
 spring:
+  main:
+    web-application-type: none
   application:
     name: "redis-bouncer"
   data:

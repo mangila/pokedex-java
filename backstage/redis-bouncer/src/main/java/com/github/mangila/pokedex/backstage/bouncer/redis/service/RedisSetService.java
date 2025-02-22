@@ -2,9 +2,10 @@ package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
 import com.github.mangila.pokedex.backstage.model.grpc.SetGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.SetRequest;
-import com.google.protobuf.Empty;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
 
@@ -20,19 +21,31 @@ public class RedisSetService extends SetGrpc.SetImplBase {
     }
 
     @Override
-    public void add(SetRequest request, StreamObserver<Empty> responseObserver) {
+    public void add(SetRequest request, StreamObserver<Int64Value> responseObserver) {
         var queueName = request.getQueueName();
         var data = request.getData();
-        redisTemplate.opsForSet().add(queueName, data);
-        responseObserver.onNext(Empty.getDefaultInstance());
-        responseObserver.onCompleted();
+        var response = redisTemplate.opsForSet().add(queueName, data);
+        if (Objects.isNull(response)) {
+            responseObserver.onError(new RuntimeException("failed to unbox redis set add response"));
+        } else {
+            responseObserver.onNext(
+                    Int64Value.newBuilder()
+                            .setValue(response)
+                            .build()
+            );
+            responseObserver.onCompleted();
+        }
     }
 
     @Override
     public void pop(SetRequest request, StreamObserver<StringValue> responseObserver) {
         var queueName = request.getQueueName();
         var data = redisTemplate.opsForSet().pop(queueName);
-        if (Objects.nonNull(data)) {
+        if (Objects.isNull(data)) {
+            responseObserver.onNext(StringValue.newBuilder()
+                    .setValue(Strings.EMPTY)
+                    .build());
+        } else {
             responseObserver.onNext(StringValue.newBuilder()
                     .setValue(data)
                     .build());
