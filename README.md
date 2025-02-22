@@ -7,6 +7,7 @@ Maven multi-module project consuming and displaying PokeAPI data.
 * Mongodb GridFS as media database
 * Minikube for k8s deployment
 * Native images for Tasks
+* Native images for Bouncer applications
 
 ## Requirements
 

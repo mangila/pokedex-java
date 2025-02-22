@@ -1,3 +1,10 @@
+app:
+  integration:
+    pokeapi:
+      host: "https://pokeapi.co/api/v2"
+    bouncer:
+      redis:
+        host: "0.0.0.0:9090"
 # Spring
 spring:
   main:

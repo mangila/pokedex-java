@@ -26,29 +26,49 @@ Dockerfiles for the tasks has a graalvm image ready to compile
 
 ## generation-task
 
-* fetches the all the pokemons according to their Generation
+* PokeApi request to fetch all pokemons from their Generation
+* Puts all pokemons on PokemonQueue
 
 ## integration
 
-* everything third party api - PokeApi, bouncer clients
+Everything third party api
+
+To use any integration `application.yml` must be configured with the server address
+
+* Conditional bean for props to load the DI container
+
+* PokeApi - RestClient
+* Redis - Grpc Client
+* MongoDb - Grpc Client
 
 ## media-task
 
-* poll for queue and fetches and download the pokemon image from the Queue - updates database
+* Polls from Media Queue
+* Updates the pokemon document with the new media entry
+* Adds reference to file server api for src (TODO: Service discovery stuffs or hardcoding)
+* Puts Files into GridFS
 
 ## model
 
-* everything structs - shared domain objects
+* everything structs
+* Shared domain objects
+* Shared Protos
 
 ## pokemon-task
 
-* fetch Pokemon - update database - put images on Media queue
+* Fetch from PokeApi and checks already made http requests to Redis
+* Updates Database with new pokemon
+* Runs a side effect and puts Pokemon media (images and cries) to the Media Queue
 
 ## redis-bouncer
 
 * Redis bouncer service to handle connection pooling
+* Grpc Server
+* Relays requests to and from Redis
 
 ## mongodb-bouncer
 
 * Mongodb bouncer service to handle connection pooling
+* Grpc Server
+* Relays requests to and from MongoDb
 

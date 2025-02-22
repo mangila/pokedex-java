@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
 import com.github.mangila.pokedex.backstage.model.Task;
-import com.github.mangila.pokedex.backstage.shared.integration.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.shared.integration.pokeapi.PokeApiTemplate;
+import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
