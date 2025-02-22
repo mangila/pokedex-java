@@ -1,5 +1,9 @@
 # Spring
 spring:
+  grpc:
+    server:
+      reflection:
+        enabled: false
   main:
     web-application-type: none
   application:
@@ -17,8 +21,3 @@ spring:
           min-idle: 0
           max-idle: 8
           max-active: 8
-  grpc:
-    server:
-      port: 9090
-      reflection:
-        enabled: true

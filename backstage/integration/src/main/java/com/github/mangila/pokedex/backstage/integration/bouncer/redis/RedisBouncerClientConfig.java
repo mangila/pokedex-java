@@ -11,26 +11,20 @@ import org.springframework.grpc.client.GrpcChannelFactory;
 @Configuration
 public class RedisBouncerClientConfig {
 
-    private final RedisBouncerProps redisBouncerProps;
-
-    public RedisBouncerClientConfig(RedisBouncerProps redisBouncerProps) {
-        this.redisBouncerProps = redisBouncerProps;
-    }
-
     @Bean
-    @ConditionalOnProperty(name = "app.integration.bouncer.redis", matchIfMissing = true)
+    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
     public SetGrpc.SetBlockingStub setBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
-                redisBouncerProps.getHost(),
+                "redis-bouncer",
                 ChannelBuilderOptions.defaults());
         return SetGrpc.newBlockingStub(channel);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "app.integration.bouncer.redis", matchIfMissing = true)
+    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
     public ValueGrpc.ValueBlockingStub valueBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
-                redisBouncerProps.getHost(),
+                "redis-bouncer",
                 ChannelBuilderOptions.defaults());
         return ValueGrpc.newBlockingStub(channel);
     }

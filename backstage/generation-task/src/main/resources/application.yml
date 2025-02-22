@@ -1,14 +1,12 @@
-app:
-  integration:
-    pokeapi:
-      host: "https://pokeapi.co/api/v2"
-    bouncer:
-      redis:
-        host: "0.0.0.0:9090"
 # Spring
 spring:
+  application:
+    name: "generation-task"
   main:
     web-application-type: none
     lazy-initialization: true
-  application:
-    name: "generation-task"
+  grpc:
+    client:
+      channels:
+        redis-bouncer:
+          address: "0.0.0.0:9090"
