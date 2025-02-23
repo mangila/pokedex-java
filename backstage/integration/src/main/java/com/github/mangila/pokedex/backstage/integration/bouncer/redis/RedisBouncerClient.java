@@ -19,6 +19,7 @@ import java.util.Optional;
 public class RedisBouncerClient {
 
     private static final Logger log = LoggerFactory.getLogger(RedisBouncerClient.class);
+
     private final SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub;
     private final SetOperationGrpc.SetOperationStub setOperationStub;
     private final ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub;

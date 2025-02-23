@@ -1,9 +1,22 @@
 # Spring
 spring:
-  main:
-    web-application-type: none
   application:
     name: "mongodb-bouncer"
+  main:
+    web-application-type: none
+  threads:
+    virtual:
+      enabled: true
   grpc:
     server:
       port: 9090
+      host: "*"
+      reflection:
+        enabled: false
+  data:
+    mongodb:
+      uri: "mongodb://admin:password@localhost:27017/"
+      database: "pokemon"
+      gridfs:
+        database: "pokemon-db"
+        bucket: "pokemon"

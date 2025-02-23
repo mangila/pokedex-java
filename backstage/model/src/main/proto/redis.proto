@@ -4,7 +4,7 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 
 option java_multiple_files = true;
-option java_package = "com.github.mangila.pokedex.backstage.model.grpc";
+option java_package = "com.github.mangila.pokedex.backstage.model.grpc.redis";
 
 // Redis set Operations
 service SetOperation {

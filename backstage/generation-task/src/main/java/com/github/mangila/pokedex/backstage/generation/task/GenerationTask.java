@@ -21,15 +21,16 @@ import java.util.List;
 public class GenerationTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(GenerationTask.class);
-    private final RedisBouncerClient redisBouncerClient;
+
     private final PokeApiTemplate pokeApiTemplate;
+    private final RedisBouncerClient redisBouncerClient;
     private final ObjectMapper objectMapper;
 
-    public GenerationTask(RedisBouncerClient redisBouncerClient,
-                          PokeApiTemplate pokeApiTemplate,
+    public GenerationTask(PokeApiTemplate pokeApiTemplate,
+                          RedisBouncerClient redisBouncerClient,
                           ObjectMapper objectMapper) {
-        this.redisBouncerClient = redisBouncerClient;
         this.pokeApiTemplate = pokeApiTemplate;
+        this.redisBouncerClient = redisBouncerClient;
         this.objectMapper = objectMapper;
     }
 

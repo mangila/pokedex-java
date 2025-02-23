@@ -1,15 +1,18 @@
 # Spring
 spring:
+  application:
+    name: "redis-bouncer"
+  main:
+    web-application-type: none
+  threads:
+    virtual:
+      enabled: true
   grpc:
     server:
       port: 9090
       host: "*"
       reflection:
         enabled: false
-  main:
-    web-application-type: none
-  application:
-    name: "redis-bouncer"
   data:
     redis:
       client-type: lettuce
@@ -23,6 +26,3 @@ spring:
           min-idle: 0
           max-idle: -1
           max-active: -1
-  threads:
-    virtual:
-      enabled: true

@@ -2,7 +2,6 @@ package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
 import com.github.mangila.pokedex.backstage.model.grpc.SetOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.grpc.client.GrpcChannelFactory;
@@ -11,7 +10,6 @@ import org.springframework.grpc.client.GrpcChannelFactory;
 public class RedisBouncerClientConfig {
 
     @Bean
-    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
     public SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer");
@@ -19,7 +17,6 @@ public class RedisBouncerClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
     public SetOperationGrpc.SetOperationStub setOperationFutureStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer");
@@ -27,7 +24,6 @@ public class RedisBouncerClientConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
     public ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer");

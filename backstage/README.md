@@ -1,74 +1,71 @@
-# backstage
+# Backstage
 
-Background jobs compiled a Native Image for FaaS(Function as a Service)
+- Tasks that is compiled as Native Images used a Function as a Service(FaaS)
+- Bouncer applications that relays and handle connection pooling to the datasources
+    - Redis
+    - Mongodb
 
-## To run
+## To Run
 
-Will compile everything and install and generate native executables for your host system
+To compile everything, install, and generate native executables for your host system:
 
-* `mvn -U clean install` - compile and install all modules
-* `mvn native:compile -Pnative -DskipTests` - generate native executables - this might take a while
+- `mvn -U clean install` - Compiles and installs all modules.
+- `mvn native:compile -Pnative -DskipTests` - Generates native executables. Note that this might take some time.
 
 ## Requirements
 
-For local development
+For local development:
 
-* GraalVM for compiling the native Image
+- GraalVM for compiling the native image.
 
 ## Docker
 
-Dockerfiles for the tasks has a graalvm image ready to compile
+Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
-* use "host.docker.internal" as host if running locally
-* see minikube.ps1 for build step
+- Refer to `minikube.ps1` for the build steps.
 
-# modules
+## Modules
 
-## generation-task
+### generation-task
 
-* PokeApi request to fetch all pokemons from their Generation
-* Puts all pokemons on PokemonQueue
+- Makes a PokeApi request to fetch all Pokémon from their Generation.
+- Enqueues all Pokémon into the `PokemonQueue`.
 
-## integration
+### integration
 
-Everything third party api
+Handles all third-party APIs:
 
-To use any integration `application.yml` must be configured with the server address
+- PokeApi - RestClient
+- Redis - gRPC Client
+- MongoDB - gRPC Client
 
-* Conditional bean for props to load the DI container
+### media-task
 
-* PokeApi - RestClient
-* Redis - Grpc Client
-* MongoDb - Grpc Client
+- Polls from the `MediaQueue`.
+- Updates the Pokémon document with the new media entry.
+- Adds a reference to the file server API for the source (TODO: Service discovery setup or hardcoding).
+- Inserts media into GridFS.
 
-## media-task
+### model
 
-* Polls from Media Queue
-* Updates the pokemon document with the new media entry
-* Adds reference to file server api for src (TODO: Service discovery stuffs or hardcoding)
-* Puts Files into GridFS
+- Contains all struct definitions.
+- Shared domain objects.
+- Shared Proto implementations.
 
-## model
+### pokemon-task
 
-* everything structs
-* Shared domain objects
-* Shared Protos
+- Fetches data from PokeApi and checks already made HTTP requests to Redis.
+- Updates the database with new Pokémon.
+- Runs a side effect and enqueues Pokémon media (images and cries) into the `MediaQueue`.
 
-## pokemon-task
+### redis-bouncer
 
-* Fetch from PokeApi and checks already made http requests to Redis
-* Updates Database with new pokemon
-* Runs a side effect and puts Pokemon media (images and cries) to the Media Queue
+- Redis bouncer service to handle connection pooling.
+- gRPC Server.
+- Relays requests to and from Redis.
 
-## redis-bouncer
+### mongodb-bouncer
 
-* Redis bouncer service to handle connection pooling
-* Grpc Server
-* Relays requests to and from Redis
-
-## mongodb-bouncer
-
-* Mongodb bouncer service to handle connection pooling
-* Grpc Server
-* Relays requests to and from MongoDb
-
+- MongoDB bouncer service to handle connection pooling.
+- gRPC Server.
+- Relays requests to and from MongoDB.
