@@ -7,9 +7,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 
 import java.io.Serializable;
 
+@RegisterReflectionForBinding({
+        PokemonName.class
+})
 public class PokemonName implements Serializable {
     @NotNull(message = "Name cannot be null")
     @NotEmpty(message = "Name cannot be empty")

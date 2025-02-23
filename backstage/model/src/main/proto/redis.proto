@@ -7,34 +7,34 @@ option java_multiple_files = true;
 option java_package = "com.github.mangila.pokedex.backstage.model.grpc";
 
 // Redis set Operations
-service Set {
+service SetOperation {
 
   // Add to Redis Set
-  rpc Add(SetRequest) returns (google.protobuf.Int64Value){}
+  rpc Add(SetOperationRequest) returns (google.protobuf.Int64Value){}
 
   // Pop from Set
-  rpc Pop(SetRequest) returns (google.protobuf.StringValue){}
+  rpc Pop(SetOperationRequest) returns (google.protobuf.StringValue){}
 }
 
 // Redis value Operations
-service Value {
+service ValueOperation {
 
   // Set Redis Value
-  rpc Set(ValueRequest) returns (google.protobuf.Empty){}
+  rpc Set(ValueOperationRequest) returns (google.protobuf.Empty){}
 
   // Get Redis Value
-  rpc Get(ValueRequest) returns (google.protobuf.StringValue){}
+  rpc Get(ValueOperationRequest) returns (google.protobuf.StringValue){}
 
 }
 
-// Create new ValueRequest
-message ValueRequest {
+// Create new ValueOperationRequest
+message ValueOperationRequest {
   string key = 1;
   string data = 2;
 }
 
-// Create a new SetRequest
-message SetRequest {
+// Create a new SetOperationRequest
+message SetOperationRequest {
   string queueName = 1;
   string data = 2;
 }

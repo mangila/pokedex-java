@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class GenerationTask implements Task {
@@ -41,12 +40,12 @@ public class GenerationTask implements Task {
                 .peek(generation -> log.info("Generation push to Queue: {}", generation))
                 .map(generationName -> {
                     var cacheValue = redisBouncerClient.get(generationName, GenerationResponse.class);
-                    if (Objects.isNull(cacheValue)) {
+                    if (cacheValue.isEmpty()) {
                         var response = pokeApiTemplate.fetchGeneration(generationName);
                         redisBouncerClient.set(generationName, response.toJson(objectMapper));
                         return response;
                     }
-                    return cacheValue;
+                    return cacheValue.get();
                 })
                 .map(GenerationResponse::pokemonSpecies)
                 .flatMap(List::stream)

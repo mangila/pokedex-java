@@ -9,4 +9,4 @@ spring:
     client:
       channels:
         redis-bouncer:
-          address: "0.0.0.0:9090"
+          address: "static://0.0.0.0:9090"

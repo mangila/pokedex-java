@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.grpc.ValueGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.ValueRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
@@ -12,16 +12,16 @@ import org.springframework.grpc.server.service.GrpcService;
 import java.util.Objects;
 
 @GrpcService
-public class RedisValueService extends ValueGrpc.ValueImplBase {
+public class RedisValueOperationService extends ValueOperationGrpc.ValueOperationImplBase {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisValueService(RedisTemplate<String, String> redisTemplate) {
+    public RedisValueOperationService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     @Override
-    public void get(ValueRequest request, StreamObserver<StringValue> responseObserver) {
+    public void get(ValueOperationRequest request, StreamObserver<StringValue> responseObserver) {
         var value = redisTemplate.opsForValue()
                 .get(request.getKey());
         if (Objects.isNull(value)) {
@@ -37,7 +37,7 @@ public class RedisValueService extends ValueGrpc.ValueImplBase {
     }
 
     @Override
-    public void set(ValueRequest request, StreamObserver<Empty> responseObserver) {
+    public void set(ValueOperationRequest request, StreamObserver<Empty> responseObserver) {
         redisTemplate.opsForValue()
                 .set(request.getKey(), request.getData());
         responseObserver.onNext(Empty.getDefaultInstance());
