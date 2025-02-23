@@ -2,7 +2,6 @@
 spring:
   grpc:
     server:
-      keep-alive:
       port: 9090
       host: "*"
   main:
