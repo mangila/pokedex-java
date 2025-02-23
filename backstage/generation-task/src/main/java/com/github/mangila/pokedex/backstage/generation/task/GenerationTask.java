@@ -9,6 +9,7 @@ import com.github.mangila.pokedex.backstage.model.Generation;
 import com.github.mangila.pokedex.backstage.model.PokemonName;
 import com.github.mangila.pokedex.backstage.model.RedisQueueName;
 import com.github.mangila.pokedex.backstage.model.Task;
+import com.github.mangila.pokedex.backstage.model.grpc.SetOperationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,8 +33,21 @@ public class GenerationTask implements Task {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 0. Create bi-directional stream to RedisBouncer for set add operation
+     * 1. Iterate all Generation enums
+     * 2. Map to Generation name
+     * 3. Check if generation is in Redis Cache else send Api request
+     * 4. Flatten out response list with Pokemon Species
+     * 5. Create a PokemonName object and Validate
+     * 6. Map to json string
+     * 7. Put all Pokemons on GENERATION_QUEUE redis set
+     *
+     * @param args - program arguments from the Main method
+     */
     @Override
     public void run(String[] args) {
+        var observer = redisBouncerClient.addBiDirectionalStream();
         EnumSet.allOf(Generation.class)
                 .stream()
                 .map(Generation::getName)
@@ -52,6 +66,10 @@ public class GenerationTask implements Task {
                 .map(Species::name)
                 .map(PokemonName::new)
                 .map(pokemonName -> pokemonName.toJson(objectMapper))
-                .forEach(json -> redisBouncerClient.add(RedisQueueName.GENERATION_QUEUE.toString(), json));
+                .forEach(json -> observer.onNext(SetOperationRequest.newBuilder()
+                        .setQueueName(RedisQueueName.GENERATION_QUEUE.toString())
+                        .setData(json)
+                        .build()));
+        observer.onCompleted();
     }
 }

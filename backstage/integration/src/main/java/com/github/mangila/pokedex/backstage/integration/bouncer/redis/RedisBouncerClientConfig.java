@@ -12,7 +12,7 @@ public class RedisBouncerClientConfig {
 
     @Bean
     @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
-    public SetOperationGrpc.SetOperationBlockingStub setBlockingStub(GrpcChannelFactory channels) {
+    public SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer");
         return SetOperationGrpc.newBlockingStub(channel);
@@ -20,7 +20,15 @@ public class RedisBouncerClientConfig {
 
     @Bean
     @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
-    public ValueOperationGrpc.ValueOperationBlockingStub valueBlockingStub(GrpcChannelFactory channels) {
+    public SetOperationGrpc.SetOperationStub setOperationFutureStub(GrpcChannelFactory channels) {
+        var channel = channels.createChannel(
+                "redis-bouncer");
+        return SetOperationGrpc.newStub(channel);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "spring.grpc.client.channels.redis-bouncer", matchIfMissing = true)
+    public ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer");
         return ValueOperationGrpc.newBlockingStub(channel);

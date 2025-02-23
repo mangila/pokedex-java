@@ -8,6 +8,9 @@ import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
+import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -15,21 +18,24 @@ import java.util.Optional;
 @Service
 public class RedisBouncerClient {
 
-    private final SetOperationGrpc.SetOperationBlockingStub setBlockingStub;
-    private final ValueOperationGrpc.ValueOperationBlockingStub valueBlockingStub;
+    private static final Logger log = LoggerFactory.getLogger(RedisBouncerClient.class);
+    private final SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub;
+    private final SetOperationGrpc.SetOperationStub setOperationStub;
+    private final ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub;
     private final ObjectMapper objectMapper;
 
-    public RedisBouncerClient(SetOperationGrpc.SetOperationBlockingStub setBlockingStub,
-                              ValueOperationGrpc.ValueOperationBlockingStub valueBlockingStub,
+    public RedisBouncerClient(SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub,
+                              SetOperationGrpc.SetOperationStub setOperationStub,
+                              ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub,
                               ObjectMapper objectMapper) {
-        this.setBlockingStub = setBlockingStub;
-        this.valueBlockingStub = valueBlockingStub;
+        this.setOperationBlockingStub = setOperationBlockingStub;
+        this.setOperationStub = setOperationStub;
+        this.valueOperationBlockingStub = valueOperationBlockingStub;
         this.objectMapper = objectMapper;
     }
 
-
     public Empty set(String key, String value) {
-        return valueBlockingStub.set(
+        return valueOperationBlockingStub.set(
                 ValueOperationRequest.newBuilder()
                         .setKey(key)
                         .setData(value)
@@ -41,7 +47,7 @@ public class RedisBouncerClient {
         var request = ValueOperationRequest.newBuilder()
                 .setKey(key)
                 .build();
-        var response = valueBlockingStub.get(request);
+        var response = valueOperationBlockingStub.get(request);
         var jsonString = response.getValue();
         if (jsonString.isEmpty()) {
             return Optional.empty();
@@ -53,19 +59,38 @@ public class RedisBouncerClient {
         }
     }
 
+    public StreamObserver<SetOperationRequest> addBiDirectionalStream() {
+        return setOperationStub.addBiDirectionalStream(new StreamObserver<>() {
+            @Override
+            public void onNext(Int64Value int64Value) {
+                log.debug(String.valueOf(int64Value.getValue()));
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("ERR", throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                log.debug("STREAM COMPLETED");
+            }
+        });
+    }
+
     public Int64Value add(String queueName, String data) {
         var request = SetOperationRequest.newBuilder()
                 .setQueueName(queueName)
                 .setData(data)
                 .build();
-        return setBlockingStub.add(request);
+        return setOperationBlockingStub.add(request);
     }
 
     public <T> Optional<T> pop(String queueName, Class<T> clazz) {
         var request = SetOperationRequest.newBuilder()
                 .setQueueName(queueName)
                 .build();
-        var response = setBlockingStub.pop(request);
+        var response = setOperationBlockingStub.pop(request);
         var jsonString = response.getValue();
         if (jsonString.isEmpty()) {
             return Optional.empty();

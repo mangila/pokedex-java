@@ -10,3 +10,6 @@ spring:
       channels:
         redis-bouncer:
           address: "static://0.0.0.0:9090"
+  threads:
+    virtual:
+      enabled: true

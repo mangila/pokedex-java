@@ -11,7 +11,8 @@ service SetOperation {
 
   // Add to Redis Set
   rpc Add(SetOperationRequest) returns (google.protobuf.Int64Value){}
-
+  // Add to Redis Set bi-directional Stream
+  rpc AddBiDirectionalStream(stream SetOperationRequest) returns (stream google.protobuf.Int64Value){}
   // Pop from Set
   rpc Pop(SetOperationRequest) returns (google.protobuf.StringValue){}
 }
@@ -21,7 +22,6 @@ service ValueOperation {
 
   // Set Redis Value
   rpc Set(ValueOperationRequest) returns (google.protobuf.Empty){}
-
   // Get Redis Value
   rpc Get(ValueOperationRequest) returns (google.protobuf.StringValue){}
 

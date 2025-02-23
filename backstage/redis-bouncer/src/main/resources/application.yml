@@ -4,6 +4,8 @@ spring:
     server:
       port: 9090
       host: "*"
+      reflection:
+        enabled: false
   main:
     web-application-type: none
   application:
@@ -18,6 +20,9 @@ spring:
           enabled: true
           time-between-eviction-runs: 60s
           max-wait: -1ms
-          min-idle: 3
-          max-idle: 8
-          max-active: 20
+          min-idle: 0
+          max-idle: -1
+          max-active: -1
+  threads:
+    virtual:
+      enabled: true

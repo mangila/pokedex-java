@@ -21,6 +21,37 @@ public class RedisSetOperationService extends SetOperationGrpc.SetOperationImplB
     }
 
     @Override
+    public StreamObserver<SetOperationRequest> addBiDirectionalStream(StreamObserver<Int64Value> responseObserver) {
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(SetOperationRequest request) {
+                var queueName = request.getQueueName();
+                var data = request.getData();
+                var redisResponse = redisTemplate.opsForSet().add(queueName, data);
+                if (Objects.isNull(redisResponse)) {
+                    responseObserver.onError(new RuntimeException("failed to unbox redis set add response"));
+                } else {
+                    responseObserver.onNext(
+                            Int64Value.newBuilder()
+                                    .setValue(redisResponse)
+                                    .build()
+                    );
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                responseObserver.onError(throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    @Override
     public void add(SetOperationRequest request, StreamObserver<Int64Value> responseObserver) {
         var queueName = request.getQueueName();
         var data = request.getData();
