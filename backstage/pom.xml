@@ -89,7 +89,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <pluginManagement>
             <plugins>
@@ -102,14 +101,19 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <configuration>
-                    <skipNativeBuildForPom>true</skipNativeBuildForPom>
-                    <skipNativeTests>true</skipNativeTests>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>

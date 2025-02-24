@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")

@@ -9,7 +9,7 @@ class DefaultStreamOperation implements StreamOperation {
 
     private final StreamOperationGrpc.StreamOperationStub streamOperationStub;
 
-    protected DefaultStreamOperation(StreamOperationGrpc.StreamOperationStub streamOperationStub) {
+    public DefaultStreamOperation(StreamOperationGrpc.StreamOperationStub streamOperationStub) {
         this.streamOperationStub = streamOperationStub;
     }
 

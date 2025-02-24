@@ -57,22 +57,7 @@ public class GenerationTask implements Task {
                 .stream()
                 .map(Generation::getName)
                 .peek(generation -> log.info("Generation push to Queue: {}", generation))
-                .map(generationName -> {
-                    var cacheValue = redisBouncerClient.valueOps()
-                            .get(EntryRequest.newBuilder()
-                                    .setKey(generationName)
-                                    .build());
-                    if (cacheValue.isEmpty()) {
-                        var response = pokeApiTemplate.fetchGeneration(generationName);
-                        redisBouncerClient.valueOps()
-                                .set(EntryRequest.newBuilder()
-                                        .setKey(generationName)
-                                        .setValue(response.toJson(objectMapper))
-                                        .build());
-                        return response;
-                    }
-                    return getGenerationResponseAsJson(cacheValue.get());
-                })
+                .map(this::getGenerationResponse)
                 .map(GenerationResponse::pokemonSpecies)
                 .flatMap(List::stream)
                 .map(Species::name)
@@ -105,6 +90,23 @@ public class GenerationTask implements Task {
                         log.debug("Stream finished");
                     }
                 });
+    }
+
+    private GenerationResponse getGenerationResponse(String generationName) {
+        var cacheValue = redisBouncerClient.valueOps()
+                .get(EntryRequest.newBuilder()
+                        .setKey(generationName)
+                        .build());
+        if (cacheValue.isEmpty()) {
+            var response = pokeApiTemplate.fetchGeneration(generationName);
+            redisBouncerClient.valueOps()
+                    .set(EntryRequest.newBuilder()
+                            .setKey(generationName)
+                            .setValue(response.toJson(objectMapper))
+                            .build());
+            return response;
+        }
+        return getGenerationResponseAsJson(cacheValue.get());
     }
 
     private GenerationResponse getGenerationResponseAsJson(String cacheValue) {
