@@ -9,7 +9,7 @@ import com.github.mangila.pokedex.backstage.model.Generation;
 import com.github.mangila.pokedex.backstage.model.PokemonName;
 import com.github.mangila.pokedex.backstage.model.RedisQueueName;
 import com.github.mangila.pokedex.backstage.model.Task;
-import com.github.mangila.pokedex.backstage.model.grpc.SetOperationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.SetOperationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

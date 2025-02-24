@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.SetOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.SetOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.grpc.client.GrpcChannelFactory;

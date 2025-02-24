@@ -7,10 +7,11 @@
 
 ## To Run
 
-To compile everything, install, and generate native executables for your host system:
+Native images are generated based on your OS
 
-- `mvn -U clean install` - Compiles and installs all modules.
-- `mvn native:compile -Pnative -DskipTests` - Generates native executables. Note that this might take some time.
+- `mvn -U clean install` - Compiles,tests and installs all modules.
+- `mvn native:compile -Pnative` - Generates native executables. Note that this might take some time.
+- `mvn -PnativeTest test` - Run native image tests
 
 ## Requirements
 

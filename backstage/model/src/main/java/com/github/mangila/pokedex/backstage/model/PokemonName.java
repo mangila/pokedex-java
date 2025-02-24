@@ -10,16 +10,12 @@ import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 
-public class PokemonName implements Serializable {
-    @NotNull(message = "Name cannot be null")
-    @NotEmpty(message = "Name cannot be empty")
-    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
-    @Pattern(regexp = "^[A-Za-z0-9-]+$", message = "Name not valid string")
-    private String name;
-
-    public PokemonName() {
-
-    }
+public record PokemonName(
+        @NotNull(message = "Name cannot be null")
+        @NotEmpty(message = "Name cannot be empty")
+        @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+        @Pattern(regexp = "^[A-Za-z0-9-]+$", message = "Name not valid string")
+        String name) implements Serializable {
 
     public PokemonName(String name) {
         this.name = name;
@@ -32,10 +28,6 @@ public class PokemonName implements Serializable {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public String getName() {
-        return name;
     }
 
     /**

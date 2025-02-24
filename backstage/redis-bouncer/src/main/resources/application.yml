@@ -9,10 +9,8 @@ spring:
       enabled: true
   grpc:
     server:
-      port: 9090
+      port: 9000
       host: "*"
-      reflection:
-        enabled: false
   data:
     redis:
       client-type: lettuce

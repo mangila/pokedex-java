@@ -1,12 +1,11 @@
 package com.github.mangila.pokedex.backstage.model;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.aot.DisabledInAotMode;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@DisabledInAotMode
+
 class PokemonNameTest {
 
     @Test

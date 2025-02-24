@@ -1,11 +1,13 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
 
@@ -13,6 +15,8 @@ import java.util.Objects;
 
 @GrpcService
 public class RedisValueOperationService extends ValueOperationGrpc.ValueOperationImplBase {
+
+    private static final Logger log = LoggerFactory.getLogger(RedisValueOperationService.class);
 
     private final RedisTemplate<String, String> redisTemplate;
 

@@ -2,10 +2,10 @@ package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.pokedex.backstage.model.grpc.SetOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.SetOperationRequest;
-import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.ValueOperationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.SetOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.SetOperationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int64Value;
 import io.grpc.stub.StreamObserver;
