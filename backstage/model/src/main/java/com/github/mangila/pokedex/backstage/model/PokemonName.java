@@ -1,8 +1,5 @@
 package com.github.mangila.pokedex.backstage.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Validation;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -22,28 +19,17 @@ public record PokemonName(
         validate();
     }
 
-    public String toJson(ObjectMapper mapper) {
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Validate the Jakarta annotations
      */
     private void validate() {
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
-            var validator = factory.getValidator();
-            var violations = validator.validate(this);
-            if (!violations.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                for (var violation : violations) {
-                    sb.append(violation.getMessage()).append("\n");
-                }
-                throw new IllegalArgumentException("Validation failed: " + sb);
+        var violations = ValidationUtil.getValidator().validate(this);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (var violation : violations) {
+                sb.append(violation.getMessage()).append("\n");
             }
+            throw new IllegalArgumentException("Validation failed: " + sb);
         }
     }
 }
