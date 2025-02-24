@@ -27,11 +27,11 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
         return new StreamObserver<>() {
             @Override
             public void onNext(StreamRecord streamRecord) {
-                log.debug("Server STREAM ADD received: {}", streamRecord.toString());
+                log.debug("{}", streamRecord.toString());
                 var record = StreamRecords.newRecord()
                         .ofStrings(streamRecord.getDataMap())
                         .withStreamKey(streamRecord.getStreamKey());
-                template.opsForStream()
+              template.opsForStream()
                         .add(record);
             }
 
@@ -44,6 +44,7 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
             @Override
             public void onCompleted() {
                 log.debug("Client finished stream");
+                responseObserver.onNext(Empty.getDefaultInstance());
                 responseObserver.onCompleted();
             }
         };

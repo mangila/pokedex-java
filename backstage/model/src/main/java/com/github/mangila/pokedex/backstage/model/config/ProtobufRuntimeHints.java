@@ -23,14 +23,12 @@ public class ProtobufRuntimeHints implements RuntimeHintsRegistrar {
         var packages = List.of(
                 REDIS_PROTOBUF_PACKAGE, MONGO_DB_PROTOBUF_PACKAGE
         );
-
         for (String packageName : packages) {
             Reflections reflections = new Reflections(packageName);
             registerMessages(hints, reflections.getSubTypesOf(GeneratedMessageV3.class));
             registerBuilders(hints, reflections.getSubTypesOf(GeneratedMessageV3.Builder.class));
             registerEnums(hints, reflections.getSubTypesOf(ProtocolMessageEnum.class));
         }
-
     }
 
     private static void registerMessages(RuntimeHints hints, Set<Class<? extends GeneratedMessageV3>> messageClasses) {

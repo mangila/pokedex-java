@@ -87,7 +87,7 @@ public class GenerationTask implements Task {
 
                     @Override
                     public void onCompleted() {
-                        log.debug("Stream finished");
+                        log.info("Stream finished");
                     }
                 });
     }
