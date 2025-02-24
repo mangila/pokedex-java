@@ -15,19 +15,12 @@ class DefaultValueOperation implements ValueOperation {
     }
 
     @Override
-    public Empty set(String key, String value) {
-        var request = EntryRequest.newBuilder()
-                .setKey(key)
-                .setValue(value)
-                .build();
+    public Empty set(EntryRequest request) {
         return valueOperationBlockingStub.set(request);
     }
 
     @Override
-    public Optional<String> get(String key) {
-        var request = EntryRequest.newBuilder()
-                .setKey(key)
-                .build();
+    public Optional<String> get(EntryRequest request) {
         var response = valueOperationBlockingStub.get(request);
         if (response.getValue().isEmpty()) {
             return Optional.empty();

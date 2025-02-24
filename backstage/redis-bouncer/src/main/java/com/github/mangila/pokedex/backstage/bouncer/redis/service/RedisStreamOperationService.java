@@ -11,7 +11,6 @@ import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
 
-
 @GrpcService
 public class RedisStreamOperationService extends StreamOperationGrpc.StreamOperationImplBase {
 
@@ -44,7 +43,7 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
 
             @Override
             public void onCompleted() {
-                log.debug("Client closed stream");
+                log.debug("Client finished stream");
                 responseObserver.onCompleted();
             }
         };

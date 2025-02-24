@@ -10,6 +10,7 @@ import com.github.mangila.pokedex.backstage.model.Generation;
 import com.github.mangila.pokedex.backstage.model.PokemonName;
 import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.Task;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
@@ -38,53 +39,39 @@ public class GenerationTask implements Task {
     }
 
     /**
-     * 0. Create a grpc client-stream to RedisBouncer and add Redis Stream messages
-     * 1. Iterate all Generation enums
-     * 2. Map to Generation name
-     * 3. Check if generation is in Redis Cache else send Api request
-     * 4. Flatten out response list with Pokemon Species
-     * 5. Create a PokemonName object and Validate
-     * 6. Map to json string
-     * 7. Put all Pokemons on GENERATION_STREAM
+     * 0. Create a grpc client-stream to RedisBouncer <br>
+     * 1. Iterate all Generation enums <br>
+     * 2. Map to Generation name <br>
+     * 3. Check if generation is in Redis Cache else send Api request <br>
+     * 4. Flatten out response list with Pokemon Species <br>
+     * 5. Create a PokemonName object and Validate <br>
+     * 6. Map to json string <br>
+     * 7. Put all Pokemons on POKEMON_NAME_EVENT <br>
      *
      * @param args - program arguments from the Main method
      */
     @Override
     public void run(String[] args) {
-        var observer = redisBouncerClient.streamOps()
-                .addWithClientStream(new StreamObserver<>() {
-                    @Override
-                    public void onNext(Empty empty) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-
-                    }
-
-                    @Override
-                    public void onCompleted() {
-
-                    }
-                });
+        var observer = getStreamObserver();
         EnumSet.allOf(Generation.class)
                 .stream()
                 .map(Generation::getName)
                 .peek(generation -> log.info("Generation push to Queue: {}", generation))
                 .map(generationName -> {
-                    var cacheValue = redisBouncerClient.valueOps().get(generationName);
+                    var cacheValue = redisBouncerClient.valueOps()
+                            .get(EntryRequest.newBuilder()
+                                    .setKey(generationName)
+                                    .build());
                     if (cacheValue.isEmpty()) {
                         var response = pokeApiTemplate.fetchGeneration(generationName);
                         redisBouncerClient.valueOps()
-                                .set(generationName, response.toJson(objectMapper));
+                                .set(EntryRequest.newBuilder()
+                                        .setKey(generationName)
+                                        .setValue(response.toJson(objectMapper))
+                                        .build());
                         return response;
                     }
-                    try {
-                        return objectMapper.readValue(cacheValue.get(), GenerationResponse.class);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
+                    return getGenerationResponseAsJson(cacheValue.get());
                 })
                 .map(GenerationResponse::pokemonSpecies)
                 .flatMap(List::stream)
@@ -98,5 +85,33 @@ public class GenerationTask implements Task {
                     observer.onNext(record);
                 });
         observer.onCompleted();
+    }
+
+    private StreamObserver<StreamRecord> getStreamObserver() {
+        return redisBouncerClient.streamOps()
+                .addWithClientStream(new StreamObserver<>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        log.error("ERR", throwable);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        log.debug("Stream finished");
+                    }
+                });
+    }
+
+    private GenerationResponse getGenerationResponseAsJson(String cacheValue) {
+        try {
+            return objectMapper.readValue(cacheValue, GenerationResponse.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

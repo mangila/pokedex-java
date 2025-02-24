@@ -1,8 +1,6 @@
-package com.github.mangila.pokedex.backstage.generation.task;
+package com.github.mangila.pokedex.backstage.image.task;
 
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.model.Generation;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -18,15 +16,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.util.EnumSet;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")
-class GenerationTaskE2eTest {
+class ImageTaskE2eTest {
 
     private static final String GRPC_PORT = "9999";
 
@@ -75,16 +70,7 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testCachedApiResponses() {
-        EnumSet.allOf(Generation.class)
-                .stream()
-                .map(Generation::getName)
-                .forEach(generationName -> {
-                    var response = redisBouncerClient.valueOps()
-                            .get(EntryRequest.newBuilder()
-                                    .setKey(generationName)
-                                    .build());
-                    assertThat(response).isNotEmpty();
-                });
+    void test() {
+
     }
 }
