@@ -1,32 +1,28 @@
 package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.SetOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.grpc.client.ChannelBuilderOptions;
 import org.springframework.grpc.client.GrpcChannelFactory;
 
 @Configuration
 public class RedisBouncerClientConfig {
 
     @Bean
-    public SetOperationGrpc.SetOperationBlockingStub setOperationBlockingStub(GrpcChannelFactory channels) {
+    public StreamOperationGrpc.StreamOperationStub streamOperationStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
-                "redis-bouncer");
-        return SetOperationGrpc.newBlockingStub(channel);
-    }
-
-    @Bean
-    public SetOperationGrpc.SetOperationStub setOperationFutureStub(GrpcChannelFactory channels) {
-        var channel = channels.createChannel(
-                "redis-bouncer");
-        return SetOperationGrpc.newStub(channel);
+                "redis-bouncer",
+                ChannelBuilderOptions.defaults());
+        return StreamOperationGrpc.newStub(channel);
     }
 
     @Bean
     public ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
-                "redis-bouncer");
+                "redis-bouncer",
+                ChannelBuilderOptions.defaults());
         return ValueOperationGrpc.newBlockingStub(channel);
     }
 }

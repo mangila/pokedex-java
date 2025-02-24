@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.GenerationResponse;
 import com.github.mangila.pokedex.backstage.model.Generation;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")
-class GenerationTaskTest {
+class GenerationTaskE2eTest {
 
     private static final String GRPC_PORT = "9999";
 
@@ -78,7 +77,7 @@ class GenerationTaskTest {
                 .stream()
                 .map(Generation::getName)
                 .forEach(generationName -> {
-                    var response = redisBouncerClient.get("generation-i", GenerationResponse.class);
+                    var response = redisBouncerClient.valueOps().get(generationName);
                     assertThat(response).isNotEmpty();
                 });
     }

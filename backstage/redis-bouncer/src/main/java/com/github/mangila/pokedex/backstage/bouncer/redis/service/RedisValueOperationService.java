@@ -1,14 +1,15 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
+import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
 
 import java.util.Objects;
@@ -18,15 +19,25 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
 
     private static final Logger log = LoggerFactory.getLogger(RedisValueOperationService.class);
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final StringRedisTemplate template;
 
-    public RedisValueOperationService(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public RedisValueOperationService(@Qualifier("template") StringRedisTemplate template) {
+        this.template = template;
     }
 
     @Override
-    public void get(ValueOperationRequest request, StreamObserver<StringValue> responseObserver) {
-        var value = redisTemplate.opsForValue()
+    public void set(EntryRequest request, StreamObserver<Empty> responseObserver) {
+        log.debug("Server SET received - {}", request.toString());
+        template.opsForValue()
+                .set(request.getKey(), request.getValue());
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void get(EntryRequest request, StreamObserver<StringValue> responseObserver) {
+        log.debug("Server GET received - {}", request.toString());
+        var value = template.opsForValue()
                 .get(request.getKey());
         if (Objects.isNull(value)) {
             responseObserver.onNext(StringValue.newBuilder()
@@ -37,14 +48,6 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
                     .setValue(value)
                     .build());
         }
-        responseObserver.onCompleted();
-    }
-
-    @Override
-    public void set(ValueOperationRequest request, StreamObserver<Empty> responseObserver) {
-        redisTemplate.opsForValue()
-                .set(request.getKey(), request.getData());
-        responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
 }
