@@ -1,5 +1,7 @@
 # pokedex-spring-boot
 
+NOTE - this is still work in progress
+
 Maven multi-module project consuming and displaying PokeAPI data.
 
 * Redis for caching

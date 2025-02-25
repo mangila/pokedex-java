@@ -30,7 +30,7 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 ### generation-task
 
 - Makes a PokeApi request to fetch all Pokémon from their Generation.
-- Enqueues all Pokémon into the `PokemonQueue`.
+- Add Stream logs to `pokemon-name-event`
 
 ### integration
 
@@ -42,7 +42,7 @@ Handles all third-party APIs:
 
 ### media-task
 
-- Polls from the `MediaQueue`.
+- Read Stream Logs from `pokemon-name-event`
 - Updates the Pokémon document with the new media entry.
 - Adds a reference to the file server API for the source (TODO: Service discovery setup or hardcoding).
 - Inserts media into GridFS.
@@ -52,12 +52,13 @@ Handles all third-party APIs:
 - Contains all struct definitions.
 - Shared domain objects.
 - Shared Proto implementations.
+- Native image reflection stuffs
 
 ### pokemon-task
 
 - Fetches data from PokeApi and checks already made HTTP requests to Redis.
 - Updates the database with new Pokémon.
-- Runs a side effect and enqueues Pokémon media (images and cries) into the `MediaQueue`.
+- Runs a side effect and Stream Logs Pokémon media (images and cries) into the `pokemon-media-event`.
 
 ### redis-bouncer
 
