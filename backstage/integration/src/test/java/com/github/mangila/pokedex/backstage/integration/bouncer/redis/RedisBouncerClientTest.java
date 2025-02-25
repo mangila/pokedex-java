@@ -1,7 +1,5 @@
-package com.github.mangila.pokedex.backstage.generation.task;
+package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.model.Generation;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,16 +16,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
-import java.util.EnumSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
-@SpringBootTest
+@SpringBootTest(classes = {
+        RedisBouncerClientApplicationTest.class
+})
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
-class GenerationTaskE2eTest {
+class RedisBouncerClientTest {
 
     private static final String GRPC_PORT = "9999";
 
@@ -76,16 +74,17 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testCachedApiResponses() {
-        EnumSet.allOf(Generation.class)
-                .stream()
-                .map(Generation::getName)
-                .forEach(generationName -> {
-                    var response = redisBouncerClient.valueOps()
-                            .get(EntryRequest.newBuilder()
-                                    .setKey(generationName)
-                                    .build());
-                    assertThat(response).isNotEmpty();
-                });
+    void testGetAndSet() {
+        redisBouncerClient.valueOps()
+                .set(EntryRequest.newBuilder()
+                        .setKey("key1")
+                        .setValue("value1")
+                        .build());
+        var value = redisBouncerClient.valueOps().get(EntryRequest
+                .newBuilder()
+                .setKey("key1")
+                .build());
+        assertThat(value).isNotEmpty();
+        assertThat(value).get().isEqualTo("value1");
     }
 }
