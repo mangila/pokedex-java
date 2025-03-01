@@ -2,7 +2,9 @@ package com.github.mangila.pokedex.backstage.generation.task;
 
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.model.Generation;
+import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -87,5 +89,18 @@ class GenerationTaskE2eTest {
                                     .build());
                     assertThat(response).isNotEmpty();
                 });
+    }
+
+    @Test
+    void testReadMessage() {
+        var readOne = redisBouncerClient.streamOps()
+                .readOne(
+                        StreamRecord.newBuilder()
+                                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                                .build()
+                );
+        assertThat(readOne.getDataMap())
+                .hasSize(1)
+                .containsKey("name");
     }
 }
