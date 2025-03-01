@@ -60,7 +60,7 @@ class RedisBouncerClientTest {
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)
-                        .withStartupTimeout(Duration.ofSeconds(5)));
+                        .withStartupTimeout(Duration.ofSeconds(1)));
         redisBouncer.setPortBindings(List.of(
                 GRPC_PORT.concat(":").concat(GRPC_PORT) //host:container port
         ));

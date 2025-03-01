@@ -9,8 +9,7 @@ import io.grpc.stub.StreamObserver;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -26,25 +25,9 @@ class RedisStreamOperationServiceTest {
     private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
 
     @SuppressWarnings("rawtypes")
-    public static GenericContainer redis;
-
-    @SuppressWarnings("rawtypes")
-    @BeforeAll
-    static void beforeAll() {
-        redis = new GenericContainer(REDIS_CONTAINER_NAME)
-                .withExposedPorts(6379);
-        redis.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        redis.stop();
-    }
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.port", redis::getFirstMappedPort);
-    }
+    @ServiceConnection
+    public static final GenericContainer REDIS = new GenericContainer(REDIS_CONTAINER_NAME)
+            .withExposedPorts(6379);
 
     @Test
     @Order(1)
