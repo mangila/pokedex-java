@@ -28,6 +28,6 @@ public class PokemonTask implements Task {
 
     @Override
     public void run(String[] args) {
-        log.info("Starting Pokemon Task");
+
     }
 }

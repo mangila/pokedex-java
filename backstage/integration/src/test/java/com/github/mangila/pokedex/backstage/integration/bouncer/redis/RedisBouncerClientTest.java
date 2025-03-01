@@ -1,6 +1,11 @@
 package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 
+import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.google.protobuf.Empty;
+import io.grpc.stub.StreamObserver;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -35,9 +40,12 @@ class RedisBouncerClientTest {
     private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
     private static final DockerImageName REDIS_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-redis-bouncer");
 
+    @SuppressWarnings("rawtypes")
     public static GenericContainer redis;
+    @SuppressWarnings("rawtypes")
     public static GenericContainer redisBouncer;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @BeforeAll
     static void beforeAll() {
         redis = new GenericContainer(REDIS_CONTAINER_NAME)
@@ -86,5 +94,52 @@ class RedisBouncerClientTest {
                 .build());
         assertThat(value).isNotEmpty();
         assertThat(value).get().isEqualTo("value1");
+    }
+
+    @Test
+    void testStreamLog() {
+        var observer = redisBouncerClient.streamOps()
+                .addWithClientStream(new StreamObserver<>() {
+                    @Override
+                    public void onNext(Empty empty) {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        Assertions.fail(throwable);
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        // do nothing
+                    }
+                });
+        observer.onNext(StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .putData("name", "bulbasaur")
+                .build());
+        observer.onNext(StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .putData("name", "charizard")
+                .build());
+        observer.onCompleted();
+
+        var readOne = redisBouncerClient.streamOps().readOne(StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .build());
+        assertThat(readOne.getDataMap())
+                .hasSize(1)
+                .containsEntry("name", "bulbasaur");
+        readOne = redisBouncerClient.streamOps().readOne(StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .build());
+        assertThat(readOne.getDataMap())
+                .hasSize(1)
+                .containsEntry("name", "charizard");
+        readOne = redisBouncerClient.streamOps().readOne(StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .build());
+        assertThat(readOne.getDataMap()).isEmpty();
     }
 }

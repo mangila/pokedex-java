@@ -45,8 +45,7 @@ public class GenerationTask implements Task {
      * 3. Check if generation is in Redis Cache else send Api request <br>
      * 4. Flatten out response list with Pokemon Species <br>
      * 5. Create a PokemonName object and Validate <br>
-     * 6. Map to json string <br>
-     * 7. Put all Pokemons on POKEMON_NAME_EVENT <br>
+     * 6. Put all Pokemons on POKEMON_NAME_EVENT <br>
      *
      * @param args - program arguments from the Main method
      */

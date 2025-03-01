@@ -11,9 +11,10 @@ public class RedisBouncerClient {
     private final DefaultStreamOperation streamOps;
 
     public RedisBouncerClient(ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub,
+                              StreamOperationGrpc.StreamOperationBlockingStub streamOperationBlockingStub,
                               StreamOperationGrpc.StreamOperationStub streamOperationStub) {
         this.valueOps = new DefaultValueOperation(valueOperationBlockingStub);
-        this.streamOps = new DefaultStreamOperation(streamOperationStub);
+        this.streamOps = new DefaultStreamOperation(streamOperationBlockingStub, streamOperationStub);
     }
 
     public ValueOperation valueOps() {

@@ -5,5 +5,8 @@ import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 
 public interface StreamOperation {
+
+    StreamRecord readOne(StreamRecord request);
+
     StreamObserver<StreamRecord> addWithClientStream(StreamObserver<Empty> responseObserver);
 }

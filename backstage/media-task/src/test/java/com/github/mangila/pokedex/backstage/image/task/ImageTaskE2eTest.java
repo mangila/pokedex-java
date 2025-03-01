@@ -18,6 +18,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.time.Duration;
 import java.util.List;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")

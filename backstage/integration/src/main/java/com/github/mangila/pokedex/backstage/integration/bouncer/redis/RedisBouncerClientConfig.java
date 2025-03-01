@@ -19,6 +19,14 @@ public class RedisBouncerClientConfig {
     }
 
     @Bean
+    public StreamOperationGrpc.StreamOperationBlockingStub streamOperationBlockingStub(GrpcChannelFactory channels) {
+        var channel = channels.createChannel(
+                "redis-bouncer",
+                ChannelBuilderOptions.defaults());
+        return StreamOperationGrpc.newBlockingStub(channel);
+    }
+
+    @Bean
     public ValueOperationGrpc.ValueOperationBlockingStub valueOperationBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
                 "redis-bouncer",
