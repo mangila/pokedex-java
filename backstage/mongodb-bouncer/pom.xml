@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.mangila.pokedex.backstage</groupId>
-            <artifactId>model</artifactId>
+            <artifactId>shared</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

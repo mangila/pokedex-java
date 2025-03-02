@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.google.protobuf.Empty;

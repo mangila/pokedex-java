@@ -13,7 +13,7 @@
         <module>pokemon-task</module>
         <module>media-task</module>
         <module>integration</module>
-        <module>model</module>
+        <module>shared</module>
         <module>redis-bouncer</module>
         <module>mongodb-bouncer</module>
     </modules>

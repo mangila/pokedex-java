@@ -51,6 +51,7 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 - Shared domain objects.
 - Shared Proto implementations.
 - Native image reflection stuffs
+- Utility
 
 ### pokemon-task
 

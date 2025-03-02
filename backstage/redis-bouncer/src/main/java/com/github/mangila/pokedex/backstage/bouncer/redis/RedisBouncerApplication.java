@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.RedisConsumerGroup;
-import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisConsumerGroup;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -27,7 +27,7 @@ public class RedisBouncerApplication {
     public static void main(String[] args) {
         SpringApplication.run(RedisBouncerApplication.class, args);
     }
-
+    
     @Bean
     public CommandLineRunner commandLineRunner() {
         return args -> {

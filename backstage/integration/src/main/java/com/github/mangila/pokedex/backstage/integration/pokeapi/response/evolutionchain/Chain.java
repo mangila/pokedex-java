@@ -2,9 +2,12 @@ package com.github.mangila.pokedex.backstage.integration.pokeapi.response.evolut
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public record Chain(
         @JsonProperty("evolves_to")
-        EvolutionChain[] firstChain,
+        List<EvolutionChain> firstChain,
         @JsonProperty("species")
         Species species
-) {}
+) {
+}

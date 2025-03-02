@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.model.Generation;
-import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
+import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import org.junit.jupiter.api.AfterAll;

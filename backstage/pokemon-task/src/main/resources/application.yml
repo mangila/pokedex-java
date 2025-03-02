@@ -14,4 +14,4 @@ spring:
         mongodb-bouncer:
           address: "static://0.0.0.0:9090"
         redis-bouncer:
-          address: "static://0.0.0.0:9090"
+          address: "static://0.0.0.0:9000"

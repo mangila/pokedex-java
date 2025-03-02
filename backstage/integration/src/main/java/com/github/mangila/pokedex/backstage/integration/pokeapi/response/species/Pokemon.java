@@ -3,7 +3,6 @@ package com.github.mangila.pokedex.backstage.integration.pokeapi.response.specie
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record Pokemon(
-        @JsonProperty("name") String name,
-        @JsonProperty("url") String url
+        @JsonProperty("name") String name
 ) {
 }

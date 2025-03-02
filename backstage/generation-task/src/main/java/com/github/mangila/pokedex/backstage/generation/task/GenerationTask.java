@@ -1,17 +1,18 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.GenerationResponse;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.Species;
-import com.github.mangila.pokedex.backstage.model.Generation;
-import com.github.mangila.pokedex.backstage.model.PokemonName;
-import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
-import com.github.mangila.pokedex.backstage.model.Task;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
+import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
+import com.github.mangila.pokedex.backstage.shared.model.func.Task;
+import com.github.mangila.pokedex.backstage.shared.util.JsonUtil;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -92,27 +93,20 @@ public class GenerationTask implements Task {
     }
 
     private GenerationResponse getGenerationResponse(String generationName) {
+        var key = RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generationName);
         var cacheValue = redisBouncerClient.valueOps()
                 .get(EntryRequest.newBuilder()
-                        .setKey(generationName)
+                        .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
             var response = pokeApiTemplate.fetchGeneration(generationName);
             redisBouncerClient.valueOps()
                     .set(EntryRequest.newBuilder()
-                            .setKey(generationName)
+                            .setKey(key)
                             .setValue(response.toJson(objectMapper))
                             .build());
             return response;
         }
-        return getGenerationResponseAsJson(cacheValue.get());
-    }
-
-    private GenerationResponse getGenerationResponseAsJson(String cacheValue) {
-        try {
-            return objectMapper.readValue(cacheValue, GenerationResponse.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return JsonUtil.of(cacheValue.get(), objectMapper, GenerationResponse.class);
     }
 }

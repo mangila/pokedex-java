@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.pokemon;
 
-import com.github.mangila.pokedex.backstage.model.Task;
+import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

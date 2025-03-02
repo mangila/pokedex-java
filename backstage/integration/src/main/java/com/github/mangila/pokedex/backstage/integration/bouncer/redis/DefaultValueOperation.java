@@ -22,7 +22,7 @@ class DefaultValueOperation implements ValueOperation {
     @Override
     public Optional<String> get(EntryRequest request) {
         var response = valueOperationBlockingStub.get(request);
-        if (response.getValue().isEmpty()) {
+        if (response.getValue().isBlank()) {
             return Optional.empty();
         }
         return Optional.of(response.getValue());
