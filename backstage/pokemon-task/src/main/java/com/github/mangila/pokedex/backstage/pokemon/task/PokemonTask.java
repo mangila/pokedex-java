@@ -3,10 +3,13 @@ package com.github.mangila.pokedex.backstage.pokemon.task;
 import com.github.mangila.pokedex.backstage.integration.bouncer.mongodb.MongoDbBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
+import com.github.mangila.pokedex.backstage.model.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.model.Task;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class PokemonTask implements Task {
@@ -28,6 +31,15 @@ public class PokemonTask implements Task {
 
     @Override
     public void run(String[] args) {
+        var message = redisBouncerClient.streamOps()
+                .readOne(StreamRecord.newBuilder()
+                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .build());
+        var data = message.getDataMap();
+        if (CollectionUtils.isEmpty(data)) {
+            return;
+        }
+        var pokemonName = data.get("name");
 
     }
 }

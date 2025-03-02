@@ -34,8 +34,6 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
 ### integration
 
-Handles all third-party APIs:
-
 - PokeApi - RestClient
 - Redis - gRPC Client
 - MongoDB - gRPC Client
@@ -56,7 +54,7 @@ Handles all third-party APIs:
 
 ### pokemon-task
 
-- Fetches data from PokeApi and checks already made HTTP requests to Redis.
+- Fetches data from PokeApi and cache HTTP responses in Redis
 - Updates the database with new Pokémon.
 - Runs a side effect and Stream Logs Pokémon media (images and cries) into the `pokemon-media-event`.
 

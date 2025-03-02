@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.connection.stream.Record;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -41,17 +42,24 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
                                 .block(Duration.ofSeconds(5))
                                 .count(1),
                         StreamOffset.create(request.getStreamKey(), ReadOffset.lastConsumed()));
-        Map<String, String> value = messages.stream()
-                .map(Record::getValue)
-                .map(Map::entrySet)
-                .flatMap(Collection::stream)
-                .map(entry -> Map.of((String) entry.getKey(), (String) entry.getValue()))
-                .findFirst()
-                .orElse(Collections.emptyMap());
-        responseObserver.onNext(StreamRecord.newBuilder()
-                .setStreamKey(request.getStreamKey())
-                .putAllData(value)
-                .build());
+        if (CollectionUtils.isEmpty(messages)) {
+            responseObserver.onNext(StreamRecord.newBuilder()
+                    .setStreamKey(request.getStreamKey())
+                    .putAllData(Collections.emptyMap())
+                    .build());
+        } else {
+            Map<String, String> value = messages.stream()
+                    .map(Record::getValue)
+                    .map(Map::entrySet)
+                    .flatMap(Collection::stream)
+                    .map(entry -> Map.of((String) entry.getKey(), (String) entry.getValue()))
+                    .findFirst()
+                    .orElse(Collections.emptyMap());
+            responseObserver.onNext(StreamRecord.newBuilder()
+                    .setStreamKey(request.getStreamKey())
+                    .putAllData(value)
+                    .build());
+        }
         responseObserver.onCompleted();
     }
 
