@@ -11,7 +11,7 @@ spring:
   grpc:
     client:
       channels:
-        mongodb-bouncer:
-          address: "static://0.0.0.0:9090"
         redis-bouncer:
           address: "static://0.0.0.0:9000"
+        mongodb-bouncer:
+          address: "static://0.0.0.0:9010"

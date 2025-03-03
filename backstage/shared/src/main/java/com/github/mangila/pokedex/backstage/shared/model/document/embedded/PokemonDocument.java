@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.List;
 
 public record PokemonDocument(
+        @Field("pokemon_id")
         int id,
         String name,
         @Field("is_default")

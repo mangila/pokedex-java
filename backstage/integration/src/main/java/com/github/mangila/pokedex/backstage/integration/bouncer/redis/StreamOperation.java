@@ -8,5 +8,7 @@ public interface StreamOperation {
 
     StreamRecord readOne(StreamRecord request);
 
+    Empty acknowledgeOne(StreamRecord request);
+
     StreamObserver<StreamRecord> addWithClientStream(StreamObserver<Empty> responseObserver);
 }

@@ -27,29 +27,28 @@ public class RedisBouncerApplication {
     public static void main(String[] args) {
         SpringApplication.run(RedisBouncerApplication.class, args);
     }
-    
+
     @Bean
     public CommandLineRunner commandLineRunner() {
         return args -> {
             template.execute(RedisConnection::ping);
-            try {
-                log.info("Create Group: {} with Stream: {}",
-                        RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName(),
-                        RedisStreamKey.POKEMON_NAME_EVENT.getKey());
-                template.opsForStream().createGroup(
-                        RedisStreamKey.POKEMON_NAME_EVENT.getKey(),
-                        RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName()
-                );
-                log.info("Create Group: {} with Stream: {}",
-                        RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName(),
-                        RedisStreamKey.POKEMON_MEDIA_EVENT.getKey());
-                template.opsForStream().createGroup(
-                        RedisStreamKey.POKEMON_MEDIA_EVENT.getKey(),
-                        RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName()
-                );
-            } catch (RedisSystemException e) {
-                log.info("Groups already exists!");
-            }
+            var group = RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP;
+            tryCreateGroup(RedisStreamKey.POKEMON_NAME_EVENT, group);
+            tryCreateGroup(RedisStreamKey.POKEMON_MEDIA_EVENT, group);
         };
+    }
+
+    private void tryCreateGroup(RedisStreamKey streamKey, RedisConsumerGroup group) {
+        try {
+            log.info("Try Create Group: {} with Stream: {}",
+                    group.getGroupName(),
+                    streamKey.getKey());
+            template.opsForStream().createGroup(
+                    streamKey.getKey(),
+                    group.getGroupName()
+            );
+        } catch (RedisSystemException e) {
+            log.info("Group already exist!");
+        }
     }
 }

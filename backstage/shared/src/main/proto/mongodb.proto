@@ -6,6 +6,19 @@ import "google/protobuf/empty.proto";
 option java_multiple_files = true;
 option java_package = "com.github.mangila.pokedex.backstage.model.grpc.mongodb";
 
-service HelloWorld {
-  rpc Add(google.protobuf.Empty) returns (google.protobuf.StringValue){}
+// Mongodb GridFs GRPC Operations
+service GridFsOperation {
+
+}
+
+// MongoDb GRPC Operations
+service MongoDbOperation {
+  // Insert one entry
+  rpc InsertOne(InsertRequest) returns (google.protobuf.Empty);
+}
+// Create a new InsertRequest
+message InsertRequest {
+  string type = 1;
+  string collection = 2;
+  string data = 3;
 }

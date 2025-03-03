@@ -9,14 +9,15 @@ spring:
       enabled: true
   grpc:
     server:
-      port: 9090
+      port: 9010
       host: "*"
       reflection:
         enabled: false
   data:
     mongodb:
-      uri: "mongodb://admin:password@localhost:27017/"
+      uri: "mongodb://admin:password@localhost:27017"
       database: "pokemon"
+      auto-index-creation: true
       gridfs:
         database: "pokemon-db"
         bucket: "pokemon"

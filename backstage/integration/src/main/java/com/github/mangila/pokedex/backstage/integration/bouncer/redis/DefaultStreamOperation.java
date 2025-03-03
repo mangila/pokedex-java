@@ -22,6 +22,11 @@ class DefaultStreamOperation implements StreamOperation {
     }
 
     @Override
+    public Empty acknowledgeOne(StreamRecord request) {
+        return streamOperationBlockingStub.acknowledgeOne(request);
+    }
+
+    @Override
     public StreamObserver<StreamRecord> addWithClientStream(StreamObserver<Empty> responseObserver) {
         return streamOperationStub.addWithClientStream(responseObserver);
     }

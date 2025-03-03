@@ -10,6 +10,7 @@ import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
+import com.github.mangila.pokedex.backstage.shared.util.JavaStreamUtil;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ public class PokeApiMapper {
 
     private static List<PokemonDescriptionDocument> toPokemonDescriptionDocuments(List<FlavorTextEntries> favorTextEntries) {
         return favorTextEntries.stream()
+                .filter(JavaStreamUtil.distinctByKey(text -> text.language().name()))
                 .map(textEntries -> {
                     var matcher = REPLACE_LINE_BREAKS.reset(textEntries.flavorText());
                     var description = matcher.replaceAll(" ");

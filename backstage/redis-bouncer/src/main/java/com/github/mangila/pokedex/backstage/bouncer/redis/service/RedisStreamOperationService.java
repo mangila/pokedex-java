@@ -1,15 +1,15 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.shared.model.domain.RedisConsumerGroup;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisConsumerGroup;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.stream.*;
-import org.springframework.data.redis.connection.stream.Record;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.grpc.server.service.GrpcService;
 import org.springframework.util.CollectionUtils;
@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @GrpcService
 public class RedisStreamOperationService extends StreamOperationGrpc.StreamOperationImplBase {
@@ -45,21 +46,38 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
         if (CollectionUtils.isEmpty(messages)) {
             responseObserver.onNext(StreamRecord.newBuilder()
                     .setStreamKey(request.getStreamKey())
+                    .setRecordId(Strings.EMPTY)
                     .putAllData(Collections.emptyMap())
                     .build());
         } else {
-            Map<String, String> value = messages.stream()
-                    .map(Record::getValue)
-                    .map(Map::entrySet)
-                    .flatMap(Collection::stream)
-                    .map(entry -> Map.of((String) entry.getKey(), (String) entry.getValue()))
-                    .findFirst()
-                    .orElse(Collections.emptyMap());
-            responseObserver.onNext(StreamRecord.newBuilder()
-                    .setStreamKey(request.getStreamKey())
-                    .putAllData(value)
-                    .build());
+            messages.forEach(message -> {
+                var recordId = message.getId().getValue();
+                var data = Stream.of(message.getValue())
+                        .map(Map::entrySet)
+                        .flatMap(Collection::stream)
+                        .map(entry -> Map.of((String) entry.getKey(), (String) entry.getValue()))
+                        .findFirst()
+                        .orElse(Collections.emptyMap());
+                responseObserver.onNext(
+                        StreamRecord.newBuilder()
+                                .setStreamKey(request.getStreamKey())
+                                .setRecordId(recordId)
+                                .putAllData(data)
+                                .build()
+                );
+            });
         }
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void acknowledgeOne(StreamRecord request, StreamObserver<Empty> responseObserver) {
+        template.opsForStream().acknowledge(
+                request.getStreamKey(),
+                RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName(),
+                request.getRecordId()
+        );
+        responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
 

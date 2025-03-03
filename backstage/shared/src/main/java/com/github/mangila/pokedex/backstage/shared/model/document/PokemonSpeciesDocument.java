@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.backstage.shared.model.document;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
@@ -20,5 +22,12 @@ public record PokemonSpeciesDocument(
         @NotNull @Field("varieties") List<PokemonDocument> varieties,
         @NotNull @Field("special") PokemonSpecialDocument special
 ) {
+    public String toJson(ObjectMapper mapper) {
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 

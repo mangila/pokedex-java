@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.image.task;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.mongodb.MongoDbBouncerClient;
+import com.github.mangila.pokedex.backstage.integration.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
@@ -14,14 +14,14 @@ public class ImageTask implements Task {
     private static final Logger log = LoggerFactory.getLogger(ImageTask.class);
 
     private final PokeApiTemplate pokeApiTemplate;
-    private final MongoDbBouncerClient mongoDbBouncerClient;
+    private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
 
     public ImageTask(PokeApiTemplate pokeApiTemplate,
-                     MongoDbBouncerClient mongoDbBouncerClient,
+                     MongoBouncerClient mongoBouncerClient,
                      RedisBouncerClient redisBouncerClient) {
         this.pokeApiTemplate = pokeApiTemplate;
-        this.mongoDbBouncerClient = mongoDbBouncerClient;
+        this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;
     }
 

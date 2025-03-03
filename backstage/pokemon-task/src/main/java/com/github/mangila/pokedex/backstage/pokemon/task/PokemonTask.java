@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.mongodb.MongoDbBouncerClient;
+import com.github.mangila.pokedex.backstage.integration.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
@@ -19,16 +19,16 @@ public class PokemonTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(PokemonTask.class);
 
-    private final MongoDbBouncerClient mongoDbBouncerClient;
+    private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
     private final PokemonHandler pokemonHandler;
     private final PokeApiMapper pokeApiMapper;
 
-    public PokemonTask(MongoDbBouncerClient mongoDbBouncerClient,
+    public PokemonTask(MongoBouncerClient mongoBouncerClient,
                        RedisBouncerClient redisBouncerClient,
                        PokemonHandler pokemonHandler,
                        PokeApiMapper pokeApiMapper) {
-        this.mongoDbBouncerClient = mongoDbBouncerClient;
+        this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;
         this.pokemonHandler = pokemonHandler;
         this.pokeApiMapper = pokeApiMapper;
@@ -50,8 +50,11 @@ public class PokemonTask implements Task {
                 .map(pokeApiMapper::toDocument)
                 .findFirst()
                 .orElseThrow();
-        // TODO: add to media stream
-        // TODO: add to db
-        // TODO: acknowledge message to redis
+        mongoBouncerClient.insertOne(document);
+        redisBouncerClient.streamOps()
+                .acknowledgeOne(StreamRecord.newBuilder()
+                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .setRecordId(message.getRecordId())
+                        .build());
     }
 }

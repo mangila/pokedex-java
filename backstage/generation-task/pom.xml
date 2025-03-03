@@ -22,6 +22,13 @@
             <artifactId>shared</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
+            <exclusions>
+                <!-- exclude MongoDB dependency -->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
