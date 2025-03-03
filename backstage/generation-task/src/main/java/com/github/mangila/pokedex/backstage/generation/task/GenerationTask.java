@@ -107,6 +107,6 @@ public class GenerationTask implements Task {
                             .build());
             return response;
         }
-        return JsonUtil.of(cacheValue.get(), objectMapper, GenerationResponse.class);
+        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, GenerationResponse.class);
     }
 }

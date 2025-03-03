@@ -9,7 +9,7 @@ public final class JsonUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    public static <T> T of(String json, ObjectMapper objectMapper, Class<T> clazz) {
+    public static <T> T readValueFrom(String json, ObjectMapper objectMapper, Class<T> clazz) {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (JsonProcessingException e) {

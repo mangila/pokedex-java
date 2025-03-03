@@ -43,7 +43,7 @@ public class PokemonHandler {
                     .build());
             return speciesResponse;
         }
-        return JsonUtil.of(cacheValue.get(), objectMapper, SpeciesResponse.class);
+        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, SpeciesResponse.class);
     }
 
     public PokemonResponse fetchPokemon(String pokemonName) {
@@ -60,7 +60,7 @@ public class PokemonHandler {
                     .build());
             return speciesResponse;
         }
-        return JsonUtil.of(cacheValue.get(), objectMapper, PokemonResponse.class);
+        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, PokemonResponse.class);
     }
 
     public EvolutionChainResponse fetchEvolutionChain(URI uri) {
@@ -78,6 +78,6 @@ public class PokemonHandler {
                     .build());
             return speciesResponse;
         }
-        return JsonUtil.of(cacheValue.get(), objectMapper, EvolutionChainResponse.class);
+        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, EvolutionChainResponse.class);
     }
 }

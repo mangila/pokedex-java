@@ -9,6 +9,7 @@ import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
+import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +114,8 @@ public class PokeApiMapper {
                         .name()))
                 .peek(pokemonResponse -> {
                     log.debug("adding pokemon media for pokemon: {}", pokemonResponse.name());
-                    pokemonMediaHandler.handle(pokemonResponse.sprites());
-                    pokemonMediaHandler.handle(pokemonResponse.cries());
+                    pokemonMediaHandler.handle(new PokemonName(pokemonResponse.name()), pokemonResponse.sprites());
+                    pokemonMediaHandler.handle(new PokemonName(pokemonResponse.name()), pokemonResponse.cries());
                 })
                 .map(this::toDocument)
                 .toList();
