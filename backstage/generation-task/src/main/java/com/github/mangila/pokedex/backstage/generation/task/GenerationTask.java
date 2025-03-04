@@ -61,11 +61,11 @@ public class GenerationTask implements Task {
                 .map(GenerationResponse::pokemonSpecies)
                 .flatMap(List::stream)
                 .map(Species::name)
-                .map(PokemonName::new)
+                .map(PokemonName::create)
                 .forEach(pokemonName -> {
                     var record = StreamRecord.newBuilder()
                             .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
-                            .putData("name", pokemonName.name())
+                            .putData("name", pokemonName.getValue())
                             .build();
                     observer.onNext(record);
                 });

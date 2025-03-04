@@ -9,11 +9,11 @@ class PokemonNameTest {
 
     @Test
     void TestEmptyAndNull() {
-        assertThatThrownBy(() -> new PokemonName(""))
+        assertThatThrownBy(() -> PokemonName.create(""))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Validation failed")
                 .hasMessageContaining("Name cannot be empty");
-        assertThatThrownBy(() -> new PokemonName(null))
+        assertThatThrownBy(() -> PokemonName.create(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Validation failed")
                 .hasMessageContaining("Name cannot be null");
@@ -21,7 +21,7 @@ class PokemonNameTest {
 
     @Test
     void TestSpecial() {
-        assertThatThrownBy(() -> new PokemonName("#123%!"))
+        assertThatThrownBy(() -> PokemonName.create("#123%!"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Validation failed")
                 .hasMessageContaining("Name not valid string");
@@ -29,9 +29,9 @@ class PokemonNameTest {
 
     @Test
     void TestValid() {
-        assertThatCode(() -> new PokemonName("bulbasaur")).doesNotThrowAnyException();
-        assertThatCode(() -> new PokemonName("mr-mime")).doesNotThrowAnyException();
-        assertThatCode(() -> new PokemonName("Test-Pokemon-45")).doesNotThrowAnyException();
+        assertThatCode(() -> PokemonName.create("bulbasaur")).doesNotThrowAnyException();
+        assertThatCode(() -> PokemonName.create("mr-mime")).doesNotThrowAnyException();
+        assertThatCode(() -> PokemonName.create("Test-Pokemon-45")).doesNotThrowAnyException();
     }
 
 }

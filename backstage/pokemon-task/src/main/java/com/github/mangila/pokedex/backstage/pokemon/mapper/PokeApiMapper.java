@@ -9,11 +9,15 @@ import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
+import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
+import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonStat;
+import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonType;
 import com.github.mangila.pokedex.backstage.shared.util.JavaStreamUtil;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -42,15 +46,17 @@ public class PokeApiMapper {
     }
 
     public PokemonSpeciesDocument toDocument(SpeciesResponse response) {
+        var id = PokemonId.create(response.id());
+        var name = PokemonName.create(response.name());
         return new PokemonSpeciesDocument(
-                response.id(),
-                response.name(),
+                id.getValueAsInteger(),
+                name.getValue(),
                 response.generation().name(),
                 toPokemonNameDocuments(response.names()),
                 toPokemonDescriptionDocuments(response.flavorTextEntries()),
                 toPokemonGeneraDocuments(response.genera()),
                 toPokemonEvolutionDocuments(URI.create(response.evolutionChain().url())),
-                toPokemonDocuments(response.varieties()),
+                toPokemonDocuments(id, response.varieties()),
                 toPokemonSpecialDocument(response.legendary(), response.mythical(), response.baby())
         );
     }
@@ -108,16 +114,20 @@ public class PokeApiMapper {
         }
     }
 
-    private List<PokemonDocument> toPokemonDocuments(List<Varieties> varieties) {
+    private List<PokemonDocument> toPokemonDocuments(PokemonId speciesId, List<Varieties> varieties) {
         return varieties.stream()
                 .peek(variety -> log.debug("Fetching varieties for pokemon: {}", variety.pokemon().name()))
-                .map(variety -> pokemonHandler.fetchPokemon(variety
-                        .pokemon()
-                        .name()))
+                .map(variety -> variety.pokemon().name())
+                .map(PokemonName::create)
+                .map(PokemonName::getValue)
+                .map(pokemonHandler::fetchPokemon)
                 .peek(pokemonResponse -> {
                     log.debug("adding pokemon media for pokemon: {}", pokemonResponse.name());
-                    pokemonMediaHandler.handle(new PokemonName(pokemonResponse.name()), pokemonResponse.sprites());
-                    pokemonMediaHandler.handle(new PokemonName(pokemonResponse.name()), pokemonResponse.cries());
+                    var pokemonVarietyId = PokemonId.create(pokemonResponse.id());
+                    var pokemonVarietyName = PokemonName.create(pokemonResponse.name());
+                    var idPair = Pair.of(speciesId, pokemonVarietyId);
+                    pokemonMediaHandler.handle(idPair, pokemonVarietyName, pokemonResponse.sprites());
+                    pokemonMediaHandler.handle(idPair, pokemonVarietyName, pokemonResponse.cries());
                 })
                 .map(this::toDocument)
                 .toList();
@@ -132,7 +142,6 @@ public class PokeApiMapper {
                 toKilogram(pokemonResponse.weight()),
                 toTypes(pokemonResponse.types()),
                 toStats(pokemonResponse.stats()),
-                Collections.emptyList(),
                 Collections.emptyList()
         );
     }
@@ -159,20 +168,28 @@ public class PokeApiMapper {
 
     private List<PokemonTypeDocument> toTypes(List<Types> types) {
         return types.stream()
-                .map(t -> t.type().name())
+                .map(type -> type.type().name())
+                .map(PokemonType::from)
+                .map(PokemonType::getType)
                 .map(PokemonTypeDocument::new)
                 .toList();
     }
 
     private List<PokemonStatDocument> toStats(List<Stats> stats) {
-        AtomicInteger total = new AtomicInteger();
+        var total = new AtomicInteger();
         var documents = new ArrayList<>(stats.stream()
-                .peek(stat -> total.addAndGet(stat.baseStat()))
-                .map(stat -> new PokemonStatDocument(stat.stat().name(), stat.baseStat()))
+                .map(s -> {
+                    var stat = PokemonStat.from(s.stat().name());
+                    var baseStat = s.baseStat();
+                    total.addAndGet(baseStat);
+                    stat.setValue(baseStat);
+                    return stat;
+                })
+                .map(pokemonStat -> new PokemonStatDocument(
+                        pokemonStat.getStat(),
+                        pokemonStat.getValue()))
                 .toList());
-        documents.add(
-                new PokemonStatDocument("total", total.intValue())
-        );
+        documents.add(new PokemonStatDocument("total", total.get()));
         return documents;
     }
 

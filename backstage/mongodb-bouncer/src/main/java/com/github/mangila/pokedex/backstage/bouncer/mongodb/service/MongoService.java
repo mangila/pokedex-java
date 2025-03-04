@@ -26,7 +26,7 @@ public class MongoService extends MongoDbOperationGrpc.MongoDbOperationImplBase 
         try {
             var clazz = Class.forName(request.getType());
             var document = JsonUtil.readValueFrom(request.getData(), objectMapper, clazz);
-            mongoTemplate.insert(document, request.getCollection());
+            mongoTemplate.save(document, request.getCollection());
             responseObserver.onNext(Empty.getDefaultInstance());
         } catch (ClassNotFoundException e) {
             responseObserver.onError(e);

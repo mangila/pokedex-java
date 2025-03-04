@@ -14,7 +14,6 @@ public record PokemonDocument(
         String weight,
         List<PokemonTypeDocument> types,
         List<PokemonStatDocument> stats,
-        List<PokemonMediaDocument> images,
-        List<PokemonMediaDocument> audios
+        List<PokemonMediaDocument> media
 ) {
 }
