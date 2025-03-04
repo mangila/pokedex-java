@@ -34,6 +34,16 @@ public class PokemonTask implements Task {
         this.pokeApiMapper = pokeApiMapper;
     }
 
+    /**
+     * 0. Read from Redis stream
+     * 1. Does it have any data? Else exit execution
+     * 2. Fetch PokemonSpeciesResponse from Cache or PokeAPI
+     * 3. Glue everything together and create a PokemonSpeciesDocument
+     * 4. Save to MongoDb
+     * 5. Acknowledge the message to Redis Stream
+     *
+     * @param args - Program arguments from Main/Invoker
+     */
     @Override
     public void run(String[] args) {
         var streamKey = RedisStreamKey.POKEMON_NAME_EVENT.getKey();

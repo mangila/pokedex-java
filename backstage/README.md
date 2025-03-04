@@ -1,5 +1,8 @@
 # Backstage
 
+- TODO - Create Service Discovery stuffs
+- TODO - Failed/Pending Messages Handling
+
 - Tasks that is compiled as Native Images used a Function as a Service(FaaS)
 - Bouncer applications that relays and handle connection pooling to the datasources
     - Redis
@@ -42,7 +45,7 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
 - Read Stream Logs from `pokemon-media-event`
 - Updates the Pokémon document with the new media entry.
-- Adds a reference to the file server API for the source (TODO: Service discovery setup or hardcoding).
+- Adds a reference to the file server API for the source.
 - Inserts media into GridFS.
 
 ### shared
