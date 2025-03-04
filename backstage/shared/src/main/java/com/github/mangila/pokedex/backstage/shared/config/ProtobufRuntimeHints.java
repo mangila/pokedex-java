@@ -12,7 +12,6 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("rawtypes")
 public class ProtobufRuntimeHints implements RuntimeHintsRegistrar {
 
     private static final Logger log = LoggerFactory.getLogger(ProtobufRuntimeHints.class);
