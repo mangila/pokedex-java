@@ -1,7 +1,6 @@
+# Stage 1: Build
 FROM ghcr.io/graalvm/native-image-community:21 AS build
-
 WORKDIR /usr/src/app
-
 COPY . .
 # Compile and test all modules - with Spring Native Profile
 RUN ./mvnw.sh clean install -Pnative
@@ -11,5 +10,5 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl integration -pl shared 
 # Stage 2: Run
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=build /usr/src/app/pokemon-task/target/pokemon-task /app/task
-CMD ["/app/task"]
+COPY --from=build /usr/src/app/pokemon-task/target/pokemon-task .
+CMD ["/pokemon-task"]
