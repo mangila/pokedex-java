@@ -32,7 +32,7 @@ class MongoServiceTest extends MongoDbTestContainer {
                 .usePlaintext()
                 .build();
         var stub = MongoDbOperationGrpc.newBlockingStub(channel);
-        var document = TestDataGenerator.createPokemonSpeciesDocument();
+        var document = TestDataGenerator.createDefaultPokemonSpeciesDocument();
         stub.insertOne(
                 InsertRequest.newBuilder()
                         .setType(PokemonSpeciesDocument.class.getName())

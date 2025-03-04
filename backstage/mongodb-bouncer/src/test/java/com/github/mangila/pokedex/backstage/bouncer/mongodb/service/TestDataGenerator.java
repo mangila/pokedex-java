@@ -7,7 +7,7 @@ import java.util.Collections;
 
 final class TestDataGenerator {
 
-    public static PokemonSpeciesDocument createPokemonSpeciesDocument() {
+    public static PokemonSpeciesDocument createDefaultPokemonSpeciesDocument() {
         return new PokemonSpeciesDocument(
                 1,
                 "bulbasaur",

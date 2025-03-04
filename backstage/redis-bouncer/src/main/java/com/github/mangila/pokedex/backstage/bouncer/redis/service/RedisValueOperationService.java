@@ -27,7 +27,7 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
 
     @Override
     public void set(EntryRequest request, StreamObserver<Empty> responseObserver) {
-        log.debug("Server SET received - {}", request.toString());
+        log.debug("{}", request.toString());
         template.opsForValue()
                 .set(request.getKey(), request.getValue());
         responseObserver.onNext(Empty.getDefaultInstance());
@@ -36,7 +36,7 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
 
     @Override
     public void get(EntryRequest request, StreamObserver<StringValue> responseObserver) {
-        log.debug("Server GET received - {}", request.toString());
+        log.debug("{}", request.toString());
         var value = template.opsForValue()
                 .get(request.getKey());
         if (Objects.isNull(value)) {

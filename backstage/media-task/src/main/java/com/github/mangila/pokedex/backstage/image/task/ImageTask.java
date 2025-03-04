@@ -39,6 +39,5 @@ public class ImageTask implements Task {
             log.debug("No new messages found");
             return;
         }
-
     }
 }

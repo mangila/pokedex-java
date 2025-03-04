@@ -10,12 +10,16 @@ import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
 import com.github.mangila.pokedex.backstage.shared.util.JsonUtil;
 import com.github.mangila.pokedex.backstage.shared.util.UriUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 
 @Service
 public class PokemonHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PokemonHandler.class);
 
     private final PokeApiTemplate pokeApiTemplate;
     private final RedisBouncerClient redisBouncerClient;
@@ -36,6 +40,7 @@ public class PokemonHandler {
                         .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
+            log.debug("Cache miss - {}", key);
             var speciesResponse = pokeApiTemplate.fetchSpecies(speciesName);
             redisBouncerClient.valueOps().set(EntryRequest.newBuilder()
                     .setKey(key)
@@ -43,6 +48,7 @@ public class PokemonHandler {
                     .build());
             return speciesResponse;
         }
+        log.debug("Cache hit - {}", key);
         return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, SpeciesResponse.class);
     }
 
@@ -53,6 +59,7 @@ public class PokemonHandler {
                         .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
+            log.debug("Cache miss - {}", key);
             var pokemonResponse = pokeApiTemplate.fetchPokemon(pokemonName);
             redisBouncerClient.valueOps().set(EntryRequest.newBuilder()
                     .setKey(key)
@@ -60,6 +67,7 @@ public class PokemonHandler {
                     .build());
             return pokemonResponse;
         }
+        log.debug("Cache hit - {}", key);
         return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, PokemonResponse.class);
     }
 
@@ -71,6 +79,7 @@ public class PokemonHandler {
                         .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
+            log.debug("Cache miss - {}", key);
             var evolutionChainResponse = pokeApiTemplate.fetchEvolutionChain(evolutionChainId);
             redisBouncerClient.valueOps().set(EntryRequest.newBuilder()
                     .setKey(key)
@@ -78,6 +87,7 @@ public class PokemonHandler {
                     .build());
             return evolutionChainResponse;
         }
+        log.debug("Cache hit - {}", key);
         return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, EvolutionChainResponse.class);
     }
 }

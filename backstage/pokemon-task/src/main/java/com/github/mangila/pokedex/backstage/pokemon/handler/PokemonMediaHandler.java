@@ -57,7 +57,7 @@ public class PokemonMediaHandler {
 
                     @Override
                     public void onCompleted() {
-                        log.info("Stream finished - {}", type);
+                        log.debug("Stream finished - {}", type);
                     }
                 });
     }

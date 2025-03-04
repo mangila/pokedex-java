@@ -101,7 +101,7 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
 
             @Override
             public void onCompleted() {
-                log.debug("Client finished stream");
+                log.debug("Stream finished");
                 responseObserver.onNext(Empty.getDefaultInstance());
                 responseObserver.onCompleted();
             }
