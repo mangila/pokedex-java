@@ -36,9 +36,10 @@ public class PokemonTask implements Task {
 
     @Override
     public void run(String[] args) {
+        var streamKey = RedisStreamKey.POKEMON_NAME_EVENT.getKey();
         var message = redisBouncerClient.streamOps()
                 .readOne(StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .setStreamKey(streamKey)
                         .build());
         var data = message.getDataMap();
         if (CollectionUtils.isEmpty(data)) {
@@ -54,7 +55,7 @@ public class PokemonTask implements Task {
         mongoBouncerClient.insertOne(document);
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .setStreamKey(streamKey)
                         .setRecordId(message.getRecordId())
                         .build());
     }

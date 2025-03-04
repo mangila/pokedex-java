@@ -36,7 +36,9 @@ public class ImageTask implements Task {
                         .build());
         var data = message.getDataMap();
         if (CollectionUtils.isEmpty(data)) {
+            log.debug("No new messages found");
             return;
         }
+
     }
 }
