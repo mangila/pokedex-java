@@ -14,7 +14,7 @@ service GridFsOperation {
 // MongoDb GRPC Operations
 service MongoDbOperation {
   // Insert one entry
-  rpc InsertOne(InsertRequest) returns (google.protobuf.Empty);
+  rpc SaveOne(InsertRequest) returns (google.protobuf.Empty);
 }
 // Create a new InsertRequest
 message InsertRequest {

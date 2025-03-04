@@ -19,8 +19,8 @@ public class MongoBouncerClient {
         this.objectMapper = objectMapper;
     }
 
-    public Empty insertOne(PokemonSpeciesDocument document) {
-        return mongoDbOperationBlockingStub.insertOne(
+    public Empty saveOne(PokemonSpeciesDocument document) {
+        return mongoDbOperationBlockingStub.saveOne(
                 InsertRequest.newBuilder()
                         .setType(PokemonSpeciesDocument.class.getName())
                         .setCollection("pokemon-species")

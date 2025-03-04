@@ -2,6 +2,7 @@
 
 - TODO - Create Service Discovery stuffs
 - TODO - Failed/Pending Messages Handling
+- TODO - WebP image conversion
 
 - Tasks that is compiled as Native Images used a Function as a Service(FaaS)
 - Bouncer applications that relays and handle connection pooling to the datasources
@@ -34,6 +35,11 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
 - Makes a PokeApi request to fetch all Pokémon from their Generation.
 - Add Stream logs to `pokemon-name-event`
+
+### image-converter
+
+- gRPC Server
+- Converts Images to WebP format
 
 ### integration
 

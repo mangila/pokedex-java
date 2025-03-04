@@ -62,7 +62,7 @@ public class PokemonTask implements Task {
                 .map(pokeApiMapper::toDocument)
                 .findFirst()
                 .orElseThrow();
-        mongoBouncerClient.insertOne(document);
+        mongoBouncerClient.saveOne(document);
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
                         .setStreamKey(streamKey)

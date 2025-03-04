@@ -22,7 +22,7 @@ public class MongoService extends MongoDbOperationGrpc.MongoDbOperationImplBase 
     }
 
     @Override
-    public void insertOne(InsertRequest request, StreamObserver<Empty> responseObserver) {
+    public void saveOne(InsertRequest request, StreamObserver<Empty> responseObserver) {
         try {
             var clazz = Class.forName(request.getType());
             var document = JsonUtil.readValueFrom(request.getData(), objectMapper, clazz);

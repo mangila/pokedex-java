@@ -27,13 +27,13 @@ class MongoServiceTest extends MongoDbTestContainer {
     private ObjectMapper objectMapper;
 
     @Test
-    void insertOne() {
+    void saveOne() {
         var channel = ManagedChannelBuilder.forAddress("0.0.0.0", 9010)
                 .usePlaintext()
                 .build();
         var stub = MongoDbOperationGrpc.newBlockingStub(channel);
         var document = TestDataGenerator.createDefaultPokemonSpeciesDocument();
-        stub.insertOne(
+        stub.saveOne(
                 InsertRequest.newBuilder()
                         .setType(PokemonSpeciesDocument.class.getName())
                         .setCollection("pokemon-species")
