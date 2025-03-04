@@ -45,7 +45,7 @@ public class PokemonTask implements Task {
             return;
         }
         var document = Stream.ofNullable(data.get("name"))
-                .peek(name -> log.info("name: {}", name))
+                .peek(name -> log.info("Process - {}", name))
                 .map(pokemonHandler::fetchSpecies)
                 .map(pokeApiMapper::toDocument)
                 .findFirst()

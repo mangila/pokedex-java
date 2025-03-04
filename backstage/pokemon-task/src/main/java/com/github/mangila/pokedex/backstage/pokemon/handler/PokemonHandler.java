@@ -53,12 +53,12 @@ public class PokemonHandler {
                         .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
-            var speciesResponse = pokeApiTemplate.fetchPokemon(pokemonName);
+            var pokemonResponse = pokeApiTemplate.fetchPokemon(pokemonName);
             redisBouncerClient.valueOps().set(EntryRequest.newBuilder()
                     .setKey(key)
-                    .setValue(speciesResponse.toJson(objectMapper))
+                    .setValue(pokemonResponse.toJson(objectMapper))
                     .build());
-            return speciesResponse;
+            return pokemonResponse;
         }
         return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, PokemonResponse.class);
     }
@@ -71,12 +71,12 @@ public class PokemonHandler {
                         .setKey(key)
                         .build());
         if (cacheValue.isEmpty()) {
-            var speciesResponse = pokeApiTemplate.fetchEvolutionChain(evolutionChainId);
+            var evolutionChainResponse = pokeApiTemplate.fetchEvolutionChain(evolutionChainId);
             redisBouncerClient.valueOps().set(EntryRequest.newBuilder()
                     .setKey(key)
-                    .setValue(speciesResponse.toJson(objectMapper))
+                    .setValue(evolutionChainResponse.toJson(objectMapper))
                     .build());
-            return speciesResponse;
+            return evolutionChainResponse;
         }
         return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, EvolutionChainResponse.class);
     }

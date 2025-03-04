@@ -182,5 +182,4 @@ public class PokeApiMapper {
         boolean isSpecial = legendary && mythical && baby;
         return new PokemonSpecialDocument(isSpecial, legendary, mythical, baby);
     }
-
 }

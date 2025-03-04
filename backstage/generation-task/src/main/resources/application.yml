@@ -8,10 +8,6 @@ spring:
   threads:
     virtual:
       enabled: true
-  data:
-    mongodb:
-      repositories:
-        type: none
   grpc:
     client:
       channels:

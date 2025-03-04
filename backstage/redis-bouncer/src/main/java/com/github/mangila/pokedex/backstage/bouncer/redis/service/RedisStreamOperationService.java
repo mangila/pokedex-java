@@ -24,8 +24,9 @@ import java.util.stream.Stream;
 public class RedisStreamOperationService extends StreamOperationGrpc.StreamOperationImplBase {
 
     private static final Logger log = LoggerFactory.getLogger(RedisStreamOperationService.class);
-
     private static final String CONSUMER = "redis-bouncer";
+    private static final String CONSUMER_GROUP = RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName();
+
     private final StringRedisTemplate template;
 
     public RedisStreamOperationService(@Qualifier("template") StringRedisTemplate template) {
@@ -35,10 +36,8 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
     @SuppressWarnings("unchecked")
     @Override
     public void readOne(StreamRecord request, StreamObserver<StreamRecord> responseObserver) {
-        var messages = template
-                .opsForStream()
-                .read(Consumer.from(
-                                RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName(), CONSUMER),
+        var messages = template.opsForStream()
+                .read(Consumer.from(CONSUMER_GROUP, CONSUMER),
                         StreamReadOptions.empty()
                                 .block(Duration.ofSeconds(5))
                                 .count(1),
@@ -74,7 +73,7 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
     public void acknowledgeOne(StreamRecord request, StreamObserver<Empty> responseObserver) {
         template.opsForStream().acknowledge(
                 request.getStreamKey(),
-                RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP.getGroupName(),
+                CONSUMER_GROUP,
                 request.getRecordId()
         );
         responseObserver.onNext(Empty.getDefaultInstance());

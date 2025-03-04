@@ -26,20 +26,20 @@ public class PokemonMediaHandler {
     }
 
     public void handle(PokemonName name, Sprites sprites) {
-        var observer = getStreamObserver();
+        var observer = getStreamObserver("sprites");
         addIfNotNull(name.name(), "front-default", sprites.frontDefault(), observer);
         addIfNotNull(name.name(), "back-default", sprites.backDefault(), observer);
         observer.onCompleted();
     }
 
     public void handle(PokemonName name, Cries cries) {
-        var observer = getStreamObserver();
+        var observer = getStreamObserver("cries");
         addIfNotNull(name.name(), "legacy", cries.legacy(), observer);
         addIfNotNull(name.name(), "latest", cries.latest(), observer);
         observer.onCompleted();
     }
 
-    private StreamObserver<StreamRecord> getStreamObserver() {
+    private StreamObserver<StreamRecord> getStreamObserver(String type) {
         return redisBouncerClient.streamOps()
                 .addWithClientStream(new StreamObserver<>() {
                     @Override
@@ -54,7 +54,7 @@ public class PokemonMediaHandler {
 
                     @Override
                     public void onCompleted() {
-                        log.info("Stream finished");
+                        log.info("Stream finished - {}", type);
                     }
                 });
     }
