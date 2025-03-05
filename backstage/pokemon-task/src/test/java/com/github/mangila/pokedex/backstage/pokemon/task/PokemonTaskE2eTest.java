@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-@Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
+@Disabled(value = "Run only where a Docker env is available - redis-bouncer and mongodb-bouncer server needs to be in a Container")
 class PokemonTaskE2eTest {
 
     private static final String GRPC_PORT = "9999";
