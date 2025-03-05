@@ -17,11 +17,14 @@ public class ProtobufRuntimeHints implements RuntimeHintsRegistrar {
     private static final Logger log = LoggerFactory.getLogger(ProtobufRuntimeHints.class);
     private static final String REDIS_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.redis";
     private static final String MONGO_DB_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.mongodb";
+    private static final String IMAGE_CONVERTER_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.imageconverter";
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         var packages = List.of(
-                REDIS_PROTOBUF_PACKAGE, MONGO_DB_PROTOBUF_PACKAGE
+                REDIS_PROTOBUF_PACKAGE,
+                MONGO_DB_PROTOBUF_PACKAGE,
+                IMAGE_CONVERTER_PROTOBUF_PACKAGE
         );
         for (String packageName : packages) {
             Reflections reflections = new Reflections(packageName);
