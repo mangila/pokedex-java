@@ -25,7 +25,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
@@ -39,9 +38,12 @@ class GenerationTaskE2eTest {
     private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
     private static final DockerImageName REDIS_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-redis-bouncer");
 
+    @SuppressWarnings("rawtypes")
     public static GenericContainer redis;
+    @SuppressWarnings("rawtypes")
     public static GenericContainer redisBouncer;
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @BeforeAll
     static void beforeAll() {
         redis = new GenericContainer(REDIS_CONTAINER_NAME)
