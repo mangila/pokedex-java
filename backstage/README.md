@@ -25,7 +25,7 @@ For local development:
 - Go SDK - used in image-converter gRPC server
 - Protocol buffer compiler
 - Go protoc generator - `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest`
-- Go Grpc proto generator - `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
+- Go protoc Grpc generator - `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
 
 ## Docker
 

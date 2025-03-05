@@ -15,6 +15,8 @@ Maven multi-module project consuming and displaying PokeAPI data.
 
 * GraalVM for playing around with the Native images in backstage module
 * Minikube for playing around with the k8s deployment
+* Golang SDK - to play around with image-converter in backstage module
+* Protocol buffer compiler on host machine - to compile proto for Golang - The java maven has is it embedded
 
 ## api
 
