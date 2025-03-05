@@ -11,4 +11,4 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl integration -pl shared 
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=build /usr/src/app/pokemon-task/target/pokemon-task .
-CMD ["/pokemon-task"]
+CMD ["./pokemon-task"]

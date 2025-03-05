@@ -20,7 +20,7 @@ import java.util.List;
 
 @SpringBootTest
 @Testcontainers
-@Disabled(value = "Run only where a Docker env is available")
+@Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
 class PokemonTaskE2eTest {
 
     private static final String GRPC_PORT = "9999";

@@ -11,4 +11,4 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl mongodb-boun
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=build /usr/src/app/mongodb-bouncer/target/mongodb-bouncer .
-CMD ["/mongodb-bouncer"]
+CMD ["./mongodb-bouncer"]

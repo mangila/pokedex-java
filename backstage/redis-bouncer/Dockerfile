@@ -11,4 +11,4 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl redis-bounce
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /usr/src/app/redis-bouncer/target/redis-bouncer .
-CMD ["/redis-bouncer"]
+CMD ["./redis-bouncer"]

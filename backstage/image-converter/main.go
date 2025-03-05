@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	_ "github.com/joho/godotenv/autoload"
+	"image-converter/server"
+	"os"
 )
 
 func main() {
-	fmt.Println("Hello World")
+	server.Init(os.Getenv("PORT"))
 }

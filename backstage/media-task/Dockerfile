@@ -11,4 +11,4 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl integration -pl shared 
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=build /usr/src/app/media-task/target/media-task .
-CMD ["/media-task"]
+CMD ["./media-task"]
