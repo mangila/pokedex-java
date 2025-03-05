@@ -91,6 +91,10 @@ class PokemonTaskE2eTest {
         redis.close();
         redisBouncer.stop();
         redisBouncer.close();
+        mongoDb.stop();
+        mongoDb.close();
+        mongoDbBouncer.stop();
+        mongoDbBouncer.close();
     }
 
     @DynamicPropertySource
