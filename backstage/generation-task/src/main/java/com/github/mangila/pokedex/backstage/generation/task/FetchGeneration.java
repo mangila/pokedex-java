@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 public class FetchGeneration implements Callable<GenerationResponse> {
 
     private static final Logger log = LoggerFactory.getLogger(FetchGeneration.class);
+
     private final PokeApiTemplate pokeApiTemplate;
     private final RedisBouncerClient redisBouncerClient;
     private final Generation generation;
