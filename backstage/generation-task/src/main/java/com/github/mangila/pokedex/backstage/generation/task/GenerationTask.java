@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.GenerationResponse;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 @Service
 public class GenerationTask implements Task {
@@ -30,14 +30,14 @@ public class GenerationTask implements Task {
 
     private final PokeApiTemplate pokeApiTemplate;
     private final RedisBouncerClient redisBouncerClient;
-    private final ObjectMapper objectMapper;
+    private final ExecutorService virtualThreadExecutor;
 
     public GenerationTask(PokeApiTemplate pokeApiTemplate,
                           RedisBouncerClient redisBouncerClient,
-                          ObjectMapper objectMapper) {
+                          ExecutorService virtualThreadExecutor) {
         this.pokeApiTemplate = pokeApiTemplate;
         this.redisBouncerClient = redisBouncerClient;
-        this.objectMapper = objectMapper;
+        this.virtualThreadExecutor = virtualThreadExecutor;
     }
 
     /**
@@ -105,7 +105,7 @@ public class GenerationTask implements Task {
                     .setKey(key)
                     .setValue(Any.pack(response.toProto()))
                     .build();
-            redisBouncerClient.valueOps().set(entryRequest);
+            virtualThreadExecutor.submit(() -> redisBouncerClient.valueOps().set(entryRequest));
             return response;
         }
         return GenerationResponse.fromProto(cacheValue.get());

@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.backstage.pokemon.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.evolutionchain.EvolutionChainResponse;
@@ -8,7 +7,6 @@ import com.github.mangila.pokedex.backstage.integration.pokeapi.response.pokemon
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.species.SpeciesResponse;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
-import com.github.mangila.pokedex.backstage.shared.util.JsonUtil;
 import com.github.mangila.pokedex.backstage.shared.util.UriUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +21,11 @@ public class PokemonHandler {
 
     private final PokeApiTemplate pokeApiTemplate;
     private final RedisBouncerClient redisBouncerClient;
-    private final ObjectMapper objectMapper;
 
     public PokemonHandler(PokeApiTemplate pokeApiTemplate,
-                          RedisBouncerClient redisBouncerClient,
-                          ObjectMapper objectMapper) {
+                          RedisBouncerClient redisBouncerClient) {
         this.pokeApiTemplate = pokeApiTemplate;
         this.redisBouncerClient = redisBouncerClient;
-        this.objectMapper = objectMapper;
     }
 
     public SpeciesResponse fetchSpecies(String speciesName) {
