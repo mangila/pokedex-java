@@ -9,6 +9,12 @@ option java_package = "com.github.mangila.pokedex.backstage.model.grpc.pokeapi";
 
 // PokeApi service sends http requests to https://pokeapi.co
 service PokeApi {
-  // Fetch all Pokemons by Generation
-  rpc GetGeneration(google.protobuf.StringValue) returns (GenerationResponsePrototype);
+  // Fetch all Pokemons by Generation name
+  rpc FetchGeneration(google.protobuf.StringValue) returns (GenerationResponsePrototype);
+  // Fetch Pokemon species by name
+  rpc FetchPokemonSpecies(google.protobuf.StringValue) returns (PokemonSpeciesResponsePrototype);
+  // Fetch evolution chain by evolution chain id
+  rpc FetchEvolutionChain(google.protobuf.StringValue) returns (EvolutionChainResponsePrototype);
+  // Fetch pokemon by name
+  rpc FetchPokemon(google.protobuf.StringValue) returns (PokemonResponsePrototype);
 }

@@ -42,17 +42,18 @@ public class GenerationTask implements Task {
      * 3. Get the PokemonName from the response
      * 4. Put the PokemonName on the stream
      *
-     * @param args - program arguments from the Main method
+     * @param args - program arguments
      */
     @Override
     public void run(String[] args) throws Exception {
         var observer = getStreamObserver();
         var fetchGenerations = EnumSet.allOf(Generation.class)
                 .stream()
-                .map(generation -> (Callable<List<PokemonName>>) () -> {
-                    log.info("{}", generation.getName());
-                    return pokeApiBouncerClient.getGeneration(StringValue.newBuilder()
-                                    .setValue(generation.getName())
+                .map(Generation::getName)
+                .map(generationName -> (Callable<List<PokemonName>>) () -> {
+                    log.info("{}", generationName);
+                    return pokeApiBouncerClient.fetchGeneration(StringValue.newBuilder()
+                                    .setValue(generationName)
                                     .build())
                             .getNameList()
                             .stream()
@@ -63,13 +64,12 @@ public class GenerationTask implements Task {
         var futures = virtualThreadExecutor.invokeAll(fetchGenerations);
         for (var future : futures) {
             var pokemonNames = future.get();
-            pokemonNames.forEach(pokemonName -> {
-                var record = StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
-                        .putData("name", pokemonName.getValue())
-                        .build();
-                observer.onNext(record);
-            });
+            pokemonNames.stream()
+                    .map(pokemonName -> StreamRecord.newBuilder()
+                            .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                            .putData("name", pokemonName.getValue())
+                            .build())
+                    .forEach(observer::onNext);
         }
         observer.onCompleted();
     }

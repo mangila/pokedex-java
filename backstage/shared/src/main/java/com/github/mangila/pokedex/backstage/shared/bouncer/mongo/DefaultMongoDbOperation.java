@@ -1,20 +1,19 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.mongo;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
 import com.google.protobuf.Empty;
 
 class DefaultMongoDbOperation implements MongoDb {
 
-    private final MongoDbOperationGrpc.MongoDbOperationBlockingStub mongoDbOperationBlockingStub;
+    private final MongoDbGrpc.MongoDbBlockingStub stub;
 
-    public DefaultMongoDbOperation(MongoDbOperationGrpc.MongoDbOperationBlockingStub mongoDbOperationBlockingStub) {
-        this.mongoDbOperationBlockingStub = mongoDbOperationBlockingStub;
+    DefaultMongoDbOperation(MongoDbGrpc.MongoDbBlockingStub stub) {
+        this.stub = stub;
     }
-
 
     @Override
     public Empty saveOne(PokemonSpeciesPrototype prototype) {
-        return mongoDbOperationBlockingStub.saveOne(prototype);
+        return stub.saveOne(prototype);
     }
 }

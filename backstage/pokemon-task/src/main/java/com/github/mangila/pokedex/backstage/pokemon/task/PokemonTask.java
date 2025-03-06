@@ -1,12 +1,13 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
-import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
 import com.github.mangila.pokedex.backstage.pokemon.mapper.PokeApiMapper;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
+import com.google.protobuf.StringValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,18 +20,18 @@ public class PokemonTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(PokemonTask.class);
 
+    private final PokeApiBouncerClient pokeApiBouncerClient;
     private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
-    private final PokemonHandler pokemonHandler;
     private final PokeApiMapper pokeApiMapper;
 
-    public PokemonTask(MongoBouncerClient mongoBouncerClient,
+    public PokemonTask(PokeApiBouncerClient pokeApiBouncerClient,
+                       MongoBouncerClient mongoBouncerClient,
                        RedisBouncerClient redisBouncerClient,
-                       PokemonHandler pokemonHandler,
                        PokeApiMapper pokeApiMapper) {
+        this.pokeApiBouncerClient = pokeApiBouncerClient;
         this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;
-        this.pokemonHandler = pokemonHandler;
         this.pokeApiMapper = pokeApiMapper;
     }
 
@@ -58,7 +59,8 @@ public class PokemonTask implements Task {
         }
         var document = Stream.ofNullable(data.get("name"))
                 .peek(name -> log.info("Process - {}", name))
-                .map(pokemonHandler::fetchSpecies)
+                .map(StringValue::of)
+                .map(pokeApiBouncerClient::fetchPokemonSpecies)
                 .map(pokeApiMapper::toDocument)
                 .findFirst()
                 .orElseThrow();

@@ -1,8 +1,6 @@
 package com.github.mangila.pokedex.backstage.pokemon.handler;
 
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.Cries;
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.sprites.Sprites;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;

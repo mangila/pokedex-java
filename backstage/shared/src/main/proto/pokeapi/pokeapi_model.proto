@@ -9,3 +9,15 @@ option java_package = "com.github.mangila.pokedex.backstage.model.grpc.pokeapi";
 message GenerationResponsePrototype {
   repeated string name = 1;
 }
+
+message PokemonSpeciesResponsePrototype {
+
+}
+
+message EvolutionChainResponsePrototype {
+
+}
+
+message PokemonResponsePrototype {
+
+}

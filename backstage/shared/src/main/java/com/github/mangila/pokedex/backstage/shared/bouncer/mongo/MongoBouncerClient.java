@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.mongo;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.GridFsGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbGrpc;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -9,9 +10,10 @@ public class MongoBouncerClient {
     private final DefaultMongoDbOperation mongoDb;
     private final DefaultGridFsOperation gridFs;
 
-    public MongoBouncerClient(MongoDbOperationGrpc.MongoDbOperationBlockingStub mongoDbOperationBlockingStub) {
-        this.mongoDb = new DefaultMongoDbOperation(mongoDbOperationBlockingStub);
-        this.gridFs = new DefaultGridFsOperation();
+    public MongoBouncerClient(MongoDbGrpc.MongoDbBlockingStub mongoDbBlockingStub,
+                              GridFsGrpc.GridFsBlockingStub gridFsBlockingStub) {
+        this.mongoDb = new DefaultMongoDbOperation(mongoDbBlockingStub);
+        this.gridFs = new DefaultGridFsOperation(gridFsBlockingStub);
     }
 
     public MongoDb mongoDb() {
