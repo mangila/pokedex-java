@@ -21,9 +21,5 @@ message EntryRequest {
 }
 
 message GenerationResponsePrototype {
-  repeated SpeciesPrototype pokemon_species = 1;
-}
-
-message SpeciesPrototype {
-  string name = 1;
+  repeated string name = 1;
 }

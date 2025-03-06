@@ -10,17 +10,10 @@ public record GenerationResponse(
         List<Species> pokemonSpecies
 ) {
 
-    public static GenerationResponse fromProto(GenerationResponsePrototype proto) {
-        return new GenerationResponse(proto.getPokemonSpeciesList()
-                .stream()
-                .map(Species::fromProto)
-                .toList());
-    }
-
     public GenerationResponsePrototype toProto() {
         return GenerationResponsePrototype.newBuilder()
-                .addAllPokemonSpecies(pokemonSpecies.stream()
-                        .map(Species::toProto)
+                .addAllName(pokemonSpecies.stream()
+                        .map(Species::name)
                         .toList())
                 .build();
     }
