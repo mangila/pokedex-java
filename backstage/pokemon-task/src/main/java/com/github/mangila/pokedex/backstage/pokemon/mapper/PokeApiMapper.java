@@ -1,22 +1,16 @@
 package com.github.mangila.pokedex.backstage.pokemon.mapper;
 
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.evolutionchain.EvolutionChain;
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.PokemonResponse;
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.Stats;
-import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.Types;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
-import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.*;
+import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.*;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
-import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
+import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
-import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonStat;
-import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonType;
-import com.github.mangila.pokedex.backstage.shared.util.JavaStreamUtil;
+import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.StringValue;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -24,7 +18,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -35,115 +28,127 @@ public class PokeApiMapper {
     private static final Logger log = LoggerFactory.getLogger(PokeApiMapper.class);
     private static final Matcher REPLACE_LINE_BREAKS = Pattern.compile("[\r\n\t\f]+").matcher(Strings.EMPTY);
 
-    private final PokemonHandler pokemonHandler;
+    private final PokeApiBouncerClient pokeApiBouncerClient;
     private final PokemonMediaHandler pokemonMediaHandler;
 
-    public PokeApiMapper(PokemonHandler pokemonHandler,
+    public PokeApiMapper(PokeApiBouncerClient pokeApiBouncerClient,
                          PokemonMediaHandler pokemonMediaHandler) {
-        this.pokemonHandler = pokemonHandler;
+        this.pokeApiBouncerClient = pokeApiBouncerClient;
         this.pokemonMediaHandler = pokemonMediaHandler;
     }
 
-    public PokemonSpeciesPrototype toDocument(PokemonSpeciesResponse response) {
-        var id = PokemonId.create(response.id());
-        var name = PokemonName.create(response.name());
-        var evolutionChainUrl = URI.create(response.evolutionChain().url());
-        return new PokemonSpeciesDocument(
-                id.getValueAsInteger(),
-                name.getValue(),
-                response.generation().name(),
-                toPokemonNameDocuments(response.names()),
-                toPokemonDescriptionDocuments(response.flavorTextEntries()),
-                toPokemonGeneraDocuments(response.genera()),
-                toPokemonEvolutionDocuments(evolutionChainUrl),
-                toPokemonDocuments(id, response.varieties()),
-                toPokemonSpecialDocument(response.legendary(), response.mythical(), response.baby())
-        );
+    public PokemonSpeciesPrototype toProto(PokemonSpeciesResponsePrototype response) {
+        var id = PokemonId.create(response.getId());
+        var name = PokemonName.create(response.getName());
+        return PokemonSpeciesPrototype.newBuilder()
+                .setId(id.getValueAsInteger())
+                .setName(name.getValue())
+                .setGeneration(response.getGeneration())
+                .addAllNames(toPokemonNames(response.getNamesList()))
+                .addAllDescriptions(toDescriptions(response.getFlavorTextEntriesList()))
+                .addAllGenera(toGenera(response.getGeneraList()))
+                .addAllEvolutions(toEvolutions(URI.create(response.getEvolutionChainUrl())))
+                .addAllVarieties(toVarieties(id, response.getVarietiesList()))
+                .setSpecial(toSpecial(response.getIsBaby(), response.getIsLegendary(), response.getIsMythical()))
+                .build();
     }
 
-    private static List<PokemonNameDocument> toPokemonNameDocuments(List<Names> names) {
-        return names.stream()
-                .map(name -> new PokemonNameDocument(name.name(), name.language().name()))
+    private Iterable<PokemonPrototype> toVarieties(PokemonId speciesId, ProtocolStringList varietiesList) {
+        return varietiesList.stream()
+                .peek(variety -> log.debug("Fetching variety: {}", variety))
+                .map(PokemonName::create)
+                .map(PokemonName::getValue)
+                .map(StringValue::of)
+                .map(pokeApiBouncerClient::fetchPokemon)
+                .peek(response -> {
+                    log.debug("adding pokemon media for pokemon: {}", response.getName());
+                    var pokemonVarietyId = PokemonId.create(response.getId());
+                    var pokemonVarietyName = PokemonName.create(response.getName());
+                    pokemonMediaHandler.handle(speciesId, pokemonVarietyId, pokemonVarietyName, response.getCries());
+                    pokemonMediaHandler.handle(speciesId, pokemonVarietyId, pokemonVarietyName, response.getSprites());
+                })
+                .map(response -> PokemonPrototype.newBuilder()
+                        .setId(response.getId())
+                        .setName(response.getName())
+                        .setWeight(toKilogram(response.getWeight()))
+                        .setHeight(toMeter(response.getHeight()))
+                        .setIsDefault(response.getIsDefault())
+                        .addAllTypes(response.getTypesList())
+                        .addAllStats(response.getStatsList()
+                                .stream()
+                                .map(statsPrototype -> PokemonStatPrototype.newBuilder()
+                                        .setValue(statsPrototype.getValue())
+                                        .setName(statsPrototype.getName())
+                                        .build()).toList())
+                        .addAllMedia(Collections.emptyList())
+                        .build())
                 .toList();
     }
 
-    private static List<PokemonDescriptionDocument> toPokemonDescriptionDocuments(List<FlavorTextEntries> favorTextEntries) {
-        return favorTextEntries.stream()
-                .filter(JavaStreamUtil.distinctByKey(text -> text.language().name()))
-                .map(textEntries -> {
-                    var matcher = REPLACE_LINE_BREAKS.reset(textEntries.flavorText());
+    private Iterable<PokemonEvolutionPrototype> toEvolutions(URI uri) {
+        var response = Stream.ofNullable(uri)
+                .map(URI::toString)
+                .peek(uriString -> log.debug("fetch evolution chain: {}", uriString))
+                .map(StringValue::of)
+                .map(pokeApiBouncerClient::fetchEvolutionChain)
+                .findFirst()
+                .orElseThrow();
+        if (CollectionUtils.isEmpty(response.getChain().getFirstChainList())) {
+            return Collections.emptyList();
+        }
+        var chain = response.getChain();
+        var evolutions = new ArrayList<PokemonEvolutionPrototype>();
+        evolutions.add(PokemonEvolutionPrototype.newBuilder()
+                .setOrder(0)
+                .setName(chain.getSpeciesName())
+                .build());
+        return getEvolutions(chain.getFirstChainList(), evolutions);
+    }
+
+    private Iterable<PokemonGeneraPrototype> toGenera(List<GeneraPrototype> generaList) {
+        return generaList.stream()
+                .map(generaPrototype -> PokemonGeneraPrototype.newBuilder()
+                        .setGenera(generaPrototype.getGenus())
+                        .setLanguage(generaPrototype.getLanguage())
+                        .build())
+                .toList();
+    }
+
+    private Iterable<PokemonNamePrototype> toPokemonNames(List<NamePrototype> namesList) {
+        return namesList.stream()
+                .map(namePrototype -> PokemonNamePrototype.newBuilder()
+                        .setName(namePrototype.getName())
+                        .setLanguage(namePrototype.getLanguage())
+                        .build())
+                .toList();
+    }
+
+    private Iterable<PokemonDescriptionPrototype> toDescriptions(List<FlavorTextEntriesPrototype> flavorTextEntriesList) {
+        return flavorTextEntriesList.stream()
+                .map(flavorText -> {
+                    var matcher = REPLACE_LINE_BREAKS.reset(flavorText.getFlavorText());
                     var description = matcher.replaceAll(" ");
-                    return new PokemonDescriptionDocument(
-                            description,
-                            textEntries.language().name()
-                    );
+                    return PokemonDescriptionPrototype.newBuilder()
+                            .setDescription(description)
+                            .setLanguage(flavorText.getLanguage())
+                            .build();
                 })
                 .toList();
     }
 
-    private List<PokemonGeneraDocument> toPokemonGeneraDocuments(List<Genera> genera) {
-        return genera.stream()
-                .map(g -> new PokemonGeneraDocument(g.genus(), g.language().name()))
-                .toList();
-    }
-
-    private List<PokemonEvolutionDocument> toPokemonEvolutionDocuments(URI evolutionChainUrl) {
-        var response = Stream.ofNullable(evolutionChainUrl)
-                .map(pokemonHandler::fetchEvolutionChain)
-                .findFirst()
-                .orElseThrow();
-        if (CollectionUtils.isEmpty(response.chain().firstChain())) {
-            return Collections.emptyList();
-        }
-        var chain = response.chain();
-        var evolutions = new ArrayList<PokemonEvolutionDocument>();
-        evolutions.add(new PokemonEvolutionDocument(0, chain.species().name()));
-        return getEvolutions(chain.firstChain(), evolutions);
-    }
-
-    private List<PokemonEvolutionDocument> getEvolutions(List<EvolutionChain> next,
-                                                         ArrayList<PokemonEvolutionDocument> evolutions) {
+    private List<PokemonEvolutionPrototype> getEvolutions(List<EvolutionChainPrototype> next,
+                                                          ArrayList<PokemonEvolutionPrototype> evolutions) {
         while (true) {
             if (CollectionUtils.isEmpty(next)) {
                 return evolutions;
             }
-
             var chain = next.getFirst();
-            evolutions.add(new PokemonEvolutionDocument(evolutions.size(), chain.species().name()));
-            next = chain.nextChain();
+            evolutions.add(PokemonEvolutionPrototype.newBuilder()
+                    .setOrder(evolutions.size())
+                    .setName(chain.getSpeciesName())
+                    .build());
+            next = chain.getNextChainList();
         }
-    }
-
-    private List<PokemonDocument> toPokemonDocuments(PokemonId speciesId, List<Varieties> varieties) {
-        return varieties.stream()
-                .peek(variety -> log.debug("Fetching varieties for pokemon: {}", variety.pokemon().name()))
-                .map(variety -> variety.pokemon().name())
-                .map(PokemonName::create)
-                .map(PokemonName::getValue)
-                .map(pokemonHandler::fetchPokemon)
-                .peek(pokemonResponse -> {
-                    log.debug("adding pokemon media for pokemon: {}", pokemonResponse.name());
-                    var pokemonVarietyId = PokemonId.create(pokemonResponse.id());
-                    var pokemonVarietyName = PokemonName.create(pokemonResponse.name());
-                    var idPair = Pair.of(speciesId, pokemonVarietyId);
-                    pokemonMediaHandler.handle(idPair, pokemonVarietyName, pokemonResponse.sprites());
-                    pokemonMediaHandler.handle(idPair, pokemonVarietyName, pokemonResponse.cries());
-                })
-                .map(this::toDocument)
-                .toList();
-    }
-
-    private PokemonDocument toDocument(PokemonResponse pokemonResponse) {
-        return new PokemonDocument(
-                pokemonResponse.id(),
-                pokemonResponse.name(),
-                pokemonResponse.isDefault(),
-                toMeter(pokemonResponse.height()),
-                toKilogram(pokemonResponse.weight()),
-                toTypes(pokemonResponse.types()),
-                toStats(pokemonResponse.stats()),
-                Collections.emptyList()
-        );
     }
 
     /**
@@ -166,37 +171,13 @@ public class PokeApiMapper {
         return String.valueOf(kilogram);
     }
 
-    private List<PokemonTypeDocument> toTypes(List<Types> types) {
-        return types.stream()
-                .map(type -> type.type().name())
-                .map(PokemonType::from)
-                .map(PokemonType::getType)
-                .map(PokemonTypeDocument::new)
-                .toList();
-    }
-
-    private List<PokemonStatDocument> toStats(List<Stats> stats) {
-        var total = new AtomicInteger();
-        var documents = new ArrayList<>(stats.stream()
-                .map(s -> {
-                    var stat = PokemonStat.from(s.stat().name());
-                    var baseStat = s.baseStat();
-                    total.addAndGet(baseStat);
-                    stat.setValue(baseStat);
-                    return stat;
-                })
-                .map(pokemonStat -> new PokemonStatDocument(
-                        pokemonStat.getStat(),
-                        pokemonStat.getValue()))
-                .toList());
-        documents.add(new PokemonStatDocument("total", total.get()));
-        return documents;
-    }
-
-    private PokemonSpecialDocument toPokemonSpecialDocument(boolean legendary,
-                                                            boolean mythical,
-                                                            boolean baby) {
-        boolean isSpecial = legendary && mythical && baby;
-        return new PokemonSpecialDocument(isSpecial, legendary, mythical, baby);
+    private PokemonSpecialPrototype toSpecial(boolean isBaby, boolean isLegendary, boolean isMythical) {
+        var isSpecial = isBaby && isLegendary && isMythical;
+        return PokemonSpecialPrototype.newBuilder()
+                .setIsSpecial(isSpecial)
+                .setBaby(isBaby)
+                .setLegendary(isLegendary)
+                .setMythical(isMythical)
+                .build();
     }
 }

@@ -20,7 +20,7 @@ public record PokemonDocument(
 
     public PokemonPrototype toProto() {
         var typeProtos = types.stream()
-                .map(PokemonTypeDocument::toProto)
+                .map(PokemonTypeDocument::type)
                 .toList();
         var statProtos = stats.stream()
                 .map(PokemonStatDocument::toProto)
@@ -44,7 +44,7 @@ public record PokemonDocument(
                 proto.getIsDefault(),
                 proto.getHeight(),
                 proto.getWeight(),
-                proto.getTypesList().stream().map(PokemonTypeDocument::fromProto).toList(),
+                proto.getTypesList().stream().map(PokemonTypeDocument::new).toList(),
                 proto.getStatsList().stream().map(PokemonStatDocument::fromProto).toList(),
                 proto.getMediaList().stream().map(PokemonMediaDocument::fromProto).toList()
         );

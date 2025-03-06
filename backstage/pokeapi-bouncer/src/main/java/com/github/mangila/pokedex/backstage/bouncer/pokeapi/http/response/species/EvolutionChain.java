@@ -4,4 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record EvolutionChain(
         @JsonProperty("url") String url
-) {}
+) {
+}

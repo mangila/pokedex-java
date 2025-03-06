@@ -61,11 +61,10 @@ public class PokemonTask implements Task {
                 .peek(name -> log.info("Process - {}", name))
                 .map(StringValue::of)
                 .map(pokeApiBouncerClient::fetchPokemonSpecies)
-                .map(pokeApiMapper::toDocument)
+                .map(pokeApiMapper::toProto)
                 .findFirst()
                 .orElseThrow();
-        mongoBouncerClient.mongoDb()
-                .saveOne(document);
+        mongoBouncerClient.mongoDb().saveOne(document);
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
                         .setStreamKey(streamKey)
