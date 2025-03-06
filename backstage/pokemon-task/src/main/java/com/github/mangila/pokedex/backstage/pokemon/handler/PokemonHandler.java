@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.backstage.pokemon.handler;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.evolutionchain.EvolutionChainResponse;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.pokemon.PokemonResponse;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.species.SpeciesResponse;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.evolutionchain.EvolutionChainResponse;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.PokemonResponse;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.species.PokemonSpeciesResponse;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
 import com.github.mangila.pokedex.backstage.shared.util.UriUtil;
@@ -28,7 +28,7 @@ public class PokemonHandler {
         this.redisBouncerClient = redisBouncerClient;
     }
 
-    public SpeciesResponse fetchSpecies(String speciesName) {
+    public PokemonSpeciesResponse fetchSpecies(String speciesName) {
         var key = RedisKeyPrefix.SPECIES_KEY_PREFIX.getPrefix().concat(speciesName);
         var cacheValue = redisBouncerClient.valueOps()
                 .get(EntryRequest.newBuilder()
@@ -44,7 +44,7 @@ public class PokemonHandler {
             return speciesResponse;
         }
         log.debug("Cache hit - {}", key);
-        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, SpeciesResponse.class);
+        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, PokemonSpeciesResponse.class);
     }
 
     public PokemonResponse fetchPokemon(String pokemonName) {

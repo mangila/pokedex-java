@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;

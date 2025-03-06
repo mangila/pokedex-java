@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.backstage.pokemon.mapper;
 
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.evolutionchain.EvolutionChain;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.pokemon.PokemonResponse;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.pokemon.Stats;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.pokemon.Types;
-import com.github.mangila.pokedex.backstage.integration.pokeapi.response.species.*;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.evolutionchain.EvolutionChain;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.PokemonResponse;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.Stats;
+import com.github.mangila.pokedex.backstage.bouncer.pokeapi.response.pokemon.Types;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
-import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonStat;
@@ -45,7 +44,7 @@ public class PokeApiMapper {
         this.pokemonMediaHandler = pokemonMediaHandler;
     }
 
-    public PokemonSpeciesDocument toDocument(SpeciesResponse response) {
+    public PokemonSpeciesPrototype toDocument(PokemonSpeciesResponse response) {
         var id = PokemonId.create(response.id());
         var name = PokemonName.create(response.name());
         var evolutionChainUrl = URI.create(response.evolutionChain().url());

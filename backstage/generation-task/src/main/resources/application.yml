@@ -11,5 +11,7 @@ spring:
   grpc:
     client:
       channels:
-        redis-bouncer:
+        pokeapi-bouncer:
           address: "static://0.0.0.0:9000"
+        redis-bouncer:
+          address: "static://0.0.0.0:9010"

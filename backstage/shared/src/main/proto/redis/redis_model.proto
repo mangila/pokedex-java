@@ -20,6 +20,3 @@ message EntryRequest {
   google.protobuf.Any value = 2;
 }
 
-message GenerationResponsePrototype {
-  repeated string name = 1;
-}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "pokeapi/pokeapi_model.proto";
+
+option java_multiple_files = true;
+option java_package = "com.github.mangila.pokedex.backstage.model.grpc.pokeapi";
+
+// PokeApi service sends http requests to https://pokeapi.co
+service PokeApi {
+  // Fetch all Pokemons by Generation
+  rpc GetGeneration(google.protobuf.StringValue) returns (GenerationResponsePrototype);
+}

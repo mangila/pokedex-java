@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.image.task;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.mongo.MongoBouncerClient;
-import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;

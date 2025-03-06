@@ -9,7 +9,7 @@ spring:
       enabled: true
   grpc:
     server:
-      port: 9000
+      port: 9010
       host: "*"
       reflection:
         enabled: false

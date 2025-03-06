@@ -12,10 +12,10 @@
         <module>generation-task</module>
         <module>pokemon-task</module>
         <module>media-task</module>
-        <module>integration</module>
         <module>shared</module>
         <module>redis-bouncer</module>
         <module>mongodb-bouncer</module>
+        <module>pokeapi-bouncer</module>
     </modules>
 
     <properties>

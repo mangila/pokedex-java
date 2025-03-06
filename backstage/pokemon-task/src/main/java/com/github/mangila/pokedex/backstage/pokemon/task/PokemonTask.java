@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
-import com.github.mangila.pokedex.backstage.integration.bouncer.mongo.MongoBouncerClient;
-import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonHandler;
 import com.github.mangila.pokedex.backstage.pokemon.mapper.PokeApiMapper;
+import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import org.slf4j.Logger;
@@ -62,7 +62,8 @@ public class PokemonTask implements Task {
                 .map(pokeApiMapper::toDocument)
                 .findFirst()
                 .orElseThrow();
-        mongoBouncerClient.saveOne(document);
+        mongoBouncerClient.mongoDb()
+                .saveOne(document);
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
                         .setStreamKey(streamKey)

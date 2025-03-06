@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
-import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
+import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.PokemonSpeciesDocument;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.springframework.data.mongodb.core.MongoTemplate;

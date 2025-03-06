@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
-import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
+import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.PokemonSpeciesDocument;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
