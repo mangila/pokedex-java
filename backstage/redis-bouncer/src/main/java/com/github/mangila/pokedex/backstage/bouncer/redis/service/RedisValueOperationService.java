@@ -34,7 +34,7 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
     public void set(EntryRequest request, StreamObserver<Empty> responseObserver) {
         log.debug("{}", request.toString());
         template.opsForValue()
-                .set(request.getKey(), BASE_64_ENCODER.encodeToString(request.toByteArray()));
+                .set(request.getKey(), BASE_64_ENCODER.encodeToString(request.getValue().toByteArray()));
         responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
