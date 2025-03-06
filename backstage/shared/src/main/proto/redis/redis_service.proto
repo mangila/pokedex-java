@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 import "redis/redis_model.proto";
 
 option java_multiple_files = true;
@@ -21,5 +22,5 @@ service ValueOperation {
   // Set Redis Value
   rpc Set(EntryRequest) returns (google.protobuf.Empty){}
   // Get Redis Value
-  rpc Get(EntryRequest) returns (google.protobuf.StringValue){}
+  rpc Get(EntryRequest) returns (google.protobuf.Any){}
 }

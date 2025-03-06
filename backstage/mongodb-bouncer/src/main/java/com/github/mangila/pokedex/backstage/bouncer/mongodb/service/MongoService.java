@@ -1,9 +1,8 @@
 package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.InsertRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
-import com.github.mangila.pokedex.backstage.shared.util.JsonUtil;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
+import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,24 +12,16 @@ import org.springframework.grpc.server.service.GrpcService;
 public class MongoService extends MongoDbOperationGrpc.MongoDbOperationImplBase {
 
     private final MongoTemplate mongoTemplate;
-    private final ObjectMapper objectMapper;
 
-    public MongoService(MongoTemplate mongoTemplate,
-                        ObjectMapper objectMapper) {
+    public MongoService(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
-        this.objectMapper = objectMapper;
     }
 
     @Override
-    public void saveOne(InsertRequest request, StreamObserver<Empty> responseObserver) {
-        try {
-            var clazz = Class.forName(request.getType());
-            var document = JsonUtil.readValueFrom(request.getData(), objectMapper, clazz);
-            mongoTemplate.save(document, request.getCollection());
-            responseObserver.onNext(Empty.getDefaultInstance());
-        } catch (ClassNotFoundException e) {
-            responseObserver.onError(e);
-        }
+    public void saveOne(PokemonSpeciesPrototype request, StreamObserver<Empty> responseObserver) {
+        var document = PokemonSpeciesDocument.fromProto(request);
+        mongoTemplate.save(document);
+        responseObserver.onNext(Empty.getDefaultInstance());
         responseObserver.onCompleted();
     }
 }

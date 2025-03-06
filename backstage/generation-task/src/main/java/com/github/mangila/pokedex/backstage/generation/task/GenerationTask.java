@@ -6,13 +6,14 @@ import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.GenerationResponse;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.Species;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.GenerationResponsePrototype;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
-import com.github.mangila.pokedex.backstage.shared.util.JsonUtil;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -97,16 +98,16 @@ public class GenerationTask implements Task {
         var cacheValue = redisBouncerClient.valueOps()
                 .get(EntryRequest.newBuilder()
                         .setKey(key)
-                        .build());
+                        .build(), GenerationResponsePrototype.class);
         if (cacheValue.isEmpty()) {
             var response = pokeApiTemplate.fetchGeneration(generationName);
-            redisBouncerClient.valueOps()
-                    .set(EntryRequest.newBuilder()
-                            .setKey(key)
-                            .setValue(response.toJson(objectMapper))
-                            .build());
+            var entryRequest = EntryRequest.newBuilder()
+                    .setKey(key)
+                    .setValue(Any.pack(response.toProto()))
+                    .build();
+            redisBouncerClient.valueOps().set(entryRequest);
             return response;
         }
-        return JsonUtil.readValueFrom(cacheValue.get(), objectMapper, GenerationResponse.class);
+        return GenerationResponse.fromProto(cacheValue.get());
     }
 }

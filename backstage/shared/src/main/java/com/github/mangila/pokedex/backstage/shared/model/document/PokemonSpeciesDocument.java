@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.model.document;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonSpeciesPrototype;
 import com.github.mangila.pokedex.backstage.shared.model.document.embedded.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
@@ -22,12 +21,33 @@ public record PokemonSpeciesDocument(
         @NotNull @Field("varieties") List<PokemonDocument> varieties,
         @NotNull @Field("special") PokemonSpecialDocument special
 ) {
-    public String toJson(ObjectMapper mapper) {
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
+    public static PokemonSpeciesDocument fromProto(PokemonSpeciesPrototype proto) {
+        return new PokemonSpeciesDocument(
+                proto.getId(),
+                proto.getName(),
+                proto.getGeneration(),
+                proto.getNamesList().stream().map(PokemonNameDocument::fromProto).toList(),
+                proto.getDescriptionsList().stream().map(PokemonDescriptionDocument::fromProto).toList(),
+                proto.getGeneraList().stream().map(PokemonGeneraDocument::fromProto).toList(),
+                proto.getEvolutionsList().stream().map(PokemonEvolutionDocument::fromProto).toList(),
+                proto.getVarietiesList().stream().map(PokemonDocument::fromProto).toList(),
+                PokemonSpecialDocument.fromProto(proto.getSpecial())
+        );
+    }
+
+    public PokemonSpeciesPrototype toProto() {
+        return PokemonSpeciesPrototype.newBuilder()
+                .setId(id)
+                .setName(name)
+                .setGeneration(generation)
+                .addAllNames(names.stream().map(PokemonNameDocument::toProto).toList())
+                .addAllGenera(genera.stream().map(PokemonGeneraDocument::toProto).toList())
+                .addAllDescriptions(descriptions.stream().map(PokemonDescriptionDocument::toProto).toList())
+                .addAllEvolutions(evolutions.stream().map(PokemonEvolutionDocument::toProto).toList())
+                .addAllVarieties(varieties.stream().map(PokemonDocument::toProto).toList())
+                .setSpecial(special.toProto())
+                .build();
     }
 }
 

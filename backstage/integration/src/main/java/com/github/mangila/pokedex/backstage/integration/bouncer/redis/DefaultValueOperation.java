@@ -3,6 +3,8 @@ package com.github.mangila.pokedex.backstage.integration.bouncer.redis;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
 import com.google.protobuf.Empty;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 
 import java.util.Optional;
 
@@ -20,11 +22,13 @@ class DefaultValueOperation implements ValueOperation {
     }
 
     @Override
-    public Optional<String> get(EntryRequest request) {
-        var response = valueOperationBlockingStub.get(request);
-        if (response.getValue().isBlank()) {
+    public <T extends Message> Optional<T> get(EntryRequest request, Class<T> clazz) {
+        try {
+            var response = valueOperationBlockingStub.get(request);
+            return Optional.ofNullable(response.unpack(clazz));
+        } catch (InvalidProtocolBufferException e) {
             return Optional.empty();
         }
-        return Optional.of(response.getValue());
     }
+
 }

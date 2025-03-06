@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.backstage.integration.bouncer.mongo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.InsertRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import com.google.protobuf.Empty;
@@ -20,12 +19,6 @@ public class MongoBouncerClient {
     }
 
     public Empty saveOne(PokemonSpeciesDocument document) {
-        return mongoDbOperationBlockingStub.saveOne(
-                InsertRequest.newBuilder()
-                        .setType(PokemonSpeciesDocument.class.getName())
-                        .setCollection("pokemon-species")
-                        .setData(document.toJson(objectMapper))
-                        .build()
-        );
+        return mongoDbOperationBlockingStub.saveOne(document.toProto());
     }
 }

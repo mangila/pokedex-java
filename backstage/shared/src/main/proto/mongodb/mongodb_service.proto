@@ -15,5 +15,5 @@ service GridFsOperation {
 // MongoDb GRPC Operations
 service MongoDbOperation {
   // Insert one entry
-  rpc SaveOne(InsertRequest) returns (google.protobuf.Empty);
+  rpc SaveOne(PokemonSpeciesPrototype) returns (google.protobuf.Empty);
 }

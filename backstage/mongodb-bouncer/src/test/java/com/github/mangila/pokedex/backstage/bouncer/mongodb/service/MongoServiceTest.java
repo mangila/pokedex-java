@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.InsertRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbOperationGrpc;
 import com.github.mangila.pokedex.backstage.shared.model.document.PokemonSpeciesDocument;
 import io.grpc.ManagedChannelBuilder;
@@ -33,13 +32,7 @@ class MongoServiceTest extends MongoDbTestContainer {
                 .build();
         var stub = MongoDbOperationGrpc.newBlockingStub(channel);
         var document = TestDataGenerator.createDefaultPokemonSpeciesDocument();
-        stub.saveOne(
-                InsertRequest.newBuilder()
-                        .setType(PokemonSpeciesDocument.class.getName())
-                        .setCollection("pokemon-species")
-                        .setData(document.toJson(objectMapper))
-                        .build()
-        );
+        stub.saveOne(document.toProto());
         Query query = new Query();
         query.addCriteria(Criteria.where("name").is("bulbasaur"));
         var findOne = mongoTemplate.findOne(query, PokemonSpeciesDocument.class);

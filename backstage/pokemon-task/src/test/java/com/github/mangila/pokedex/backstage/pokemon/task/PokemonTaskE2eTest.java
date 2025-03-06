@@ -30,7 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @Disabled(value = "Run only where a Docker env is available - redis-bouncer and mongodb-bouncer server needs to be in a Container")
 class PokemonTaskE2eTest {
 
-    private static final String GRPC_PORT = "9999";
+    private static final String REDIS_BOUNCER_GRPC_PORT = "9080";
+    private static final String MONGO_DB_BOUNCER_GRPC_PORT = "9090";
     @Autowired
     private Task pokemonTask;
     @Autowired
@@ -55,10 +56,9 @@ class PokemonTaskE2eTest {
         redis = new GenericContainer(REDIS_CONTAINER_NAME)
                 .withNetworkAliases("redis")
                 .withNetwork(Network.SHARED);
-        redis.start();
         redisBouncer = new GenericContainer(REDIS_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", GRPC_PORT)
+                .withEnv("spring.grpc.server.port", REDIS_BOUNCER_GRPC_PORT)
                 .withEnv("spring.data.redis.host", "redis")
                 .withEnv("spring.data.redis.port", "6379")
                 .waitingFor(new LogMessageWaitStrategy()
@@ -66,23 +66,26 @@ class PokemonTaskE2eTest {
                         .withTimes(1)
                         .withStartupTimeout(Duration.ofSeconds(1)));
         redisBouncer.setPortBindings(List.of(
-                GRPC_PORT.concat(":").concat(GRPC_PORT) //host:container port
+                REDIS_BOUNCER_GRPC_PORT.concat(":").concat(REDIS_BOUNCER_GRPC_PORT) //host:container port
         ));
-        redisBouncer.start();
         mongoDb = new MongoDBContainer(MONGODB_IMAGE_NAME)
                 .withNetworkAliases("mongo")
                 .withNetwork(Network.SHARED);
-        mongoDb.start();
         mongoDbBouncer = new GenericContainer(MONGO_DB_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
+                .withEnv("spring.grpc.server.port", MONGO_DB_BOUNCER_GRPC_PORT)
+                .withEnv("spring.data.mongodb.uri", "mongodb://admin:password@mongo:27017")
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)
                         .withStartupTimeout(Duration.ofSeconds(1)));
         mongoDbBouncer.setPortBindings(List.of(
-                GRPC_PORT.concat(":").concat(GRPC_PORT) //host:container port
+                MONGO_DB_BOUNCER_GRPC_PORT.concat(":").concat(MONGO_DB_BOUNCER_GRPC_PORT) //host:container port
         ));
-
+        redis.start();
+        redisBouncer.start();
+        mongoDb.start();
+        mongoDbBouncer.start();
     }
 
     @AfterAll
@@ -99,8 +102,10 @@ class PokemonTaskE2eTest {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        var grpcAddress = "static://0.0.0.0:".concat(GRPC_PORT);
-        registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> grpcAddress);
+        var redisBouncerAddress = "static://0.0.0.0:".concat(REDIS_BOUNCER_GRPC_PORT);
+        registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> redisBouncerAddress);
+        var mongoDbBouncerAddress = "static://0.0.0.0:".concat(MONGO_DB_BOUNCER_GRPC_PORT);
+        registry.add("spring.grpc.client.channels.mongodb-bouncer.address", () -> mongoDbBouncerAddress);
     }
 
     @Test
