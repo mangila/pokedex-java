@@ -48,6 +48,7 @@ public class PokeApiMapper {
     public PokemonSpeciesDocument toDocument(SpeciesResponse response) {
         var id = PokemonId.create(response.id());
         var name = PokemonName.create(response.name());
+        var evolutionChainUrl = URI.create(response.evolutionChain().url());
         return new PokemonSpeciesDocument(
                 id.getValueAsInteger(),
                 name.getValue(),
@@ -55,7 +56,7 @@ public class PokeApiMapper {
                 toPokemonNameDocuments(response.names()),
                 toPokemonDescriptionDocuments(response.flavorTextEntries()),
                 toPokemonGeneraDocuments(response.genera()),
-                toPokemonEvolutionDocuments(URI.create(response.evolutionChain().url())),
+                toPokemonEvolutionDocuments(evolutionChainUrl),
                 toPokemonDocuments(id, response.varieties()),
                 toPokemonSpecialDocument(response.legendary(), response.mythical(), response.baby())
         );

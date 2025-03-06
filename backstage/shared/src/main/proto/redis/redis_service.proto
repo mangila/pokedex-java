@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
+import "redis/redis_model.proto";
 
 option java_multiple_files = true;
 option java_package = "com.github.mangila.pokedex.backstage.model.grpc.redis";
@@ -15,21 +16,10 @@ service StreamOperation {
   // Acknowledge Stream Log
   rpc AcknowledgeOne(StreamRecord) returns (google.protobuf.Empty);
 }
-// Create a new StreamRecord
-message StreamRecord {
-  string streamKey = 1;
-  string recordId = 2;
-  map<string, string> data = 3;
-}
 // Redis value GRPC Operations
 service ValueOperation {
   // Set Redis Value
   rpc Set(EntryRequest) returns (google.protobuf.Empty){}
   // Get Redis Value
   rpc Get(EntryRequest) returns (google.protobuf.StringValue){}
-}
-// Create a new Entry
-message EntryRequest {
-  string key = 1;
-  string value = 2;
 }
