@@ -65,6 +65,10 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 - Native image reflection stuffs
 - Utility
 
+### pokeapi-bouncer
+
+- Relays and caches http requests from pokeapi.co
+
 ### pokemon-task
 
 - Read Stream Logs from `pokemon-name-event`
