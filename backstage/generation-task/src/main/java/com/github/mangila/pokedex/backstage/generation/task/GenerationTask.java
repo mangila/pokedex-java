@@ -2,12 +2,17 @@ package com.github.mangila.pokedex.backstage.generation.task;
 
 import com.github.mangila.pokedex.backstage.integration.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.PokeApiTemplate;
+import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.GenerationResponse;
 import com.github.mangila.pokedex.backstage.integration.pokeapi.response.generation.Species;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.GenerationResponsePrototype;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -15,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 @Service
@@ -45,11 +52,30 @@ public class GenerationTask implements Task {
      */
     @Override
     public void run(String[] args) throws Exception {
+        var observer = getStreamObserver();
         var fetchGenerations = EnumSet.allOf(Generation.class)
                 .stream()
-                .map(generation -> new FetchGeneration(generation, pokeApiTemplate, redisBouncerClient))
+                .map(generation -> (Callable<GenerationResponse>) () -> {
+                    log.info("{}", generation.getName());
+                    var generationName = generation.getName();
+                    var key = RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generationName);
+                    var cacheValue = redisBouncerClient.valueOps()
+                            .get(EntryRequest.newBuilder()
+                                    .setKey(key)
+                                    .build(), GenerationResponsePrototype.class);
+                    if (cacheValue.isEmpty()) {
+                        var response = pokeApiTemplate.fetchGeneration(generationName);
+                        var entryRequest = EntryRequest.newBuilder()
+                                .setKey(key)
+                                .setValue(Any.pack(response.toProto()))
+                                .build();
+                        redisBouncerClient.valueOps().set(entryRequest);
+                        return response;
+                    }
+                    return GenerationResponse.fromProto(cacheValue.get());
+                })
                 .toList();
-        var observer = getStreamObserver();
+
         var futures = virtualThreadExecutor.invokeAll(fetchGenerations);
         for (var future : futures) {
             var response = future.get();
