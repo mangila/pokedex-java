@@ -9,7 +9,7 @@ class SpritesTest {
     void abc() {
         var r = new Reflections("com.github.mangila.pokedex.backstage.bouncer.pokeapi.http.response.pokemon.sprites");
         var sub = r.getSubTypesOf(Record.class);
-       var l = sub.stream()
+        var l = sub.stream()
                 .map(Class::getFields)
                 .toList();
         System.out.println(l);

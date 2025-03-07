@@ -6,6 +6,7 @@ import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
+import com.github.mangila.pokedex.backstage.shared.util.JavaStreamUtil;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import org.apache.logging.log4j.util.Strings;
@@ -125,6 +126,7 @@ public class PokeApiMapper {
 
     private Iterable<PokemonDescriptionPrototype> toDescriptions(List<FlavorTextEntriesPrototype> flavorTextEntriesList) {
         return flavorTextEntriesList.stream()
+                .filter(JavaStreamUtil.distinctByKey(FlavorTextEntriesPrototype::getLanguage))
                 .map(flavorText -> {
                     var matcher = REPLACE_LINE_BREAKS.reset(flavorText.getFlavorText());
                     var description = matcher.replaceAll(" ");

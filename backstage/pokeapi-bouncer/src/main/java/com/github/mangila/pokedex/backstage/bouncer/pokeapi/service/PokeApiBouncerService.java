@@ -65,6 +65,8 @@ public class PokeApiBouncerService extends PokeApiGrpc.PokeApiImplBase {
                     .build();
             redisBouncerClient.valueOps().set(entryRequest);
             responseObserver.onNext(proto);
+        } else {
+            responseObserver.onNext(cacheValue.get());
         }
         responseObserver.onCompleted();
     }
@@ -86,6 +88,8 @@ public class PokeApiBouncerService extends PokeApiGrpc.PokeApiImplBase {
                     .build();
             redisBouncerClient.valueOps().set(entryRequest);
             responseObserver.onNext(proto);
+        } else {
+            responseObserver.onNext(cacheValue.get());
         }
         responseObserver.onCompleted();
     }
@@ -107,6 +111,8 @@ public class PokeApiBouncerService extends PokeApiGrpc.PokeApiImplBase {
                     .build();
             redisBouncerClient.valueOps().set(entryRequest);
             responseObserver.onNext(proto);
+        } else {
+            responseObserver.onNext(cacheValue.get());
         }
         responseObserver.onCompleted();
     }
