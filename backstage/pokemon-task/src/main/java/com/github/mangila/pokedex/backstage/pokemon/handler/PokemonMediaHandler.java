@@ -32,7 +32,8 @@ public class PokemonMediaHandler {
                        PokemonName name,
                        SpritesPrototype sprites) {
         var observer = getStreamObserver("sprites");
-        addIfNotNull(speciesId, pokemonId, name, "", URI.create(""), observer);
+        addIfNotNull(speciesId, pokemonId, name, "front-default", URI.create(sprites.getFrontDefault()), observer);
+        addIfNotNull(speciesId, pokemonId, name, "official-artwork", URI.create(sprites.getOfficialArtwork()), observer);
         observer.onCompleted();
     }
 

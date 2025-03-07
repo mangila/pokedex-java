@@ -76,5 +76,6 @@ message StatsPrototype {
 }
 
 message SpritesPrototype {
-
+  string front_default = 1;
+  string official_artwork = 2;
 }
