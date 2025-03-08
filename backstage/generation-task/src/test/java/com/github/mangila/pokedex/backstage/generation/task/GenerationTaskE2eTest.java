@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import org.junit.jupiter.api.AfterAll;
@@ -23,6 +24,7 @@ import java.util.EnumSet;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @SpringBootTest
 @Testcontainers
@@ -75,14 +77,14 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testCachedApiResponses() throws Exception {
-        generationTask.run(new String[0]);
+    void shouldCachePokeApiResponses() {
+        assertThatCode(() -> generationTask.run(new String[0])).doesNotThrowAnyException();
         EnumSet.allOf(Generation.class)
                 .stream()
                 .map(Generation::getName)
                 .forEach(generationName -> {
                     var request = EntryRequest.newBuilder()
-                            .setKey(generationName)
+                            .setKey(RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generationName))
                             .build();
                     var response = redisBouncerClient.valueOps()
                             .get(request, GenerationResponsePrototype.class);
@@ -91,15 +93,13 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testReadMessage() throws Exception {
-        generationTask.run(new String[0]);
-        var readOne = redisBouncerClient.streamOps()
-                .readOne(
-                        StreamRecord.newBuilder()
-                                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
-                                .build()
-                );
-        assertThat(readOne.getDataMap())
+    void shouldAddStreamMessages() {
+        assertThatCode(() -> generationTask.run(new String[0])).doesNotThrowAnyException();
+        var record = StreamRecord.newBuilder()
+                .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                .build();
+        var streamRecord = redisBouncerClient.streamOps().readOne(record);
+        assertThat(streamRecord.getDataMap())
                 .hasSize(1)
                 .containsKey("name");
     }

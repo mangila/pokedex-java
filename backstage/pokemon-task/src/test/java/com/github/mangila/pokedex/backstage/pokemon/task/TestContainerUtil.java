@@ -72,7 +72,7 @@ final class TestContainerUtil {
         var mongoDbBouncer = new GenericContainer(MONGO_DB_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
                 .withEnv("spring.grpc.server.port", port)
-                .withEnv("spring.data.mongodb.uri", "mongodb://admin:password@mongo:27017")
+                .withEnv("spring.data.mongodb.uri", "mongodb://mongo:27017")
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)

@@ -23,7 +23,7 @@ final class TestContainerUtil {
         var pokeApiBouncer = new GenericContainer(POKE_API_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
                 .withEnv("spring.grpc.server.port", serverPort)
-                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://0.0.0.0:".concat(redisBouncerPort))
+                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://redis-bouncer:".concat(redisBouncerPort))
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)
@@ -34,7 +34,7 @@ final class TestContainerUtil {
         return pokeApiBouncer;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     static GenericContainer<?> buildRedis() {
         return new GenericContainer(REDIS_CONTAINER_NAME)
                 .withNetworkAliases("redis")
@@ -44,6 +44,7 @@ final class TestContainerUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     static GenericContainer<?> buildRedisBouncer(String serverPort) {
         var redisBouncer = new GenericContainer(REDIS_BOUNCER_CONTAINER_NAME)
+                .withNetworkAliases("redis-bouncer")
                 .withNetwork(Network.SHARED)
                 .withEnv("spring.grpc.server.port", serverPort)
                 .withEnv("spring.data.redis.host", "redis")
