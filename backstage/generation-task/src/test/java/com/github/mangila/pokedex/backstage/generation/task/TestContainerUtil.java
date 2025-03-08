@@ -19,16 +19,17 @@ final class TestContainerUtil {
     private static final DockerImageName POKE_API_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-pokeapi-bouncer");
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static GenericContainer<?> buildPokeApiBouncer(String port) {
+    static GenericContainer<?> buildPokeApiBouncer(String serverPort, String redisBouncerPort) {
         var pokeApiBouncer = new GenericContainer(POKE_API_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://0.0.0.0:".concat(port))
+                .withEnv("spring.grpc.server.port", serverPort)
+                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://0.0.0.0:".concat(redisBouncerPort))
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)
                         .withStartupTimeout(Duration.ofSeconds(1)));
         pokeApiBouncer.setPortBindings(List.of(
-                port.concat(":").concat(port)
+                serverPort.concat(":").concat(serverPort)
         ));
         return pokeApiBouncer;
     }
@@ -36,14 +37,15 @@ final class TestContainerUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     static GenericContainer<?> buildRedis() {
         return new GenericContainer(REDIS_CONTAINER_NAME)
-                .withNetworkAliases("redis");
+                .withNetworkAliases("redis")
+                .withNetwork(Network.SHARED);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static GenericContainer<?> buildRedisBouncer(String port) {
+    static GenericContainer<?> buildRedisBouncer(String serverPort) {
         var redisBouncer = new GenericContainer(REDIS_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", port)
+                .withEnv("spring.grpc.server.port", serverPort)
                 .withEnv("spring.data.redis.host", "redis")
                 .withEnv("spring.data.redis.port", "6379")
                 .waitingFor(new LogMessageWaitStrategy()
@@ -51,7 +53,7 @@ final class TestContainerUtil {
                         .withTimes(1)
                         .withStartupTimeout(Duration.ofSeconds(1)));
         redisBouncer.setPortBindings(List.of(
-                port.concat(":").concat(port) //host:container port
+                serverPort.concat(":").concat(serverPort) //host:container port
         ));
         return redisBouncer;
     }

@@ -6,15 +6,14 @@ import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Random;
@@ -35,25 +34,40 @@ class PokemonTaskE2eTest {
     @Autowired
     private RedisBouncerClient redisBouncerClient;
 
+    private static GenericContainer<?> pokeApiBouncer;
+    private static GenericContainer<?> redis;
+    private static GenericContainer<?> redisBouncer;
+    private static MongoDBContainer mongoDb;
+    private static GenericContainer<?> mongoDbBouncer;
+
     static String generateRandomEphemeralPort() {
-        int minPort = 49152;
-        int maxPort = 65535;
+        int minPort = 30_000;
+        int maxPort = 40_000;
         Random random = new Random();
         return String.valueOf(random.nextInt((maxPort - minPort) + 1) + minPort);
     }
 
     @BeforeAll
     static void beforeAll() {
-        TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT)
-                .start();
-        TestContainerUtil.buildRedis()
-                .start();
-        TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT)
-                .start();
-        TestContainerUtil.buildMongoDb()
-                .start();
-        TestContainerUtil.buildMongoDbBouncer(MONGO_DB_BOUNCER_GRPC_PORT)
-                .start();
+        pokeApiBouncer = TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT);
+        redis = TestContainerUtil.buildRedis();
+        redisBouncer = TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT);
+        mongoDb = TestContainerUtil.buildMongoDb();
+        mongoDbBouncer = TestContainerUtil.buildMongoDbBouncer(MONGO_DB_BOUNCER_GRPC_PORT);
+        pokeApiBouncer.start();
+        redis.start();
+        redisBouncer.start();
+        mongoDb.start();
+        mongoDbBouncer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        pokeApiBouncer.stop();
+        redis.stop();
+        redisBouncer.stop();
+        mongoDb.stop();
+        mongoDbBouncer.stop();
     }
 
     @DynamicPropertySource

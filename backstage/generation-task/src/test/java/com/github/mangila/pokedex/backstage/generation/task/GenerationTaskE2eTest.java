@@ -6,6 +6,7 @@ import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.EnumSet;
@@ -31,26 +33,38 @@ class GenerationTaskE2eTest {
     @Autowired
     private RedisBouncerClient redisBouncerClient;
 
+    private static GenericContainer<?> pokeApiBouncer;
+    private static GenericContainer<?> redis;
+    private static GenericContainer<?> redisBouncer;
+
     static String generateRandomEphemeralPort() {
-        int minPort = 49152;
-        int maxPort = 65535;
+        int minPort = 30_000;
+        int maxPort = 40_000;
         Random random = new Random();
         return String.valueOf(random.nextInt((maxPort - minPort) + 1) + minPort);
     }
 
     @BeforeAll
     static void beforeAll() {
-        TestContainerUtil.buildRedis().start();
-        TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT)
-                .start();
-        TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT)
-                .start();
+        pokeApiBouncer = TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT, REDIS_BOUNCER_GRPC_PORT);
+        redis = TestContainerUtil.buildRedis();
+        redisBouncer = TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT);
+        pokeApiBouncer.start();
+        redis.start();
+        redisBouncer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        pokeApiBouncer.stop();
+        redis.stop();
+        redisBouncer.stop();
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         var grpcPokeApiBouncerAddress = "static://0.0.0.0:".concat(POKE_API_BOUNCER_GRPC_PORT);
-        registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> grpcPokeApiBouncerAddress);
+        registry.add("spring.grpc.client.channels.pokeapi-bouncer.address", () -> grpcPokeApiBouncerAddress);
         var grpcRedisBouncerAddress = "static://0.0.0.0:".concat(REDIS_BOUNCER_GRPC_PORT);
         registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> grpcRedisBouncerAddress);
     }
