@@ -17,6 +17,8 @@ public record Sprites(
 ) {
     public SpritesPrototype toProto() {
         return SpritesPrototype.newBuilder()
+                .setFrontDefault(frontDefault)
+                .setOfficialArtwork(other.officialArtwork().frontDefault())
                 .build();
     }
 }

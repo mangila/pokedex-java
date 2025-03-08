@@ -12,9 +12,9 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.net.URI;
-import java.util.Objects;
 
 @Service
 public class PokemonMediaHandler {
@@ -32,8 +32,8 @@ public class PokemonMediaHandler {
                        PokemonName name,
                        SpritesPrototype sprites) {
         var observer = getStreamObserver("sprites");
-        addIfNotNull(speciesId, pokemonId, name, "front-default", URI.create(sprites.getFrontDefault()), observer);
-        addIfNotNull(speciesId, pokemonId, name, "official-artwork", URI.create(sprites.getOfficialArtwork()), observer);
+        addIfUrlHasText(speciesId, pokemonId, name, "front-default", sprites.getFrontDefault(), observer);
+        addIfUrlHasText(speciesId, pokemonId, name, "official-artwork", sprites.getOfficialArtwork(), observer);
         observer.onCompleted();
     }
 
@@ -42,8 +42,8 @@ public class PokemonMediaHandler {
                        PokemonName name,
                        CriesPrototype cries) {
         var observer = getStreamObserver("cries");
-        addIfNotNull(speciesId, pokemonId, name, "legacy", URI.create(cries.getLegacy()), observer);
-        addIfNotNull(speciesId, pokemonId, name, "latest", URI.create(cries.getLatest()), observer);
+        addIfUrlHasText(speciesId, pokemonId, name, "legacy", cries.getLegacy(), observer);
+        addIfUrlHasText(speciesId, pokemonId, name, "latest", cries.getLatest(), observer);
         observer.onCompleted();
     }
 
@@ -67,14 +67,14 @@ public class PokemonMediaHandler {
                 });
     }
 
-    private void addIfNotNull(
+    private void addIfUrlHasText(
             PokemonId speciesId,
             PokemonId pokemonId,
             PokemonName pokemonName,
             String description,
-            URI url,
+            String url,
             StreamObserver<StreamRecord> streamObserver) {
-        if (Objects.nonNull(url)) {
+        if (StringUtils.hasText(url)) {
             log.debug("{} - {} - {} - {} - {}",
                     speciesId.getValue(),
                     pokemonId.getValue(),
@@ -88,7 +88,7 @@ public class PokemonMediaHandler {
                             .putData("pokemon_id", pokemonId.getValue())
                             .putData("name", pokemonName.getValue())
                             .putData("description", description)
-                            .putData("url", url.toString())
+                            .putData("url", url)
                             .build()
             );
         }
