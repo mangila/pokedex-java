@@ -21,5 +21,6 @@ kubectl -- apply -f ${imageConverterDir}/k8s.yml
 kubectl -- apply -f ${generationTaskDir}/k8s.yml
 kubectl -- apply -f ${pokemonTaskDir}/k8s.yml
 kubectl -- apply -f ${mediaTaskDir}/k8s.yml
+kubectl -- apply -f ${pokeApiBouncer}/k8s.yml
 kubectl -- apply -f ${redisBouncerkDir}/k8s.yml
 kubectl -- apply -f ${mongoDbBouncerkDir}/k8s.yml
