@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-@Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
+@Disabled(value = "Run only where a Docker env is available - redis and pokeapi bouncer needs to be in container")
 class GenerationTaskE2eTest {
 
     private static final String POKE_API_BOUNCER_GRPC_PORT = generateRandomEphemeralPort();
