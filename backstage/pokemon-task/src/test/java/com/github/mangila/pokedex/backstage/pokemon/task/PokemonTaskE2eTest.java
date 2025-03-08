@@ -49,7 +49,7 @@ class PokemonTaskE2eTest {
 
     @BeforeAll
     static void beforeAll() {
-        pokeApiBouncer = TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT);
+        pokeApiBouncer = TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT, REDIS_BOUNCER_GRPC_PORT);
         redis = TestContainerUtil.buildRedis();
         redisBouncer = TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT);
         mongoDb = TestContainerUtil.buildMongoDb();

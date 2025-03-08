@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.config;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.ProtocolMessageEnum;
 import org.reflections.Reflections;
@@ -26,7 +27,8 @@ public class ProtobufRuntimeHints implements RuntimeHintsRegistrar {
                 REDIS_PROTOBUF_PACKAGE,
                 MONGO_DB_PROTOBUF_PACKAGE,
                 POKE_API_PROTOBUF_PACKAGE,
-                IMAGE_CONVERTER_PROTOBUF_PACKAGE
+                IMAGE_CONVERTER_PROTOBUF_PACKAGE,
+                "com.google.protobuf"
         );
         for (String packageName : packages) {
             Reflections reflections = new Reflections(packageName);

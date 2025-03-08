@@ -9,6 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 
 @SpringBootApplication
 @ComponentScan({"com.github.mangila.pokedex.backstage"})
@@ -25,8 +27,15 @@ public class GenerationTaskApplication {
         SpringApplication.run(GenerationTaskApplication.class, args);
     }
 
+    /**
+     * Native Images cannot decide on a ConditionalBean - run condition on Runtime instead.
+     */
     @Bean
-    public CommandLineRunner commandLineRunner() {
+    public CommandLineRunner commandLineRunner(Environment environment) {
+        var isTestProfile = environment.acceptsProfiles(Profiles.of("test"));
+        if (isTestProfile) {
+            return args -> log.info("Running test profile - will not start PokemonTask");
+        }
         return task::run;
     }
 

@@ -6,12 +6,14 @@ import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
+import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -24,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Testcontainers
+@ActiveProfiles("test")
 @Disabled(value = "Run only where a Docker env is available - redis-bouncer server needs to be in a Container")
 class GenerationTaskE2eTest {
 
@@ -32,6 +35,8 @@ class GenerationTaskE2eTest {
 
     @Autowired
     private RedisBouncerClient redisBouncerClient;
+    @Autowired
+    private Task generationTask;
 
     private static GenericContainer<?> pokeApiBouncer;
     private static GenericContainer<?> redis;
@@ -70,7 +75,8 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testCachedApiResponses() {
+    void testCachedApiResponses() throws Exception {
+        generationTask.run(new String[0]);
         EnumSet.allOf(Generation.class)
                 .stream()
                 .map(Generation::getName)
@@ -85,7 +91,8 @@ class GenerationTaskE2eTest {
     }
 
     @Test
-    void testReadMessage() {
+    void testReadMessage() throws Exception {
+        generationTask.run(new String[0]);
         var readOne = redisBouncerClient.streamOps()
                 .readOne(
                         StreamRecord.newBuilder()

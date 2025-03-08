@@ -22,17 +22,17 @@ final class TestContainerUtil {
     private static final DockerImageName MONGO_DB_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-mongodb-bouncer");
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static GenericContainer<?> buildPokeApiBouncer(String port) {
+    static GenericContainer<?> buildPokeApiBouncer(String serverPort, String redisBouncerServerPort) {
         var pokeApiBouncer = new GenericContainer(POKE_API_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", port)
-                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://0.0.0.0:".concat(port))
+                .withEnv("spring.grpc.server.port", serverPort)
+                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://redis-bouncer:".concat(redisBouncerServerPort))
                 .waitingFor(new LogMessageWaitStrategy()
                         .withRegEx(".*gRPC Server started.*")
                         .withTimes(1)
                         .withStartupTimeout(Duration.ofSeconds(1)));
         pokeApiBouncer.setPortBindings(List.of(
-                port.concat(":").concat(port)
+                serverPort.concat(":").concat(serverPort)
         ));
         return pokeApiBouncer;
     }
@@ -47,6 +47,7 @@ final class TestContainerUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     static GenericContainer<?> buildRedisBouncer(String port) {
         var redisBouncer = new GenericContainer(REDIS_BOUNCER_CONTAINER_NAME)
+                .withNetworkAliases("redis-bouncer")
                 .withNetwork(Network.SHARED)
                 .withEnv("spring.grpc.server.port", port)
                 .withEnv("spring.data.redis.host", "redis")
