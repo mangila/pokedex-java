@@ -57,14 +57,14 @@ public class PokemonTask implements Task {
             log.debug("No new messages found");
             return;
         }
-        var document = Stream.ofNullable(data.get("name"))
+        var proto = Stream.ofNullable(data.get("name"))
                 .peek(name -> log.info("Process - {}", name))
                 .map(StringValue::of)
                 .map(pokeApiBouncerClient::fetchPokemonSpecies)
                 .map(pokeApiMapper::toProto)
                 .findFirst()
                 .orElseThrow();
-        mongoBouncerClient.mongoDb().saveOne(document);
+        mongoBouncerClient.mongoDb().saveOne(proto);
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
                         .setStreamKey(streamKey)

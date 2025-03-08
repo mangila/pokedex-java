@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM ghcr.io/graalvm/native-image-community:21 AS buil
+FROM ghcr.io/graalvm/native-image-community:21 AS builder
 WORKDIR /usr/src/app
 COPY . .
 # Compile and test all modules - with Spring Native Profile
@@ -10,5 +10,5 @@ RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl mongodb-boun
 # Stage 2: Run
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=build /usr/src/app/mongodb-bouncer/target/mongodb-bouncer .
+COPY --from=builder /usr/src/app/mongodb-bouncer/target/mongodb-bouncer .
 CMD ["./mongodb-bouncer"]

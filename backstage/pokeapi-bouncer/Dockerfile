@@ -5,10 +5,10 @@ COPY . .
 # Compile and test all modules - with Spring Native Profile
 RUN ./mvnw.sh clean install -Pnative
 # Generate Native Image only for the target modules and skip tests
-RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl pokemon-task
+RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl pokeapi-bouncer
 
 # Stage 2: Run
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=builder /usr/src/app/pokemon-task/target/pokemon-task .
-CMD ["./pokemon-task"]
+COPY --from=builder /usr/src/app/pokeapi-bouncer/target/pokeapi-bouncer .
+CMD ["./pokeapi-bouncer"]

@@ -5,7 +5,7 @@ COPY . .
 # Compile and test all modules - with Spring Native Profile
 RUN ./mvnw.sh clean install -Pnative
 # Generate Native Image only for the target modules and skip tests
-RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl integration -pl shared -pl generation-task
+RUN ./mvnw.sh -o native:compile -DskipTests -Pnative -pl shared -pl generation-task
 
 # Stage 2: Run
 FROM debian:bookworm-slim

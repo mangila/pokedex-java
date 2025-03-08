@@ -1,26 +1,23 @@
 package com.github.mangila.pokedex.backstage.pokemon.task;
 
-import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.Network;
-import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
-import java.util.List;
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -30,78 +27,39 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @Disabled(value = "Run only where a Docker env is available - redis-bouncer and mongodb-bouncer server needs to be in a Container")
 class PokemonTaskE2eTest {
 
-    private static final String REDIS_BOUNCER_GRPC_PORT = "9080";
-    private static final String MONGO_DB_BOUNCER_GRPC_PORT = "9090";
+    private static final String POKE_API_BOUNCER_GRPC_PORT = generateRandomEphemeralPort();
+    private static final String REDIS_BOUNCER_GRPC_PORT = generateRandomEphemeralPort();
+    private static final String MONGO_DB_BOUNCER_GRPC_PORT = generateRandomEphemeralPort();
     @Autowired
     private Task pokemonTask;
     @Autowired
     private RedisBouncerClient redisBouncerClient;
 
-    private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
-    private static final DockerImageName MONGODB_IMAGE_NAME = DockerImageName.parse("mongo");
-    private static final DockerImageName REDIS_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-redis-bouncer");
-    private static final DockerImageName MONGO_DB_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-mongodb-bouncer");
-
-    @SuppressWarnings("rawtypes")
-    public static GenericContainer redis;
-    private static MongoDBContainer mongoDb;
-    @SuppressWarnings("rawtypes")
-    public static GenericContainer redisBouncer;
-    @SuppressWarnings("rawtypes")
-    public static GenericContainer mongoDbBouncer;
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    @BeforeAll
-    static void beforeAll() {
-        redis = new GenericContainer(REDIS_CONTAINER_NAME)
-                .withNetworkAliases("redis")
-                .withNetwork(Network.SHARED);
-        redisBouncer = new GenericContainer(REDIS_BOUNCER_CONTAINER_NAME)
-                .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", REDIS_BOUNCER_GRPC_PORT)
-                .withEnv("spring.data.redis.host", "redis")
-                .withEnv("spring.data.redis.port", "6379")
-                .waitingFor(new LogMessageWaitStrategy()
-                        .withRegEx(".*gRPC Server started.*")
-                        .withTimes(1)
-                        .withStartupTimeout(Duration.ofSeconds(1)));
-        redisBouncer.setPortBindings(List.of(
-                REDIS_BOUNCER_GRPC_PORT.concat(":").concat(REDIS_BOUNCER_GRPC_PORT) //host:container port
-        ));
-        mongoDb = new MongoDBContainer(MONGODB_IMAGE_NAME)
-                .withNetworkAliases("mongo")
-                .withNetwork(Network.SHARED);
-        mongoDbBouncer = new GenericContainer(MONGO_DB_BOUNCER_CONTAINER_NAME)
-                .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", MONGO_DB_BOUNCER_GRPC_PORT)
-                .withEnv("spring.data.mongodb.uri", "mongodb://admin:password@mongo:27017")
-                .waitingFor(new LogMessageWaitStrategy()
-                        .withRegEx(".*gRPC Server started.*")
-                        .withTimes(1)
-                        .withStartupTimeout(Duration.ofSeconds(1)));
-        mongoDbBouncer.setPortBindings(List.of(
-                MONGO_DB_BOUNCER_GRPC_PORT.concat(":").concat(MONGO_DB_BOUNCER_GRPC_PORT) //host:container port
-        ));
-        redis.start();
-        redisBouncer.start();
-        mongoDb.start();
-        mongoDbBouncer.start();
+    static String generateRandomEphemeralPort() {
+        int minPort = 49152;
+        int maxPort = 65535;
+        Random random = new Random();
+        return String.valueOf(random.nextInt((maxPort - minPort) + 1) + minPort);
     }
 
-    @AfterAll
-    static void afterAll() {
-        redis.stop();
-        redis.close();
-        redisBouncer.stop();
-        redisBouncer.close();
-        mongoDb.stop();
-        mongoDb.close();
-        mongoDbBouncer.stop();
-        mongoDbBouncer.close();
+    @BeforeAll
+    static void beforeAll() {
+        TestContainerUtil.buildPokeApiBouncer(POKE_API_BOUNCER_GRPC_PORT)
+                .start();
+        TestContainerUtil.buildRedis()
+                .start();
+        TestContainerUtil.buildRedisBouncer(REDIS_BOUNCER_GRPC_PORT)
+                .start();
+        TestContainerUtil.buildMongoDb()
+                .start();
+        TestContainerUtil.buildMongoDbBouncer(MONGO_DB_BOUNCER_GRPC_PORT)
+                .start();
     }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
+        var pokeApiBouncerAddress = "static://0.0.0.0:".concat(POKE_API_BOUNCER_GRPC_PORT);
+        registry.add("spring.grpc.client.channels.pokeapi-bouncer.address", () -> pokeApiBouncerAddress);
         var redisBouncerAddress = "static://0.0.0.0:".concat(REDIS_BOUNCER_GRPC_PORT);
         registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> redisBouncerAddress);
         var mongoDbBouncerAddress = "static://0.0.0.0:".concat(MONGO_DB_BOUNCER_GRPC_PORT);

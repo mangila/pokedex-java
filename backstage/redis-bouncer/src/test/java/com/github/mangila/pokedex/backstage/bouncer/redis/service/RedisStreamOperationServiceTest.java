@@ -19,13 +19,15 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "spring.grpc.server.port=32768"
+})
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RedisStreamOperationServiceTest extends RedisTestContainer {
 
-    private static final ManagedChannel MANAGED_CHANNEL = ManagedChannelBuilder.forAddress("0.0.0.0", 9000)
+    private static final ManagedChannel MANAGED_CHANNEL = ManagedChannelBuilder.forAddress("0.0.0.0", 32768)
             .usePlaintext()
             .build();
 
