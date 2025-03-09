@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
 import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.stream.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisConsumerGroup;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;

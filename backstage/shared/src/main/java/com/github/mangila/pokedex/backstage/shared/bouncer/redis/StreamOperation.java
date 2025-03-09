@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.stream.StreamRecord;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 

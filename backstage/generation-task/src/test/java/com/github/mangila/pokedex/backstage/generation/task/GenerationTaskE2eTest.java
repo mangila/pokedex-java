@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.GenerationResponsePrototype;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.generation.GenerationResponse;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.entry.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.redis.stream.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
@@ -87,7 +87,7 @@ class GenerationTaskE2eTest {
                             .setKey(RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generationName))
                             .build();
                     var response = redisBouncerClient.valueOps()
-                            .get(request, GenerationResponsePrototype.class);
+                            .get(request, GenerationResponse.class);
                     assertThat(response).isNotEmpty();
                 });
     }

@@ -17,9 +17,10 @@ final class TestContainerUtil {
     private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
     private static final DockerImageName REDIS_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-redis-bouncer");
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     static GenericContainer<?> buildRedis() {
         return new GenericContainer(REDIS_CONTAINER_NAME)
+                .withNetwork(Network.SHARED)
                 .withNetworkAliases("redis");
     }
 

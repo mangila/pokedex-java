@@ -54,7 +54,7 @@ public class PokemonTask implements Task {
                         .build());
         var data = message.getDataMap();
         if (CollectionUtils.isEmpty(data)) {
-            log.debug("No new messages found");
+            log.debug("No new messages");
             return;
         }
         var proto = Stream.ofNullable(data.get("name"))

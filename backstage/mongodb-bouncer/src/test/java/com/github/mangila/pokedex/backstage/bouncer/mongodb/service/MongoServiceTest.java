@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbGrpc;
 import io.grpc.ManagedChannelBuilder;
@@ -22,8 +21,6 @@ class MongoServiceTest extends MongoDbTestContainer {
 
     @Autowired
     private MongoTemplate mongoTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
     void saveOne() {

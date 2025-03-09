@@ -1,7 +1,5 @@
 package com.github.mangila.pokedex.backstage.pokemon.mapper;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.*;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.*;
 import com.github.mangila.pokedex.backstage.pokemon.handler.PokemonMediaHandler;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonId;
