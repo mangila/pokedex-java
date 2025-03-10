@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @GrpcService
@@ -54,9 +55,10 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
                 var data = Stream.of(message.getValue())
                         .map(Map::entrySet)
                         .flatMap(Collection::stream)
-                        .map(entry -> Map.of((String) entry.getKey(), (String) entry.getValue()))
-                        .findFirst()
-                        .orElse(Collections.emptyMap());
+                        .collect(Collectors.toMap(
+                                entry -> (String) entry.getKey(),
+                                entry -> (String) entry.getValue()
+                        ));
                 responseObserver.onNext(
                         StreamRecord.newBuilder()
                                 .setStreamKey(request.getStreamKey())

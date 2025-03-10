@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.backstage.pokemon.task;
+package com.github.mangila.pokedex.backstage.media.task;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
@@ -18,24 +18,7 @@ final class TestContainerUtil {
     private static final DockerImageName REDIS_CONTAINER_NAME = DockerImageName.parse("redis:7.4.2-alpine");
     private static final DockerImageName MONGODB_IMAGE_NAME = DockerImageName.parse("mongo");
     private static final DockerImageName REDIS_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-redis-bouncer");
-    private static final DockerImageName POKE_API_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-pokeapi-bouncer");
     private static final DockerImageName MONGO_DB_BOUNCER_CONTAINER_NAME = DockerImageName.parse("mangila/pokedex-mongodb-bouncer");
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    static GenericContainer<?> buildPokeApiBouncer(String serverPort, String redisBouncerServerPort) {
-        var pokeApiBouncer = new GenericContainer(POKE_API_BOUNCER_CONTAINER_NAME)
-                .withNetwork(Network.SHARED)
-                .withEnv("spring.grpc.server.port", serverPort)
-                .withEnv("spring.grpc.client.channels.redis-bouncer.address", "static://redis-bouncer:".concat(redisBouncerServerPort))
-                .waitingFor(new LogMessageWaitStrategy()
-                        .withRegEx(".*gRPC Server started.*")
-                        .withTimes(1)
-                        .withStartupTimeout(Duration.ofSeconds(1)));
-        pokeApiBouncer.setPortBindings(List.of(
-                serverPort.concat(":").concat(serverPort)
-        ));
-        return pokeApiBouncer;
-    }
 
     @SuppressWarnings({"rawtypes"})
     static GenericContainer<?> buildRedis() {
@@ -68,6 +51,7 @@ final class TestContainerUtil {
                 .withNetwork(Network.SHARED);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static GenericContainer<?> buildMongoDbBouncer(String port) {
         var mongoDbBouncer = new GenericContainer(MONGO_DB_BOUNCER_CONTAINER_NAME)
                 .withNetwork(Network.SHARED)
