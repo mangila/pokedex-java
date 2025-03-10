@@ -30,7 +30,7 @@ message PokemonSpeciesRequest {
 }
 
 message PokemonSpecies {
-  int32 id = 1;
+  int32 species_id = 1;
   string name = 2;
   string generation = 3;
   repeated PokemonName names = 4;
@@ -47,7 +47,7 @@ message PokemonDescription {
 }
 
 message Pokemon {
-  int32 id = 1;
+  int32 pokemon_id = 1;
   string name = 2;
   bool isDefault = 3;
   string height = 4;
@@ -85,5 +85,9 @@ message PokemonStat {
 }
 
 message PokemonMedia {
-
+  string url = 1;
+  string description = 2;
+  int32 species_id = 3;
+  int32 pokemon_id = 4;
+  string pokemon_name = 5;
 }

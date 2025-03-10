@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.util;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.pokemonspecies.PokemonDescription;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonDescription;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;

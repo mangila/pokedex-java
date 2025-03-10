@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.GenerationRequest;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.stream.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
@@ -56,7 +56,7 @@ public class GenerationTask implements Task {
                                     GenerationRequest.newBuilder()
                                             .setGeneration(generationName)
                                             .build())
-                            .getNameList()
+                            .getPokemonNameList()
                             .stream()
                             .map(PokemonName::create)
                             .toList();

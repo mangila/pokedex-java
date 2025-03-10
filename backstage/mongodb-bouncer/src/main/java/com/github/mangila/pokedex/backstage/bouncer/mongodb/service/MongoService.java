@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.bouncer.mongodb.service;
 
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.mapper.DocumentMapper;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.MongoDbGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.pokemonspecies.PokemonSpecies;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpecies;
+import com.github.mangila.pokedex.backstage.model.grpc.service.MongoDbGrpc;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
 import org.springframework.data.mongodb.core.MongoTemplate;

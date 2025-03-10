@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.*;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.evolutionchain.EvolutionChainResponse;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.generation.GenerationResponse;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.pokemon.PokemonResponse;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.species.PokemonSpeciesResponse;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationResponse;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpecies;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpeciesRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.service.PokeApiGrpc;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,17 +22,7 @@ public class PokeApiBouncerClient implements PokeApi {
     }
 
     @Override
-    public PokemonSpeciesResponse fetchPokemonSpecies(PokemonSpeciesRequest request) {
+    public PokemonSpecies fetchPokemonSpecies(PokemonSpeciesRequest request) {
         return blockingStub.fetchPokemonSpecies(request);
-    }
-
-    @Override
-    public EvolutionChainResponse fetchEvolutionChain(EvolutionChainRequest request) {
-        return blockingStub.fetchEvolutionChain(request);
-    }
-
-    @Override
-    public PokemonResponse fetchPokemon(PokemonRequest request) {
-        return blockingStub.fetchPokemon(request);
     }
 }

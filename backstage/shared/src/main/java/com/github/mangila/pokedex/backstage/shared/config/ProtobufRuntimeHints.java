@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.backstage.shared.config;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.ProtocolMessageEnum;
 import org.reflections.Reflections;
@@ -16,18 +15,14 @@ import java.util.Set;
 public class ProtobufRuntimeHints implements RuntimeHintsRegistrar {
 
     private static final Logger log = LoggerFactory.getLogger(ProtobufRuntimeHints.class);
-    private static final String REDIS_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.redis";
-    private static final String MONGO_DB_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.mongodb";
-    private static final String POKE_API_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.pokeapi";
-    private static final String IMAGE_CONVERTER_PROTOBUF_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.imageconverter";
+    private static final String GRPC_MODEL_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc";
+    private static final String GRPC_SERVICE_PACKAGE = "com.github.mangila.pokedex.backstage.model.grpc.service";
 
     @Override
     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
         var packages = List.of(
-                REDIS_PROTOBUF_PACKAGE,
-                MONGO_DB_PROTOBUF_PACKAGE,
-                POKE_API_PROTOBUF_PACKAGE,
-                IMAGE_CONVERTER_PROTOBUF_PACKAGE,
+                GRPC_MODEL_PACKAGE,
+                GRPC_SERVICE_PACKAGE,
                 "com.google.protobuf"
         );
         for (String packageName : packages) {

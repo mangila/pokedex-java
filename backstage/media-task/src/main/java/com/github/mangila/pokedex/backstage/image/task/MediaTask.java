@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.image.task;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
-public class ImageTask implements Task {
+public class MediaTask implements Task {
 
-    private static final Logger log = LoggerFactory.getLogger(ImageTask.class);
+    private static final Logger log = LoggerFactory.getLogger(MediaTask.class);
 
     private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
 
-    public ImageTask(MongoBouncerClient mongoBouncerClient,
+    public MediaTask(MongoBouncerClient mongoBouncerClient,
                      RedisBouncerClient redisBouncerClient) {
         this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;

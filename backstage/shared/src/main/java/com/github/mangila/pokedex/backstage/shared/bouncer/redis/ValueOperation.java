@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.entry.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 
