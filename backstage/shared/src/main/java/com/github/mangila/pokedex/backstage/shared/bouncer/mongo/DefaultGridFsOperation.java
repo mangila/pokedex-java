@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.mongo;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.GridFsGrpc;
+
+import com.github.mangila.pokedex.backstage.model.grpc.service.GridFsGrpc;
 
 class DefaultGridFsOperation implements GridFs {
 

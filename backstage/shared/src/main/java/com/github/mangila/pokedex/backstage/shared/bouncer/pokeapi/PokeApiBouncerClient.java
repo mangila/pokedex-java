@@ -1,7 +1,10 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.*;
-import com.google.protobuf.StringValue;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationResponse;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpecies;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpeciesRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.service.PokeApiGrpc;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,22 +17,12 @@ public class PokeApiBouncerClient implements PokeApi {
     }
 
     @Override
-    public GenerationResponsePrototype fetchGeneration(StringValue request) {
+    public GenerationResponse fetchGeneration(GenerationRequest request) {
         return blockingStub.fetchGeneration(request);
     }
 
     @Override
-    public PokemonSpeciesResponsePrototype fetchPokemonSpecies(StringValue request) {
+    public PokemonSpecies fetchPokemonSpecies(PokemonSpeciesRequest request) {
         return blockingStub.fetchPokemonSpecies(request);
-    }
-
-    @Override
-    public EvolutionChainResponsePrototype fetchEvolutionChain(StringValue request) {
-        return blockingStub.fetchEvolutionChain(request);
-    }
-
-    @Override
-    public PokemonResponsePrototype fetchPokemon(StringValue request) {
-        return blockingStub.fetchPokemon(request);
     }
 }

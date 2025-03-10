@@ -1,12 +1,11 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

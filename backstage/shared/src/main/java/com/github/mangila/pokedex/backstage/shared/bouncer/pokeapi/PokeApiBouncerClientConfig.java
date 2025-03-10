@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.PokeApiGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.service.PokeApiGrpc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.grpc.client.ChannelBuilderOptions;

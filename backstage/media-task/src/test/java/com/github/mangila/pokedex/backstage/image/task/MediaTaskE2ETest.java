@@ -22,7 +22,7 @@ import java.util.List;
 @SpringBootTest
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")
-class ImageTaskE2eTest {
+class MediaTaskE2ETest {
 
     private static final String GRPC_PORT = "9999";
 

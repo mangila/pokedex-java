@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.util;
 
-import com.github.mangila.pokedex.backstage.model.grpc.mongodb.PokemonDescriptionPrototype;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonDescription;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
@@ -12,24 +12,24 @@ class JavaStreamUtilTest {
     @Test
     void testDistinctByKey() {
         var descriptions = Stream.of(
-                        PokemonDescriptionPrototype.newBuilder()
+                        PokemonDescription.newBuilder()
                                 .setDescription("Drifts in shallow seas. Anglers who hook them by accident are often punished by its stinging acid.")
                                 .setLanguage("en")
                                 .build(),
-                        PokemonDescriptionPrototype.newBuilder()
+                        PokemonDescription.newBuilder()
                                 .setDescription("Found in fields and mountains. Mistaking them for boulders, people often step or trip on them.")
                                 .setLanguage("se")
                                 .build(),
-                        PokemonDescriptionPrototype.newBuilder()
+                        PokemonDescription.newBuilder()
                                 .setDescription("hello world")
                                 .setLanguage("en")
                                 .build(),
-                        PokemonDescriptionPrototype.newBuilder()
+                        PokemonDescription.newBuilder()
                                 .setDescription("hello world")
                                 .setLanguage("se")
                                 .build()
                 )
-                .filter(JavaStreamUtil.distinctByKey(PokemonDescriptionPrototype::getLanguage));
+                .filter(JavaStreamUtil.distinctByKey(PokemonDescription::getLanguage));
         assertThat(descriptions).hasSize(2);
     }
 }

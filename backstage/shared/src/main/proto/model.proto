@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+option java_multiple_files = true;
+option java_package = "com.github.mangila.pokedex.backstage.model.grpc.model";
+option go_package = "shared/model";
+
+message StreamRecord {
+  string stream_key = 1;
+  string record_id = 2;
+  map<string, string> data = 3;
+}
+
+message EntryRequest {
+  string key = 1;
+  google.protobuf.Any value = 2;
+}
+
+message GenerationRequest {
+  string generation = 1;
+}
+
+message GenerationResponse {
+  repeated string pokemon_name = 1;
+}
+
+message PokemonSpeciesRequest {
+  string pokemon_species_name = 1;
+}
+
+message PokemonSpecies {
+  int32 species_id = 1;
+  string name = 2;
+  string generation = 3;
+  repeated PokemonName names = 4;
+  repeated PokemonDescription descriptions = 5;
+  repeated PokemonGenera genera = 6;
+  repeated PokemonEvolution evolutions = 7;
+  repeated Pokemon varieties = 8;
+  PokemonSpecial special = 9;
+}
+
+message PokemonDescription {
+  string description = 1;
+  string language = 2;
+}
+
+message Pokemon {
+  int32 pokemon_id = 1;
+  string name = 2;
+  bool isDefault = 3;
+  string height = 4;
+  string weight = 5;
+  repeated string types = 6;
+  repeated PokemonStat stats = 7;
+  repeated PokemonMedia media = 8;
+}
+
+message PokemonEvolution {
+  int32 order = 1;
+  string name = 2;
+}
+
+message PokemonGenera {
+  string genera = 1;
+  string language = 2;
+}
+
+message PokemonName {
+  string name = 1;
+  string language = 2;
+}
+
+message PokemonSpecial {
+  bool isSpecial = 1;
+  bool legendary = 2;
+  bool mythical = 3;
+  bool baby = 4;
+}
+
+message PokemonStat {
+  string name = 1;
+  int32 value = 2;
+}
+
+message PokemonMedia {
+  string url = 1;
+  string description = 2;
+  int32 species_id = 3;
+  int32 pokemon_id = 4;
+  string pokemon_name = 5;
+}

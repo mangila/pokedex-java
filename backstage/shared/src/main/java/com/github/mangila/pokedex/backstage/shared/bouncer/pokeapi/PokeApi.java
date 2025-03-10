@@ -1,18 +1,15 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi;
 
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.EvolutionChainResponsePrototype;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.GenerationResponsePrototype;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.PokemonResponsePrototype;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.PokemonSpeciesResponsePrototype;
-import com.google.protobuf.StringValue;
+
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationResponse;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpecies;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpeciesRequest;
 
 public interface PokeApi {
 
-    GenerationResponsePrototype fetchGeneration(StringValue request);
+    GenerationResponse fetchGeneration(GenerationRequest request);
 
-    PokemonSpeciesResponsePrototype fetchPokemonSpecies(StringValue request);
+    PokemonSpecies fetchPokemonSpecies(PokemonSpeciesRequest request);
 
-    EvolutionChainResponsePrototype fetchEvolutionChain(StringValue request);
-
-    PokemonResponsePrototype fetchPokemon(StringValue request);
 }

@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.EntryRequest;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;

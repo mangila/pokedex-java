@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
@@ -8,7 +9,6 @@ import com.github.mangila.pokedex.backstage.shared.model.domain.PokemonName;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +52,11 @@ public class GenerationTask implements Task {
                 .map(Generation::getName)
                 .map(generationName -> (Callable<List<PokemonName>>) () -> {
                     log.info("{}", generationName);
-                    return pokeApiBouncerClient.fetchGeneration(StringValue.newBuilder()
-                                    .setValue(generationName)
-                                    .build())
-                            .getNameList()
+                    return pokeApiBouncerClient.fetchGeneration(
+                                    GenerationRequest.newBuilder()
+                                            .setGeneration(generationName)
+                                            .build())
+                            .getPokemonNameList()
                             .stream()
                             .map(PokemonName::create)
                             .toList();

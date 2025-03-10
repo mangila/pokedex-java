@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.backstage.bouncer.pokeapi.http.response.pokemon.sprites;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.mangila.pokedex.backstage.model.grpc.pokeapi.SpritesPrototype;
 
 public record Sprites(
         @JsonProperty("back_default") String backDefault,
@@ -15,12 +14,6 @@ public record Sprites(
         @JsonProperty("other") Other other,
         @JsonProperty("versions") Versions versions
 ) {
-    public SpritesPrototype toProto() {
-        return SpritesPrototype.newBuilder()
-                .setFrontDefault(frontDefault)
-                .setOfficialArtwork(other.officialArtwork().frontDefault())
-                .build();
-    }
 }
 
 

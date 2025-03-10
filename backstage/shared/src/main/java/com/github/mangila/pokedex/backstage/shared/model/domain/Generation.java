@@ -1,8 +1,9 @@
 package com.github.mangila.pokedex.backstage.shared.model.domain;
 
 
-public enum Generation {
+import java.util.EnumSet;
 
+public enum Generation {
     GENERATION_I("generation-i"),
     GENERATION_II("generation-ii"),
     GENERATION_III("generation-iii"),
@@ -21,5 +22,12 @@ public enum Generation {
 
     public String getName() {
         return name;
+    }
+
+    public static Generation from(String name) {
+        return EnumSet.allOf(Generation.class).stream()
+                .filter(generation -> generation.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No enum constant with name: " + name));
     }
 }

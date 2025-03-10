@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.redis.StreamOperationGrpc;
-import com.github.mangila.pokedex.backstage.model.grpc.redis.ValueOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.service.StreamOperationGrpc;
+import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import org.springframework.stereotype.Service;
 
 @Service

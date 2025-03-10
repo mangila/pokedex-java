@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "model.proto";
+
+option java_multiple_files = true;
+option java_package = "com.github.mangila.pokedex.backstage.model.grpc.service";
+option go_package = "shared/service";
+
+// Redis Stream GRPC Operations
+service StreamOperation {
+  // Add to Redis Stream with gRPC Client side streaming
+  rpc AddWithClientStream(stream StreamRecord) returns (google.protobuf.Empty);
+  // Read Stream Log
+  rpc ReadOne(StreamRecord) returns (StreamRecord);
+  // Acknowledge Stream Log
+  rpc AcknowledgeOne(StreamRecord) returns (google.protobuf.Empty);
+}
+
+// Redis value GRPC Operations
+service ValueOperation {
+  // Set Redis Value
+  rpc Set(EntryRequest) returns (google.protobuf.Empty){}
+  // Get Redis Value
+  rpc Get(EntryRequest) returns (google.protobuf.Any){}
+}
+
+// PokeApi service sends http requests to https://pokeapi.co
+service PokeApi {
+  // Fetch all Pokemons by Generation name
+  rpc FetchGeneration(GenerationRequest) returns (GenerationResponse);
+  // Fetch Pokemon species by name
+  rpc FetchPokemonSpecies(PokemonSpeciesRequest) returns (PokemonSpecies);
+}
+
+// Mongodb GridFs GRPC Operations
+service GridFs {
+
+}
+
+// MongoDb GRPC Operations
+service MongoDb {
+  // Save one PokemonSpecies
+  rpc SaveOne(PokemonSpecies) returns (google.protobuf.Empty);
+}
