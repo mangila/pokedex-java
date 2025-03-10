@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.util.unit.DataSize;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -65,6 +66,7 @@ class PokeApiBouncerServiceTest {
     static void configureProperties(DynamicPropertyRegistry registry) {
         var grpcRedisBouncerAddress = "static://0.0.0.0:".concat(REDIS_BOUNCER_GRPC_PORT);
         registry.add("spring.grpc.client.channels.redis-bouncer.address", () -> grpcRedisBouncerAddress);
+        registry.add("spring.grpc.client.channels.redis-bouncer.max-inbound-metadata-size", () -> DataSize.parse("15000B"));
     }
 
     @Test

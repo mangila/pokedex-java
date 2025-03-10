@@ -37,12 +37,10 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
 ### generation-task
 
-- Makes a PokeApi request to fetch all Pokémon from their Generation.
 - Add Stream logs to `pokemon-name-event`
 
 ### image-converter
 
-- gRPC Server
 - Converts Images to WebP format
 
 ### integration
@@ -55,6 +53,7 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
 - Read Stream Logs from `pokemon-media-event`
 - Updates the Pokémon document with the new media entry.
+- Downloads the media from source
 - Adds a reference to the file server API for the source.
 - Inserts media into GridFS.
 
@@ -72,7 +71,6 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 ### pokemon-task
 
 - Read Stream Logs from `pokemon-name-event`
-- Fetches data from PokeApi and cache HTTP responses in Redis
 - Updates the database with new Pokémon.
 - Runs a side effect and add Stream Logs (images and cries) into the `pokemon-media-event`.
 

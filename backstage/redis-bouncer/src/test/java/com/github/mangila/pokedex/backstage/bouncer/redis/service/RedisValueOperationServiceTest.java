@@ -4,6 +4,8 @@ import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.StringValue;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.jupiter.api.Disabled;
@@ -18,25 +20,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 @Testcontainers
 @Disabled(value = "Run only where a Docker env is available")
-public class RedisValueOperationServiceTest extends RedisTestContainer {
+class RedisValueOperationServiceTest extends RedisTestContainer {
 
     private static final ManagedChannel MANAGED_CHANNEL = ManagedChannelBuilder.forAddress("0.0.0.0", 32768)
             .usePlaintext()
             .build();
 
     @Test
-    void set() {
+    void set() throws InvalidProtocolBufferException {
         var stub = ValueOperationGrpc.newBlockingStub(MANAGED_CHANNEL);
         stub.set(EntryRequest.newBuilder()
                 .setKey("key1")
-                .setValue(Any.newBuilder()
-                        .setValue(ByteString.copyFromUtf8("value1"))
-                        .build())
+                .setValue(Any.pack(StringValue.of("value1")))
                 .build());
         var value = stub.get(EntryRequest.newBuilder()
                 .setKey("key1")
                 .build());
-        assertThat(value.getValue().toStringUtf8())
+        assertThat(value.unpack(StringValue.class).getValue())
                 .isEqualTo("value1");
     }
 
