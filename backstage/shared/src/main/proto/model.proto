@@ -17,6 +17,12 @@ message EntryRequest {
   google.protobuf.Any value = 2;
 }
 
+message MediaValue {
+  string file_name = 1;
+  bytes content = 2;
+  string content_type = 3;
+}
+
 message GenerationRequest {
   string generation = 1;
 }

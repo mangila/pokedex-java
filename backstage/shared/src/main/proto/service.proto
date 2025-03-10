@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 import "model.proto";
 
 option java_multiple_files = true;
@@ -36,11 +37,15 @@ service PokeApi {
 
 // Mongodb GridFs GRPC Operations
 service GridFs {
-
+  rpc StoreOne(MediaValue) returns (google.protobuf.StringValue);
 }
 
 // MongoDb GRPC Operations
 service MongoDb {
   // Save one PokemonSpecies
   rpc SaveOne(PokemonSpecies) returns (google.protobuf.Empty);
+}
+
+service ImageConverter {
+  rpc ConvertToWebP(MediaValue) returns (MediaValue);
 }

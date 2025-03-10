@@ -46,6 +46,7 @@ public class MediaTask implements Task {
         var response = RestClient.create(url)
                 .get()
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .retrieve()
                 .toEntity(byte[].class);
@@ -55,6 +56,7 @@ public class MediaTask implements Task {
             var pokemonId = data.get("pokemon_id");
             var description = data.get("description");
             var fileName = createFileName(data);
+
         }
     }
 
