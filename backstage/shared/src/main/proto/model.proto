@@ -4,7 +4,7 @@ import "google/protobuf/any.proto";
 
 option java_multiple_files = true;
 option java_package = "com.github.mangila.pokedex.backstage.model.grpc.model";
-option go_package = "shared/model";
+option go_package = "image-converter/model";
 
 message StreamRecord {
   string stream_key = 1;

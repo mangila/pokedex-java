@@ -11,6 +11,9 @@ spring:
   grpc:
     client:
       channels:
+        imageconverter-bouncer:
+          max-inbound-metadata-size: 200000B
+          address: "static://0.0.0.0:9050"
         mongodb-bouncer:
           address: "static://0.0.0.0:9020"
         redis-bouncer:

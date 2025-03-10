@@ -7,7 +7,7 @@ import "model.proto";
 
 option java_multiple_files = true;
 option java_package = "com.github.mangila.pokedex.backstage.model.grpc.service";
-option go_package = "shared/service";
+option go_package = "image-converter/service";
 
 // Redis Stream GRPC Operations
 service StreamOperation {

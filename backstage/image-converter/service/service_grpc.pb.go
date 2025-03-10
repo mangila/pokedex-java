@@ -13,7 +13,8 @@ import (
 	status "google.golang.org/grpc/status"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	model "shared/model"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+	model "image-converter/model"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -499,12 +500,17 @@ var PokeApi_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "service.proto",
 }
 
+const (
+	GridFs_StoreOne_FullMethodName = "/GridFs/StoreOne"
+)
+
 // GridFsClient is the client API for GridFs service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // Mongodb GridFs GRPC Operations
 type GridFsClient interface {
+	StoreOne(ctx context.Context, in *model.MediaValue, opts ...grpc.CallOption) (*wrapperspb.StringValue, error)
 }
 
 type gridFsClient struct {
@@ -515,12 +521,23 @@ func NewGridFsClient(cc grpc.ClientConnInterface) GridFsClient {
 	return &gridFsClient{cc}
 }
 
+func (c *gridFsClient) StoreOne(ctx context.Context, in *model.MediaValue, opts ...grpc.CallOption) (*wrapperspb.StringValue, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(wrapperspb.StringValue)
+	err := c.cc.Invoke(ctx, GridFs_StoreOne_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GridFsServer is the server API for GridFs service.
 // All implementations must embed UnimplementedGridFsServer
 // for forward compatibility.
 //
 // Mongodb GridFs GRPC Operations
 type GridFsServer interface {
+	StoreOne(context.Context, *model.MediaValue) (*wrapperspb.StringValue, error)
 	mustEmbedUnimplementedGridFsServer()
 }
 
@@ -531,6 +548,9 @@ type GridFsServer interface {
 // pointer dereference when methods are called.
 type UnimplementedGridFsServer struct{}
 
+func (UnimplementedGridFsServer) StoreOne(context.Context, *model.MediaValue) (*wrapperspb.StringValue, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StoreOne not implemented")
+}
 func (UnimplementedGridFsServer) mustEmbedUnimplementedGridFsServer() {}
 func (UnimplementedGridFsServer) testEmbeddedByValue()                {}
 
@@ -552,15 +572,38 @@ func RegisterGridFsServer(s grpc.ServiceRegistrar, srv GridFsServer) {
 	s.RegisterService(&GridFs_ServiceDesc, srv)
 }
 
+func _GridFs_StoreOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(model.MediaValue)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GridFsServer).StoreOne(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GridFs_StoreOne_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GridFsServer).StoreOne(ctx, req.(*model.MediaValue))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GridFs_ServiceDesc is the grpc.ServiceDesc for GridFs service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var GridFs_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "GridFs",
 	HandlerType: (*GridFsServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "service.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StoreOne",
+			Handler:    _GridFs_StoreOne_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "service.proto",
 }
 
 const (
@@ -665,6 +708,108 @@ var MongoDb_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveOne",
 			Handler:    _MongoDb_SaveOne_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "service.proto",
+}
+
+const (
+	ImageConverter_ConvertToWebP_FullMethodName = "/ImageConverter/ConvertToWebP"
+)
+
+// ImageConverterClient is the client API for ImageConverter service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ImageConverterClient interface {
+	ConvertToWebP(ctx context.Context, in *model.MediaValue, opts ...grpc.CallOption) (*model.MediaValue, error)
+}
+
+type imageConverterClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewImageConverterClient(cc grpc.ClientConnInterface) ImageConverterClient {
+	return &imageConverterClient{cc}
+}
+
+func (c *imageConverterClient) ConvertToWebP(ctx context.Context, in *model.MediaValue, opts ...grpc.CallOption) (*model.MediaValue, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(model.MediaValue)
+	err := c.cc.Invoke(ctx, ImageConverter_ConvertToWebP_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ImageConverterServer is the server API for ImageConverter service.
+// All implementations must embed UnimplementedImageConverterServer
+// for forward compatibility.
+type ImageConverterServer interface {
+	ConvertToWebP(context.Context, *model.MediaValue) (*model.MediaValue, error)
+	mustEmbedUnimplementedImageConverterServer()
+}
+
+// UnimplementedImageConverterServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedImageConverterServer struct{}
+
+func (UnimplementedImageConverterServer) ConvertToWebP(context.Context, *model.MediaValue) (*model.MediaValue, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConvertToWebP not implemented")
+}
+func (UnimplementedImageConverterServer) mustEmbedUnimplementedImageConverterServer() {}
+func (UnimplementedImageConverterServer) testEmbeddedByValue()                        {}
+
+// UnsafeImageConverterServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ImageConverterServer will
+// result in compilation errors.
+type UnsafeImageConverterServer interface {
+	mustEmbedUnimplementedImageConverterServer()
+}
+
+func RegisterImageConverterServer(s grpc.ServiceRegistrar, srv ImageConverterServer) {
+	// If the following call pancis, it indicates UnimplementedImageConverterServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ImageConverter_ServiceDesc, srv)
+}
+
+func _ImageConverter_ConvertToWebP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(model.MediaValue)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageConverterServer).ConvertToWebP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImageConverter_ConvertToWebP_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageConverterServer).ConvertToWebP(ctx, req.(*model.MediaValue))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ImageConverter_ServiceDesc is the grpc.ServiceDesc for ImageConverter service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ImageConverter_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ImageConverter",
+	HandlerType: (*ImageConverterServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "ConvertToWebP",
+			Handler:    _ImageConverter_ConvertToWebP_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

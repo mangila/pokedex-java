@@ -15,7 +15,6 @@ public class MongoConfig {
 
     @PostConstruct
     public void initIndexes() {
-
     }
 
 }
