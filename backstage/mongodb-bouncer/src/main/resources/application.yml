@@ -19,5 +19,5 @@ spring:
       database: "pokemon"
       auto-index-creation: true
       gridfs:
-        database: "pokemon-db"
+        database: "pokemon"
         bucket: "pokemon"

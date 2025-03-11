@@ -40,7 +40,7 @@ public class RedisBouncerApplication {
 
     private void tryCreateGroup(RedisStreamKey streamKey, RedisConsumerGroup group) {
         try {
-            log.info("Try Create Group: {} with Stream: {}",
+            log.info("Create Group: {} with Stream: {}",
                     group.getGroupName(),
                     streamKey.getKey());
             template.opsForStream().createGroup(
@@ -48,7 +48,9 @@ public class RedisBouncerApplication {
                     group.getGroupName()
             );
         } catch (RedisSystemException e) {
-            log.info("Group already exist!");
+            log.info("Group: {} with Stream: {} - already exist!",
+                    group.getGroupName(),
+                    streamKey.getKey());
         }
     }
 }
