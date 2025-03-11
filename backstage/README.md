@@ -24,6 +24,7 @@ For local development:
 - GraalVM for compiling the native image.
 - Go SDK - used in image-converter gRPC server
 - Protocol buffer compiler
+- libwebp - https://developers.google.com/speed/webp/docs/api
 - Go protoc generator - `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest`
 - Go protoc Grpc generator - `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
 
