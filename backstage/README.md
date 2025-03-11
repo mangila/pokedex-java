@@ -9,7 +9,7 @@
     - Redis
     - Mongodb
 
-![backstage](backstage.drawio.png)
+![backstage](backstage.png)
 
 ## To Run
 
