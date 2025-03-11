@@ -9,6 +9,8 @@
     - Redis
     - Mongodb
 
+![backstage](backstage.drawio.png)
+
 ## To Run
 
 Native images are generated based on your OS

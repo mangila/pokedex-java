@@ -80,6 +80,13 @@ public class MediaTask implements Task {
         }
     }
 
+    private void ensureUrlDeriveFromPokeApi(String url) {
+        var isFromPokeApi = url.startsWith("https://raw.githubusercontent.com/PokeAPI");
+        if (!isFromPokeApi) {
+            throw new IllegalArgumentException("Invalid URL: " + url);
+        }
+    }
+
     private String getContentType(String fileName) {
         return switch (UriUtils.extractFileExtension(fileName)) {
             case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
@@ -90,13 +97,6 @@ public class MediaTask implements Task {
             case null -> throw new NullPointerException();
             default -> throw new IllegalArgumentException("Unsupported file extension: " + fileName);
         };
-    }
-
-    private void ensureUrlDeriveFromPokeApi(String url) {
-        var isFromPokeApi = url.startsWith("https://raw.githubusercontent.com/PokeAPI");
-        if (!isFromPokeApi) {
-            throw new IllegalArgumentException("Invalid URL: " + url);
-        }
     }
 
     private String createFileName(Map<String, String> data) {

@@ -78,9 +78,7 @@ class RedisStreamOperationServiceTest extends RedisTestContainer {
         var readOne = stub.readOne(StreamRecord.newBuilder()
                 .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
                 .build());
-        assertThat(readOne).isNotNull();
         assertThat(readOne.getRecordId())
-                .isNotNull()
                 .isNotBlank();
         assertThat(readOne.getDataMap())
                 .hasSize(1)
@@ -112,9 +110,7 @@ class RedisStreamOperationServiceTest extends RedisTestContainer {
         var readOne = stub.readOne(StreamRecord.newBuilder()
                 .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
                 .build());
-        assertThat(readOne).isNotNull();
         assertThat(readOne.getRecordId())
-                .isNotNull()
                 .isNotBlank();
         assertThat(readOne.getDataMap())
                 .hasSize(1)
@@ -146,9 +142,7 @@ class RedisStreamOperationServiceTest extends RedisTestContainer {
         var readOne = stub.readOne(StreamRecord.newBuilder()
                 .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
                 .build());
-        assertThat(readOne).isNotNull();
         assertThat(readOne.getRecordId())
-                .isNotNull()
                 .isEmpty();
         assertThat(readOne.getDataMap()).isEmpty();
         await().atMost(5, SECONDS)

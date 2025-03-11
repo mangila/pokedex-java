@@ -12,7 +12,7 @@ message StreamRecord {
   map<string, string> data = 3;
 }
 
-message EntryRequest {
+message ValueRequest {
   string key = 1;
   google.protobuf.Any value = 2;
 }

@@ -22,9 +22,9 @@ service StreamOperation {
 // Redis value GRPC Operations
 service ValueOperation {
   // Set Redis Value
-  rpc Set(EntryRequest) returns (google.protobuf.Empty){}
+  rpc Set(ValueRequest) returns (google.protobuf.Empty){}
   // Get Redis Value
-  rpc Get(EntryRequest) returns (google.protobuf.Any){}
+  rpc Get(ValueRequest) returns (google.protobuf.Any){}
 }
 
 // PokeApi service sends http requests to https://pokeapi.co
