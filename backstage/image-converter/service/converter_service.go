@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/chai2010/webp"
 	"image"
 	"image-converter/model"
@@ -22,7 +23,7 @@ type ConverterService struct {
 func (service *ConverterService) ConvertToWebP(_ context.Context, mediaValue *model.MediaValue) (*model.MediaValue, error) {
 	img, err := detectFileFormat(mediaValue)
 	if err != nil {
-		log.Printf("failed to detect image format: %v", mediaValue.FileName)
+		log.Printf(err.Error())
 		return mediaValue, nil
 	}
 	var buffer bytes.Buffer
@@ -48,7 +49,7 @@ func detectFileFormat(mediaValue *model.MediaValue) (image.Image, error) {
 	case strings.HasSuffix(mediaValue.FileName, ".gif"):
 		return gif.Decode(bytes.NewReader(mediaValue.Content))
 	default:
-		return nil, errors.New("unsupported file format")
+		return nil, errors.New(fmt.Sprintf("unsupported file type: %v", mediaValue.FileName))
 	}
 }
 

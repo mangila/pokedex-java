@@ -48,7 +48,9 @@ public class MediaTask implements Task {
             log.debug("No new messages found");
             return;
         }
+        var pokemonName = data.get("pokemon_name");
         var url = data.get("url");
+        log.info("Process media - {} - {}", pokemonName, url);
         ensureUrlDeriveFromPokeApi(url);
         var response = RestClient.create(url)
                 .get()
@@ -68,10 +70,8 @@ public class MediaTask implements Task {
                             .build()
             );
             var fileId = mongoBouncerClient.gridFs().storeOne(converted);
-            var pokemonName = data.get("pokemon_name");
             var speciesId = data.get("species_id");
             var pokemonId = data.get("pokemon_id");
-            var description = data.get("description");
             // update mongodb
             redisBouncerClient.streamOps()
                     .acknowledgeOne(streamRecord.toBuilder()
@@ -85,6 +85,7 @@ public class MediaTask implements Task {
             case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
             case "png" -> MediaType.IMAGE_PNG_VALUE;
             case "gif" -> MediaType.IMAGE_GIF_VALUE;
+            case "svg" -> "image/svg+xml";
             case "ogg" -> "audio/ogg";
             case null -> throw new NullPointerException();
             default -> throw new IllegalArgumentException("Unsupported file extension: " + fileName);

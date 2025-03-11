@@ -2,9 +2,9 @@
 
 - TODO - Create Service Discovery stuffs
 - TODO - Failed/Pending Messages Handling
-- TODO - WebP image conversion
 
 - Tasks that is compiled as Native Images used a Function as a Service(FaaS)
+- Image converter service converts images to .webp
 - Bouncer applications that relays and handle connection pooling to the datasources
     - Redis
     - Mongodb
@@ -43,6 +43,7 @@ Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 ### image-converter
 
 - Converts Images to WebP format
+- gRPC server
 
 ### integration
 

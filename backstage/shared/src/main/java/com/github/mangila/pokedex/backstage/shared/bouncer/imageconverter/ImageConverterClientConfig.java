@@ -12,7 +12,7 @@ public class ImageConverterClientConfig {
     @Bean
     public ImageConverterGrpc.ImageConverterBlockingStub imageConverterBlockingStub(GrpcChannelFactory channels) {
         var channel = channels.createChannel(
-                "imageconverter-bouncer",
+                "image-converter",
                 ChannelBuilderOptions.defaults());
         return ImageConverterGrpc.newBlockingStub(channel);
     }
