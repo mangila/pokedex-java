@@ -21,7 +21,7 @@ public class GridFsService extends GridFsGrpc.GridFsImplBase {
     @Override
     public void storeOne(MediaValue request, StreamObserver<StringValue> responseObserver) {
         var id = gridFsTemplate.store(
-                new ByteArrayInputStream(request.toByteArray()),
+                new ByteArrayInputStream(request.getContent().toByteArray()),
                 request.getFileName(),
                 request.getContentType());
         responseObserver.onNext(StringValue.of(id.toString()));
