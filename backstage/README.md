@@ -1,9 +1,9 @@
 # Backstage
 
-- TODO - Create Service Discovery stuffs
-- TODO - Failed/Pending Messages Handling
-
 - Tasks that is compiled as Native Images used a Function as a Service(FaaS)
+    - generation-task
+    - pokemon-task
+    - media-task
 - Image converter service converts images to .webp
 - Bouncer applications that relays and handle connection pooling to the datasources
     - Redis
@@ -17,24 +17,13 @@ Native images are generated based on your OS
 
 - `mvn -U clean install` - Compiles,tests and installs all modules.
 - `mvn native:compile -Pnative` - Generates native executables. Note that this might take some time.
-- `mvn -PnativeTest test` - Run native image tests
-
-## Requirements
-
-For local development:
-
-- GraalVM for compiling the native image.
-- Go SDK - used in image-converter gRPC server
-- Protocol buffer compiler
-- libwebp - https://developers.google.com/speed/webp/docs/api
-- Go protoc generator - `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest`
-- Go protoc Grpc generator - `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
+- `mvn -PnativeTest test` - Run native image tests - (might not be very useful since e2e tests them in containers)
 
 ## Docker
 
 Dockerfiles for the tasks and bouncers include a GraalVM image ready to compile.
 
-- Refer to `minikube.ps1` for the build steps.
+- Refer to `minikube.ps1` and `docker-build.ps1` for the build steps.
 
 ## Modules
 

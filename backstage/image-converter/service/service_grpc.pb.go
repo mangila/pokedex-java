@@ -216,9 +216,9 @@ const (
 // Redis value GRPC Operations
 type ValueOperationClient interface {
 	// Set Redis Value
-	Set(ctx context.Context, in *model.EntryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Set(ctx context.Context, in *model.ValueRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Get Redis Value
-	Get(ctx context.Context, in *model.EntryRequest, opts ...grpc.CallOption) (*anypb.Any, error)
+	Get(ctx context.Context, in *model.ValueRequest, opts ...grpc.CallOption) (*anypb.Any, error)
 }
 
 type valueOperationClient struct {
@@ -229,7 +229,7 @@ func NewValueOperationClient(cc grpc.ClientConnInterface) ValueOperationClient {
 	return &valueOperationClient{cc}
 }
 
-func (c *valueOperationClient) Set(ctx context.Context, in *model.EntryRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *valueOperationClient) Set(ctx context.Context, in *model.ValueRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, ValueOperation_Set_FullMethodName, in, out, cOpts...)
@@ -239,7 +239,7 @@ func (c *valueOperationClient) Set(ctx context.Context, in *model.EntryRequest, 
 	return out, nil
 }
 
-func (c *valueOperationClient) Get(ctx context.Context, in *model.EntryRequest, opts ...grpc.CallOption) (*anypb.Any, error) {
+func (c *valueOperationClient) Get(ctx context.Context, in *model.ValueRequest, opts ...grpc.CallOption) (*anypb.Any, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(anypb.Any)
 	err := c.cc.Invoke(ctx, ValueOperation_Get_FullMethodName, in, out, cOpts...)
@@ -256,9 +256,9 @@ func (c *valueOperationClient) Get(ctx context.Context, in *model.EntryRequest, 
 // Redis value GRPC Operations
 type ValueOperationServer interface {
 	// Set Redis Value
-	Set(context.Context, *model.EntryRequest) (*emptypb.Empty, error)
+	Set(context.Context, *model.ValueRequest) (*emptypb.Empty, error)
 	// Get Redis Value
-	Get(context.Context, *model.EntryRequest) (*anypb.Any, error)
+	Get(context.Context, *model.ValueRequest) (*anypb.Any, error)
 	mustEmbedUnimplementedValueOperationServer()
 }
 
@@ -269,10 +269,10 @@ type ValueOperationServer interface {
 // pointer dereference when methods are called.
 type UnimplementedValueOperationServer struct{}
 
-func (UnimplementedValueOperationServer) Set(context.Context, *model.EntryRequest) (*emptypb.Empty, error) {
+func (UnimplementedValueOperationServer) Set(context.Context, *model.ValueRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedValueOperationServer) Get(context.Context, *model.EntryRequest) (*anypb.Any, error) {
+func (UnimplementedValueOperationServer) Get(context.Context, *model.ValueRequest) (*anypb.Any, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedValueOperationServer) mustEmbedUnimplementedValueOperationServer() {}
@@ -297,7 +297,7 @@ func RegisterValueOperationServer(s grpc.ServiceRegistrar, srv ValueOperationSer
 }
 
 func _ValueOperation_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(model.EntryRequest)
+	in := new(model.ValueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -309,13 +309,13 @@ func _ValueOperation_Set_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: ValueOperation_Set_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ValueOperationServer).Set(ctx, req.(*model.EntryRequest))
+		return srv.(ValueOperationServer).Set(ctx, req.(*model.ValueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ValueOperation_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(model.EntryRequest)
+	in := new(model.ValueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ func _ValueOperation_Get_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: ValueOperation_Get_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ValueOperationServer).Get(ctx, req.(*model.EntryRequest))
+		return srv.(ValueOperationServer).Get(ctx, req.(*model.ValueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -510,6 +510,7 @@ const (
 //
 // Mongodb GridFs GRPC Operations
 type GridFsClient interface {
+	// Store one image to GridFs
 	StoreOne(ctx context.Context, in *model.MediaValue, opts ...grpc.CallOption) (*wrapperspb.StringValue, error)
 }
 
@@ -537,6 +538,7 @@ func (c *gridFsClient) StoreOne(ctx context.Context, in *model.MediaValue, opts 
 //
 // Mongodb GridFs GRPC Operations
 type GridFsServer interface {
+	// Store one image to GridFs
 	StoreOne(context.Context, *model.MediaValue) (*wrapperspb.StringValue, error)
 	mustEmbedUnimplementedGridFsServer()
 }
@@ -607,7 +609,8 @@ var GridFs_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	MongoDb_SaveOne_FullMethodName = "/MongoDb/SaveOne"
+	MongoDb_SaveOne_FullMethodName   = "/MongoDb/SaveOne"
+	MongoDb_PushMedia_FullMethodName = "/MongoDb/PushMedia"
 )
 
 // MongoDbClient is the client API for MongoDb service.
@@ -618,6 +621,8 @@ const (
 type MongoDbClient interface {
 	// Save one PokemonSpecies
 	SaveOne(ctx context.Context, in *model.PokemonSpecies, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Push media to PokemonMedia list
+	PushMedia(ctx context.Context, in *model.PokemonMediaValue, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type mongoDbClient struct {
@@ -638,6 +643,16 @@ func (c *mongoDbClient) SaveOne(ctx context.Context, in *model.PokemonSpecies, o
 	return out, nil
 }
 
+func (c *mongoDbClient) PushMedia(ctx context.Context, in *model.PokemonMediaValue, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, MongoDb_PushMedia_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MongoDbServer is the server API for MongoDb service.
 // All implementations must embed UnimplementedMongoDbServer
 // for forward compatibility.
@@ -646,6 +661,8 @@ func (c *mongoDbClient) SaveOne(ctx context.Context, in *model.PokemonSpecies, o
 type MongoDbServer interface {
 	// Save one PokemonSpecies
 	SaveOne(context.Context, *model.PokemonSpecies) (*emptypb.Empty, error)
+	// Push media to PokemonMedia list
+	PushMedia(context.Context, *model.PokemonMediaValue) (*emptypb.Empty, error)
 	mustEmbedUnimplementedMongoDbServer()
 }
 
@@ -658,6 +675,9 @@ type UnimplementedMongoDbServer struct{}
 
 func (UnimplementedMongoDbServer) SaveOne(context.Context, *model.PokemonSpecies) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveOne not implemented")
+}
+func (UnimplementedMongoDbServer) PushMedia(context.Context, *model.PokemonMediaValue) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PushMedia not implemented")
 }
 func (UnimplementedMongoDbServer) mustEmbedUnimplementedMongoDbServer() {}
 func (UnimplementedMongoDbServer) testEmbeddedByValue()                 {}
@@ -698,6 +718,24 @@ func _MongoDb_SaveOne_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MongoDb_PushMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(model.PokemonMediaValue)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MongoDbServer).PushMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MongoDb_PushMedia_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MongoDbServer).PushMedia(ctx, req.(*model.PokemonMediaValue))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MongoDb_ServiceDesc is the grpc.ServiceDesc for MongoDb service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -708,6 +746,10 @@ var MongoDb_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveOne",
 			Handler:    _MongoDb_SaveOne_Handler,
+		},
+		{
+			MethodName: "PushMedia",
+			Handler:    _MongoDb_PushMedia_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

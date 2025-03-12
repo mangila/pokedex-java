@@ -15,9 +15,13 @@ spring:
         enabled: false
   data:
     mongodb:
-      uri: "mongodb://admin:password@localhost:27017"
+      host: "localhost"
+      port: "27017"
+      username: "admin"
+      password: "password"
+      authentication-database: "admin"
       database: "pokemon"
-      auto-index-creation: true
       gridfs:
-        database: "pokemon"
         bucket: "pokemon"
+        database: "pokemon"
+      auto-index-creation: true

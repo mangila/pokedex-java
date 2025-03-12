@@ -2,13 +2,13 @@
 
 Public accessed apis.
 
-# file-api
+## file-api
 
 Fetch files from the GridFs database
 
 * /api/v1/file/{fileName}?download=true|false
 
-# graphql-api
+## graphql-api
 
 Query from pokemon-species database via Graphql queries.
 

@@ -7,11 +7,12 @@ spring:
     name: "file-api"
   data:
     mongodb:
-      database: "pokemon-db"
-      authentication-database: "admin"
       host: "localhost"
+      port: "27017"
       username: "admin"
       password: "password"
+      authentication-database: "admin"
+      database: "pokemon"
       gridfs:
         bucket: "pokemon"
-        database: "pokemon-db"
+        database: "pokemon"
