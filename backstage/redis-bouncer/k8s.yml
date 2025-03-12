@@ -1,2 +1,14 @@
 apiVersion: v1
 kind: Pod
+metadata:
+  name: redis-bouncer
+  namespace: pokedex
+  labels:
+    app: redis-bouncer-app
+spec:
+  containers:
+    - name: redis-bouncer-container
+      image: mangila/pokedex-redis-bouncer:latest
+      imagePullPolicy: Never
+      ports:
+        - protocol: "TCP"
