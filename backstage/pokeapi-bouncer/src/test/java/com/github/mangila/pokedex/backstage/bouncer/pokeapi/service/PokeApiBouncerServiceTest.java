@@ -73,7 +73,7 @@ class PokeApiBouncerServiceTest {
     void shouldCacheGenerationResponse() {
         var stub = PokeApiGrpc.newBlockingStub(MANAGED_CHANNEL);
         // Check redis cache - should be empty
-        var entryRequest = EntryRequest.newBuilder()
+        var entryRequest = ValueRequest.newBuilder()
                 .setKey(RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(Generation.GENERATION_I.getName()))
                 .build();
         var cache = redisBouncerClient.valueOps()
@@ -99,7 +99,7 @@ class PokeApiBouncerServiceTest {
     void shouldCacheSpecies() {
         var stub = PokeApiGrpc.newBlockingStub(MANAGED_CHANNEL);
         // Check redis cache - should be empty
-        var entryRequest = EntryRequest.newBuilder()
+        var entryRequest = ValueRequest.newBuilder()
                 .setKey(RedisKeyPrefix.SPECIES_KEY_PREFIX.getPrefix().concat("charizard"))
                 .build();
         var cache = redisBouncerClient.valueOps()

@@ -69,7 +69,7 @@ public class PokemonTask implements Task {
         var observer = getStreamObserver();
         proto.getVarietiesList()
                 .stream()
-                .map(Pokemon::getMediaList)
+                .map(Pokemon::getMediaMetadataList)
                 .flatMap(Collection::stream)
                 .map(media -> StreamRecord.newBuilder()
                         .setStreamKey(RedisStreamKey.POKEMON_MEDIA_EVENT.getKey())

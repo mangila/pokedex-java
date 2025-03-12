@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.backstage.media.task;
 
 import com.github.mangila.pokedex.backstage.model.grpc.model.MediaValue;
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonMediaValue;
 import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.imageconverter.ImageConverterClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
@@ -37,6 +38,16 @@ public class MediaTask implements Task {
         this.redisBouncerClient = redisBouncerClient;
     }
 
+    /**
+     * 0. Read from pokemon-media-event stream
+     * 1. download media from PokeAPI
+     * 2. if media download was successful - else leave message pending
+     * 3. convert media to webp if possible
+     * 4. store media to GridFs
+     * 5. save media src(url to file-api) and file name to mongodb
+     * 6. acknowledge message to stream as successful
+     * @param args
+     */
     @Override
     public void run(String[] args) {
         var streamRecord = StreamRecord.newBuilder()
@@ -45,7 +56,7 @@ public class MediaTask implements Task {
         var message = redisBouncerClient.streamOps().readOne(streamRecord);
         var data = message.getDataMap();
         if (CollectionUtils.isEmpty(data)) {
-            log.debug("No new messages found");
+            log.debug("No new messages");
             return;
         }
         var pokemonName = data.get("pokemon_name");
@@ -69,10 +80,15 @@ public class MediaTask implements Task {
                             .setContent(ByteString.copyFrom(response.getBody()))
                             .build()
             );
-            var fileId = mongoBouncerClient.gridFs().storeOne(converted);
+            var mediaId = mongoBouncerClient.gridFs().storeOne(converted);
             var speciesId = data.get("species_id");
             var pokemonId = data.get("pokemon_id");
-            // update mongodb
+            mongoBouncerClient.mongoDb().pushMedia(PokemonMediaValue.newBuilder()
+                    .setMediaId(mediaId.getValue())
+                    .setSpeciesId(Integer.parseInt(speciesId))
+                    .setPokemonId(Integer.parseInt(pokemonId))
+                    .setFileName(fileName)
+                    .build());
             redisBouncerClient.streamOps()
                     .acknowledgeOne(streamRecord.toBuilder()
                             .setRecordId(message.getRecordId())

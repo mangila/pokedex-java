@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.backstage.generation.task;
 
-import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.model.GenerationResponse;
 import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
+import com.github.mangila.pokedex.backstage.model.grpc.model.ValueRequest;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.model.domain.Generation;
 import com.github.mangila.pokedex.backstage.shared.model.domain.RedisKeyPrefix;
@@ -83,7 +83,7 @@ class GenerationTaskE2eTest {
                 .stream()
                 .map(Generation::getName)
                 .forEach(generationName -> {
-                    var request = EntryRequest.newBuilder()
+                    var request = ValueRequest.newBuilder()
                             .setKey(RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generationName))
                             .build();
                     var response = redisBouncerClient.valueOps()

@@ -32,12 +32,12 @@ public class PokeApiBouncerService extends PokeApiGrpc.PokeApiImplBase {
         var generation = request.getGeneration();
         var key = RedisKeyPrefix.GENERATION_KEY_PREFIX.getPrefix().concat(generation);
         var cacheValue = redisBouncerClient.valueOps()
-                .get(EntryRequest.newBuilder()
+                .get(ValueRequest.newBuilder()
                         .setKey(key)
                         .build(), GenerationResponse.class);
         if (cacheValue.isEmpty()) {
             var proto = pokeApiProtoMapper.map(pokeApiTemplate.fetchGeneration(Generation.from(generation)));
-            var entryRequest = EntryRequest.newBuilder()
+            var entryRequest = ValueRequest.newBuilder()
                     .setKey(key)
                     .setValue(Any.pack(proto))
                     .build();
@@ -54,12 +54,12 @@ public class PokeApiBouncerService extends PokeApiGrpc.PokeApiImplBase {
         var name = PokemonName.create(request.getPokemonSpeciesName());
         var key = RedisKeyPrefix.SPECIES_KEY_PREFIX.getPrefix().concat(name.getValue());
         var cacheValue = redisBouncerClient.valueOps()
-                .get(EntryRequest.newBuilder()
+                .get(ValueRequest.newBuilder()
                         .setKey(key)
                         .build(), PokemonSpecies.class);
         if (cacheValue.isEmpty()) {
             var proto = pokeApiProtoMapper.map(pokeApiTemplate.fetchSpecies(name));
-            var entryRequest = EntryRequest.newBuilder()
+            var entryRequest = ValueRequest.newBuilder()
                     .setKey(key)
                     .setValue(Any.pack(proto))
                     .build();

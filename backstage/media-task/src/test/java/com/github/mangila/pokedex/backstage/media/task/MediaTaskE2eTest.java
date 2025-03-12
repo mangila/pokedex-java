@@ -82,7 +82,7 @@ class MediaTaskE2eTest {
     }
 
     @Test
-    void test() {
+    void shouldNotThrowAnyException() {
         var observer = redisBouncerClient.streamOps().addWithClientStream(new StreamObserver<>() {
             @Override
             public void onNext(Empty empty) {

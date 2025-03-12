@@ -3,7 +3,6 @@ package com.github.mangila.pokedex.backstage.bouncer.mongodb.mapper;
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.embedded.*;
 import com.github.mangila.pokedex.backstage.model.grpc.model.*;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -26,31 +25,31 @@ public class DocumentMapper {
         );
     }
 
-    private @NotNull List<PokemonNameDocument> toNames(List<PokemonName> namesList) {
+    private List<PokemonNameDocument> toNames(List<PokemonName> namesList) {
         return namesList.stream()
                 .map(pokemonName -> new PokemonNameDocument(pokemonName.getName(), pokemonName.getLanguage()))
                 .toList();
     }
 
-    private @NotNull List<PokemonDescriptionDocument> toDescriptions(List<PokemonDescription> descriptionsList) {
+    private List<PokemonDescriptionDocument> toDescriptions(List<PokemonDescription> descriptionsList) {
         return descriptionsList.stream()
                 .map(description -> new PokemonDescriptionDocument(description.getDescription(), description.getLanguage()))
                 .toList();
     }
 
-    private @NotNull List<PokemonGeneraDocument> toGenera(List<PokemonGenera> generaList) {
+    private List<PokemonGeneraDocument> toGenera(List<PokemonGenera> generaList) {
         return generaList.stream()
                 .map(genera -> new PokemonGeneraDocument(genera.getGenera(), genera.getLanguage()))
                 .toList();
     }
 
-    private @NotNull List<PokemonEvolutionDocument> toEvolutions(List<PokemonEvolution> evolutionsList) {
+    private List<PokemonEvolutionDocument> toEvolutions(List<PokemonEvolution> evolutionsList) {
         return evolutionsList.stream()
                 .map(evolution -> new PokemonEvolutionDocument(evolution.getOrder(), evolution.getName()))
                 .toList();
     }
 
-    private @NotNull List<PokemonDocument> toVarieties(List<Pokemon> varietiesList) {
+    private List<PokemonDocument> toVarieties(List<Pokemon> varietiesList) {
         return varietiesList.stream()
                 .map(variety -> new PokemonDocument(
                         variety.getPokemonId(),
@@ -71,11 +70,19 @@ public class DocumentMapper {
                 .toList();
     }
 
-    private @NotNull PokemonSpecialDocument toSpecial(PokemonSpecial special) {
+    private PokemonSpecialDocument toSpecial(PokemonSpecial special) {
         return new PokemonSpecialDocument(
                 special.getIsSpecial(),
                 special.getLegendary(),
                 special.getMythical(),
                 special.getBaby());
+    }
+
+    public PokemonMediaDocument toDocument(PokemonMediaValue request) {
+        return new PokemonMediaDocument(
+                request.getMediaId(),
+                "", // TODO: static config or service discovery
+                request.getFileName()
+        );
     }
 }

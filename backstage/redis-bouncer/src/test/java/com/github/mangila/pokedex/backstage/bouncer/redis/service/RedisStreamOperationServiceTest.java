@@ -36,7 +36,7 @@ class RedisStreamOperationServiceTest extends RedisTestContainer {
 
     @Test
     @Order(1)
-    void addWithClientStream() throws InterruptedException {
+    void shouldAddWithClientStream() throws InterruptedException {
         var stub = StreamOperationGrpc.newStub(MANAGED_CHANNEL);
         var streamKey = RedisStreamKey.POKEMON_NAME_EVENT.getKey();
         var observer = stub.addWithClientStream(new StreamObserver<>() {

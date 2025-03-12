@@ -85,7 +85,7 @@ public class PokeApiProtoMapper {
 
     private Iterable<PokemonEvolution> toEvolutions(URI url) {
         var evolutionChainId = UriUtil.getLastPathSegment(url);
-        var entryRequest = EntryRequest.newBuilder()
+        var entryRequest = ValueRequest.newBuilder()
                 .setKey(RedisKeyPrefix.EVOLUTION_CHAIN_KEY_PREFIX.getPrefix().concat(evolutionChainId))
                 .build();
         var cacheValue = redisBouncerClient.valueOps()
@@ -179,7 +179,7 @@ public class PokeApiProtoMapper {
                         .setIsDefault(response.isDefault())
                         .addAllTypes(response.types().stream().map(Types::type).map(Type::name).toList())
                         .addAllStats(toStats(response.stats()))
-                        .addAllMedia(toMedia(response.name(), speciesId, response.id(), response.sprites(), response.cries()))
+                        .addAllMediaMetadata(toMedia(response.name(), speciesId, response.id(), response.sprites(), response.cries()))
                         .build())
                 .toList();
     }
@@ -232,11 +232,11 @@ public class PokeApiProtoMapper {
                 .build();
     }
 
-    private Iterable<PokemonMedia> toMedia(String name,
-                                           int speciesId,
-                                           int pokemonId,
-                                           Sprites sprites,
-                                           Cries cries) {
+    private Iterable<PokemonMediaMetadata> toMedia(String name,
+                                                   int speciesId,
+                                                   int pokemonId,
+                                                   Sprites sprites,
+                                                   Cries cries) {
         return Stream.of(
                         // Audio
                         createMediaIfNotNull(name, speciesId, pokemonId, "latest",
@@ -487,13 +487,13 @@ public class PokeApiProtoMapper {
     }
 
 
-    private PokemonMedia createMediaIfNotNull(String name,
-                                              int speciesId,
-                                              int pokemonId,
-                                              String description,
-                                              String url) {
+    private PokemonMediaMetadata createMediaIfNotNull(String name,
+                                                      int speciesId,
+                                                      int pokemonId,
+                                                      String description,
+                                                      String url) {
         if (StringUtils.hasText(url)) {
-            return PokemonMedia.newBuilder()
+            return PokemonMediaMetadata.newBuilder()
                     .setPokemonName(name)
                     .setSpeciesId(speciesId)
                     .setPokemonId(pokemonId)

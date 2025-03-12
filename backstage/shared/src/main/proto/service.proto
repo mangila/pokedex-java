@@ -37,6 +37,7 @@ service PokeApi {
 
 // Mongodb GridFs GRPC Operations
 service GridFs {
+  // Store one image to GridFs
   rpc StoreOne(MediaValue) returns (google.protobuf.StringValue);
 }
 
@@ -44,6 +45,8 @@ service GridFs {
 service MongoDb {
   // Save one PokemonSpecies
   rpc SaveOne(PokemonSpecies) returns (google.protobuf.Empty);
+  // Push media to PokemonMedia list
+  rpc PushMedia(PokemonMediaValue) returns (google.protobuf.Empty);
 }
 
 service ImageConverter {

@@ -23,6 +23,13 @@ message MediaValue {
   string content_type = 3;
 }
 
+message PokemonMediaValue {
+  int32 species_id = 1;
+  int32 pokemon_id = 2;
+  string media_id = 3;
+  string file_name = 4;
+}
+
 message GenerationRequest {
   string generation = 1;
 }
@@ -60,7 +67,7 @@ message Pokemon {
   string weight = 5;
   repeated string types = 6;
   repeated PokemonStat stats = 7;
-  repeated PokemonMedia media = 8;
+  repeated PokemonMediaMetadata media_metadata = 8;
 }
 
 message PokemonEvolution {
@@ -90,7 +97,7 @@ message PokemonStat {
   int32 value = 2;
 }
 
-message PokemonMedia {
+message PokemonMediaMetadata {
   string url = 1;
   string description = 2;
   int32 species_id = 3;

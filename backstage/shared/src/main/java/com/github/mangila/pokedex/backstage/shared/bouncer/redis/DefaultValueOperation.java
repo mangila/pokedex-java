@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.redis;
 
-import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.ValueRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import com.google.protobuf.Empty;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -17,12 +17,12 @@ class DefaultValueOperation implements ValueOperation {
     }
 
     @Override
-    public Empty set(EntryRequest request) {
+    public Empty set(ValueRequest request) {
         return valueOperationBlockingStub.set(request);
     }
 
     @Override
-    public <T extends Message> Optional<T> get(EntryRequest request, Class<T> clazz) {
+    public <T extends Message> Optional<T> get(ValueRequest request, Class<T> clazz) {
         try {
             var response = valueOperationBlockingStub.get(request);
             return Optional.ofNullable(response.unpack(clazz));

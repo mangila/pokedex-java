@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.backstage.bouncer.redis.service;
 
-import com.github.mangila.pokedex.backstage.model.grpc.model.EntryRequest;
+import com.github.mangila.pokedex.backstage.model.grpc.model.ValueRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.service.ValueOperationGrpc;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
@@ -31,7 +31,7 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
     }
 
     @Override
-    public void set(EntryRequest request, StreamObserver<Empty> responseObserver) {
+    public void set(ValueRequest request, StreamObserver<Empty> responseObserver) {
         log.debug("{}", request.toString());
         template.opsForValue()
                 .set(request.getKey(), BASE_64_ENCODER.encodeToString(request.getValue().toByteArray()));
@@ -40,7 +40,7 @@ public class RedisValueOperationService extends ValueOperationGrpc.ValueOperatio
     }
 
     @Override
-    public void get(EntryRequest request, StreamObserver<Any> responseObserver) {
+    public void get(ValueRequest request, StreamObserver<Any> responseObserver) {
         String value = template.opsForValue().get(request.getKey());
         if (Objects.isNull(value)) {
             responseObserver.onNext(Any.getDefaultInstance());

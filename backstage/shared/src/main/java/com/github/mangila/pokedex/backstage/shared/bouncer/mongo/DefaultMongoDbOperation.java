@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.backstage.shared.bouncer.mongo;
 
+import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonMediaValue;
 import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpecies;
 import com.github.mangila.pokedex.backstage.model.grpc.service.MongoDbGrpc;
 import com.google.protobuf.Empty;
@@ -16,4 +17,10 @@ class DefaultMongoDbOperation implements MongoDb {
     public Empty saveOne(PokemonSpecies pokemonSpecies) {
         return stub.saveOne(pokemonSpecies);
     }
+
+    @Override
+    public Empty pushMedia(PokemonMediaValue request) {
+        return stub.pushMedia(request);
+    }
+
 }
