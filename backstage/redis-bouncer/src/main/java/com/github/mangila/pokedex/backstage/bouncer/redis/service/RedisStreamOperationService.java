@@ -83,6 +83,17 @@ public class RedisStreamOperationService extends StreamOperationGrpc.StreamOpera
     }
 
     @Override
+    public void addOne(StreamRecord request, StreamObserver<Empty> responseObserver) {
+        var record = StreamRecords.newRecord()
+                .ofStrings(request.getDataMap())
+                .withStreamKey(request.getStreamKey());
+        template.opsForStream()
+                .add(record);
+        responseObserver.onNext(Empty.getDefaultInstance());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public StreamObserver<StreamRecord> addWithClientStream(StreamObserver<Empty> responseObserver) {
         return new StreamObserver<>() {
             @Override

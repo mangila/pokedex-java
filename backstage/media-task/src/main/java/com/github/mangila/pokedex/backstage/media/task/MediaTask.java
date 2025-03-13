@@ -7,15 +7,18 @@ import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.imageconverter.ImageConverterClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriUtils;
 
 import java.util.Map;
@@ -61,18 +64,20 @@ public class MediaTask implements Task {
             log.debug("No new messages");
             return;
         }
-        var pokemonName = data.get("pokemon_name");
-        var url = data.get("url");
-        log.info("Process media - {} - {}", pokemonName, url);
-        ensureUrlDeriveFromPokeApi(url);
-        var response = RestClient.create(url)
-                .get()
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .retrieve()
-                .toEntity(byte[].class);
-        if (response.getStatusCode().is2xxSuccessful() && Objects.nonNull(response.getBody())) {
+        try {
+            var pokemonName = data.get("pokemon_name");
+            var url = data.get("url");
+            log.info("Process media - {} - {}", pokemonName, url);
+            ensureUrlDeriveFromPokeApi(url);
+            var response = RestClient.create(url)
+                    .get()
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                    .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                    .retrieve()
+                    .toEntity(byte[].class);
+            ensureSuccessStatusCode(response);
+            Objects.requireNonNull(response.getBody(), "body is null");
             var fileName = createFileName(data);
             var contentType = getContentType(fileName);
             var converted = imageConverterClient.convertToWebP(
@@ -91,6 +96,14 @@ public class MediaTask implements Task {
                     .setPokemonId(Integer.parseInt(pokemonId))
                     .setFileName(fileName)
                     .build());
+        } catch (Exception e) {
+            log.error("ERR", e);
+            redisBouncerClient.streamOps()
+                    .addOne(StreamRecord.newBuilder()
+                            .setStreamKey(RedisStreamKey.POKEMON_MEDIA_DEAD_EVENT.getKey())
+                            .putAllData(data)
+                            .build());
+        } finally {
             redisBouncerClient.streamOps()
                     .acknowledgeOne(streamRecord.toBuilder()
                             .setRecordId(message.getRecordId())
@@ -102,6 +115,12 @@ public class MediaTask implements Task {
         var isFromPokeApi = url.startsWith("https://raw.githubusercontent.com/PokeAPI");
         if (!isFromPokeApi) {
             throw new IllegalArgumentException("Invalid URL: " + url);
+        }
+    }
+
+    private void ensureSuccessStatusCode(ResponseEntity<byte[]> response) {
+        if (response.getStatusCode().is2xxSuccessful()) {
+            throw new ResponseStatusException(response.getStatusCode());
         }
     }
 

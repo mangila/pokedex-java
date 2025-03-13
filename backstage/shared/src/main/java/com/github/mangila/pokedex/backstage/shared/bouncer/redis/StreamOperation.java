@@ -10,5 +10,7 @@ public interface StreamOperation {
 
     Empty acknowledgeOne(StreamRecord request);
 
+    Empty addOne(StreamRecord request);
+
     StreamObserver<StreamRecord> addWithClientStream(StreamObserver<Empty> responseObserver);
 }

@@ -11,6 +11,8 @@ option go_package = "image-converter/service";
 
 // Redis Stream GRPC Operations
 service StreamOperation {
+  // Add to Redis Stream
+  rpc AddOne(StreamRecord) returns (google.protobuf.Empty);
   // Add to Redis Stream with gRPC Client side streaming
   rpc AddWithClientStream(stream StreamRecord) returns (google.protobuf.Empty);
   // Read Stream Log

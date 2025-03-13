@@ -7,6 +7,7 @@ import com.github.mangila.pokedex.backstage.pokemon.props.PokemonTaskProperties;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
+import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
@@ -58,35 +59,46 @@ public class PokemonTask implements Task {
             log.debug("No new messages");
             return;
         }
-        var proto = Stream.ofNullable(data.get("name"))
-                .peek(name -> log.info("Process - {}", name))
-                .map(speciesName -> PokemonSpeciesRequest.newBuilder()
-                        .setPokemonSpeciesName(speciesName)
-                        .build())
-                .map(pokeApiBouncerClient::fetchPokemonSpecies)
-                .findFirst()
-                .orElseThrow();
-        mongoBouncerClient.mongoDb().saveOne(proto);
         var observer = getStreamObserver();
-        proto.getVarietiesList()
-                .stream()
-                .map(Pokemon::getMediaMetadataList)
-                .flatMap(Collection::stream)
-                .map(media -> StreamRecord.newBuilder()
-                        .setStreamKey(taskProperties.getMediaStreamKey().getKey())
-                        .putData("pokemon_name", media.getPokemonName())
-                        .putData("species_id", String.valueOf(media.getSpeciesId()))
-                        .putData("pokemon_id", String.valueOf(media.getPokemonId()))
-                        .putData("description", media.getDescription())
-                        .putData("url", media.getUrl())
-                        .build())
-                .forEach(observer::onNext);
-        observer.onCompleted();
-        redisBouncerClient.streamOps()
-                .acknowledgeOne(StreamRecord.newBuilder()
-                        .setStreamKey(taskProperties.getNameStreamKey().getKey())
-                        .setRecordId(message.getRecordId())
-                        .build());
+        try {
+            var proto = Stream.ofNullable(data.get("name"))
+                    .peek(name -> log.info("Process - {}", name))
+                    .map(speciesName -> PokemonSpeciesRequest.newBuilder()
+                            .setPokemonSpeciesName(speciesName)
+                            .build())
+                    .map(pokeApiBouncerClient::fetchPokemonSpecies)
+                    .findFirst()
+                    .orElseThrow();
+            mongoBouncerClient.mongoDb().saveOne(proto);
+            proto.getVarietiesList()
+                    .stream()
+                    .map(Pokemon::getMediaMetadataList)
+                    .flatMap(Collection::stream)
+                    .map(media -> StreamRecord.newBuilder()
+                            .setStreamKey(taskProperties.getMediaStreamKey().getKey())
+                            .putData("pokemon_name", media.getPokemonName())
+                            .putData("species_id", String.valueOf(media.getSpeciesId()))
+                            .putData("pokemon_id", String.valueOf(media.getPokemonId()))
+                            .putData("description", media.getDescription())
+                            .putData("url", media.getUrl())
+                            .build())
+                    .forEach(observer::onNext);
+        } catch (Exception e) {
+            log.error("ERR", e);
+            redisBouncerClient.streamOps().addOne(
+                    StreamRecord.newBuilder()
+                            .setStreamKey(RedisStreamKey.POKEMON_NAME_DEAD_EVENT.getKey())
+                            .putAllData(data)
+                            .build()
+            );
+        } finally {
+            observer.onCompleted();
+            redisBouncerClient.streamOps()
+                    .acknowledgeOne(StreamRecord.newBuilder()
+                            .setStreamKey(taskProperties.getNameStreamKey().getKey())
+                            .setRecordId(message.getRecordId())
+                            .build());
+        }
     }
 
     private StreamObserver<StreamRecord> getStreamObserver() {
