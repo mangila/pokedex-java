@@ -57,9 +57,9 @@ spec:
               containerPort: 80
           envFrom:
             - secretRef:
-                name: mongodb-bouncer-secret
+                name: graphql-api-secret
             - configMapRef:
-                name: mongodb-bouncer-config
+                name: graphql-api-config
           resources:
             limits:
               memory: "512Mi"

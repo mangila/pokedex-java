@@ -1,4 +1,25 @@
-# Create NodePort service for Graphql Api
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graphql-api-config
+  namespace: pokedex
+data:
+  SPRING_DATA_MONGODB_HOST: "mongodb-external.pokedex.svc.cluster.local"
+  SPRING_DATA_MONGODB_PORT: "27017"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: graphql-api-secret
+  namespace: pokedex
+type: Opaque
+data:
+  # admin
+  SPRING_DATA_MONGODB_USERNAME: "YWRtaW4="
+  # password
+  SPRING_DATA_MONGODB_PASSWORD: "cGFzc3dvcmQ="
+---
+# graphql-api.pokedex.svc.cluster.local
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,9 +31,41 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
-      nodePort: 30001
-  type: NodePort
+      targetPort: 80
+  type: ExternalName
+  externalName: "host.minikube.internal"
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql-api
+  namespace: pokedex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphql-api-app
+  template:
+    metadata:
+      labels:
+        app: graphql-api-app
+    spec:
+      containers:
+        - name: graphql-api-container
+          image: pokedex-graphql-api
+          imagePullPolicy: Never
+          ports:
+            - protocol: "TCP"
+              containerPort: 80
+          envFrom:
+            - secretRef:
+                name: graphql-api-secret
+            - configMapRef:
+                name: graphql-api-config
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
