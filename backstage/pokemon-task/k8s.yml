@@ -23,15 +23,13 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: pokemon-task-cronjob
+  namespace: pokedex
 spec:
   schedule: "* * * * *"
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 0
-      activeDeadlineSeconds: 60
-      backoffLimit: 0
       parallelism: 5
       completions: 5
       template:
@@ -59,15 +57,13 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: pokemon-dead-task-cronjob
+  namespace: pokedex
 spec:
   schedule: "* * * * *"
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 0
-      activeDeadlineSeconds: 60
-      backoffLimit: 0
       parallelism: 5
       completions: 5
       template:

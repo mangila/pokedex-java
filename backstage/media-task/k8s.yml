@@ -14,7 +14,7 @@ metadata:
   name: media-dead-task-config
   namespace: pokedex
 data:
-  APP_TASK_NAME-STREAM-KEY: "media_name_dead_event"
+  APP_TASK_MEDIA-STREAM-KEY: "media_name_dead_event"
   SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
   SPRING_GRPC_CLIENT_CHANNELS_IMAGE-CONVERTER_ADDRESS: "static://image-converter"
   SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
@@ -23,15 +23,16 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: media-task-cronjob
+  namespace: pokedex
 spec:
   schedule: "* * * * *"
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   jobTemplate:
+    metadata:
+      labels:
+        job-name: media-task-cronjob
     spec:
-      ttlSecondsAfterFinished: 0
-      activeDeadlineSeconds: 60
-      backoffLimit: 0
       parallelism: 5
       completions: 5
       template:
@@ -59,15 +60,13 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: media-dead-task-cronjob
+  namespace: pokedex
 spec:
   schedule: "* * * * *"
   successfulJobsHistoryLimit: 5
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      ttlSecondsAfterFinished: 0
-      activeDeadlineSeconds: 60
-      backoffLimit: 0
       parallelism: 5
       completions: 5
       template:

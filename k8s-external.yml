@@ -1,5 +1,5 @@
 # External access for the k8s cluster to Redis
-# redis-external.pokedex.svc.cluster.local
+# redis-external-service.pokedex.svc.cluster.local
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,7 +10,7 @@ spec:
   externalName: "host.minikube.internal"
 ---
 # External access for the k8s cluster to MongoDb
-# mongodb-external.pokedex.svc.cluster.local
+# mongodb-external-service.pokedex.svc.cluster.local
 apiVersion: v1
 kind: Service
 metadata:
