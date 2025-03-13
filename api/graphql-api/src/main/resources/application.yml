@@ -7,6 +7,8 @@ spring:
   application:
     name: graphql-server
   graphql:
+    schema:
+      file-extensions: .graphql
     graphiql:
       enabled: true
       path: "/graphiql"
@@ -14,4 +16,13 @@ spring:
       allowed-origins: "*"
       allowed-headers: "*"
       allowed-methods: "*"
-    path: "api/v1/graphql"
+    path: "/api/v1/graphql"
+  data:
+    mongodb:
+      host: "localhost"
+      port: "27017"
+      username: "admin"
+      password: "password"
+      authentication-database: "admin"
+      database: "pokemon"
+      auto-index-creation: true

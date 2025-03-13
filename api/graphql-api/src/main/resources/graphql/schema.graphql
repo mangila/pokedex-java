@@ -1,0 +1,69 @@
+type PokemonName {
+    name: String!
+    language: String!
+}
+
+type PokemonDescription {
+    name: String!
+    language: String!
+}
+
+type PokemonGenera {
+    genera:String!
+    language:String!
+}
+
+type PokemonEvolution {
+    order:Int!,
+    name:String!
+}
+
+type PokemonType {
+    type:String!
+}
+
+type PokemonStat {
+    name:String!
+    value:Int
+}
+
+type PokemonMedia {
+    mediaId:String!
+    src:String!
+    fileName:String!
+}
+
+type PokemonVariety {
+    id: Int!
+    name: String!
+    isDefault: Boolean!
+    height: String
+    weight: String
+    types: [PokemonType!]!
+    stats: [PokemonStat!]!
+    media: [PokemonMedia!]!
+}
+
+type PokemonSpecial {
+    isSpecial: Boolean!
+    legendary: Boolean!
+    mythical: Boolean!
+    baby: Boolean!
+}
+
+type PokemonSpecies {
+    id: Int!
+    name: String!
+    generation: String!
+    names: [PokemonName!]!
+    descriptions: [PokemonDescription!]!
+    genera: [PokemonGenera!]!
+    evolutions: [PokemonEvolution!]!
+    varieties: [PokemonVariety!]!
+    special: PokemonSpecial!
+}
+
+type Query {
+    findById(id: Int!): PokemonSpecies
+    findByName(name: String!): PokemonSpecies
+}
