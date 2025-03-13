@@ -36,12 +36,12 @@ public class PokemonTask implements Task {
     }
 
     /**
-     * 0. Read from Redis stream
-     * 1. Does it have any data? Else exit execution
-     * 2. Fetch PokemonSpeciesResponse from Cache or PokeAPI
-     * 3. Glue everything together and create a PokemonSpeciesDocument
-     * 4. Save to MongoDb
-     * 5. Push POKEMON_MEDIA_EVENT messages to Redis Stream
+     * 0. Read from Redis stream <br>
+     * 1. Does it have any data? Else exit execution <br>
+     * 2. Fetch PokemonSpeciesResponse from Cache or PokeAPI <br>
+     * 3. Glue everything together and create a PokemonSpeciesProto <br>
+     * 4. request mongodb-bouncer to save one to MongoDb <br>
+     * 5. Push POKEMON_MEDIA_EVENT messages to Redis Stream <br>
      * 6. Acknowledge the POKEMON_NAME_EVENT message to Redis Stream
      *
      * @param args - Program arguments from Main/Invoker
