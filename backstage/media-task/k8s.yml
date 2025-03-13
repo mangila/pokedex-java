@@ -1,8 +1,92 @@
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: media-task-config
+  namespace: pokedex
+data:
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
+metadata:
+  name: media-dead-task-config
+  namespace: pokedex
+data:
+  APP_TASK_NAME-STREAM-KEY: "media_name_dead_event"
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_IMAGE-CONVERTER_ADDRESS: "static://image-converter"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
 ---
 apiVersion: batch/v1
 kind: CronJob
+metadata:
+  name: media-task-cronjob
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 0
+      activeDeadlineSeconds: 60
+      backoffLimit: 0
+      parallelism: 5
+      completions: 5
+      template:
+        metadata:
+          labels:
+            job-name: media-task-cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: media-task-container
+              image: pokedex-media-task
+              imagePullPolicy: Never
+              envFrom:
+                - configMapRef:
+                    name: media-task-config
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: media-dead-task-cronjob
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 0
+      activeDeadlineSeconds: 60
+      backoffLimit: 0
+      parallelism: 5
+      completions: 5
+      template:
+        metadata:
+          labels:
+            job-name: media-dead-task-cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: media-task-container
+              image: pokedex-media-task
+              imagePullPolicy: Never
+              envFrom:
+                - configMapRef:
+                    name: media-dead-task-config
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "500m"

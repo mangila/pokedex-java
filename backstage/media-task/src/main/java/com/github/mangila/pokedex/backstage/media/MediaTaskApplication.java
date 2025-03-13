@@ -36,7 +36,7 @@ public class MediaTaskApplication {
         if (isTestProfile) {
             return args -> log.info("Running test profile - will not start PokemonTask");
         }
-        return task::run;
+        return args -> task.run();
     }
 
     /**

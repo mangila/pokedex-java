@@ -42,10 +42,9 @@ public class GenerationTask implements Task {
      * 3. Get the PokemonName from the response
      * 4. Put the PokemonName on the stream
      *
-     * @param args - program arguments
      */
     @Override
-    public void run(String[] args) throws Exception {
+    public void run() throws Exception {
         var observer = getStreamObserver();
         var fetchGenerations = EnumSet.allOf(Generation.class)
                 .stream()

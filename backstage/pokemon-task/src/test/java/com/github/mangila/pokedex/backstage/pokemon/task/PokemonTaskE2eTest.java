@@ -103,6 +103,6 @@ class PokemonTaskE2eTest {
                 .putData("name", "bulbasaur")
                 .build());
         observer.onCompleted();
-        assertThatCode(() -> pokemonTask.run(new String[0])).doesNotThrowAnyException();
+        assertThatCode(() -> pokemonTask.run()).doesNotThrowAnyException();
     }
 }

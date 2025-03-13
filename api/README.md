@@ -12,5 +12,7 @@ Fetch files from the GridFs database
 
 Query from pokemon-species database via Graphql queries.
 
+- `minikube service graphql-api-service -n pokedex --url` - to get minikube tunnel ip
+
 * /api/v1/graphql
 * /graphiql

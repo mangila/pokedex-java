@@ -1,3 +1,7 @@
+# Application properties
+app:
+  task:
+    media-stream-key: pokemon_media_event
 # Spring
 spring:
   application:

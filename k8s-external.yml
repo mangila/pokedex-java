@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-external
+  name: redis-external-service
   namespace: pokedex
 spec:
   type: ExternalName
@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb-external
+  name: mongodb-external-service
   namespace: pokedex
 spec:
   type: ExternalName

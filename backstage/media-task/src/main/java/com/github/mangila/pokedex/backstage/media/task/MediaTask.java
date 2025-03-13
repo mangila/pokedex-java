@@ -1,12 +1,12 @@
 package com.github.mangila.pokedex.backstage.media.task;
 
+import com.github.mangila.pokedex.backstage.media.props.MediaTaskProperties;
 import com.github.mangila.pokedex.backstage.model.grpc.model.MediaValue;
 import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonMediaValue;
 import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
 import com.github.mangila.pokedex.backstage.shared.bouncer.imageconverter.ImageConverterClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
@@ -26,13 +26,16 @@ public class MediaTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(MediaTask.class);
 
+    private final MediaTaskProperties taskProperties;
     private final ImageConverterClient imageConverterClient;
     private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
 
-    public MediaTask(ImageConverterClient imageConverterClient,
+    public MediaTask(MediaTaskProperties taskProperties,
+                     ImageConverterClient imageConverterClient,
                      MongoBouncerClient mongoBouncerClient,
                      RedisBouncerClient redisBouncerClient) {
+        this.taskProperties = taskProperties;
         this.imageConverterClient = imageConverterClient;
         this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;
@@ -46,13 +49,11 @@ public class MediaTask implements Task {
      * 4. store media to GridFs
      * 5. save media src(url to file-api) and file name to mongodb
      * 6. acknowledge message to stream as successful
-     *
-     * @param args
      */
     @Override
-    public void run(String[] args) {
+    public void run() {
         var streamRecord = StreamRecord.newBuilder()
-                .setStreamKey(RedisStreamKey.POKEMON_MEDIA_EVENT.getKey())
+                .setStreamKey(taskProperties.getMediaStreamKey().getKey())
                 .build();
         var message = redisBouncerClient.streamOps().readOne(streamRecord);
         var data = message.getDataMap();

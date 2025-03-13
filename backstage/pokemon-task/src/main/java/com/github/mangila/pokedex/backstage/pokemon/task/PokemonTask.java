@@ -3,10 +3,10 @@ package com.github.mangila.pokedex.backstage.pokemon.task;
 import com.github.mangila.pokedex.backstage.model.grpc.model.Pokemon;
 import com.github.mangila.pokedex.backstage.model.grpc.model.PokemonSpeciesRequest;
 import com.github.mangila.pokedex.backstage.model.grpc.model.StreamRecord;
+import com.github.mangila.pokedex.backstage.pokemon.props.PokemonTaskProperties;
 import com.github.mangila.pokedex.backstage.shared.bouncer.mongo.MongoBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.pokeapi.PokeApiBouncerClient;
 import com.github.mangila.pokedex.backstage.shared.bouncer.redis.RedisBouncerClient;
-import com.github.mangila.pokedex.backstage.shared.model.domain.RedisStreamKey;
 import com.github.mangila.pokedex.backstage.shared.model.func.Task;
 import com.google.protobuf.Empty;
 import io.grpc.stub.StreamObserver;
@@ -23,13 +23,16 @@ public class PokemonTask implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(PokemonTask.class);
 
+    private final PokemonTaskProperties taskProperties;
     private final PokeApiBouncerClient pokeApiBouncerClient;
     private final MongoBouncerClient mongoBouncerClient;
     private final RedisBouncerClient redisBouncerClient;
 
-    public PokemonTask(PokeApiBouncerClient pokeApiBouncerClient,
+    public PokemonTask(PokemonTaskProperties taskProperties,
+                       PokeApiBouncerClient pokeApiBouncerClient,
                        MongoBouncerClient mongoBouncerClient,
                        RedisBouncerClient redisBouncerClient) {
+        this.taskProperties = taskProperties;
         this.pokeApiBouncerClient = pokeApiBouncerClient;
         this.mongoBouncerClient = mongoBouncerClient;
         this.redisBouncerClient = redisBouncerClient;
@@ -43,14 +46,12 @@ public class PokemonTask implements Task {
      * 4. request mongodb-bouncer to save one to MongoDb <br>
      * 5. Push POKEMON_MEDIA_EVENT messages to Redis Stream <br>
      * 6. Acknowledge the POKEMON_NAME_EVENT message to Redis Stream
-     *
-     * @param args - Program arguments from Main/Invoker
      */
     @Override
-    public void run(String[] args) {
+    public void run() {
         var message = redisBouncerClient.streamOps()
                 .readOne(StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .setStreamKey(taskProperties.getNameStreamKey().getKey())
                         .build());
         var data = message.getDataMap();
         if (CollectionUtils.isEmpty(data)) {
@@ -72,7 +73,7 @@ public class PokemonTask implements Task {
                 .map(Pokemon::getMediaMetadataList)
                 .flatMap(Collection::stream)
                 .map(media -> StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_MEDIA_EVENT.getKey())
+                        .setStreamKey(taskProperties.getMediaStreamKey().getKey())
                         .putData("pokemon_name", media.getPokemonName())
                         .putData("species_id", String.valueOf(media.getSpeciesId()))
                         .putData("pokemon_id", String.valueOf(media.getPokemonId()))
@@ -83,7 +84,7 @@ public class PokemonTask implements Task {
         observer.onCompleted();
         redisBouncerClient.streamOps()
                 .acknowledgeOne(StreamRecord.newBuilder()
-                        .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
+                        .setStreamKey(taskProperties.getNameStreamKey().getKey())
                         .setRecordId(message.getRecordId())
                         .build());
     }

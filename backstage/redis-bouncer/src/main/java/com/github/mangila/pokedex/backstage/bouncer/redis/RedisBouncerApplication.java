@@ -34,7 +34,9 @@ public class RedisBouncerApplication {
             template.execute(RedisConnection::ping);
             var group = RedisConsumerGroup.POKEDEX_BACKSTAGE_GROUP;
             tryCreateGroup(RedisStreamKey.POKEMON_NAME_EVENT, group);
+            tryCreateGroup(RedisStreamKey.POKEMON_NAME_DEAD_EVENT, group);
             tryCreateGroup(RedisStreamKey.POKEMON_MEDIA_EVENT, group);
+            tryCreateGroup(RedisStreamKey.POKEMON_MEDIA_DEAD_EVENT, group);
         };
     }
 

@@ -116,7 +116,7 @@ class MediaTaskE2eTest {
                 .putData("pokemon_name", "bulbasaur")
                 .build());
         observer.onCompleted();
-        assertThatCode(() -> mediaTask.run(new String[0])).doesNotThrowAnyException();
-        assertThatCode(() -> mediaTask.run(new String[0])).doesNotThrowAnyException();
+        assertThatCode(() -> mediaTask.run()).doesNotThrowAnyException();
+        assertThatCode(() -> mediaTask.run()).doesNotThrowAnyException();
     }
 }

@@ -78,7 +78,7 @@ class GenerationTaskE2eTest {
 
     @Test
     void shouldCachePokeApiResponses() {
-        assertThatCode(() -> generationTask.run(new String[0])).doesNotThrowAnyException();
+        assertThatCode(() -> generationTask.run()).doesNotThrowAnyException();
         EnumSet.allOf(Generation.class)
                 .stream()
                 .map(Generation::getName)
@@ -94,7 +94,7 @@ class GenerationTaskE2eTest {
 
     @Test
     void shouldAddStreamMessages() {
-        assertThatCode(() -> generationTask.run(new String[0])).doesNotThrowAnyException();
+        assertThatCode(() -> generationTask.run()).doesNotThrowAnyException();
         var record = StreamRecord.newBuilder()
                 .setStreamKey(RedisStreamKey.POKEMON_NAME_EVENT.getKey())
                 .build();
