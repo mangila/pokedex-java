@@ -15,6 +15,7 @@ metadata:
   namespace: pokedex
 spec:
   parallelism: 1
+  completions: 1
   template:
     spec:
       restartPolicy: Never

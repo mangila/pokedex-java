@@ -13,8 +13,8 @@ import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClient;
@@ -76,7 +76,7 @@ public class MediaTask implements Task {
                     .header(HttpHeaders.CACHE_CONTROL, "no-store")
                     .retrieve()
                     .toEntity(byte[].class);
-            ensureSuccessStatusCode(response);
+            ensureSuccessStatusCode(response.getStatusCode());
             Objects.requireNonNull(response.getBody(), "body is null");
             var fileName = createFileName(data);
             var contentType = getContentType(fileName);
@@ -118,9 +118,9 @@ public class MediaTask implements Task {
         }
     }
 
-    private void ensureSuccessStatusCode(ResponseEntity<byte[]> response) {
-        if (response.getStatusCode().isError()) {
-            throw new ResponseStatusException(response.getStatusCode());
+    private void ensureSuccessStatusCode(HttpStatusCode statusCode) {
+        if (statusCode.isError()) {
+            throw new ResponseStatusException(statusCode);
         }
     }
 

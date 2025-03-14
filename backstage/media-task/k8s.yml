@@ -26,8 +26,8 @@ metadata:
   namespace: pokedex
 spec:
   schedule: "* * * * *"
-  successfulJobsHistoryLimit: 10
-  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       parallelism: 10
