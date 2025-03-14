@@ -88,7 +88,7 @@ public class DocumentMapper {
 
     /**
      * When using this in k8s minikube, and we want to access file-api on localhost.
-     * So this is not the "true" address - since tunneling is addressing randomly
+     * then this is not the "true" address - since tunneling is addressing randomly
      * but… it works... in theory…
      * see - "minikube service file-api-service -n pokedex --url"
      * see - https://minikube.sigs.k8s.io/docs/handbook/accessing/
