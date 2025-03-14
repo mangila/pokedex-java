@@ -5,7 +5,7 @@ metadata:
   namespace: pokedex
 data:
   SERVER_PORT: "80"
-  SPRING_DATA_MONGODB_HOST: "mongodb-external.pokedex.svc.cluster.local"
+  SPRING_DATA_MONGODB_HOST: "mongodb-external-service.pokedex.svc.cluster.local"
   SPRING_DATA_MONGODB_PORT: "27017"
 ---
 apiVersion: v1

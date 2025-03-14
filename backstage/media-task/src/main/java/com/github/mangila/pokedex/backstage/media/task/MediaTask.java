@@ -119,7 +119,7 @@ public class MediaTask implements Task {
     }
 
     private void ensureSuccessStatusCode(ResponseEntity<byte[]> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
+        if (response.getStatusCode().isError()) {
             throw new ResponseStatusException(response.getStatusCode());
         }
     }

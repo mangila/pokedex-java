@@ -4,9 +4,9 @@ metadata:
   name: pokemon-task-config
   namespace: pokedex
 data:
-  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer-service"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -15,9 +15,9 @@ metadata:
   namespace: pokedex
 data:
   APP_TASK_NAME-STREAM-KEY: "pokemon_name_dead_event"
-  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer-service"
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -26,16 +26,13 @@ metadata:
   namespace: pokedex
 spec:
   schedule: "* * * * *"
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 10
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      parallelism: 5
-      completions: 5
+      parallelism: 3
+      completions: 3
       template:
-        metadata:
-          labels:
-            job-name: pokemon-task-cronjob
         spec:
           restartPolicy: Never
           containers:
@@ -60,16 +57,12 @@ metadata:
   namespace: pokedex
 spec:
   schedule: "* * * * *"
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      parallelism: 5
-      completions: 5
+      parallelism: 1
       template:
-        metadata:
-          labels:
-            job-name: pokemon-dead-task-cronjob
         spec:
           restartPolicy: Never
           containers:

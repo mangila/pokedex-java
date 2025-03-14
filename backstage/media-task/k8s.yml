@@ -4,9 +4,9 @@ metadata:
   name: media-task-config
   namespace: pokedex
 data:
-  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_POKEAPI-BOUNCER_ADDRESS: "static://pokeapi-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_IMAGE-CONVERTER_ADDRESS: "static://image-converter-service"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer-service"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -14,10 +14,10 @@ metadata:
   name: media-dead-task-config
   namespace: pokedex
 data:
-  APP_TASK_MEDIA-STREAM-KEY: "media_name_dead_event"
-  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer"
-  SPRING_GRPC_CLIENT_CHANNELS_IMAGE-CONVERTER_ADDRESS: "static://image-converter"
-  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer"
+  APP_TASK_MEDIA-STREAM-KEY: "pokemon_media_dead_event"
+  SPRING_GRPC_CLIENT_CHANNELS_REDIS-BOUNCER_ADDRESS: "static://redis-bouncer-service"
+  SPRING_GRPC_CLIENT_CHANNELS_IMAGE-CONVERTER_ADDRESS: "static://image-converter-service"
+  SPRING_GRPC_CLIENT_CHANNELS_MONGODB-BOUNCER_ADDRESS: "static://mongodb-bouncer-service"
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -26,19 +26,13 @@ metadata:
   namespace: pokedex
 spec:
   schedule: "* * * * *"
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 10
   failedJobsHistoryLimit: 5
   jobTemplate:
-    metadata:
-      labels:
-        job-name: media-task-cronjob
     spec:
-      parallelism: 5
-      completions: 5
+      parallelism: 10
+      completions: 10
       template:
-        metadata:
-          labels:
-            job-name: media-task-cronjob
         spec:
           restartPolicy: Never
           containers:
@@ -63,16 +57,12 @@ metadata:
   namespace: pokedex
 spec:
   schedule: "* * * * *"
-  successfulJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 5
   jobTemplate:
     spec:
-      parallelism: 5
-      completions: 5
+      parallelism: 1
       template:
-        metadata:
-          labels:
-            job-name: media-dead-task-cronjob
         spec:
           restartPolicy: Never
           containers:
