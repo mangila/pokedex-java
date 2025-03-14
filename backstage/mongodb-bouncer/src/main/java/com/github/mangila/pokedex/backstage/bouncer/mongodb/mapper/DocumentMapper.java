@@ -2,14 +2,22 @@ package com.github.mangila.pokedex.backstage.bouncer.mongodb.mapper;
 
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.backstage.bouncer.mongodb.document.embedded.*;
+import com.github.mangila.pokedex.backstage.bouncer.mongodb.props.MongoDbBouncerFileApiProperties;
 import com.github.mangila.pokedex.backstage.model.grpc.model.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Collections;
 import java.util.List;
 
 @Component
 public class DocumentMapper {
+
+    private final MongoDbBouncerFileApiProperties fileApiProperties;
+
+    public DocumentMapper(MongoDbBouncerFileApiProperties fileApiProperties) {
+        this.fileApiProperties = fileApiProperties;
+    }
 
     public PokemonSpeciesDocument toDocument(PokemonSpecies request) {
         return new PokemonSpeciesDocument(
@@ -79,9 +87,12 @@ public class DocumentMapper {
     }
 
     public PokemonMediaDocument toDocument(PokemonMediaValue request) {
+        var src = UriComponentsBuilder.fromUriString(fileApiProperties.getHost())
+                .path(fileApiProperties.getUri())
+                .build(request.getFileName());
         return new PokemonMediaDocument(
                 request.getMediaId(),
-                "", // TODO: static config or service discovery
+                src.toString(),
                 request.getFileName()
         );
     }

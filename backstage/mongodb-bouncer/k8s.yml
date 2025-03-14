@@ -4,6 +4,7 @@ metadata:
   name: mongodb-bouncer-config
   namespace: pokedex
 data:
+  APP_FILE-API_HOST: "http://file-api-service"
   SPRING_DATA_MONGODB_HOST: "mongodb-external-service.pokedex.svc.cluster.local"
   SPRING_DATA_MONGODB_PORT: "27017"
   SPRING_GRPC_SERVER_PORT: "80"
