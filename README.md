@@ -1,10 +1,5 @@
 # pokedex-spring-boot
 
-- NOTE - this is still work in progress
-    - TODO - error handling for failed messages
-    - TODO - file-api server discovery or static config
-    - TODO - finish up k8s deployment
-
 Maven multi-module project(and some Golang!) consuming and displaying PokeAPI data
 
 * Datasource
