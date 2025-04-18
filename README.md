@@ -1,44 +1,15 @@
 # pokedex-spring-boot
 
-Maven multi-module project(and some Golang!) consuming and displaying PokeAPI data
+## pokedex-graphql
 
-* Datasource
-    * Redis for caching
-    * Mongodb as database
-    * GridFs as media database or object storage
-* Deployment
-    * Containers
-    * Minikube cluster
+Graphql server that serves the pokemon data and serves media from REST controller
 
-## Requirements
+- /api/v1/graphql
+- /api/v1/file/{fileName}
+- /graphiql
 
-For local development
+## pokedex-scheduler
 
-- GraalVM
-    - native image compilation
-- Go SDK
-    - libwebp - https://developers.google.com/speed/webp/docs/api
-- Protocol buffer compiler
-    - Maven do the compilation automatically
-    - Go protoc generator - `go install google.golang.org/protobuf/cmd/protoc-gen-go@latest`
-    - Go protoc Grpc generator - `go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
+Spring Boot scheduler that fetches pokeapi data and stores data to mongodb.
 
-## Quickstart
-
-* Install Docker
-    * run `docker compose -f docker-compose-db.yml up --force-recreate -d`
-    * start the databases on localhost for k8s external access
-* Install Minikube
-    * `minikube start`
-    * `minikube dashboard` - for some nice visualization
-* run `docker-build-all.ps1` - this might take a while
-* run `minikube-all.ps1`
-* Should do the trick!
-
-## api
-
-Contains the file-api server and graphql server
-
-## backstage
-
-Tasks and middleware services that populates redis and mongodb with data
+Redis Set is being used as a process queue
