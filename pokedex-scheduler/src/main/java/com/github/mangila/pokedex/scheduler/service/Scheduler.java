@@ -6,13 +6,11 @@ import com.github.mangila.pokedex.scheduler.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.scheduler.pokeapi.response.allpokemons.AllPokemonsResponse;
 import com.github.mangila.pokedex.scheduler.pokeapi.response.allpokemons.Result;
 import jakarta.annotation.PostConstruct;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -21,13 +19,10 @@ import java.util.concurrent.TimeUnit;
 @lombok.extern.slf4j.Slf4j
 public class Scheduler {
 
-    public static final String REDIS_POKEMON_RESULT_SET = "pokemon-result-set";
-    public static final String REDIS_POKEMON_MEDIA_SET = "pokemon-media-set";
-
     private final PokemonTask pokemonTask;
     private final MediaTask mediaTask;
     private final PokeApiTemplate pokeApiTemplate;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final QueueService queueService;
 
     /**
      * Initializes and queues all Pokémon species results from the external PokéAPI into a Redis set.
@@ -52,52 +47,18 @@ public class Scheduler {
         pokeApiTemplate.fetchByUrl(uri, AllPokemonsResponse.class)
                 .results()
                 .stream()
-                .map(result -> PokemonEntry.builder()
-                        .name(result.name())
-                        .uri(URI.create(result.url()))
-                        .build())
-                .forEach(entry -> {
-                    Long added = redisTemplate
-                            .opsForSet()
-                            .add(REDIS_POKEMON_RESULT_SET, entry);
-                    if (Objects.nonNull(added) && added == 1) {
-                        log.debug("Added pokemon result: {}", entry);
-                    }
-                });
+                .map(PokemonEntry::of)
+                .forEach(entry -> queueService.add(QueueService.REDIS_POKEMON_SET, entry));
     }
 
     @Scheduled(initialDelay = 5, fixedRate = 10, timeUnit = TimeUnit.SECONDS)
     public void pollPokemonResult() {
-        var pokemonEntry = (PokemonEntry) redisTemplate
-                .opsForSet()
-                .pop(REDIS_POKEMON_RESULT_SET);
-        if (Objects.nonNull(pokemonEntry)) {
-            try {
-                log.debug("Processing pokemon entry: {}", pokemonEntry.name());
-                pokemonTask.run(pokemonEntry);
-            } catch (Exception e) {
-                log.error("ERR", e);
-                redisTemplate.opsForSet()
-                        .add(REDIS_POKEMON_RESULT_SET, pokemonEntry);
-            }
-        }
+        queueService.poll(QueueService.REDIS_POKEMON_SET, PokemonEntry.class, pokemonTask::run);
     }
 
 
     @Scheduled(initialDelay = 30, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
     public void pollPokemonMedia() {
-        var mediaEntry = (MediaEntry) redisTemplate
-                .opsForSet()
-                .pop(REDIS_POKEMON_MEDIA_SET);
-        if (Objects.nonNull(mediaEntry)) {
-            try {
-                log.debug("Processing media entry: {}", mediaEntry.name());
-                mediaTask.run(mediaEntry);
-            } catch (Exception e) {
-                log.error("ERR", e);
-                redisTemplate.opsForSet()
-                        .add(REDIS_POKEMON_MEDIA_SET, mediaEntry);
-            }
-        }
+        queueService.poll(QueueService.REDIS_POKEMON_MEDIA_SET, MediaEntry.class, mediaTask::run);
     }
 }
