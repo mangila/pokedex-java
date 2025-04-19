@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.mangila</groupId>
     <artifactId>pokedex-graphql</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>pokedex-graphql</name>
     <description>pokedex-graphql</description>
     <properties>

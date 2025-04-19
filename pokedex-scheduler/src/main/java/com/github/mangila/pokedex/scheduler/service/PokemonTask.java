@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.scheduler.service;
 
+import com.github.mangila.pokedex.scheduler.domain.PokemonEntry;
 import com.github.mangila.pokedex.scheduler.pokeapi.PokeApiTemplate;
-import com.github.mangila.pokedex.scheduler.pokeapi.response.allpokemons.Result;
 import com.github.mangila.pokedex.scheduler.pokeapi.response.evolutionchain.EvolutionChainResponse;
 import com.github.mangila.pokedex.scheduler.pokeapi.response.pokemon.PokemonResponse;
 import com.github.mangila.pokedex.scheduler.pokeapi.response.species.SpeciesResponse;
@@ -21,12 +21,12 @@ public class PokemonTask {
     private final PokemonSpeciesRepository pokemonSpeciesRepository;
     private final PokemonMediaHandler pokemonMediaHandler;
 
-    public void run(Result poll) {
-        var speciesResponse = pokeApiTemplate.fetchByUrl(URI.create(poll.url()), SpeciesResponse.class);
+    public void run(PokemonEntry pokemonEntry) {
+        var speciesResponse = pokeApiTemplate.fetchByUrl(pokemonEntry.uri(), SpeciesResponse.class);
         var evolutionChainResponse = pokeApiTemplate.fetchByUrl(URI.create(speciesResponse.evolutionChain().url()), EvolutionChainResponse.class);
         var varieties = speciesResponse.varieties()
                 .stream()
-                .peek(variety -> log.debug("Processing varieties: {} - {}", variety.pokemon().name(), poll.name()))
+                .peek(variety -> log.debug("Processing varieties: {} - {}", variety.pokemon().name(), pokemonEntry.name()))
                 .map(variety -> URI.create(variety.pokemon().url()))
                 .map(uri -> pokeApiTemplate.fetchByUrl(uri, PokemonResponse.class))
                 .toList();

@@ -51,7 +51,7 @@ public class MediaTask {
                     mediaEntry.uri()
             );
             var contentType = getContentType(fileName);
-            var fileId = gridFsTemplate.store(
+            var mediaId = gridFsTemplate.store(
                     new ByteArrayInputStream(response.getBody()),
                     fileName,
                     contentType);
@@ -61,7 +61,7 @@ public class MediaTask {
                     .is(mediaEntry.varietyId()));
             Update update = new Update();
             update.push("varieties.$.media", PokemonMediaDocument.builder()
-                    .mediaId(fileId.toString())
+                    .mediaId(mediaId.toString())
                     .fileName(fileName)
                     .build());
             mongoTemplate.updateFirst(query, update, PokemonSpeciesDocument.class);
