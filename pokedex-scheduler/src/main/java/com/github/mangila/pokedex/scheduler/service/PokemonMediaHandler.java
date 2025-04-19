@@ -35,7 +35,7 @@ public class PokemonMediaHandler {
         if (Objects.nonNull(url)) {
             var uri = URI.create(url);
             ensureUriFromPokeApi(uri);
-            redisTemplate.opsForSet().add(Scheduler.REDIS_POKEMON_MEDIA_SET, MediaEntry.builder()
+            redisTemplate.opsForSet().add(QueueService.REDIS_POKEMON_MEDIA_SET, MediaEntry.builder()
                     .speciesId(speciesId)
                     .varietyId(varietyId)
                     .name(name)
