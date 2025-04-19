@@ -27,7 +27,8 @@ public class PokemonTask {
         var varieties = speciesResponse.varieties()
                 .stream()
                 .peek(variety -> log.debug("Processing varieties: {} - {}", variety.pokemon().name(), pokemonEntry.name()))
-                .map(variety -> URI.create(variety.pokemon().url()))
+                .map(variety -> variety.pokemon().url())
+                .map(URI::create)
                 .map(uri -> pokeApiTemplate.fetchByUrl(uri, PokemonResponse.class))
                 .toList();
         var document = PokemonSpeciesDocument.of(speciesResponse, evolutionChainResponse, varieties);

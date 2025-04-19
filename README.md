@@ -21,6 +21,7 @@ through GraphQL endpoints.
 - GraphQL for API queries
 - Project Reactor Netty for async operations
 - TestContainers for integration testing
+- Minikube for local Kubernetes development
 
 ## Prerequisites
 
@@ -28,25 +29,8 @@ through GraphQL endpoints.
 - MongoDB
 - Redis
 - Maven
+- Python 3.8+
 
 ## Building
 
-## Architecture
-
-The application consists of several key components:
-
-1. **Scheduler**: Coordinates the data processing pipeline
-2. **Task Processors**:
-    - Pokemon Task: Handles Pokemon data processing
-    - Media Task: Manages media file downloads and storage
-3. **API Layer**:
-    - GraphQL endpoints for data queries
-    - REST endpoints for media file serving
-
-## Data Flow
-
-1. Initial data fetch from PokéAPI
-2. Task queuing in Redis
-3. Scheduled processing of queued tasks
-4. Storage in MongoDB/GridFS
-5. Data serving through GraphQL/REST APIs
+### 1. Build Java Applications
