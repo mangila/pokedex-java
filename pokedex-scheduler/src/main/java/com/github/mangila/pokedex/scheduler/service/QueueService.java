@@ -36,4 +36,10 @@ public class QueueService {
         }
     }
 
+    public boolean isEmpty(String queueName) {
+        var size = redisTemplate.opsForSet().size(queueName);
+        log.debug("Queue: {} size: {}", queueName, size);
+        return Objects.nonNull(size) && size == 0L;
+    }
+
 }

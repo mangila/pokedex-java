@@ -57,8 +57,15 @@ public class Scheduler {
     }
 
 
-    @Scheduled(initialDelay = 30, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(initialDelay = 60, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
     public void pollPokemonMedia() {
         queueService.poll(QueueService.REDIS_POKEMON_MEDIA_SET, MediaEntry.class, mediaTask::run);
+    }
+
+    @Scheduled(initialDelay = 3, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
+    public void shutdown() {
+        if (queueService.isEmpty(QueueService.REDIS_POKEMON_SET) && queueService.isEmpty(QueueService.REDIS_POKEMON_MEDIA_SET)) {
+            System.exit(0);
+        }
     }
 }
