@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import sys
 from subprocess import CalledProcessError
@@ -28,6 +29,25 @@ def run_command(command) -> CommandResult:
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
         return CommandResult(None, str(e))
+
+
+def build_jar_file():
+    """Build the Java project"""
+    os = platform.system().lower()
+    if os == "windows":
+        build = run_command("mvnw.cmd clean package")
+        if build.stderr is not None:
+            print(f"{build.stderr}")
+            return False
+    elif os == "linux":
+        build = run_command("mvnw.sh clean package")
+        if build.stderr is not None:
+            print(f"{build.stderr}")
+            return False
+    else:
+        print(f"Unsupported OS: {os}")
+        return False
+    return True
 
 
 def check_minikube_status() -> bool:
@@ -66,6 +86,9 @@ def minikube_deploy():
 
 def main():
     """Main execution function."""
+    if not build_jar_file():
+        print("Failed to build Java project")
+        sys.exit(1)
     if not check_minikube_status():
         print("Minikube is not running")
         sys.exit(1)
