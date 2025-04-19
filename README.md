@@ -89,7 +89,7 @@ The application is built using a microservices architecture with two main compon
 - Java 21 or higher
 - MongoDB 5.0+
 - Redis 6.0+
-- Maven 3.8+
+- Maven 3.8+ (optional)
 - Minikube 1.26+
 - Python 3.8+
 - Docker
