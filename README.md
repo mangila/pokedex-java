@@ -20,9 +20,8 @@ The application is built using a microservices architecture with two main compon
 - Handles media file downloads and storage
 - Components:
     - Task Scheduler
-    - Pokemon Data Processor
-    - Media Handler
-    - Redis Queue Manager
+    - PokemonMediaHandler
+    - QueueService
 
 ### 2. GraphQL API Service
 
