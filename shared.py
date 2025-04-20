@@ -1,7 +1,6 @@
 import subprocess
 from subprocess import CalledProcessError
 
-DOCKER_TAG = "pokedex-graphql"
 
 class CommandResult:
     def __init__(self, stdout, stderr):
@@ -9,13 +8,14 @@ class CommandResult:
         self.stderr = stderr
 
 
-def run_command(command) -> CommandResult:
+def run_command(command, cwd) -> CommandResult:
     """Execute a shell command and return its output."""
     try:
         print(command)
         process = subprocess.run(command,
                                  shell=True,
                                  check=True,
+                                 cwd=cwd,
                                  text=True,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)

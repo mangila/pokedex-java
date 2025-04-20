@@ -4,19 +4,17 @@ repos:
     hooks:
       - id: build_graphql
         name: Build Graphql Project
-        entry: python build.py
+        entry: python build.py ./pokedex-graphql pokedex-graphql
         language: system
         verbose: true
-        require_serial: true
         files: "^pokedex-graphql"
         stages:
           - pre-commit
       - id: build_scheduler
         name: Build Scheduler Project
-        entry: python build.py
+        entry: python build.py ./pokedex-scheduler pokedex-scheduler
         language: system
         verbose: true
-        require_serial: true
         files: "^pokedex-scheduler"
         stages:
           - pre-commit

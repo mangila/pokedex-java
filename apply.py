@@ -1,7 +1,6 @@
 import sys
 
-from shared import run_command, DOCKER_TAG
-
+from shared import run_command
 
 
 def check_minikube_status() -> bool:
@@ -9,9 +8,9 @@ def check_minikube_status() -> bool:
     return "Running" in run_command("minikube status").stdout
 
 
-def minikube_deploy() -> bool:
-    """Deploy the Docker image to Minikube and apply the k8s spec"""
-    load = run_command(f"minikube image load {DOCKER_TAG}.tar")
+def minikube_apply(cwd, docker_tag) -> bool:
+    """Load the Docker image to Minikube and apply the k8s spec"""
+    load = run_command(f"minikube image load {docker_tag}.tar", cwd)
     if load.stderr is not None:
         print(f"{load.stderr}")
         return False
@@ -23,16 +22,21 @@ def minikube_deploy() -> bool:
     return True
 
 
-def main():
+def main(args):
     """Main execution function."""
+    if not args:
+        print("No args specified")
+        sys.exit(1)
+    cwd = args[0]
+    docker_tag = args[1]
     if not check_minikube_status():
         print("Minikube is not running")
         sys.exit(1)
-    if not minikube_deploy():
+    if not minikube_apply(cwd, docker_tag):
         print("Failed to deploy to Minikube")
         sys.exit(1)
     print("Deployment successful")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[:1])

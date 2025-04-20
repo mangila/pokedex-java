@@ -3,22 +3,26 @@ import sys
 from shared import run_command
 
 
-def minikube_destroy() -> bool:
+def minikube_destroy(cwd):
     """Delete the k8s resources"""
-    destroy = run_command(f"minikube kubectl -- delete -f k8s.yml")
+    destroy = run_command("minikube kubectl -- delete -f k8s.yml", cwd)
     if destroy.stderr is not None:
         print(f"{destroy.stderr}")
         return False
     return True
 
 
-def main():
+def main(args):
     """Main execution function."""
-    if not minikube_destroy():
+    cwd = args[0]
+    if not cwd:
+        print("No working directory specified")
+        sys.exit(1)
+    if not minikube_destroy(cwd):
         print("Failed to destroy deployment")
         sys.exit(1)
     print("Deployment destroyed")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[:1])
