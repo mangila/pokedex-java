@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.scheduler.pokeapi;
 
+import com.github.mangila.pokedex.scheduler.util.SchedulerUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -30,13 +31,13 @@ public class PokeApiTemplate {
     }
 
     public <T> T fetchByUrl(URI uri, Class<T> clazz) {
-        ensureUriFromPokeApi(uri);
+        SchedulerUtils.ensureUriFromPokeApi(uri);
         var cacheValue = redisTemplate.opsForValue().get(uri.toString());
         if (Objects.nonNull(cacheValue)) {
             log.debug("Cache hit - {}", cacheValue);
             return clazz.cast(cacheValue);
         }
-        log.debug("Cache miss");
+        log.debug("Cache miss - {}", uri);
         var response = http.get()
                 .uri(uri)
                 .retrieve()
@@ -45,11 +46,5 @@ public class PokeApiTemplate {
             redisTemplate.opsForValue().set(uri.toString(), response);
         }
         return response;
-    }
-
-    private void ensureUriFromPokeApi(URI uri) {
-        if (!uri.getHost().startsWith("pokeapi.co")) {
-            throw new IllegalArgumentException("PokeApiTemplate only supports hosts of 'pokeapi.com'");
-        }
     }
 }

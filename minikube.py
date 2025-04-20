@@ -73,11 +73,11 @@ if __name__ == "__main__":
     destroy_graphql = run_python_script("destroy.py", GRAPHQL_CWD)
     if destroy_scheduler.stderr is not None:
         print(f"{destroy_graphql.stderr}")
-    apply_scheduler = run_python_script("deploy.py", SCHEDULER_CWD)
+    apply_scheduler = run_python_script("apply.py", SCHEDULER_CWD)
     if apply_scheduler.stderr is not None:
         print(f"{apply_scheduler.stderr}")
         sys.exit(1)
-    apply_graphql = run_python_script("deploy.py", GRAPHQL_CWD)
+    apply_graphql = run_python_script("apply.py", GRAPHQL_CWD)
     if apply_graphql.stderr is not None:
         print(f"{apply_graphql.stderr}")
         sys.exit(1)

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Import;
 import org.testcontainers.Testcontainers;
 
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest
+@SpringBootTest(properties = "app.scheduler.enabled=false")
 class SchedulerApplicationTests {
 
     @Test

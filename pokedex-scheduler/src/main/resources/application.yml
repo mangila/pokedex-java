@@ -1,5 +1,11 @@
+# Application properties
+app:
+  scheduler:
+    enabled: true
 # Spring Properties
 spring:
+  application:
+    name: pokedex-scheduler
   main:
     web-application-type: none
     keep-alive: true

@@ -3,6 +3,7 @@ package com.github.mangila.pokedex.scheduler.service;
 import com.github.mangila.pokedex.scheduler.domain.MediaEntry;
 import com.github.mangila.pokedex.scheduler.repository.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.scheduler.repository.document.embedded.PokemonMediaDocument;
+import com.github.mangila.pokedex.scheduler.util.SchedulerUtils;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -13,10 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriUtils;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.util.Objects;
 
 @Service
@@ -34,23 +33,28 @@ public class MediaTask {
                 .requestFactory(new ReactorClientHttpRequestFactory())
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .defaultHeader(HttpHeaders.ACCEPT_ENCODING, "gzip")
-                .defaultHeader(HttpHeaders.CACHE_CONTROL, "no-store")
                 .build();
     }
 
 
+    /**
+     * Executes a task to retrieve media from a specified URI, store it in GridFS with metadata,
+     * and update the media information in the corresponding database document for a specific Pokemon species and variety.
+     *
+     * @param mediaEntry the media entry object containing details about the species, variety, name, file suffix, and URI to the media
+     */
     public void run(MediaEntry mediaEntry) {
         var response = http.get()
                 .uri(mediaEntry.uri())
                 .retrieve()
                 .toEntity(byte[].class);
         if (response.getStatusCode().is2xxSuccessful() && Objects.nonNull(response.getBody())) {
-            var fileName = createFileName(
+            var fileName = SchedulerUtils.createFileName(
                     mediaEntry.name(),
                     mediaEntry.suffix(),
                     mediaEntry.uri()
             );
-            var contentType = getContentType(fileName);
+            var contentType = SchedulerUtils.getContentType(fileName);
             var mediaId = gridFsTemplate.store(
                     new ByteArrayInputStream(response.getBody()),
                     fileName,
@@ -66,27 +70,5 @@ public class MediaTask {
                     .build());
             mongoTemplate.updateFirst(query, update, PokemonSpeciesDocument.class);
         }
-    }
-
-    private String getContentType(String fileName) {
-        return switch (UriUtils.extractFileExtension(fileName)) {
-            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
-            case "png" -> MediaType.IMAGE_PNG_VALUE;
-            case "gif" -> MediaType.IMAGE_GIF_VALUE;
-            case "svg" -> "image/svg+xml";
-            case "ogg" -> "audio/ogg";
-            case null -> throw new NullPointerException();
-            default -> throw new IllegalArgumentException("Unsupported file extension: " + fileName);
-        };
-    }
-
-    private String createFileName(String name, String suffix, URI uri) {
-        return new StringBuilder()
-                .append(name)
-                .append("-")
-                .append(suffix)
-                .append(".")
-                .append(UriUtils.extractFileExtension(uri.toString()))
-                .toString();
     }
 }
