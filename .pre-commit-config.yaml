@@ -17,6 +17,6 @@ repos:
         language: system
         verbose: true
         require_serial: true
-        files: "pokedex-scheduler/.*"
+        files: "^pokedex-scheduler/.*"
         stages:
           - pre-commit

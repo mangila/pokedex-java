@@ -4,7 +4,6 @@ from shared import run_command, DOCKER_TAG
 
 
 
-
 def check_minikube_status() -> bool:
     """ Check if Minikube is running """
     return "Running" in run_command("minikube status").stdout
