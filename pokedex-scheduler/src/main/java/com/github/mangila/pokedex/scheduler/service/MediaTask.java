@@ -44,15 +44,17 @@ public class MediaTask {
      * @param mediaEntry the media entry object containing details about the species, variety, name, file suffix, and URI to the media
      */
     public void run(MediaEntry mediaEntry) {
+        var uri = mediaEntry.uri();
+        SchedulerUtils.ensureUriFromPokeApi(uri);
         var response = http.get()
-                .uri(mediaEntry.uri())
+                .uri(uri)
                 .retrieve()
                 .toEntity(byte[].class);
         if (response.getStatusCode().is2xxSuccessful() && Objects.nonNull(response.getBody())) {
             var fileName = SchedulerUtils.createFileName(
                     mediaEntry.name(),
                     mediaEntry.suffix(),
-                    mediaEntry.uri()
+                    uri
             );
             var contentType = SchedulerUtils.getContentType(fileName);
             var mediaId = gridFsTemplate.store(

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+@lombok.Builder
 public record SpeciesResponse(
         @JsonProperty("id") int id,
         @JsonProperty("name") String name,

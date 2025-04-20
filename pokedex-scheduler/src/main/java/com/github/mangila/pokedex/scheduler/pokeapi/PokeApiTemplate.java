@@ -34,7 +34,7 @@ public class PokeApiTemplate {
         SchedulerUtils.ensureUriFromPokeApi(uri);
         var cacheValue = redisTemplate.opsForValue().get(uri.toString());
         if (Objects.nonNull(cacheValue)) {
-            log.debug("Cache hit - {}", cacheValue);
+            log.debug("Cache hit - {}", uri);
             return clazz.cast(cacheValue);
         }
         log.debug("Cache miss - {}", uri);

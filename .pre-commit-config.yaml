@@ -1,0 +1,22 @@
+fail_fast: true
+repos:
+  - repo: local
+    hooks:
+      - id: build_graphql
+        name: Build Graphql Project
+        entry: python build.py
+        language: system
+        verbose: true
+        require_serial: true
+        files: "^pokedex-graphql"
+        stages:
+          - pre-commit
+      - id: build_scheduler
+        name: Build Scheduler Project
+        entry: python build.py
+        language: system
+        verbose: true
+        require_serial: true
+        files: "^pokedex-scheduler"
+        stages:
+          - pre-commit

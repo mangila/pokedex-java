@@ -35,11 +35,13 @@ public class SchedulerUtils {
         if (Objects.isNull(uri)) {
             throw new IllegalArgumentException("URI cannot be null");
         }
-        switch (uri.getHost()) {
-            case "raw.githubusercontent.com", "pokeapi.co":
-                return;
-            default:
-                throw new IllegalArgumentException("should start with 'raw.githubusercontent.com' or 'pokeapi.co' - " + uri);
+        var host = uri.getHost();
+        if (Objects.equals(host, "pokeapi.co") || Objects.equals(host, "raw.githubusercontent.com")) {
+            if (!Objects.equals(uri.getScheme(), "https")) {
+                throw new IllegalArgumentException("should be 'https' - " + uri);
+            }
+        } else {
+            throw new IllegalArgumentException("should start with 'raw.githubusercontent.com' or 'pokeapi.co' - " + uri);
         }
     }
 }
