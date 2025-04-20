@@ -20,6 +20,7 @@ def build_jar_file(cwd) -> bool:
     else:
         print(f"Unsupported OS: {os}")
         return False
+
     return True
 
 
