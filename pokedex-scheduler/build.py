@@ -47,6 +47,5 @@ def main():
         sys.exit(1)
     print("Build successful")
 
-
 if __name__ == "__main__":
     main()
