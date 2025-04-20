@@ -5,7 +5,7 @@ from shared import run_command
 
 def check_minikube_status() -> bool:
     """ Check if Minikube is running """
-    return "Running" in run_command("minikube status").stdout
+    return "Running" in run_command("minikube status", ".").stdout
 
 
 def minikube_apply(cwd, docker_tag) -> bool:
@@ -14,7 +14,7 @@ def minikube_apply(cwd, docker_tag) -> bool:
     if load.stderr is not None:
         print(f"{load.stderr}")
         return False
-    apply = run_command(f"minikube kubectl -- apply -f k8s.yml")
+    apply = run_command(f"minikube kubectl -- apply -f k8s.yml", cwd)
     if apply.stderr is not None:
         print(f"{apply.stderr}")
         return False
@@ -39,4 +39,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv[:1])
+    main(sys.argv[1:])
