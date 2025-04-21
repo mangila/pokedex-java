@@ -72,6 +72,34 @@ spec:
             - name: http
               protocol: TCP
               containerPort: 80
+          # Startup probe - checks initial application startup
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 80
+            failureThreshold: 30       # Allow up to 5 minutes for startup (30 * 10s)
+            periodSeconds: 10
+            initialDelaySeconds: 10
+          # Readiness probe - checks if app is ready to serve traffic
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          # Liveness probe - checks if app is running properly
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 80
+            initialDelaySeconds: 60    # Give app time to start up
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
           envFrom:
             - secretRef:
                 name: pokedex-graphql-secret
