@@ -2,19 +2,19 @@ fail_fast: true
 repos:
   - repo: local
     hooks:
-      - id: build_graphql
-        name: Build Graphql Project
-        entry: python build.py ./pokedex-graphql pokedex-graphql
+      - id: test_graphql
+        name: Test Graphql Project
+        entry: python pokedex/mvn.py 'test -pl shared,graphql -am' pokedex
         language: system
         verbose: true
-        files: "^pokedex-graphql"
+        files: "^pokedex/graphql"
         stages:
           - pre-commit
-      - id: build_scheduler
-        name: Build Scheduler Project
-        entry: python build.py ./pokedex-scheduler pokedex-scheduler
+      - id: test_scheduler
+        name: Test Scheduler Project
+        entry: python pokedex/mvn.py 'test -pl shared,scheduler -am' pokedex
         language: system
         verbose: true
-        files: "^pokedex-scheduler"
+        files: "^pokedex/scheduler"
         stages:
           - pre-commit

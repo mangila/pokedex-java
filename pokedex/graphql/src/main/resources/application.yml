@@ -1,0 +1,39 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+  graphql:
+    schema:
+      file-extensions: .graphql
+    graphiql:
+      enabled: true
+      path: "/graphiql"
+    cors:
+      allowed-origins: "*"
+      allowed-headers: "*"
+      allowed-methods: "*"
+    path: "/api/v1/graphql"
+  data:
+    mongodb:
+      host: "localhost"
+      port: "27017"
+      username: "admin"
+      password: "password"
+      authentication-database: "admin"
+      database: "pokemon"
+      gridfs:
+        bucket: "pokemon"
+        database: "pokemon"
+      auto-index-creation: true
+    redis:
+      client-type: lettuce
+      host: "localhost"
+      port: 6379
+      lettuce:
+        pool:
+          enabled: true
+          time-between-eviction-runs: 60s
+          max-wait: -1ms
+          min-idle: 0
+          max-idle: -1
+          max-active: -1
