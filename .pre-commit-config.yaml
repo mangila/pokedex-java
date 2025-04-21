@@ -7,7 +7,7 @@ repos:
         entry: python pokedex/mvn.py 'test -pl shared,graphql -am' pokedex
         language: system
         verbose: true
-        files: "^pokedex/graphql"
+        files: "^pokedex/graphql/src"
         stages:
           - pre-commit
       - id: test_scheduler
@@ -15,6 +15,6 @@ repos:
         entry: python pokedex/mvn.py 'test -pl shared,scheduler -am' pokedex
         language: system
         verbose: true
-        files: "^pokedex/scheduler"
+        files: "^pokedex/scheduler/src"
         stages:
           - pre-commit
