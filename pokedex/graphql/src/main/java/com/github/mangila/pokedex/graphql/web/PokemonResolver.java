@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.graphql.web;
 
+import com.github.mangila.pokedex.shared.repository.document.PokemonSpeciesDocument;
 import lombok.AllArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -16,11 +17,11 @@ public class PokemonResolver {
 
     @QueryMapping
     public Object findById(@Argument Integer id) {
-        return mongoTemplate.findById(id, Object.class, "pokemon");
+        return mongoTemplate.findById(id, PokemonSpeciesDocument.class);
     }
 
     @QueryMapping
     public Object findByName(@Argument String name) {
-        return mongoTemplate.findOne(Query.query(Criteria.where("name").is(name)), Object.class, "pokemon");
+        return mongoTemplate.findOne(Query.query(Criteria.where("name").is(name)), PokemonSpeciesDocument.class);
     }
 }
