@@ -28,12 +28,12 @@ type PokemonStat {
 }
 
 type PokemonMedia {
-    media_id:String!
-    file_name:String!
+    mediaId:String!
+    fileName:String!
 }
 
 type PokemonVariety {
-    pokemon_id: ID!
+    pokemonId: ID!
     name: String!
     is_default: Boolean!
     height: String
@@ -44,14 +44,14 @@ type PokemonVariety {
 }
 
 type PokemonSpecial {
-    is_special: Boolean!
+    isSpecial: Boolean!
     legendary: Boolean!
     mythical: Boolean!
     baby: Boolean!
 }
 
 type PokemonSpecies {
-    _id: ID!
+    id: ID!
     name: String!
     generation: String!
     names: [PokemonName!]!
