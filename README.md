@@ -3,7 +3,7 @@
 A modern Pokedex application built with Spring Boot, GraphQL, MongoDB, and Redis. This project provides a GraphQL API
 for querying Pokemon data and a scheduler for fetching and updating Pokemon data from the PokeAPI.
 
-![Pokedex](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png)
+<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="pikachu" width="200"/>
 
 ## Features
 
