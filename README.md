@@ -10,7 +10,9 @@ for querying Pokemon data and a scheduler for fetching and updating Pokemon data
 - **GraphQL API**: Query Pokemon data using GraphQL
 - **Automatic Data Synchronization**: Scheduler fetches and updates Pokemon data from the PokeAPI
 - **MongoDB Storage**: Pokemon data is stored in MongoDB
+    - Mongodb Connection String - `mongodb://admin:password@localhost:27017`
 - **Redis Caching**: Frequently accessed data is cached in Redis
+    - Redis Insight—http://localhost:8001
 - **Kubernetes Ready**: Deployment configurations for Kubernetes included
 - **Docker Support**: Containerized for easy deployment
 
@@ -57,8 +59,9 @@ The project is structured as a multi-module Maven project:
 
 The easiest way to deploy the application is by using the provided minikube.py script:
 
-1. Start Minikube:
+1. Start Minikube and start the MongoDB and Redis containers:
    ```bash
+   docker compose -f docker-compose-db.yml up -d
    minikube start
    ```
 
@@ -67,13 +70,13 @@ The easiest way to deploy the application is by using the provided minikube.py s
    python minikube.py
    ```
 
-This script will:
+   This script will:
 
-- Check minikube status
-- Deploy MongoDB and Redis to your local Kubernetes cluster
-- Build and package the application modules
-- Build Docker images for each service
-- Deploy all services to your minikube cluster
+    - Check minikube status
+    - create access to external MongoDB and Redis to your local Kubernetes cluster
+    - Build and package the application modules
+    - Build Docker images for each service
+    - Deploy all services to your minikube cluster
 
 3. Access the GraphQL API:
    ```bash
