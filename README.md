@@ -48,78 +48,36 @@ The project is structured as a multi-module Maven project:
 
 ### Prerequisites
 
-- Java 21 or later
-- Maven 3.6 or later
-- Docker and Docker Compose (for local development)
 - Minikube (for local Kubernetes deployment)
-- Python 3.8 or later (for automated local Kubernetes deployment)
+- Java 21 or later
+- Python 3.8 or later
+- Docker
 
-### Local Development
+### Deployment with Minikube
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/mangila/pokedex-spring-boot.git
-   cd pokedex-spring-boot
-   ```
-
-2. Build the project:
-   ```bash
-   mvn clean install
-   ```
-
-3. Run the applications:
-   ```bash
-   # Run the scheduler to fetch Pokemon data
-   java -jar scheduler/target/scheduler.jar
-   
-   # Run the GraphQL API
-   java -jar graphql/target/api.jar
-   ```
-
-### Docker Deployment
-
-1. Build the Docker images:
-   ```bash
-   # Build the scheduler image
-   docker build -t pokedex-scheduler:latest -f scheduler/Dockerfile .
-   
-   # Build the GraphQL API image
-   docker build -t pokedex-graphql:latest -f graphql/Dockerfile .
-   ```
-
-2. Run the containers:
-   ```bash
-   docker-compose up -d
-   ```
-
-### Kubernetes Deployment
+The easiest way to deploy the application is by using the provided minikube.py script:
 
 1. Start Minikube:
    ```bash
    minikube start
    ```
 
-2. Deploy MongoDB:
-   ```bash
-   kubectl apply -f k8s-external-database.yml
-   ```
-
-3. Deploy the applications:
-   ```bash
-   # Deploy the scheduler
-   kubectl apply -f scheduler/k8s.yml
-   
-   # Deploy the GraphQL API
-   kubectl apply -f graphql/k8s.yml
-   ```
-
-4. Access the GraphQL API:
-   ```bash
-   minikube service pokedex-graphql-service -n pokedex
-   ```
-5. Run python script(Optional):
+2. Run the deployment script:
    ```bash
    python minikube.py
+   ```
+
+This script will:
+
+- Check minikube status
+- Deploy MongoDB and Redis to your local Kubernetes cluster
+- Build and package the application modules
+- Build Docker images for each service
+- Deploy all services to your minikube cluster
+
+3. Access the GraphQL API:
+   ```bash
+   minikube service pokedex-graphql-service -n pokedex
    ```
 
 ## API Usage
@@ -186,19 +144,9 @@ query {
 }
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License—see the LICENSE file for details.
 
 ## Acknowledgements
 
