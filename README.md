@@ -5,19 +5,32 @@ for querying Pokemon data and a scheduler for fetching and updating Pokemon data
 
 #### Requirements
 
-Why build this project? To use Spring Boot and Java with its ecosystem to fulfill the requirements:
+Why build this project?
+
+- Discover how to create a simple casual application and see how much pain there is to build it using these
+  technologies and ecosystem.
+
+Spring Boot and Java with its ecosystem to fulfill the requirements:
 
 - [x] HTTP request to third-party API
+    - [x] GZIP compression
 - [x] Daemon Service to fetch and transform data
+    - [x] CronJob or anything else to run periodically, some kind of trigger
 - [x] Expose endpoints to serve data
+    - [x] REST, GraphQL, etc.
 - [x] Media processing
-    - [?] Image compression/conversion (.webp)
+    - [?] Convert images to .webp
 - [x] Media storage
+    - [x] Client for GridFS, S3, AZ Blob Storage, etc.
 - [x] Data caching
+    - [x] Client for Redis, Memcached, etc.
 - [x] Data storage
+    - [x] Client for MongoDB, MySQL, etc.
 - [WIP] Integration and unit testing
 - [WIP] Real-time data processing
+    - [WIP] Websocket, SSE, etc.
 - [x] Deployment
+    - [x] Build artifact and run
 
 <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="pikachu" width="200"/>
 
