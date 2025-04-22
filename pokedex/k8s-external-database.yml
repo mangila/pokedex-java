@@ -13,8 +13,7 @@ spec:
   type: ExternalName
   externalName: "host.minikube.internal"
   ports:
-    - name: redis
-      protocol: TCP
+    - protocol: TCP
       port: 6379
       targetPort: 6379
 ---
@@ -32,9 +31,7 @@ metadata:
 spec:
   type: ExternalName
   externalName: "host.minikube.internal"
-  sessionAffinity: None
   ports:
-    - name: mongodb
-      protocol: TCP
+    - protocol: TCP
       port: 27017
       targetPort: 27017
