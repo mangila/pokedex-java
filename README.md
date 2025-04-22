@@ -12,12 +12,14 @@ Why build this project?
 
 Spring Boot and Java with its ecosystem to fulfill the requirements:
 
-- [x] HTTP request to third-party API
+- [x] HTTP Client
     - [x] GZIP compression
+    - [WIP] Retry Strategy
 - [x] Daemon Service to fetch and transform data
     - [x] CronJob or anything else to run periodically, some kind of trigger
 - [x] Expose endpoints to serve data
     - [x] REST, GraphQL, etc.
+    - [WIP] C.R.U.D. operations
 - [x] Media processing
     - [?] Convert images to .webp
 - [x] Media storage
@@ -28,7 +30,7 @@ Spring Boot and Java with its ecosystem to fulfill the requirements:
     - [x] Client for MongoDB, MySQL, etc.
 - [WIP] Integration and unit testing
 - [WIP] Real-time data processing
-    - [WIP] Websocket, SSE, etc.
+    - [WIP] Websocket, SSE, Reactive Streams, etc.
 - [x] Deployment
     - [x] Build artifact and run
 
