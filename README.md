@@ -7,8 +7,8 @@ for querying Pokemon data and a scheduler for fetching and updating Pokemon data
 
 Why build this project?
 
-- Discover how to create a simple casual application and see how much pain there is to build it using these
-  technologies and ecosystem.
+- Explore the process of building a casual application,
+  highlighting both the capabilities and challenges of working with this technology stack and ecosystem.
 
 Spring Boot and Java with its ecosystem to fulfill the requirements:
 
@@ -86,7 +86,7 @@ The project is structured as a multi-module Maven project:
 
 ### Deployment with Minikube
 
-The easiest way to deploy the application is by using the provided minikube.py script:
+The easiest way to deploy the application is by using the provided `minikube.py` script:
 
 1. Start Minikube and start the MongoDB and Redis containers:
    ```bash
@@ -102,6 +102,7 @@ The easiest way to deploy the application is by using the provided minikube.py s
    This script will:
 
     - Check minikube status
+    - Create a Kubernetes namespace for the application
     - Create access to external MongoDB and Redis to your local Kubernetes cluster
     - Build and package the application modules
     - Build Docker images for each service
