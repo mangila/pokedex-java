@@ -33,7 +33,7 @@ if __name__ == "__main__":
     run_cmd("minikube kubectl -- apply -f k8s-external-database.yml")
 
     for service in SERVICES:
-        run_mvn_command(command=f"clean package -pl {service['mvn_modules']} -am")
+        run_mvn_command(command=f"clean package -DskipTests -pl {service['mvn_modules']} -am")
         build_docker_image(working_dir=service['cwd'], docker_tag=service['docker_tag'])
         run_cmd(command="minikube kubectl -- delete -f k8s.yml", cwd=service['cwd'])
         run_cmd(command=f"minikube image load {service['docker_tag']}.tar", cwd=service['cwd'])
