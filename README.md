@@ -100,7 +100,7 @@ The easiest way to deploy the application is by using the provided minikube.py s
    This script will:
 
     - Check minikube status
-    - create access to external MongoDB and Redis to your local Kubernetes cluster
+    - Create access to external MongoDB and Redis to your local Kubernetes cluster
     - Build and package the application modules
     - Build Docker images for each service
     - Deploy all services to your minikube cluster
