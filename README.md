@@ -3,6 +3,22 @@
 A modern Pokedex application built with Spring Boot, GraphQL, MongoDB, and Redis. This project provides a GraphQL API
 for querying Pokemon data and a scheduler for fetching and updating Pokemon data from the PokeAPI.
 
+#### Requirements
+
+Why build this project? To use Spring Boot and Java with its ecosystem to fulfill the requirements:
+
+- [x] HTTP request to third-party API
+- [x] Daemon Service to fetch and transform data
+- [x] Expose endpoints to serve data
+- [x] Media processing
+    - [?] Image compression/conversion (.webp)
+- [x] Media storage
+- [x] Data caching
+- [x] Data storage
+- [WIP] Integration and unit testing
+- [WIP] Real-time data processing
+- [x] Deployment
+
 <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="pikachu" width="200"/>
 
 ## Features
@@ -10,9 +26,7 @@ for querying Pokemon data and a scheduler for fetching and updating Pokemon data
 - **GraphQL API**: Query Pokemon data using GraphQL
 - **Automatic Data Synchronization**: Scheduler fetches and updates Pokemon data from the PokeAPI
 - **MongoDB Storage**: Pokemon data is stored in MongoDB
-    - Mongodb Connection String - `mongodb://admin:password@localhost:27017`
 - **Redis Caching**: Frequently accessed data is cached in Redis
-    - Redis Insight—http://localhost:8001
 - **Kubernetes Ready**: Deployment configurations for Kubernetes included
 - **Docker Support**: Containerized for easy deployment
 
@@ -84,6 +98,14 @@ The easiest way to deploy the application is by using the provided minikube.py s
    ```
 
 ## API Usage
+
+### Datasources
+
+When running the application locally, the following datasources are available:
+
+- Redis Cache—http://localhost:6379
+- Redis Insight—http://localhost:8001
+- Mongodb Connection String - `mongodb://admin:password@localhost:27017`
 
 ### GraphQL API
 
