@@ -14,7 +14,7 @@ public record PokemonEvolutionDocument(
         String name
 ) {
 
-    public static List<PokemonEvolutionDocument> of(EvolutionChainResponse response) {
+    public static List<PokemonEvolutionDocument> fromEvolutionChainResponse(EvolutionChainResponse response) {
         if (CollectionUtils.isEmpty(response.chain().firstChain())) {
             return Collections.emptyList();
         }

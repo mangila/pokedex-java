@@ -1,16 +1,17 @@
 package com.github.mangila.pokedex.scheduler.service;
 
 import com.github.mangila.pokedex.scheduler.domain.MediaEntry;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
+import com.github.mangila.pokedex.shared.pokeapi.PokeApiMediaTemplate;
+import com.github.mangila.pokedex.shared.repository.document.PokemonSpeciesDocument;
+import com.github.mangila.pokedex.shared.repository.document.embedded.PokemonMediaDocument;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Service;
-import com.github.mangila.pokedex.shared.pokeapi.PokeApiMediaTemplate;
-import com.github.mangila.pokedex.shared.repository.document.PokemonSpeciesDocument;
-import com.github.mangila.pokedex.shared.repository.document.embedded.PokemonMediaDocument;
-import com.github.mangila.pokedex.shared.util.SchedulerUtils;
+import org.springframework.web.util.UriUtils;
 
 import java.io.ByteArrayInputStream;
 
@@ -39,7 +40,7 @@ public class MediaTask {
     public void run(MediaEntry mediaEntry) {
         var uri = mediaEntry.uri();
         var response = http.fetchMedia(uri);
-        var fileName = SchedulerUtils.createFileName(
+        var fileName = createFileName(
                 mediaEntry.name(),
                 mediaEntry.suffix(),
                 uri
@@ -58,5 +59,15 @@ public class MediaTask {
                 .fileName(fileName)
                 .build());
         mongoTemplate.updateFirst(query, update, PokemonSpeciesDocument.class);
+    }
+
+    private String createFileName(String name, String suffix, PokeApiUri pokeApiUri) {
+        return new StringBuilder()
+                .append(name)
+                .append("-")
+                .append(suffix)
+                .append(".")
+                .append(UriUtils.extractFileExtension(pokeApiUri.toUriString()))
+                .toString();
     }
 }

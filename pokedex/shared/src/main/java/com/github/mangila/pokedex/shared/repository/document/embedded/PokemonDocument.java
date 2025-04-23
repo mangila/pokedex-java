@@ -25,20 +25,20 @@ public record PokemonDocument(
     private static final int METER_DENOMINATOR = 10;
     private static final int KILOGRAM_DENOMINATOR = 10;
 
-    public static PokemonDocument of(PokemonResponse response) {
+    public static PokemonDocument fromPokemonResponse(PokemonResponse response) {
         return PokemonDocument.builder()
                 .id(response.id())
                 .name(response.name())
                 .isDefault(response.isDefault())
                 .height(String.valueOf((double) response.height() / METER_DENOMINATOR))
                 .weight(String.valueOf((double) response.weight() / KILOGRAM_DENOMINATOR))
-                .types(PokemonTypeDocument.of(response.types()))
-                .stats(PokemonStatDocument.of(response.stats()))
+                .types(PokemonTypeDocument.fromTypesList(response.types()))
+                .stats(PokemonStatDocument.fromStatsWithTotal(response.stats()))
                 .media(Collections.emptyList())
                 .build();
     }
 
-    public static List<PokemonDocument> of(List<PokemonResponse> varieties) {
-        return varieties.stream().map(PokemonDocument::of).toList();
+    public static List<PokemonDocument> fromPokemonResponses(List<PokemonResponse> varieties) {
+        return varieties.stream().map(PokemonDocument::fromPokemonResponse).toList();
     }
 }

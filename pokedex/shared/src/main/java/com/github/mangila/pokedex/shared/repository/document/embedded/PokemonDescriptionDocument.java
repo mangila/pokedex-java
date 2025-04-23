@@ -15,16 +15,16 @@ public record PokemonDescriptionDocument(
 
     private static final Matcher REPLACE_LINE_BREAKS = Pattern.compile("[\r\n\t\f]+").matcher("");
 
-    public static PokemonDescriptionDocument of(FlavorTextEntries flavorTextEntries) {
+    public static PokemonDescriptionDocument fromFlavorTextEntry(FlavorTextEntries flavorTextEntries) {
         return PokemonDescriptionDocument.builder()
                 .description(REPLACE_LINE_BREAKS.reset(flavorTextEntries.flavorText()).replaceAll(" "))
                 .language(flavorTextEntries.language().name())
                 .build();
     }
 
-    public static List<PokemonDescriptionDocument> of(List<FlavorTextEntries> flavorTextEntries) {
+    public static List<PokemonDescriptionDocument> fromFlavorTextEntries(List<FlavorTextEntries> flavorTextEntries) {
         return flavorTextEntries.stream()
-                .map(PokemonDescriptionDocument::of)
+                .map(PokemonDescriptionDocument::fromFlavorTextEntry)
                 .toList();
     }
 }

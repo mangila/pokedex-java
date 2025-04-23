@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.scheduler.service;
 
 import com.github.mangila.pokedex.scheduler.domain.MediaEntry;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.pokeapi.response.pokemon.Cries;
 import com.github.mangila.pokedex.shared.pokeapi.response.pokemon.sprites.Sprites;
-import com.github.mangila.pokedex.shared.util.SchedulerUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.Objects;
 
 @Service
@@ -33,14 +32,12 @@ public class PokemonMediaHandler {
                                    String suffix,
                                    String url) {
         if (Objects.nonNull(url)) {
-            var uri = URI.create(url);
-            SchedulerUtils.ensureUriFromPokeApi(uri);
             redisTemplate.opsForSet().add(QueueService.MEDIA_QUEUE, MediaEntry.builder()
                     .speciesId(idPair.getFirst())
                     .varietyId(idPair.getSecond())
                     .name(name)
                     .suffix(suffix)
-                    .uri(uri)
+                    .uri(PokeApiUri.create(url))
                     .build());
         }
     }

@@ -10,13 +10,13 @@ public record PokemonTypeDocument(
         String type
 ) {
 
-    public static PokemonTypeDocument of(Types types) {
+    public static PokemonTypeDocument fromType(Types types) {
         return PokemonTypeDocument.builder()
                 .type(types.type().name())
                 .build();
     }
 
-    public static List<PokemonTypeDocument> of(List<Types> types) {
-        return types.stream().map(PokemonTypeDocument::of).toList();
+    public static List<PokemonTypeDocument> fromTypesList(List<Types> types) {
+        return types.stream().map(PokemonTypeDocument::fromType).toList();
     }
 }

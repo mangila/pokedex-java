@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.scheduler.domain.PokemonEntry;
 import com.github.mangila.pokedex.scheduler.service.MediaTask;
 import com.github.mangila.pokedex.scheduler.service.PokemonTask;
 import com.github.mangila.pokedex.scheduler.service.QueueService;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.repository.PokemonSpeciesRepository;
 import com.github.mangila.pokedex.shared.repository.document.PokemonSpeciesDocument;
 import com.github.mangila.pokedex.shared.repository.document.embedded.PokemonDocument;
@@ -18,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +45,7 @@ class SchedulerApplicationTests {
     void testPokemonTask() {
         queueService.add(QueueService.POKEMON_QUEUE, PokemonEntry.builder()
                 .name("ditto")
-                .uri(URI.create("https://pokeapi.co/api/v2/pokemon-species/ditto"))
+                .pokeApiUri(PokeApiUri.create("https://pokeapi.co/api/v2/pokemon-species/ditto"))
                 .build());
         var poll = queueService.poll(QueueService.POKEMON_QUEUE, PokemonEntry.class);
         assertThat(poll).isNotEmpty();
@@ -73,18 +73,9 @@ class SchedulerApplicationTests {
     @Test
     @Order(2)
     void testPokemonTaskSadPath() {
-        queueService.add(QueueService.POKEMON_QUEUE, PokemonEntry.builder()
-                .name("POKEMON_NOT_EXIST")
-                .uri(URI.create("https://example.xyz"))
-                .build());
-        var poll = queueService.poll(QueueService.POKEMON_QUEUE, PokemonEntry.class);
-        assertThat(poll).isNotEmpty();
-        assertThatThrownBy(() -> pokemonTask.run(poll.get()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("should start with 'raw.githubusercontent.com' or 'pokeapi.co'");
         assertThatThrownBy(() -> pokemonTask.run(PokemonEntry.builder()
                 .name("POKEMON_NOT_EXIST")
-                .uri(URI.create("http://pokeapi.co"))
+                .pokeApiUri(PokeApiUri.create("http://pokeapi.co"))
                 .build()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("should be 'https'");

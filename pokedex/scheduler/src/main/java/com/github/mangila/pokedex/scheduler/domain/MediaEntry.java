@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler.domain;
 
-import java.net.URI;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 
 @lombok.Builder
 public record MediaEntry(
@@ -8,6 +8,14 @@ public record MediaEntry(
         Integer varietyId,
         String name,
         String suffix,
-        URI uri
+        PokeApiUri uri
 ) {
+    public MediaEntry {
+        java.util.Objects.requireNonNull(speciesId, "Species ID cannot be null");
+        java.util.Objects.requireNonNull(varietyId, "Variety ID cannot be null");
+        java.util.Objects.requireNonNull(name, "Name cannot be null");
+        java.util.Objects.requireNonNull(suffix, "Suffix cannot be null");
+        java.util.Objects.requireNonNull(uri, "URI cannot be null");
+    }
 }
+

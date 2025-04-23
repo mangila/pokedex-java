@@ -11,14 +11,14 @@ public record PokemonGeneraDocument(
         String language
 ) {
 
-    public static PokemonGeneraDocument of(Genera genera) {
+    public static PokemonGeneraDocument fromGenera(Genera genera) {
         return PokemonGeneraDocument.builder()
                 .genera(genera.genus())
                 .language(genera.language().name())
                 .build();
     }
 
-    public static List<PokemonGeneraDocument> of(List<Genera> genera) {
-        return genera.stream().map(PokemonGeneraDocument::of).toList();
+    public static List<PokemonGeneraDocument> fromGeneraList(List<Genera> genera) {
+        return genera.stream().map(PokemonGeneraDocument::fromGenera).toList();
     }
 }

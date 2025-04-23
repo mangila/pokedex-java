@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.scheduler.service;
 
 import com.github.mangila.pokedex.scheduler.domain.MediaEntry;
 import com.github.mangila.pokedex.scheduler.domain.PokemonEntry;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.shared.pokeapi.response.allpokemons.AllPokemonsResponse;
 import jakarta.annotation.PostConstruct;
@@ -10,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -27,11 +27,11 @@ public class Scheduler {
 
     @PostConstruct
     public void queueAllPokemonSpecies() {
-        var uri = URI.create("https://pokeapi.co/api/v2/pokemon-species/?&limit=1025");
-        pokeApiTemplate.fetchByUrl(uri, AllPokemonsResponse.class)
+        var pokeApiUri = PokeApiUri.create("https://pokeapi.co/api/v2/pokemon-species/?&limit=1025");
+        pokeApiTemplate.fetchByUrl(pokeApiUri, AllPokemonsResponse.class)
                 .results()
                 .stream()
-                .map(PokemonEntry::of)
+                .map(PokemonEntry::fromResult)
                 .forEach(entry -> queueService.add(QueueService.POKEMON_QUEUE, entry));
     }
 

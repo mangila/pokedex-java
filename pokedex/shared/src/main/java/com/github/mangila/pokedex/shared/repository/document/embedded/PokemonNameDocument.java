@@ -11,15 +11,15 @@ public record PokemonNameDocument(
         String language
 ) {
 
-    public static PokemonNameDocument of(Names names) {
+    public static PokemonNameDocument fromNames(Names names) {
         return PokemonNameDocument.builder()
                 .name(names.name())
                 .language(names.language().name())
                 .build();
     }
 
-    public static List<PokemonNameDocument> of(List<Names> names) {
-        return names.stream().map(PokemonNameDocument::of).toList();
+    public static List<PokemonNameDocument> fromNamesList(List<Names> names) {
+        return names.stream().map(PokemonNameDocument::fromNames).toList();
     }
 
 }

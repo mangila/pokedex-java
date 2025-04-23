@@ -30,18 +30,18 @@ public record PokemonSpeciesDocument(
         @LastModifiedDate Instant lastModifiedDate
 ) {
 
-    public static PokemonSpeciesDocument of(SpeciesResponse speciesResponse,
+    public static PokemonSpeciesDocument fromSpeciesEvolutionAndVarieties(SpeciesResponse speciesResponse,
                                             EvolutionChainResponse evolutionChainResponse,
                                             List<PokemonResponse> varieties) {
         return PokemonSpeciesDocument.builder()
                 .id(speciesResponse.id())
                 .name(speciesResponse.name())
                 .generation(speciesResponse.generation().name())
-                .names(PokemonNameDocument.of(speciesResponse.names()))
-                .descriptions(PokemonDescriptionDocument.of(speciesResponse.flavorTextEntries()))
-                .genera(PokemonGeneraDocument.of(speciesResponse.genera()))
-                .evolutions(PokemonEvolutionDocument.of(evolutionChainResponse))
-                .varieties(PokemonDocument.of(varieties))
+                .names(PokemonNameDocument.fromNamesList(speciesResponse.names()))
+                .descriptions(PokemonDescriptionDocument.fromFlavorTextEntries(speciesResponse.flavorTextEntries()))
+                .genera(PokemonGeneraDocument.fromGeneraList(speciesResponse.genera()))
+                .evolutions(PokemonEvolutionDocument.fromEvolutionChainResponse(evolutionChainResponse))
+                .varieties(PokemonDocument.fromPokemonResponses(varieties))
                 .special(PokemonSpecialDocument.builder()
                         .isSpecial(speciesResponse.baby() && speciesResponse.legendary() && speciesResponse.mythical())
                         .baby(speciesResponse.baby())
@@ -52,4 +52,3 @@ public record PokemonSpeciesDocument(
     }
 
 }
-

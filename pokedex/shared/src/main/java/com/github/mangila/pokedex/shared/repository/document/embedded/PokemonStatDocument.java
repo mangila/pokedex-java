@@ -11,14 +11,14 @@ public record PokemonStatDocument(
         int value
 ) {
 
-    public static PokemonStatDocument of(Stats stats) {
+    public static PokemonStatDocument fromStat(Stats stats) {
         return PokemonStatDocument.builder()
                 .name(stats.stat().name())
                 .value(stats.baseStat())
                 .build();
     }
 
-    public static List<PokemonStatDocument> of(List<Stats> stats) {
+    public static List<PokemonStatDocument> fromStatsWithTotal(List<Stats> stats) {
         var totalSum = stats.stream()
                 .mapToInt(Stats::baseStat)
                 .sum();
@@ -27,7 +27,7 @@ public record PokemonStatDocument(
                 .value(totalSum)
                 .build();
         var list = new java.util.ArrayList<>(stats.stream()
-                .map(PokemonStatDocument::of)
+                .map(PokemonStatDocument::fromStat)
                 .toList());
         list.add(total);
         return list;

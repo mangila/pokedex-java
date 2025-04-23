@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -7,9 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import com.github.mangila.pokedex.shared.util.SchedulerUtils;
 
-import java.net.URI;
 import java.util.Objects;
 
 @Slf4j
@@ -29,20 +28,20 @@ public class PokeApiTemplate {
         this.redisTemplate = redisTemplate;
     }
 
-    public <T> T fetchByUrl(URI uri, Class<T> clazz) {
-        SchedulerUtils.ensureUriFromPokeApi(uri);
-        var cacheValue = redisTemplate.opsForValue().get(uri.toString());
+    public <T> T fetchByUrl(PokeApiUri pokeApiUri, Class<T> clazz) {
+        var cacheValue = redisTemplate.opsForValue().get(pokeApiUri.toUriString());
         if (Objects.nonNull(cacheValue)) {
-            log.debug("Cache hit - {}", uri);
+            log.debug("Cache hit - {}", pokeApiUri);
             return clazz.cast(cacheValue);
         }
-        log.debug("Cache miss - {}", uri);
+        log.debug("Cache miss - {}", pokeApiUri);
         var response = http.get()
-                .uri(uri)
+                .uri(pokeApiUri.uri())
                 .retrieve()
                 .body(clazz);
         if (Objects.nonNull(response)) {
-            redisTemplate.opsForValue().set(uri.toString(), response);
+            redisTemplate.opsForValue()
+                    .set(pokeApiUri.toUriString(), response);
         }
         return response;
     }

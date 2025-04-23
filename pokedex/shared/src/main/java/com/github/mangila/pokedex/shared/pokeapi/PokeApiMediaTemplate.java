@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -7,11 +8,9 @@ import org.springframework.http.client.ReactorClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
-import com.github.mangila.pokedex.shared.util.SchedulerUtils;
-
-import java.net.URI;
 
 @Service
+@lombok.extern.slf4j.Slf4j
 public class PokeApiMediaTemplate {
 
     private final RestClient http;
@@ -27,10 +26,10 @@ public class PokeApiMediaTemplate {
                 .build();
     }
 
-    public MediaResponse fetchMedia(URI uri) {
-        SchedulerUtils.ensureUriFromPokeApi(uri);
+    public MediaResponse fetchMedia(PokeApiUri pokeApiUri) {
+        log.debug("Fetching media: {}", pokeApiUri);
         return http.get()
-                .uri(uri)
+                .uri(pokeApiUri.uri())
                 .exchange((request, response) -> {
                     var contentType = response.getHeaders().getContentType();
                     long contentLength = response.getHeaders().getContentLength();
