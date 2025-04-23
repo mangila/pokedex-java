@@ -3,7 +3,7 @@ from subprocess import CalledProcessError
 
 
 def run_cmd(command, cwd="."):
-    """Execute a shell command and return its output."""
+    """Execute a shell command and print its output."""
     try:
         print(command)
         process = subprocess.run(command,

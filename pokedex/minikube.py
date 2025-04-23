@@ -26,7 +26,6 @@ def build_docker_image(working_dir: str, docker_tag: str):
 
 
 if __name__ == "__main__":
-    """Main execution function."""
     run_cmd("minikube status")
     run_cmd("minikube kubectl create namespace pokedex")
     run_cmd("minikube kubectl -- delete -f k8s-external-database.yml")

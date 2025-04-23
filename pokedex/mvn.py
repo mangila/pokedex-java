@@ -15,7 +15,6 @@ def run_mvn_command(command: str, working_dir: str = "."):
 
 
 if __name__ == "__main__":
-    """Main execution function."""
     mvn_command = sys.argv[1]
     cwd = sys.argv[2]
     run_mvn_command(command=mvn_command, working_dir=cwd)
