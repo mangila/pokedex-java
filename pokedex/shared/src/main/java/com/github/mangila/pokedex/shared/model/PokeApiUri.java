@@ -23,19 +23,13 @@ public record PokeApiUri(URI uri) {
      * @throws IllegalArgumentException if the URI is not valid or doesn't meet the PokeApi requirements
      */
     public static PokeApiUri create(String uri) {
-        if (uri == null) {
-            throw new IllegalArgumentException("URI string cannot be null");
-        }
-
+        Objects.requireNonNull(uri, "URI string cannot be null");
         URI parsedUri = URI.create(uri);
         ensureUriFromPokeApi(parsedUri);
         return new PokeApiUri(parsedUri);
     }
 
     private static void ensureUriFromPokeApi(URI uri) {
-        if (Objects.isNull(uri)) {
-            throw new IllegalArgumentException("URI cannot be null");
-        }
         var host = uri.getHost();
         if (Objects.equals(host, "pokeapi.co") || Objects.equals(host, "raw.githubusercontent.com")) {
             if (!Objects.equals(uri.getScheme(), "https")) {

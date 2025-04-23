@@ -33,7 +33,7 @@ class PokeApiUriTest {
     @Test
     void create_shouldThrowIllegalArgumentException_whenUriStringIsNull() {
         assertThatThrownBy(() -> PokeApiUri.create(null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(NullPointerException.class)
                 .hasMessage("URI string cannot be null");
     }
 
