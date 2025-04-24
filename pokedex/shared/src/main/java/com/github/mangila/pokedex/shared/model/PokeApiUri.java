@@ -13,6 +13,7 @@ public record PokeApiUri(URI uri) {
 
     public PokeApiUri {
         Objects.requireNonNull(uri, "URI cannot be null");
+        ensureUriFromPokeApi(uri);
     }
 
     /**

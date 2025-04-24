@@ -6,8 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.net.URI;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class PokeApiUriTest {
 
@@ -84,5 +83,19 @@ class PokeApiUriTest {
 
         // Then
         assertThat(result).isEqualTo(uriString);
+    }
+
+    @Test
+    void compactConstructor_shouldValidate() {
+        var validUri = URI.create("https://pokeapi.co/api/v2/pokemon/1");
+        assertThatCode(() -> new PokeApiUri(validUri)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void compactConstructor_shouldValidateAndThrow() {
+        var invalidUri = URI.create("https://example.com/api/v2/pokemon/1");
+        assertThatThrownBy(() -> new PokeApiUri(invalidUri))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("should start with 'raw.githubusercontent.com' or 'pokeapi.co'");
     }
 }
