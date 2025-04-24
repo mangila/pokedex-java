@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 @Service
 @EnableScheduling
@@ -40,30 +41,36 @@ public class Scheduler {
 
     @Scheduled(initialDelay = 5, fixedRate = 10, timeUnit = TimeUnit.SECONDS)
     public void pollPokemon() {
-        var entryOptional = queueService.poll(QueueService.POKEMON_QUEUE, PokemonEntry.class);
-        if (entryOptional.isPresent()) {
-            try {
-                pokemonTask.run(entryOptional.get());
-            } catch (Exception e) {
-                log.error("Failed to process entry", e);
-                queueService.add(QueueService.POKEMON_QUEUE, entryOptional.get());
-            }
-        }
+        processQueueEntry(QueueService.POKEMON_QUEUE, PokemonEntry.class, pokemonTask::run);
     }
 
 
     @Scheduled(initialDelay = 60, fixedRate = 3, timeUnit = TimeUnit.SECONDS)
     public void pollMedia() {
-        var entryOptional = queueService.poll(QueueService.MEDIA_QUEUE, MediaEntry.class);
+        processQueueEntry(QueueService.MEDIA_QUEUE, MediaEntry.class, mediaTask::run);
+    }
+
+    /**
+     * Generic method to process entries from a queue with proper error handling.
+     *
+     * @param queueName  the name of the queue to poll
+     * @param entryClass the class type of the entry
+     * @param processor  the function to process the entry
+     * @param <T>        the type of the entry
+     */
+    private <T> void processQueueEntry(String queueName, Class<T> entryClass, Consumer<T> processor) {
+        var entryOptional = queueService.poll(queueName, entryClass);
         if (entryOptional.isPresent()) {
+            T entry = entryOptional.get();
             try {
-                mediaTask.run(entryOptional.get());
+                processor.accept(entry);
             } catch (Exception e) {
-                log.error("Failed to process entry", e);
-                queueService.add(QueueService.MEDIA_QUEUE, entryOptional.get());
+                log.error("Failed to process entry from queue '{}': {}", queueName, entry, e);
+                queueService.add(queueName, entry);
             }
         }
     }
+
 
     @Scheduled(initialDelay = 3, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void terminateIfProcessingComplete() {
