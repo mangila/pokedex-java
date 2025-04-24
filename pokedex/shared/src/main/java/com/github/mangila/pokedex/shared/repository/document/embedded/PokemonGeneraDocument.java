@@ -5,17 +5,13 @@ import com.github.mangila.pokedex.shared.pokeapi.response.species.Genera;
 
 import java.util.List;
 
-@lombok.Builder
 public record PokemonGeneraDocument(
         String genera,
         String language
 ) {
 
     public static PokemonGeneraDocument fromGenera(Genera genera) {
-        return PokemonGeneraDocument.builder()
-                .genera(genera.genus())
-                .language(genera.language().name())
-                .build();
+        return new PokemonGeneraDocument(genera.genus(), genera.language().name());
     }
 
     public static List<PokemonGeneraDocument> fromGeneraList(List<Genera> genera) {

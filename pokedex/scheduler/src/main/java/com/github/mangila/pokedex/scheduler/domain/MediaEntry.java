@@ -2,7 +2,6 @@ package com.github.mangila.pokedex.scheduler.domain;
 
 import com.github.mangila.pokedex.shared.model.PokeApiUri;
 
-@lombok.Builder
 public record MediaEntry(
         Integer speciesId,
         Integer varietyId,

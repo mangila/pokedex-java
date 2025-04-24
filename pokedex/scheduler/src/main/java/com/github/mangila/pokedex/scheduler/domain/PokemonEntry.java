@@ -8,7 +8,6 @@ import com.github.mangila.pokedex.shared.pokeapi.response.allpokemons.Result;
  * Represents a Pokémon entry with basic identification information.
  * This record holds a Pokémon's name and its validated API URI.
  */
-@lombok.Builder
 public record PokemonEntry(
         String name,
         PokeApiUri pokeApiUri
@@ -35,4 +34,6 @@ public record PokemonEntry(
     public static PokemonEntry fromResult(Result result) {
         return new PokemonEntry(result.name(), PokeApiUri.create(result.url()));
     }
+
+
 }

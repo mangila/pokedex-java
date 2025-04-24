@@ -7,7 +7,6 @@ import com.github.mangila.pokedex.shared.pokeapi.response.pokemon.PokemonRespons
 import java.util.Collections;
 import java.util.List;
 
-@lombok.Builder
 public record PokemonDocument(
         @Field("pokemon_id")
         @Indexed
@@ -26,16 +25,16 @@ public record PokemonDocument(
     private static final int KILOGRAM_DENOMINATOR = 10;
 
     public static PokemonDocument fromPokemonResponse(PokemonResponse response) {
-        return PokemonDocument.builder()
-                .id(response.id())
-                .name(response.name())
-                .isDefault(response.isDefault())
-                .height(String.valueOf((double) response.height() / METER_DENOMINATOR))
-                .weight(String.valueOf((double) response.weight() / KILOGRAM_DENOMINATOR))
-                .types(PokemonTypeDocument.fromTypesList(response.types()))
-                .stats(PokemonStatDocument.fromStatsWithTotal(response.stats()))
-                .media(Collections.emptyList())
-                .build();
+        return new PokemonDocument(
+                response.id(),
+                response.name(),
+                response.isDefault(),
+                String.valueOf((double) response.height() / METER_DENOMINATOR),
+                String.valueOf((double) response.weight() / KILOGRAM_DENOMINATOR),
+                PokemonTypeDocument.fromTypesList(response.types()),
+                PokemonStatDocument.fromStatsWithTotal(response.stats()),
+                Collections.emptyList()
+        );
     }
 
     public static List<PokemonDocument> fromPokemonResponses(List<PokemonResponse> varieties) {

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@lombok.Builder
 public record PokemonEvolutionDocument(
         int order,
         String name
@@ -20,10 +19,7 @@ public record PokemonEvolutionDocument(
         }
         var chain = response.chain();
         return getEvolutions(chain.firstChain(), new ArrayList<>(
-                List.of(PokemonEvolutionDocument.builder()
-                        .order(0)
-                        .name(chain.species().name())
-                        .build())
+                List.of(new PokemonEvolutionDocument(0, chain.species().name()))
         ));
     }
 
@@ -34,10 +30,7 @@ public record PokemonEvolutionDocument(
                 return evolutions;
             }
             var chain = next.getFirst();
-            evolutions.add(PokemonEvolutionDocument.builder()
-                    .order(evolutions.size())
-                    .name(chain.species().name())
-                    .build());
+            evolutions.add(new PokemonEvolutionDocument(evolutions.size(), chain.species().name()));
             next = chain.nextChain();
         }
     }

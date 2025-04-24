@@ -43,10 +43,7 @@ class SchedulerApplicationTests {
     @Test
     @Order(1)
     void testPokemonTask() {
-        queueService.add(QueueService.POKEMON_QUEUE, PokemonEntry.builder()
-                .name("ditto")
-                .pokeApiUri(PokeApiUri.create("https://pokeapi.co/api/v2/pokemon-species/ditto"))
-                .build());
+        queueService.add(QueueService.POKEMON_QUEUE, new PokemonEntry("ditto", PokeApiUri.create("https://pokeapi.co/api/v2/pokemon-species/ditto")));
         var poll = queueService.poll(QueueService.POKEMON_QUEUE, PokemonEntry.class);
         assertThat(poll).isNotEmpty();
         assertThatNoException().isThrownBy(() -> pokemonTask.run(poll.get()));
@@ -73,10 +70,7 @@ class SchedulerApplicationTests {
     @Test
     @Order(2)
     void testPokemonTaskSadPath() {
-        assertThatThrownBy(() -> pokemonTask.run(PokemonEntry.builder()
-                .name("POKEMON_NOT_EXIST")
-                .pokeApiUri(PokeApiUri.create("http://pokeapi.co"))
-                .build()))
+        assertThatThrownBy(() -> pokemonTask.run(new PokemonEntry("POKEMON_NOT_EXIST", PokeApiUri.create("http://pokeapi.co"))))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("should be 'https'");
     }

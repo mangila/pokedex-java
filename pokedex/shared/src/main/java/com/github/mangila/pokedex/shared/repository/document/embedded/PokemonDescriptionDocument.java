@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@lombok.Builder
 public record PokemonDescriptionDocument(
         String description,
         String language
@@ -16,10 +15,10 @@ public record PokemonDescriptionDocument(
     private static final Matcher REPLACE_LINE_BREAKS = Pattern.compile("[\r\n\t\f]+").matcher("");
 
     public static PokemonDescriptionDocument fromFlavorTextEntry(FlavorTextEntries flavorTextEntries) {
-        return PokemonDescriptionDocument.builder()
-                .description(REPLACE_LINE_BREAKS.reset(flavorTextEntries.flavorText()).replaceAll(" "))
-                .language(flavorTextEntries.language().name())
-                .build();
+        return new PokemonDescriptionDocument(
+                REPLACE_LINE_BREAKS.reset(flavorTextEntries.flavorText()).replaceAll(" "),
+                flavorTextEntries.language().name()
+        );
     }
 
     public static List<PokemonDescriptionDocument> fromFlavorTextEntries(List<FlavorTextEntries> flavorTextEntries) {

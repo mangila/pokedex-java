@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.List;
 
 @Document("pokemon")
-@lombok.Builder
 public record PokemonSpeciesDocument(
         @NotNull @Id int id,
         @NotNull @Field("name") String name,
@@ -33,22 +32,24 @@ public record PokemonSpeciesDocument(
     public static PokemonSpeciesDocument fromSpeciesEvolutionAndVarieties(SpeciesResponse speciesResponse,
                                             EvolutionChainResponse evolutionChainResponse,
                                             List<PokemonResponse> varieties) {
-        return PokemonSpeciesDocument.builder()
-                .id(speciesResponse.id())
-                .name(speciesResponse.name())
-                .generation(speciesResponse.generation().name())
-                .names(PokemonNameDocument.fromNamesList(speciesResponse.names()))
-                .descriptions(PokemonDescriptionDocument.fromFlavorTextEntries(speciesResponse.flavorTextEntries()))
-                .genera(PokemonGeneraDocument.fromGeneraList(speciesResponse.genera()))
-                .evolutions(PokemonEvolutionDocument.fromEvolutionChainResponse(evolutionChainResponse))
-                .varieties(PokemonDocument.fromPokemonResponses(varieties))
-                .special(PokemonSpecialDocument.builder()
-                        .isSpecial(speciesResponse.baby() && speciesResponse.legendary() && speciesResponse.mythical())
-                        .baby(speciesResponse.baby())
-                        .legendary(speciesResponse.legendary())
-                        .mythical(speciesResponse.mythical())
-                        .build())
-                .build();
+        return new PokemonSpeciesDocument(
+                speciesResponse.id(),
+                speciesResponse.name(),
+                speciesResponse.generation().name(),
+                PokemonNameDocument.fromNamesList(speciesResponse.names()),
+                PokemonDescriptionDocument.fromFlavorTextEntries(speciesResponse.flavorTextEntries()),
+                PokemonGeneraDocument.fromGeneraList(speciesResponse.genera()),
+                PokemonEvolutionDocument.fromEvolutionChainResponse(evolutionChainResponse),
+                PokemonDocument.fromPokemonResponses(varieties),
+                new PokemonSpecialDocument(
+                        speciesResponse.baby() && speciesResponse.legendary() && speciesResponse.mythical(),
+                        speciesResponse.legendary(),
+                        speciesResponse.mythical(),
+                        speciesResponse.baby()
+                ),
+                null,
+                null
+        );
     }
 
 }

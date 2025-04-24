@@ -12,10 +12,13 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.github.mangila.pokedex.graphql", "com.github.mangila.pokedex.shared"})
 @EnableMongoRepositories(basePackages = {"com.github.mangila.pokedex.shared.repository"})
-@lombok.AllArgsConstructor
 public class GraphqlApplication {
 
     private final MongoTemplate mongoTemplate;
+
+    public GraphqlApplication(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(GraphqlApplication.class, args);

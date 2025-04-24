@@ -1,6 +1,8 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
 import com.github.mangila.pokedex.shared.model.PokeApiUri;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -10,9 +12,9 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@lombok.extern.slf4j.Slf4j
 public class PokeApiMediaTemplate {
 
+    private static final Logger log = LoggerFactory.getLogger(PokeApiMediaTemplate.class);
     private final RestClient http;
 
     public PokeApiMediaTemplate() {

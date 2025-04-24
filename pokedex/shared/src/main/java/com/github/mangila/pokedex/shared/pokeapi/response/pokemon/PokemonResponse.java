@@ -5,7 +5,6 @@ import com.github.mangila.pokedex.shared.pokeapi.response.pokemon.sprites.Sprite
 
 import java.util.List;
 
-@lombok.Builder
 public record PokemonResponse(
         @JsonProperty("id") int id,
         @JsonProperty("name") String name,
