@@ -26,7 +26,6 @@ public record PokeApiUri(URI uri) {
     public static PokeApiUri create(String uri) {
         Objects.requireNonNull(uri, "URI string cannot be null");
         URI parsedUri = URI.create(uri);
-        ensureUriFromPokeApi(parsedUri);
         return new PokeApiUri(parsedUri);
     }
 
