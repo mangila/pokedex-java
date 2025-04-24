@@ -6,7 +6,9 @@ import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.pokeapi.PokeApiTemplate;
 import com.github.mangila.pokedex.shared.pokeapi.response.allpokemons.AllPokemonsResponse;
 import jakarta.annotation.PostConstruct;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ public class Scheduler {
     private final MediaTask mediaTask;
     private final PokeApiTemplate pokeApiTemplate;
     private final QueueService queueService;
+    private final ApplicationContext applicationContext;
 
     @PostConstruct
     public void queueAllPokemonSpecies() {
@@ -63,10 +66,15 @@ public class Scheduler {
     }
 
     @Scheduled(initialDelay = 3, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
-    public void shutdown() {
-        if (queueService.isEmpty(QueueService.POKEMON_QUEUE) &&
-                queueService.isEmpty(QueueService.MEDIA_QUEUE)) {
-            System.exit(0);
+    public void terminateIfProcessingComplete() {
+        if (areAllQueuesEmpty()) {
+            log.info("All queues are empty. Shutting down application gracefully.");
+            SpringApplication.exit(applicationContext, () -> 0);
         }
+    }
+
+    private boolean areAllQueuesEmpty() {
+        return queueService.isEmpty(QueueService.POKEMON_QUEUE) &&
+                queueService.isEmpty(QueueService.MEDIA_QUEUE);
     }
 }
