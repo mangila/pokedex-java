@@ -1,4 +1,4 @@
-package com.github.mangila;
+package com.github.mangila.pokedex.graphql;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
