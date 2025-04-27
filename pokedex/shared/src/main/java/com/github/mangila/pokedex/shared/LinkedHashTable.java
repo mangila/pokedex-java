@@ -1,4 +1,4 @@
 package com.github.mangila.pokedex.shared;
 
-public class ChainedHashTable {
+public class LinkedHashTable {
 }
