@@ -1,19 +1,17 @@
 package com.github.mangila.pokedex.shared.https;
 
+import com.github.mangila.pokedex.shared.pokeapi.Header;
+import com.github.mangila.pokedex.shared.pokeapi.Request;
 import org.junit.jupiter.api.Test;
-
-import java.net.URI;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RequestTest {
 
     @Test
     void toRawHttpRequest() {
-        var r = new Request(URI.create("https://pokeapi.co/api/v2/pokemon-species/bulbasaur"), "GET", new Header[]{
+        var r = new Request("/api/v2/pokemon-species/bulbasaur", new Header[]{
                 new Header("key", "value"),
                 new Header("accept", "application/json"),
         });
-        System.out.println(r.toRawHttpRequest());
+        System.out.println(r.toRawHttpRequest("pokeapi.co"));
     }
 }

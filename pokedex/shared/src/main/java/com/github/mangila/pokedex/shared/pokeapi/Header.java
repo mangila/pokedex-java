@@ -1,10 +1,10 @@
-package com.github.mangila.pokedex.shared.https;
+package com.github.mangila.pokedex.shared.pokeapi;
 
 public record Header(
         String key,
         String value
 ) {
     public String toHeaderLine() {
-        return key + ": " + value;
+        return String.format("%s: %s", key, value);
     }
 }

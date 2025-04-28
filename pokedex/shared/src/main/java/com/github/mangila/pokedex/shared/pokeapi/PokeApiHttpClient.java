@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https;
+package com.github.mangila.pokedex.shared.pokeapi;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -11,6 +11,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 public class PokeApiHttpClient {
+
+    private static final String HOST = "pokeapi.co";
+    private static final int PORT = 443;
+    private static final String[] PROTOCOL = new String[]{"TLSv1.2"};
 
     private static final SSLContext sslContext;
     private final SSLSocketFactory sslSocketFactory;
@@ -39,11 +43,11 @@ public class PokeApiHttpClient {
         this.sslSocketFactory = sslContext.getSocketFactory();
     }
 
-    public void connect(Request request) {
+    public void connect() {
         try {
-            this.socket = (SSLSocket) sslSocketFactory.createSocket(request.uri().getHost(), 443);
+            this.socket = (SSLSocket) sslSocketFactory.createSocket(HOST, PORT);
             socket.setUseClientMode(Boolean.TRUE);
-            socket.setEnabledProtocols(new String[]{"TLSv1.2"});
+            socket.setEnabledProtocols(PROTOCOL);
             socket.startHandshake();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -65,12 +69,11 @@ public class PokeApiHttpClient {
             var input = socket.getInputStream();
             var output = socket.getOutputStream();
             var reader = new BufferedReader(new InputStreamReader(input));
-            var r = request.toRawHttpRequest();
+            var r = request.toRawHttpRequest(HOST);
             output.write(r.getBytes());
             output.flush();
             var statusCode = reader.readLine();
             System.out.println(statusCode);
-
         } catch (Exception e) {
 
         }
