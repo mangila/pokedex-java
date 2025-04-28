@@ -6,12 +6,9 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class PokeApiHttpClient {
 
@@ -20,7 +17,7 @@ public class PokeApiHttpClient {
     private SSLSocket socket;
 
     static {
-        System.setProperty("javax.net.debug", "handshake");
+        System.setProperty("javax.net.debug", "ssl:handshake");
         try {
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, null, SecureRandom.getInstanceStrong());
