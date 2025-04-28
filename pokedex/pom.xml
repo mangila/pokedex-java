@@ -10,7 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>scheduler</module>
-        <module>graphql</module>
         <module>shared</module>
     </modules>
 
