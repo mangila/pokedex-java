@@ -28,6 +28,7 @@ public class PokeApiHttpClient {
         System.setProperty("javax.net.debug", "ssl:handshake");
         try {
             sslContext = SSLContext.getInstance("TLS");
+            // Default Java Keystore with some well-known certificates
             sslContext.init(null, null, SecureRandom.getInstanceStrong());
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new RuntimeException(e);
