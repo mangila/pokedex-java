@@ -17,6 +17,14 @@ public class PokeApiHttpClient {
     private SSLSocket socket;
 
     static {
+        /*
+        *** ClientHello, [cipher suites and supported SSL/TLS versions]
+        *** ServerHello, [cipher suite, session ID, server certificate]
+        ...
+        *** Certificate verification
+        ...
+        *** Finished handshake
+         */
         System.setProperty("javax.net.debug", "ssl:handshake");
         try {
             sslContext = SSLContext.getInstance("TLS");
