@@ -12,6 +12,9 @@ import java.util.concurrent.TimeUnit;
 public abstract class HttpsClient {
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClient.class);
+    private static final int DEFAULT_SEND_BUFFER_SIZE = 8192;
+    private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 1024 * 1024;
+    private static final int DEFAULT_PORT = 443;
     private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.2"};
 
     private final SSLSocketFactory sslSocketFactory;
@@ -24,24 +27,10 @@ public abstract class HttpsClient {
         this.sslSocketFactory = Ssl.CONTEXT.getSocketFactory();
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public SSLSocket getSocket() {
-        return socket;
-    }
-
-    public void setSocket(SSLSocket socket) {
-        this.socket = socket;
-    }
-
     /**
      * Establishes an SSL connection with custom socket options for optimized performance and secure communication.
      * <p>
      * The following socket options are configured:
-     * <p>
-     * - **SO_REUSEADDR**: Allows the socket to bind to an address that is already in use (useful for quickly restarting a server).
      * <p>
      * - **SO_SNDBUF (Send Buffer)**: Sets the socket's **send buffer size** to 8 KB, which is the amount of data the socket will buffer before sending.
      * <p>
@@ -59,14 +48,16 @@ public abstract class HttpsClient {
      * <p>
      * - **Handshake Listener**: Adds a listener that logs the **cipher suite** used in the SSL handshake, allowing verification of encryption standards.
      * <p>
+     * - **setUseClientMode**: Configures the socket to be in **client mode** (i.e., it will initiate a connection to a server). This is necessary for outgoing SSL/TLS connections.
+     * <p>
      * This method connects the socket to the specified host and port, performs the SSL handshake, and establishes a secure connection.
      */
     public void connect() {
         try {
             setSocket((SSLSocket) sslSocketFactory.createSocket());
-            getSocket().setUseClientMode(Boolean.TRUE);
-            getSocket().setSendBufferSize(8192);
-            getSocket().setReceiveBufferSize(1024 * 1024);
+            getSocket().setUseClientMode(Boolean.TRUE); // Set client mode for outgoing connections
+            getSocket().setSendBufferSize(DEFAULT_SEND_BUFFER_SIZE);
+            getSocket().setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
             getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(10));
             getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.SECONDS.toSeconds(10));
             getSocket().setTcpNoDelay(Boolean.TRUE);
@@ -75,12 +66,13 @@ public abstract class HttpsClient {
             getSocket().addHandshakeCompletedListener(event -> {
                 log.debug("Cipher Suite - {}", event.getCipherSuite());
             });
-            getSocket().connect(new InetSocketAddress(getHost(), 443));
+            getSocket().connect(new InetSocketAddress(getHost(), DEFAULT_PORT));
             getSocket().startHandshake();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 
     public void disconnect() {
         if (this.socket != null) {
@@ -93,4 +85,16 @@ public abstract class HttpsClient {
     }
 
     public abstract Response execute(Request request);
+
+    public String getHost() {
+        return host;
+    }
+
+    public SSLSocket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(SSLSocket socket) {
+        this.socket = socket;
+    }
 }
