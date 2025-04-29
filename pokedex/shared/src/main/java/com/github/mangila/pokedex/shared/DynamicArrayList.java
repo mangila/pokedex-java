@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked") // generic array creation
@@ -27,6 +28,7 @@ public class DynamicArrayList<T> implements Iterable<T> {
     }
 
     public T get(int index) {
+        Objects.checkIndex(index, size);
         return data[index];
     }
 

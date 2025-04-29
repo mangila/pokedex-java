@@ -130,7 +130,7 @@ public abstract class HttpsClient implements AutoCloseable {
                 throw new IOException("Stream ended unexpectedly");
             }
             statusCodeBuffer.write(current);
-            if (previous == '\r' && current == '\n' && statusCodeBuffer.size() >= 8) {
+            if (Utils.IsCrLf(previous, current) && statusCodeBuffer.size() >= 8) {
                 var statusCode = statusCodeBuffer.toString(Charset.defaultCharset());
                 log.debug("Status Code: {}", statusCode);
                 return statusCode;
@@ -149,7 +149,7 @@ public abstract class HttpsClient implements AutoCloseable {
                 throw new IOException("Stream ended unexpectedly");
             }
             headerBuffer.write(current);
-            if (previous == '\r' && current == '\n') {
+            if (Utils.IsCrLf(previous, current)) {
                 var header = headerBuffer.toString(Charset.defaultCharset());
                 if (header.isBlank()) {
                     break;
