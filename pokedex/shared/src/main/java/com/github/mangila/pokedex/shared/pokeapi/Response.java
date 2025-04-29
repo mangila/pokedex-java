@@ -1,4 +1,8 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
-public record Response(String statusCode, String body) {
+import java.util.Map;
+
+public record Response(String statusLine,
+                       Map<String, String> headers,
+                       String body) {
 }

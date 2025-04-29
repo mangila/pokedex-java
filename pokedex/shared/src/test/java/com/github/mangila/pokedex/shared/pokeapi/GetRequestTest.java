@@ -1,7 +1,5 @@
-package com.github.mangila.pokedex.shared.https;
+package com.github.mangila.pokedex.shared.pokeapi;
 
-import com.github.mangila.pokedex.shared.pokeapi.Header;
-import com.github.mangila.pokedex.shared.pokeapi.GetRequest;
 import org.junit.jupiter.api.Test;
 
 class GetRequestTest {
@@ -12,6 +10,6 @@ class GetRequestTest {
                 new Header("key", "value"),
                 new Header("accept", "application/json"),
         });
-        System.out.println(r.toHttp("pokeapi.co"));
+        System.out.println(r.toHttp("pokeapi.co",""));
     }
 }

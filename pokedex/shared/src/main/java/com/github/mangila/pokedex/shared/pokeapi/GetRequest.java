@@ -8,11 +8,11 @@ public record GetRequest(
         Header[] headers
 ) {
 
-    public String toRequestLine() {
-        return String.format("GET %s HTTP/1.1", path);
+    public String toRequestLine(String version) {
+        return String.format("GET %s %s", path, version.toUpperCase());
     }
 
-    public String toHttp(String host) {
+    public String toHttp(String host, String version) {
         var headers = Arrays.stream(headers())
                 .map(Header::toHeaderLine)
                 .collect(Collectors.joining("\n"));
@@ -22,6 +22,6 @@ public record GetRequest(
                 Connection: keep-alive
                 %s
                 
-                """.formatted(toRequestLine(), host, headers);
+                """.formatted(toRequestLine(version), host, headers);
     }
 }

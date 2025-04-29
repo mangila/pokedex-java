@@ -13,10 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
-public abstract class HttpsClient implements AutoCloseable {
+public class HttpsClient {
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClient.class);
     private static final int END_OF_STREAM = -1;
@@ -24,50 +23,69 @@ public abstract class HttpsClient implements AutoCloseable {
     private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 1024 * 1024;
     private static final int DEFAULT_PORT = 443;
     private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.3"};
+    private static final String DEFAULT_VERSION = "http/1.1";
 
-    private final SSLSocketFactory sslSocketFactory;
     private final PokeApiHost host;
+    private final SSLSocketFactory sslSocketFactory;
+    private final ResponseTtlCache cache;
 
     private SSLSocket socket;
-
-    public final Function<GetRequest, Response> get = this::get;
 
     public HttpsClient(String host) {
         this.host = new PokeApiHost(host);
         this.sslSocketFactory = Tls.CONTEXT.getSocketFactory();
+        this.cache = new ResponseTtlCache();
     }
 
-    abstract Response get(GetRequest getRequest);
+    Response get(GetRequest getRequest) {
+        try {
+            var outputStream = getSocket().getOutputStream();
+            var request = getRequest.toHttp(getHost(), getSocket().getApplicationProtocol());
+            outputStream.write(request.getBytes());
+            outputStream.flush();
+            var statusLine = readStatusLine();
+            var headers = readHeaders();
+            var body = readGzipBody(headers);
+            return new Response(statusLine, headers, body);
+        } catch (Exception e) {
+            log.error("ERR", e);
+            disconnect();
+        }
+        return new Response("", Map.of(), "");
+    }
 
     /**
-     * <summary>
      * Establishes a TLS/SSL connection with custom socket options for optimized performance and secure communication.
      * <p>
      * The following socket options are configured on the TCP socket:
+     * <ul>
+     * <li><b>SO_SNDBUF (Send Buffer):</b> Sets the socket's send buffer size to 8 KB, which is the amount of data the socket will buffer before sending.</li>
+     * <li><b>SO_RCVBUF (Receive Buffer):</b> Configures the socket's receive buffer size to 1 MB to handle larger incoming data efficiently.</li>
+     * <li><b>SO_TIMEOUT:</b> Sets the read timeout to 10 seconds, which prevents the socket from blocking indefinitely while waiting for a response.</li>
+     * <li><b>SO_LINGER:</b> Enables linger behavior with a timeout of 1 second, ensuring the socket closes gracefully even when there is still data being transmitted.</li>
+     * <li><b>TCP_NODELAY:</b> Disables Nagle's algorithm (via TCP_NODELAY) to ensure small packets are sent immediately without delay, reducing latency.</li>
+     * <li><b>SO_KEEPALIVE:</b> Enables keep-alive functionality, which ensures that the socket periodically checks if the connection is still active, useful for long-lived connections.</li>
+     * </ul>
      * <p>
-     * - SO_SNDBUF (Send Buffer): Sets the socket's send buffer size to 8 KB, which is the amount of data the socket will buffer before sending.
+     * SSL/TLS-specific configurations include:
+     * <ul>
+     * <li><b>Enabled Protocols:</b> Specifies which SSL/TLS protocols (e.g., TLSv1.2, TLSv1.3) to use for securing the connection.</li>
+     * <li><b>Handshake Listener:</b> Adds a listener that logs the cipher suite and protocol used during the SSL handshake, allowing verification of encryption standards.</li>
+     * <li><b>Client Mode:</b> Configures the socket to be in client mode (i.e., it will initiate a connection to a server). This is necessary for outgoing SSL/TLS connections.</li>
+     * </ul>
      * <p>
-     * - SO_RCVBUF (Receive Buffer): Configures the socket's receive buffer size to 1 MB to handle larger incoming data efficiently.
+     * This method:
+     * <ul>
+     * <li>Creates and configures an SSL socket with the specified options.</li>
+     * <li>Performs the SSL handshake and establishes a secure connection with the specified host and port.</li>
+     * <li>Logs the negotiated cipher suite and SSL/TLS protocol version after the handshake.</li>
+     * </ul>
      * <p>
-     * - SO_TIMEOUT: Sets the read timeout to 10 seconds, which prevents the socket from blocking indefinitely while waiting for a response.
-     * <p>
-     * - SO_LINGER: Enables linger behavior with a timeout of 100 ms, ensuring the socket closes gracefully even when there is still data being transmitted.
-     * <p>
-     * - TCP_NODELAY: Disables Nagle's algorithm (via TCP_NODELAY) to ensure small packets are sent immediately without delay, reducing latency.
-     * <p>
-     * - SO_KEEPALIVE: Enables keep-alive functionality, which ensures that the socket periodically checks if the connection is still active, useful for long-lived connections.
-     * <p>
-     * - Enabled Protocols: Specifies which SSL/TLS protocols (e.g., TLSv1.2, TLSv1.3) to use for securing the connection.
-     * <p>
-     * - Handshake Listener: Adds a listener that logs the cipher suite and Protocol used in the SSL handshake, allowing verification of encryption standards.
-     * <p>
-     * - setUseClientMode: Configures the socket to be in client mode (i.e., it will initiate a connection to a server). This is necessary for outgoing SSL/TLS connections.
-     * <p>
-     * This method connects the socket to the specified host and port, performs the SSL handshake, and establishes a secure connection.
-     * </summary>
+     * @throws RuntimeException If an I/O error occurs during the connection or handshake process.
      */
     public void connect() {
         try {
+            log.debug("Connecting to {}:{}", getHost(), DEFAULT_PORT);
             setSocket((SSLSocket) sslSocketFactory.createSocket());
             getSocket().setSendBufferSize(DEFAULT_SEND_BUFFER_SIZE);
             getSocket().setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
@@ -76,9 +94,14 @@ public abstract class HttpsClient implements AutoCloseable {
             getSocket().setTcpNoDelay(Boolean.TRUE);
             getSocket().setKeepAlive(Boolean.TRUE);
             getSocket().setEnabledProtocols(DEFAULT_PROTOCOL);
+            var sslParams = socket.getSSLParameters();
+            sslParams.setEndpointIdentificationAlgorithm("HTTPS");
+            sslParams.setApplicationProtocols(new String[]{DEFAULT_VERSION});
+            socket.setSSLParameters(sslParams);
             getSocket().addHandshakeCompletedListener(event -> {
                 log.debug("Protocol version - {}", event.getSession().getProtocol());
                 log.debug("Cipher Suite - {}", event.getCipherSuite());
+                log.debug("Application Protocol - {}", event.getSocket().getApplicationProtocol());
             });
             getSocket().setUseClientMode(Boolean.TRUE);
             getSocket().connect(new InetSocketAddress(getHost(), DEFAULT_PORT));
@@ -121,7 +144,7 @@ public abstract class HttpsClient implements AutoCloseable {
         return body;
     }
 
-    String readStatusCode() throws IOException {
+    String readStatusLine() throws IOException {
         var statusCodeBuffer = new ByteArrayOutputStream();
         int previous = -1;
         int current = -1;
@@ -170,15 +193,19 @@ public abstract class HttpsClient implements AutoCloseable {
         return map;
     }
 
-    public String getHost() {
+    String getHost() {
         return host.host();
     }
 
-    public SSLSocket getSocket() {
+    SSLSocket getSocket() {
         return socket;
     }
 
-    public void setSocket(SSLSocket socket) {
+    ResponseTtlCache getCache() {
+        return cache;
+    }
+
+    void setSocket(SSLSocket socket) {
         this.socket = socket;
     }
 }

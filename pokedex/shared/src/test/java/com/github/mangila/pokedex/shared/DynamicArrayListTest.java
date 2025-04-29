@@ -2,8 +2,6 @@ package com.github.mangila.pokedex.shared;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
 class DynamicArrayListTest {
 
     @Test
@@ -29,7 +27,5 @@ class DynamicArrayListTest {
             var previous = iter.previous();
             System.out.println(previous);
         }
-
-
     }
 }
