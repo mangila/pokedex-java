@@ -20,7 +20,7 @@ public class Tls {
          */
         System.setProperty("javax.net.debug", "ssl:handshake");
         try {
-            CONTEXT = SSLContext.getInstance("TLS");
+            CONTEXT = SSLContext.getInstance("TLSv1.3");
             // Default Java Keystore with some well-known certificates
             CONTEXT.init(null, null, SecureRandom.getInstanceStrong());
         } catch (NoSuchAlgorithmException | KeyManagementException e) {

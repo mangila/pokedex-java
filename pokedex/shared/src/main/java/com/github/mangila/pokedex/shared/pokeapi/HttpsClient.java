@@ -22,7 +22,7 @@ public abstract class HttpsClient implements AutoCloseable {
     private static final int DEFAULT_SEND_BUFFER_SIZE = 8192;
     private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 1024 * 1024;
     private static final int DEFAULT_PORT = 443;
-    private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.2"};
+    private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.3"};
 
     private final SSLSocketFactory sslSocketFactory;
     private final String host;
@@ -58,7 +58,7 @@ public abstract class HttpsClient implements AutoCloseable {
      * <p>
      * - Enabled Protocols: Specifies which SSL/TLS protocols (e.g., TLSv1.2, TLSv1.3) to use for securing the connection.
      * <p>
-     * - Handshake Listener: Adds a listener that logs the cipher suite used in the SSL handshake, allowing verification of encryption standards.
+     * - Handshake Listener: Adds a listener that logs the cipher suite and Protocol used in the SSL handshake, allowing verification of encryption standards.
      * <p>
      * - setUseClientMode: Configures the socket to be in client mode (i.e., it will initiate a connection to a server). This is necessary for outgoing SSL/TLS connections.
      * <p>
@@ -70,12 +70,13 @@ public abstract class HttpsClient implements AutoCloseable {
             setSocket((SSLSocket) sslSocketFactory.createSocket());
             getSocket().setSendBufferSize(DEFAULT_SEND_BUFFER_SIZE);
             getSocket().setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
-            getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(5));
+            getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(10));
             getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.SECONDS.toMillis(100));
             getSocket().setTcpNoDelay(Boolean.TRUE);
             getSocket().setKeepAlive(Boolean.TRUE);
             getSocket().setEnabledProtocols(DEFAULT_PROTOCOL);
             getSocket().addHandshakeCompletedListener(event -> {
+                log.debug("Protocol version - {}", event.getSession().getProtocol());
                 log.debug("Cipher Suite - {}", event.getCipherSuite());
             });
             getSocket().setUseClientMode(Boolean.TRUE);
