@@ -25,15 +25,15 @@ public abstract class HttpsClient implements AutoCloseable {
     private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.3"};
 
     private final SSLSocketFactory sslSocketFactory;
-    private final String host;
+    private final PokeApiHost host;
 
     private SSLSocket socket;
 
     public final Function<GetRequest, Response> get = this::get;
 
     public HttpsClient(String host) {
+        this.host = new PokeApiHost(host);
         this.sslSocketFactory = Tls.CONTEXT.getSocketFactory();
-        this.host = host;
     }
 
     abstract Response get(GetRequest getRequest);
@@ -174,7 +174,7 @@ public abstract class HttpsClient implements AutoCloseable {
     }
 
     public String getHost() {
-        return host;
+        return host.host();
     }
 
     public SSLSocket getSocket() {
