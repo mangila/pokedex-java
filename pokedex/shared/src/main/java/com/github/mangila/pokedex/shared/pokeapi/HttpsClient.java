@@ -123,7 +123,8 @@ public abstract class HttpsClient implements AutoCloseable {
 
     String readStatusCode() throws IOException {
         var statusCodeBuffer = new ByteArrayOutputStream();
-        int previous = -1, current;
+        int previous = -1;
+        int current = -1;
         while (true) {
             current = getSocket().getInputStream().read();
             if (current == END_OF_STREAM) {
@@ -142,7 +143,8 @@ public abstract class HttpsClient implements AutoCloseable {
     Map<String, String> readHeaders() throws IOException {
         var map = new HashMap<String, String>();
         var headerBuffer = new ByteArrayOutputStream();
-        int previous = -1, current;
+        int previous = -1;
+        int current = -1;
         while (true) {
             current = getSocket().getInputStream().read();
             if (current == END_OF_STREAM) {
