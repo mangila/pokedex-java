@@ -2,6 +2,8 @@ package com.github.mangila.pokedex.shared;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 class DynamicArrayListTest {
 
     @Test
@@ -14,8 +16,20 @@ class DynamicArrayListTest {
         l.add(3);
         l.add(4);
 
-        System.out.println(l.get(2));
+        var iter = l.iterator(0);
 
-        l.forEach(System.out::println);
+        while (iter.hasNext()) {
+            var next = iter.next();
+            System.out.println(next);
+        }
+
+        System.out.println();
+
+        while (iter.hasPrevious()) {
+            var previous = iter.previous();
+            System.out.println(previous);
+        }
+
+
     }
 }
