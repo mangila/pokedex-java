@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.shared.pokeapi;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public record Request(
+public record GetRequest(
         String path,
         Header[] headers
 ) {
@@ -12,8 +12,7 @@ public record Request(
         return String.format("GET %s HTTP/1.1", path);
     }
 
-    public String toRawHttpRequest(String host) {
-
+    public String toHttp(String host) {
         var headers = Arrays.stream(headers())
                 .map(Header::toHeaderLine)
                 .collect(Collectors.joining("\n"));

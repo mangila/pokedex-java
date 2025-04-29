@@ -7,7 +7,12 @@ public class PokeApiMediaClient extends HttpsClient {
     }
 
     @Override
-    public Response execute(Request request) {
+    Response get(GetRequest getRequest) {
         return null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        disconnect();
     }
 }

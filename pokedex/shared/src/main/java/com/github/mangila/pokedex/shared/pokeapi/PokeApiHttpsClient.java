@@ -1,28 +1,36 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PokeApiHttpsClient extends HttpsClient {
 
+    private static final Logger log = LoggerFactory.getLogger(PokeApiHttpsClient.class);
+
     public PokeApiHttpsClient(String host) {
         super(host);
+        connect();
     }
 
-    public Response execute(Request request) {
+    @Override
+    Response get(GetRequest getRequest) {
         try {
-            var input = getSocket().getInputStream();
-            var output = getSocket().getOutputStream();
-            var reader = new BufferedReader(new InputStreamReader(input));
-            var r = request.toRawHttpRequest(getHost());
-            output.write(r.getBytes());
-            output.flush();
-            var statusCode = reader.readLine();
-            System.out.println(statusCode);
+            var outputStream = getSocket().getOutputStream();
+            outputStream.write(getRequest.toHttp(getHost()).getBytes());
+            outputStream.flush();
+            var statusCode = readStatusCode();
+            var headers = readHeaders();
+            var body = readGzipBody(headers);
+            return new Response(statusCode, body);
         } catch (Exception e) {
-
+            log.error("ERR", e);
+            disconnect();
         }
-        return new Response();
+        return new Response("", "");
     }
 
+    @Override
+    public void close() throws Exception {
+        disconnect();
+    }
 }

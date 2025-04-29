@@ -5,11 +5,18 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.zip.GZIPInputStream;
 
-public abstract class HttpsClient {
+public abstract class HttpsClient implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClient.class);
     private static final int DEFAULT_SEND_BUFFER_SIZE = 8192;
@@ -18,17 +25,19 @@ public abstract class HttpsClient {
     private static final String[] DEFAULT_PROTOCOL = new String[]{"TLSv1.2"};
 
     private final SSLSocketFactory sslSocketFactory;
-
     private final String host;
     private SSLSocket socket;
+    public final Function<GetRequest, Response> get = this::get;
 
     public HttpsClient(String host) {
         this.host = host;
-        this.sslSocketFactory = Ssl.CONTEXT.getSocketFactory();
+        this.sslSocketFactory = Tls.CONTEXT.getSocketFactory();
     }
 
+    abstract Response get(GetRequest getRequest);
+
     /**
-     * Establishes an SSL connection with custom socket options for optimized performance and secure communication.
+     * Establishes a TLS/SSL connection with custom socket options for optimized performance and secure communication.
      * <p>
      * The following socket options are configured:
      * <p>
@@ -55,11 +64,11 @@ public abstract class HttpsClient {
     public void connect() {
         try {
             setSocket((SSLSocket) sslSocketFactory.createSocket());
-            getSocket().setUseClientMode(Boolean.TRUE); // Set client mode for outgoing connections
+            getSocket().setUseClientMode(Boolean.TRUE);
             getSocket().setSendBufferSize(DEFAULT_SEND_BUFFER_SIZE);
             getSocket().setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
-            getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(10));
-            getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.SECONDS.toSeconds(10));
+            getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(5));
+            getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.SECONDS.toMillis(10));
             getSocket().setTcpNoDelay(Boolean.TRUE);
             getSocket().setKeepAlive(Boolean.TRUE);
             getSocket().setEnabledProtocols(DEFAULT_PROTOCOL);
@@ -73,18 +82,91 @@ public abstract class HttpsClient {
         }
     }
 
-
     public void disconnect() {
         if (this.socket != null) {
             try {
                 this.socket.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.error("ERR", e);
             }
         }
     }
 
-    public abstract Response execute(Request request);
+    String readGzipBody(Map<String, String> headers) throws IOException {
+        var contentEncoding = headers.get("Content-Encoding");
+        if (Objects.isNull(contentEncoding) || !Objects.equals(contentEncoding, "gzip")) {
+            throw new IOException("Expected gzip encoding, but got " + headers.get("Content-Encoding"));
+        }
+        var hasContentLength = headers.containsKey("Content-Length");
+        if (!hasContentLength) {
+            throw new IOException("Expected Content-Length header, but got none");
+        }
+        var gzip = new GZIPInputStream(getSocket().getInputStream());
+        var contentLength = Integer.parseInt(headers.get("Content-Length"));
+        var bodyBytes = new ByteArrayOutputStream(contentLength);
+        var buffer = new byte[contentLength];
+        int len;
+        while ((len = gzip.read(buffer)) != -1) {
+            bodyBytes.write(buffer, 0, len);
+        }
+        String body = bodyBytes.toString(Charset.defaultCharset());
+        log.debug("Body: {}", body);
+        return body;
+    }
+
+    String readStatusCode() throws IOException {
+        ByteArrayOutputStream statusCodeBuffer = new ByteArrayOutputStream();
+        while (true) {
+            int read = getSocket().getInputStream().read();
+            if (read == -1) {
+                throw new IOException("Stream ended unexpectedly");
+            }
+            statusCodeBuffer.write(read);
+            if (read == '\r' && statusCodeBuffer.size() >= 8) {
+                var statusCode = statusCodeBuffer.toString(Charset.defaultCharset());
+                log.debug("Status Code: {}", statusCode);
+                return statusCode;
+            }
+        }
+    }
+
+    Map<String, String> readHeaders() throws IOException {
+        ByteArrayOutputStream headerBuffer = new ByteArrayOutputStream();
+        int previous = -1, current;
+        while (true) {
+            current = getSocket().getInputStream().read();
+            if (current == -1) {
+                throw new IOException("Stream ended unexpectedly");
+            }
+            headerBuffer.write(current);
+            if (previous == '\r' && current == '\n') {
+                byte[] bytes = headerBuffer.toByteArray();
+                if (endsWithDoubleCRLF(bytes)) {
+                    break;
+                }
+            }
+            previous = current;
+        }
+        var headers = headerBuffer.toString(Charset.defaultCharset()).split("\r\n");
+        var map = new HashMap<String, String>();
+        for (var header : headers) {
+            var parts = header.split(": ");
+            if (parts.length == 2) {
+                log.debug("Header: {} = {}", parts[0], parts[1]);
+                map.put(parts[0], parts[1]);
+            }
+        }
+        return map;
+    }
+
+    private static boolean endsWithDoubleCRLF(byte[] data) {
+        int len = data.length;
+        if (len < 4) {
+            return false;
+        }
+        return data[len - 4] == '\r' && data[len - 3] == '\n' &&
+                data[len - 2] == '\r' && data[len - 1] == '\n';
+    }
 
     public String getHost() {
         return host;
