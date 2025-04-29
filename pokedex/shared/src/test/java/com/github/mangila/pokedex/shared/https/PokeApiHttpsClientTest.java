@@ -18,7 +18,10 @@ class PokeApiHttpsClientTest {
                             new Header("accept-encoding", "gzip"),
                     }));
             http.get.andThen(Response::body)
-                    .apply(new GetRequest("/api/v2/pokemon-species/charmander", new Header[]{}));
+                    .apply(new GetRequest("/api/v2/pokemon-species/charmander", new Header[]{
+                            new Header("accept-encoding", "gzip"),
+                    }));
+            System.out.println(body);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
