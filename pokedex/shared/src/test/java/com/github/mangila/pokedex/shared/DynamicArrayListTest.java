@@ -16,7 +16,7 @@ class DynamicArrayListTest {
         l.add(3);
         l.add(4);
 
-        var iter = l.iterator(0);
+        var iter = l.iterator(2);
 
         while (iter.hasNext()) {
             var next = iter.next();

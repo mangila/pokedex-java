@@ -81,7 +81,7 @@ public class DynamicArrayList<T> {
 
             @Override
             public boolean hasPrevious() {
-                return cursor != 0;
+                return cursor != startIndex;
             }
 
             @Override
