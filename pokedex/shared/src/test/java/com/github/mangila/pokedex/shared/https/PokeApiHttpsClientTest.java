@@ -14,7 +14,9 @@ class PokeApiHttpsClientTest {
     void abc() throws IOException {
         try (var http = new PokeApiHttpsClient("pokeapi.co")) {
             var body = http.get.andThen(Response::body)
-                    .apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
+                    .apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{
+                            new Header("accept-encoding", "gzip"),
+                    }));
             http.get.andThen(Response::body)
                     .apply(new GetRequest("/api/v2/pokemon-species/charmander", new Header[]{}));
         } catch (Exception e) {

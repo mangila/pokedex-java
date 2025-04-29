@@ -19,6 +19,7 @@ import java.util.zip.GZIPInputStream;
 public abstract class HttpsClient implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(HttpsClient.class);
+    private static final int END_OF_STREAM = -1;
     private static final int DEFAULT_SEND_BUFFER_SIZE = 8192;
     private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 1024 * 1024;
     private static final int DEFAULT_PORT = 443;
@@ -111,7 +112,7 @@ public abstract class HttpsClient implements AutoCloseable {
         var bodyBytes = new ByteArrayOutputStream(contentLength);
         var buffer = new byte[contentLength];
         int len;
-        while ((len = gzip.read(buffer)) != -1) {
+        while ((len = gzip.read(buffer)) != END_OF_STREAM) {
             bodyBytes.write(buffer, 0, len);
         }
         String body = bodyBytes.toString(Charset.defaultCharset());
@@ -123,7 +124,7 @@ public abstract class HttpsClient implements AutoCloseable {
         var statusCodeBuffer = new ByteArrayOutputStream();
         while (true) {
             int read = getSocket().getInputStream().read();
-            if (read == -1) {
+            if (read == END_OF_STREAM) {
                 throw new IOException("Stream ended unexpectedly");
             }
             statusCodeBuffer.write(read);
@@ -136,41 +137,32 @@ public abstract class HttpsClient implements AutoCloseable {
     }
 
     Map<String, String> readHeaders() throws IOException {
+        var map = new HashMap<String, String>();
         var headerBuffer = new ByteArrayOutputStream();
         int previous = -1, current;
         while (true) {
             current = getSocket().getInputStream().read();
-            if (current == -1) {
+            if (current == END_OF_STREAM) {
                 throw new IOException("Stream ended unexpectedly");
             }
             headerBuffer.write(current);
             if (previous == '\r' && current == '\n') {
-                byte[] bytes = headerBuffer.toByteArray();
-                if (endsWithDoubleCrlf(bytes)) {
+                var header = headerBuffer.toString(Charset.defaultCharset());
+                if (header.isBlank()) {
                     break;
                 }
+                var parts = header
+                        .trim()
+                        .split(": ");
+                if (parts.length == 2) {
+                    log.debug("Header: {} = {}", parts[0], parts[1]);
+                    map.put(parts[0], parts[1]);
+                }
+                headerBuffer.reset();
             }
             previous = current;
         }
-        var headers = headerBuffer.toString(Charset.defaultCharset()).split("\r\n");
-        var map = new HashMap<String, String>();
-        for (var header : headers) {
-            var parts = header.split(": ");
-            if (parts.length == 2) {
-                log.debug("Header: {} = {}", parts[0], parts[1]);
-                map.put(parts[0], parts[1]);
-            }
-        }
         return map;
-    }
-
-    private static boolean endsWithDoubleCrlf(byte[] data) {
-        int len = data.length;
-        if (len < 4) {
-            return false;
-        }
-        return data[len - 4] == '\r' && data[len - 3] == '\n' &&
-                data[len - 2] == '\r' && data[len - 1] == '\n';
     }
 
     public String getHost() {

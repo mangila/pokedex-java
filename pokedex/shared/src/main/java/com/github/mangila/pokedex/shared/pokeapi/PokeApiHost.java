@@ -10,7 +10,7 @@ public record PokeApiHost(String host) {
     }
 
     private void ensurePokeApiHost(String host) {
-        if (!Objects.equals(host, "pokeapi.co") || !Objects.equals(host, "raw.githubusercontent.com")) {
+        if (!(Objects.equals(host, "pokeapi.co") || Objects.equals(host, "raw.githubusercontent.com"))) {
             throw new IllegalArgumentException("Only pokeapi.co and raw.githubusercontent.com are supported as hosts");
         }
     }

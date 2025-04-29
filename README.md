@@ -7,7 +7,8 @@ Educational Low-level project in Java
 - Http Client
 - Json Tokenization
 - Datastructures
-  - Doubly LinkedList
-  - LinkedHashtable
-  - LinkedSetQueue
+    - Doubly Linked List
+    - Dynamic Array List
+    - Linked Hashtable
+    - Linked Set Queue
 - Scheduler
