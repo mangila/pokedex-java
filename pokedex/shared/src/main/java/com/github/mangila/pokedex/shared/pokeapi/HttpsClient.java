@@ -72,7 +72,7 @@ public abstract class HttpsClient implements AutoCloseable {
             getSocket().setSendBufferSize(DEFAULT_SEND_BUFFER_SIZE);
             getSocket().setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
             getSocket().setSoTimeout((int) TimeUnit.SECONDS.toMillis(10));
-            getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.MILLISECONDS.toMillis(100));
+            getSocket().setSoLinger(Boolean.TRUE, (int) TimeUnit.SECONDS.toSeconds(1));
             getSocket().setTcpNoDelay(Boolean.TRUE);
             getSocket().setKeepAlive(Boolean.TRUE);
             getSocket().setEnabledProtocols(DEFAULT_PROTOCOL);
