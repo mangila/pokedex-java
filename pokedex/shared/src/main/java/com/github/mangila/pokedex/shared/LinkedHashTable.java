@@ -1,4 +1,11 @@
 package com.github.mangila.pokedex.shared;
 
-public class LinkedHashTable {
+public class LinkedHashTable<K, V> {
+
+    private final DynamicArrayList<DoublyLinkedList<HashNode<K, V>>> table = new DynamicArrayList<>(4);
+
+    private static class HashNode<K, V> {
+        private K key;
+        private V value;
+    }
 }
