@@ -123,17 +123,19 @@ public abstract class HttpsClient implements AutoCloseable {
 
     String readStatusCode() throws IOException {
         var statusCodeBuffer = new ByteArrayOutputStream();
+        int previous = -1, current;
         while (true) {
-            int read = getSocket().getInputStream().read();
-            if (read == END_OF_STREAM) {
+            current = getSocket().getInputStream().read();
+            if (current == END_OF_STREAM) {
                 throw new IOException("Stream ended unexpectedly");
             }
-            statusCodeBuffer.write(read);
-            if (read == '\r' && statusCodeBuffer.size() >= 8) {
+            statusCodeBuffer.write(current);
+            if (previous == '\r' && current == '\n' && statusCodeBuffer.size() >= 8) {
                 var statusCode = statusCodeBuffer.toString(Charset.defaultCharset());
                 log.debug("Status Code: {}", statusCode);
                 return statusCode;
             }
+            previous = current;
         }
     }
 
