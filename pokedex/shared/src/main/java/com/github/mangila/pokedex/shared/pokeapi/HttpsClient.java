@@ -100,12 +100,13 @@ public abstract class HttpsClient implements AutoCloseable {
 
     String readGzipBody(Map<String, String> headers) throws IOException {
         var contentEncoding = headers.get("Content-Encoding");
-        if (Objects.isNull(contentEncoding) || !Objects.equals(contentEncoding, "gzip")) {
+        Objects.requireNonNull(contentEncoding, "Expected Content-Encoding header, but was null");
+        if (!Objects.equals(contentEncoding, "gzip")) {
             throw new IOException("Expected gzip encoding, but got " + headers.get("Content-Encoding"));
         }
         var hasContentLength = headers.containsKey("Content-Length");
         if (!hasContentLength) {
-            throw new IOException("Expected Content-Length header, but got none");
+            throw new IOException("Expected Content-Length header, but found none");
         }
         var gzip = new GZIPInputStream(getSocket().getInputStream());
         var contentLength = Integer.parseInt(headers.get("Content-Length"));
