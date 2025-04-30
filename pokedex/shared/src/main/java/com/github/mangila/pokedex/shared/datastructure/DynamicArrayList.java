@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared;
+package com.github.mangila.pokedex.shared.datastructure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

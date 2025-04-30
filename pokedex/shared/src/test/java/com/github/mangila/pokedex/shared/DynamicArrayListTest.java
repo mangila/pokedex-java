@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared;
 
+import com.github.mangila.pokedex.shared.datastructure.DynamicArrayList;
 import org.junit.jupiter.api.Test;
 
 class DynamicArrayListTest {

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared;
+package com.github.mangila.pokedex.shared.datastructure;
 
 public class LinkedHashTable<K, V> {
 

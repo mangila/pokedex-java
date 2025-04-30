@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared;
+package com.github.mangila.pokedex.shared.datastructure;
 
 import java.util.Iterator;
 import java.util.Objects;

@@ -1,8 +1,7 @@
 package com.github.mangila.pokedex.shared;
 
+import com.github.mangila.pokedex.shared.datastructure.DoublyLinkedList;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DoublyLinkedListTest {
 
