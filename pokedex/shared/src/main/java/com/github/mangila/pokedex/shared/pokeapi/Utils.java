@@ -1,13 +1,16 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
-public class Utils {
+class Utils {
 
     private Utils() {
-        throw new IllegalStateException("I'm a utility class!!! Leave this constructor alone!!!");
+        throw new IllegalStateException("I'm a utility class");
     }
 
-    // carnage return, low fee
-    public static boolean IsCrLf(int cr, int lf) {
-        return cr == '\r' && lf == '\n';
+    /**
+     * CR (Carriage Return): ASCII value 13 (\r)
+     * LF (Line Feed): ASCII value 10 (\n)
+     */
+    static boolean IsCrLf(int carriageReturn, int lineFeed) {
+        return carriageReturn == '\r' && lineFeed == '\n';
     }
 }
