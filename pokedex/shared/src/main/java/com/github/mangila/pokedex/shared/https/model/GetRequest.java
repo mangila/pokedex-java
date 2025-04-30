@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.pokeapi;
+package com.github.mangila.pokedex.shared.https.model;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -20,6 +20,8 @@ public record GetRequest(
                 %s
                 Host: %s
                 Connection: keep-alive
+                Accept: application/json
+                Accept-Encoding: gzip
                 %s
                 
                 """.formatted(toRequestLine(version), host, headers);

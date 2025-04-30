@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.pokeapi;
+package com.github.mangila.pokedex.shared.https.model;
 
 import java.util.Objects;
 

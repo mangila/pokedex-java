@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
+import com.github.mangila.pokedex.shared.https.model.GetRequest;
+import com.github.mangila.pokedex.shared.https.model.Header;
 import org.junit.jupiter.api.Test;
 
 class GetRequestTest {
