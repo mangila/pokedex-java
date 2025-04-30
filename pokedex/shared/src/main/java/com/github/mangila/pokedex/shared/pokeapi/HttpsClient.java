@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.pokeapi;
 
+import com.github.mangila.pokedex.shared.func.VoidFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 class HttpsClient {
@@ -36,12 +38,16 @@ class HttpsClient {
     private OutputStream socketWrite;
     private InputStream socketRead;
 
-    public HttpsClient(String host) {
+    final Function<GetRequest, Response> GET = this::get;
+    final VoidFunction CONNECT = this::connect;
+    final VoidFunction DISCONNECT = this::disconnect;
+
+    HttpsClient(String host) {
         this.host = host;
         this.sslSocketFactory = Tls.CONTEXT.getSocketFactory();
     }
 
-    Response get(GetRequest getRequest) {
+    private Response get(GetRequest getRequest) {
         try {
             var request = getRequest.toHttp(this.host, this.socket.getApplicationProtocol());
             this.socketWrite.write(request.getBytes());
@@ -95,7 +101,7 @@ class HttpsClient {
      *
      * @throws RuntimeException If an I/O error occurs during the connection or handshake process.
      */
-    public void connect() {
+    private void connect() {
         try {
             log.debug("Connecting to {}:{}", this.host, DEFAULT_PORT);
             this.socket = (SSLSocket) sslSocketFactory.createSocket();
@@ -125,7 +131,7 @@ class HttpsClient {
         }
     }
 
-    public void disconnect() {
+    private void disconnect() {
         if (Objects.nonNull(this.socket) && !this.socket.isClosed()) {
             try {
                 this.socket.close();

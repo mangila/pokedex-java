@@ -7,11 +7,8 @@ class PokeApiClientTest {
     @Test
     void abc() {
         var https = new PokeApiClient(new PokeApiHost("pokeapi.co"), Boolean.TRUE);
-        https.get(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{
-                new Header("accept-encoding", "gzip"),
-        }));
 
-        https.get(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{
+        https.get().apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{
                 new Header("accept-encoding", "gzip"),
         }));
     }
