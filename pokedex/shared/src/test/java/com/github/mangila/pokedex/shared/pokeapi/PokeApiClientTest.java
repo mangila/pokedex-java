@@ -2,14 +2,11 @@ package com.github.mangila.pokedex.shared.pokeapi;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 class PokeApiClientTest {
 
     @Test
-    void abc() throws IOException {
-        var https = new PokeApiClient("pokeapi.co");
-
+    void abc() {
+        var https = new PokeApiClient(new PokeApiHost("pokeapi.co"), Boolean.TRUE);
         https.get(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{
                 new Header("accept-encoding", "gzip"),
         }));

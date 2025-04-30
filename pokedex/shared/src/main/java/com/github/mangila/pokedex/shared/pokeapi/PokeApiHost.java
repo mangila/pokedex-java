@@ -2,11 +2,11 @@ package com.github.mangila.pokedex.shared.pokeapi;
 
 import java.util.Objects;
 
-public record PokeApiHost(String host) {
+public record PokeApiHost(String hostName) {
 
     public PokeApiHost {
-        Objects.requireNonNull(host, "host must not be null");
-        ensurePokeApiHost(host);
+        Objects.requireNonNull(hostName, "hostName must not be null");
+        ensurePokeApiHost(hostName);
     }
 
     private void ensurePokeApiHost(String host) {

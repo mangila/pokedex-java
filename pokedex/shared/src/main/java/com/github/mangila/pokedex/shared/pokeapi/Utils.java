@@ -7,7 +7,7 @@ public class Utils {
     }
 
     // carnage return, low fee
-    protected static boolean IsCrLf(int cr, int lf) {
+    public static boolean IsCrLf(int cr, int lf) {
         return cr == '\r' && lf == '\n';
     }
 }
