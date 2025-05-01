@@ -44,6 +44,7 @@ public class JsonTokenizer {
                     if (Character.isWhitespace(charByte)) {
                         yield null;
                     } else if (Character.isDigit(charByte) || charByte == '-') {
+                        // TODO check for exponential notation
                         line.append(charByte);
                         while (true) {
                             charByte = (char) data[++i];
