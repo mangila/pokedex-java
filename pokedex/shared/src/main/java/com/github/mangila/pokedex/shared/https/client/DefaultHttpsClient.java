@@ -72,7 +72,7 @@ class DefaultHttpsClient implements HttpsClient {
                         && Objects.equals("application/json; charset=utf-8", contentType)
                         && Objects.nonNull(contentLength)) {
                     var body = ResponseHandler.readGzipBody(input, 5041);
-                    var tokens = JSON_TOKENIZER.tokenize(body);
+                    var tokens = JSON_TOKENIZER.tokenizeFrom(body);
                     var parsed = JSON_PARSER.parse(tokens);
                     return new Response(statusLine, headers, parsed.toString());
                 }

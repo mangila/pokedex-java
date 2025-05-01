@@ -20,10 +20,18 @@ public class JsonTokenizer {
             NULL, new JsonToken(NULL, null)
     );
 
-    public List<JsonToken> tokenize(byte[] body) {
+    public List<JsonToken> tokenizeFrom(byte[] data) {
+        return tokenize(data);
+    }
+
+    public List<JsonToken> tokenizeFrom(String data) {
+        return tokenize(data.getBytes());
+    }
+
+    private List<JsonToken> tokenize(byte[] data) {
         var tokens = new ArrayList<JsonToken>();
-        for (int i = 0; i < body.length; i++) {
-            var charByte = (char) body[i];
+        for (int i = 0; i < data.length; i++) {
+            var charByte = (char) data[i];
             JsonToken token = switch (charByte) {
                 case '{' -> TOKEN_MAP.get(LEFT_BRACE);
                 case '}' -> TOKEN_MAP.get(RIGHT_BRACE);
@@ -38,7 +46,7 @@ public class JsonTokenizer {
                     } else if (Character.isDigit(charByte) || charByte == '-') {
                         line.append(charByte);
                         while (true) {
-                            charByte = (char) body[++i];
+                            charByte = (char) data[++i];
                             if (!Character.isDigit(charByte)) {
                                 break;
                             }
@@ -47,17 +55,17 @@ public class JsonTokenizer {
                         yield new JsonToken(NUMBER, line.toString());
                     } else if (charByte == '"') {
                         // TODO check for escape sequences
-                        while ((charByte = (char) body[++i]) != '"') {
+                        while ((charByte = (char) data[++i]) != '"') {
                             line.append(charByte);
                         }
                         yield new JsonToken(STRING, line.toString());
-                    } else if (charByte == 't') {
+                    } else if (isTrue(charByte, i, data)) {
                         i += 3;
                         yield TOKEN_MAP.get(TRUE);
-                    } else if (charByte == 'f') {
+                    } else if (isFalse(charByte, i, data)) {
                         i += 4;
                         yield TOKEN_MAP.get(FALSE);
-                    } else if (charByte == 'n') {
+                    } else if (isNull(charByte, i, data)) {
                         i += 3;
                         yield TOKEN_MAP.get(NULL);
                     } else {
@@ -69,5 +77,17 @@ public class JsonTokenizer {
         }
 
         return tokens;
+    }
+
+    private static boolean isTrue(char charByte, int index, byte[] body) {
+        return charByte == 't' && index + 3 < body.length && new String(body, index, 4).equals("true");
+    }
+
+    private static boolean isFalse(char charByte, int index, byte[] body) {
+        return charByte == 'f' && index + 4 < body.length && new String(body, index, 5).equals("false");
+    }
+
+    private static boolean isNull(char charByte, int index, byte[] body) {
+        return charByte == 'n' && index + 3 < body.length && new String(body, index, 4).equals("null");
     }
 }
