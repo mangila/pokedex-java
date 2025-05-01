@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public class ResponseHandler {
@@ -13,7 +16,7 @@ public class ResponseHandler {
     private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
     private static final int END_OF_STREAM = -1;
 
-    public static byte[] readStatusLine(InputStream inputStream) throws IOException {
+    public static String readStatusLine(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();
         int previous = -1;
         while (true) {
@@ -27,11 +30,12 @@ public class ResponseHandler {
             }
             previous = current;
         }
-        return buffer.toByteArray();
+        return buffer.toString(Charset.defaultCharset()).trim();
     }
 
-    public static byte[] readHeaders(InputStream inputStream) throws IOException {
+    public static Map<String, String> readHeaders(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream(8 * 1024);
+        var headers = new HashMap<String, String>();
         int previous = -1;
         while (true) {
             int current = inputStream.read();
@@ -39,12 +43,21 @@ public class ResponseHandler {
                 throw new IOException("Stream ended unexpectedly");
             }
             buffer.write(current);
-            if (isCrLf(previous, current) && hasDoubleCrlf(buffer.toByteArray())) {
-                break;
+            if (isCrLf(previous, current)) {
+                var header = buffer.toString(Charset.defaultCharset()).trim();
+                if (header.isBlank()) {
+                    break;
+                }
+                log.debug("Header: {}", header);
+                var parts = header.split(": ");
+                if (parts.length == 2) {
+                    headers.put(parts[0], parts[1]);
+                    buffer.reset();
+                }
             }
             previous = current;
         }
-        return buffer.toByteArray();
+        return headers;
     }
 
     public static byte[] readGzipBody(InputStream inputStream, int contentLength) throws IOException {
@@ -65,14 +78,4 @@ public class ResponseHandler {
     private static boolean isCrLf(int carriageReturn, int lineFeed) {
         return carriageReturn == '\r' && lineFeed == '\n';
     }
-
-    private static boolean hasDoubleCrlf(byte[] buffer) {
-        var length = buffer.length;
-        if (length < 4) {
-            return false;
-        }
-        return isCrLf(buffer[length - 4], buffer[length - 3]) &&
-                isCrLf(buffer[length - 2], buffer[length - 1]);
-    }
-
 }

@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.shared.https.model;
 
 import java.util.Objects;
 
-public record PokeApiHost(String hostName) {
+public record PokeApiHost(String hostName, int port) {
 
     public PokeApiHost {
         Objects.requireNonNull(hostName, "hostName must not be null");

@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Objects;
 
-public class TlsConnection implements AutoCloseable {
+public class TlsConnection {
 
     private static final Logger log = LoggerFactory.getLogger(TlsConnection.class);
     private final String host;
@@ -44,18 +44,11 @@ public class TlsConnection implements AutoCloseable {
     }
 
     public InputStream getInputStream() throws IOException {
-        ensureOpen();
         return socket.getInputStream();
     }
 
     public OutputStream getOutputStream() throws IOException {
-        ensureOpen();
         return socket.getOutputStream();
-    }
-
-    @Override
-    public void close() throws Exception {
-        disconnect();
     }
 
     public String getHttpVersion() {

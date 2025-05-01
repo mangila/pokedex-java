@@ -3,18 +3,22 @@ package com.github.mangila.pokedex.shared.https.client;
 import com.github.mangila.pokedex.shared.func.VoidFunction;
 import com.github.mangila.pokedex.shared.https.internal.ResponseHandler;
 import com.github.mangila.pokedex.shared.https.internal.ResponseTtlCache;
+import com.github.mangila.pokedex.shared.https.internal.json.JsonParser;
+import com.github.mangila.pokedex.shared.https.internal.json.JsonTokenizer;
 import com.github.mangila.pokedex.shared.https.model.GetRequest;
 import com.github.mangila.pokedex.shared.https.model.Response;
 import com.github.mangila.pokedex.shared.https.tls.TlsConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 class DefaultHttpsClient implements HttpsClient {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpsClient.class);
+    private static final JsonTokenizer JSON_TOKENIZER = new JsonTokenizer();
+    private static final JsonParser JSON_PARSER = new JsonParser();
     private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache();
 
     private final String host;
@@ -58,19 +62,25 @@ class DefaultHttpsClient implements HttpsClient {
                 tlsConnection.getOutputStream().write(rawHttp.getBytes());
                 tlsConnection.getOutputStream().flush();
                 var input = tlsConnection.getInputStream();
-                var status = ResponseHandler.readStatusLine(input);
+                var statusLine = ResponseHandler.readStatusLine(input);
+                log.debug("{}", statusLine);
                 var headers = ResponseHandler.readHeaders(input);
-                var body = ResponseHandler.readGzipBody(input, 5041);
-                System.out.println(status.length);
-                System.out.println(headers.length);
-                System.out.println(new String(status));
-                System.out.println(new String(headers));
-                System.out.println(new String(body));
-                return new Response("", Map.of(), "");
+                var encoding = headers.get("Content-Encoding");
+                var contentLength = headers.get("Content-Length");
+                var contentType = headers.get("Content-Type");
+                if (Objects.equals("gzip", encoding)
+                        && Objects.equals("application/json; charset=utf-8", contentType)
+                        && Objects.nonNull(contentLength)) {
+                    var body = ResponseHandler.readGzipBody(input, 5041);
+                    var tokens = JSON_TOKENIZER.tokenize(body);
+                    var parsed = JSON_PARSER.parse(tokens);
+                    return new Response(statusLine, headers, parsed.toString());
+                }
+                return null;
             } catch (Exception e) {
                 log.error("ERR", e);
                 tlsConnection.disconnect();
-                throw new RuntimeException(e);
+                return null;
             }
         };
     }
