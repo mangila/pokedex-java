@@ -2,60 +2,72 @@ package com.github.mangila.pokedex.shared.https.internal.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.*;
 
 public class JsonTokenizer {
 
+    private static final Map<JsonType, JsonToken> TOKEN_MAP = Map.of(
+            LEFT_BRACE, new JsonToken(LEFT_BRACE, '{'),
+            RIGHT_BRACE, new JsonToken(RIGHT_BRACE, '}'),
+            LEFT_BRACKET, new JsonToken(LEFT_BRACKET, '['),
+            RIGHT_BRACKET, new JsonToken(RIGHT_BRACKET, ']'),
+            COMMA, new JsonToken(COMMA, ','),
+            COLON, new JsonToken(COLON, ':'),
+            TRUE, new JsonToken(TRUE, true),
+            FALSE, new JsonToken(FALSE, false),
+            NULL, new JsonToken(NULL, null)
+    );
+
     public List<JsonToken> tokenize(byte[] body) {
-        var l = new ArrayList<JsonToken>();
+        var tokens = new ArrayList<JsonToken>();
         for (int i = 0; i < body.length; i++) {
-            var c = (char) body[i];
-            JsonToken s = switch (c) {
-                case '{' -> new JsonToken(JsonType.LEFT_BRACE, c);
-                case '}' -> new JsonToken(JsonType.RIGHT_BRACE, c);
-                case '[' -> new JsonToken(JsonType.LEFT_BRACKET, c);
-                case ']' -> new JsonToken(JsonType.RIGHT_BRACKET, c);
-                case ',' -> new JsonToken(JsonType.COMMA, c);
-                case ':' -> new JsonToken(JsonType.COLON, c);
+            var charByte = (char) body[i];
+            JsonToken token = switch (charByte) {
+                case '{' -> TOKEN_MAP.get(LEFT_BRACE);
+                case '}' -> TOKEN_MAP.get(RIGHT_BRACE);
+                case '[' -> TOKEN_MAP.get(LEFT_BRACKET);
+                case ']' -> TOKEN_MAP.get(RIGHT_BRACKET);
+                case ',' -> TOKEN_MAP.get(COMMA);
+                case ':' -> TOKEN_MAP.get(COLON);
                 default -> {
-                    char j = c;
                     StringBuilder line = new StringBuilder();
-                    if (Character.isWhitespace(c)) {
+                    if (Character.isWhitespace(charByte)) {
                         yield null;
-                    }
-                    if (Character.isDigit(c) || c == '-') {
-                        line.append(j);
+                    } else if (Character.isDigit(charByte) || charByte == '-') {
+                        line.append(charByte);
                         while (true) {
-                            j = (char) body[++i];
-                            if (!Character.isDigit(j)) {
+                            charByte = (char) body[++i];
+                            if (!Character.isDigit(charByte)) {
                                 break;
                             }
-                            line.append(j);
+                            line.append(charByte);
                         }
-                        yield new JsonToken(JsonType.NUMBER, line.toString());
-                    }
-                    if (c == '"') {
+                        yield new JsonToken(NUMBER, line.toString());
+                    } else if (charByte == '"') {
                         // TODO check for escape sequences
-                        while ((j = (char) body[++i]) != '"') {
-                            line.append(j);
+                        while ((charByte = (char) body[++i]) != '"') {
+                            line.append(charByte);
                         }
-                        yield new JsonToken(JsonType.STRING, line.toString());
+                        yield new JsonToken(STRING, line.toString());
+                    } else if (charByte == 't') {
+                        i += 3;
+                        yield TOKEN_MAP.get(TRUE);
+                    } else if (charByte == 'f') {
+                        i += 4;
+                        yield TOKEN_MAP.get(FALSE);
+                    } else if (charByte == 'n') {
+                        i += 3;
+                        yield TOKEN_MAP.get(NULL);
                     } else {
-                        if (c == 't') {
-                            i += 3;
-                            yield new JsonToken(JsonType.TRUE, true);
-                        } else if (c == 'f') {
-                            i += 4;
-                            yield new JsonToken(JsonType.FALSE, false);
-                        } else {
-                            i += 3;
-                            yield new JsonToken(JsonType.NULL, null);
-                        }
+                        throw new InvalidJsonException("Unexpected character: " + charByte);
                     }
                 }
             };
-            l.add(s);
+            tokens.add(token);
         }
 
-        return l;
+        return tokens;
     }
 }
