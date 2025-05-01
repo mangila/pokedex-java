@@ -11,10 +11,12 @@ class JsonTokenizerTest {
         var tokenizer = new JsonTokenizer();
         var tokens = tokenizer.tokenizeFrom("""
                 {
-                "name": "Bulbasaur",
-                "height": 7,
-                "weight": 69,
-                "error" : "asdf "\"" "
+                
+                
+                "name": "Bulbasaur", \t
+                "weight": -6.97,
+                "success" : "escape\\"me\\""
+                "esacpe": " asdf\r "
                 }
                 """);
         System.out.println(tokens);
