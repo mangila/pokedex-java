@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.https.internal.json;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.*;
 
@@ -19,8 +18,8 @@ public class JsonLexer {
             NULL, new JsonToken(NULL, null)
     );
 
-    private int cursor;
     private final byte[] data;
+    private int cursor;
 
     public JsonLexer(byte[] data) {
         this.cursor = 0;
@@ -54,31 +53,31 @@ public class JsonLexer {
             case ':' -> TOKEN_MAP.get(COLON);
             default -> {
                 var numberToken = lexNumber(current);
-                if (numberToken.isPresent()) {
-                    yield numberToken.get();
+                if (numberToken != null) {
+                    yield numberToken;
                 }
                 var stringToken = lexString(current);
-                if (stringToken.isPresent()) {
-                    yield stringToken.get();
+                if (stringToken != null) {
+                    yield stringToken;
                 }
                 var trueToken = lexTrue(current);
-                if (trueToken.isPresent()) {
-                    yield trueToken.get();
+                if (trueToken != null) {
+                    yield trueToken;
                 }
                 var falseToken = lexFalse(current);
-                if (falseToken.isPresent()) {
-                    yield falseToken.get();
+                if (falseToken != null) {
+                    yield falseToken;
                 }
                 var nullToken = lexNull(current);
-                if (nullToken.isPresent()) {
-                    yield nullToken.get();
+                if (nullToken != null) {
+                    yield nullToken;
                 }
                 throw new InvalidJsonException(String.format("Invalid json data(invalid character): %s - %s", current, new String(data)));
             }
         };
     }
 
-    private Optional<JsonToken> lexString(char current) {
+    private JsonToken lexString(char current) {
         if (current == '"') {
             StringBuilder line = new StringBuilder();
             while (true) {
@@ -95,12 +94,12 @@ public class JsonLexer {
                 }
                 line.append(current);
             }
-            return Optional.of(new JsonToken(STRING, line.toString()));
+            return new JsonToken(STRING, line.toString());
         }
-        return Optional.empty();
+        return null;
     }
 
-    private Optional<JsonToken> lexNumber(char current) {
+    private JsonToken lexNumber(char current) {
         if (current == '-' || Character.isDigit(current)) {
             StringBuilder line = new StringBuilder();
             // TODO check for exponential notation
@@ -116,41 +115,41 @@ public class JsonLexer {
                 }
                 line.append(current);
             }
-            return Optional.of(new JsonToken(NUMBER, line.toString()));
+            return new JsonToken(NUMBER, line.toString());
         }
-        return Optional.empty();
+        return null;
     }
 
-    private Optional<JsonToken> lexTrue(char current) {
+    private JsonToken lexTrue(char current) {
         if (isTrue(current)) {
             nextChar(3);
-            return Optional.of(new JsonToken(TRUE, true));
+            return new JsonToken(TRUE, true);
         }
-        return Optional.empty();
+        return null;
     }
 
     private boolean isTrue(char current) {
         return current == 't' && cursor + 3 < data.length && new String(data, cursor, 4).equals("true");
     }
 
-    private Optional<JsonToken> lexFalse(char current) {
+    private JsonToken lexFalse(char current) {
         if (isFalse(current)) {
             nextChar(4);
-            return Optional.of(new JsonToken(FALSE, false));
+            return new JsonToken(FALSE, false);
         }
-        return Optional.empty();
+        return null;
     }
 
     private boolean isFalse(char current) {
         return current == 'f' && cursor + 4 < data.length && new String(data, cursor, 5).equals("false");
     }
 
-    private Optional<JsonToken> lexNull(char current) {
+    private JsonToken lexNull(char current) {
         if (isNull(current)) {
             nextChar(3);
-            return Optional.of(new JsonToken(NULL, null));
+            return new JsonToken(NULL, null);
         }
-        return Optional.empty();
+        return null;
     }
 
     private boolean isNull(char current) {
