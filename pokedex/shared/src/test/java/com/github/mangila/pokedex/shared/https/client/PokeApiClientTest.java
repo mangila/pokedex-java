@@ -9,12 +9,15 @@ class PokeApiClientTest {
 
     @Test
     void abc() {
-        var https = new PokeApiClient(new PokeApiHost("pokeapi.co", 443));
-        https.connect();
-        var s = https.get().apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
-        s = https.get().apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
-        System.out.println(s);
-        https.disconnect();
+        try (var https = new PokeApiClient(new PokeApiHost("pokeapi.co", 443))
+                .connect()) {
+            var s = https.get()
+                    .apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
+            s = https.get()
+                    .apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

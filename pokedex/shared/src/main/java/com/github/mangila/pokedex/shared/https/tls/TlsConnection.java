@@ -22,6 +22,13 @@ public class TlsConnection {
         this.socket = TlsSocketFactory.createClientSocket();
     }
 
+    public boolean isConnected() {
+        return socket.isConnected() &&
+                !socket.isClosed() &&
+                !socket.isInputShutdown() &&
+                !socket.isOutputShutdown();
+    }
+
     public void connect() {
         log.debug("Connecting to {}:{}", host, port);
         try {

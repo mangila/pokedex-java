@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 class DefaultHttpsClient implements HttpsClient {
 
@@ -67,6 +68,11 @@ class DefaultHttpsClient implements HttpsClient {
                 return null;
             }
         };
+    }
+
+    @Override
+    public Supplier<Boolean> isConnected() {
+        return tlsConnection::isConnected;
     }
 
     @Override
