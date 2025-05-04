@@ -7,9 +7,10 @@ import com.github.mangila.pokedex.shared.https.model.Response;
 import java.util.function.Function;
 
 public interface HttpsClient {
+
+    Function<GetRequest, Response> get();
+
     VoidFunction disconnect();
 
     VoidFunction connect();
-
-    Function<GetRequest, Response> get();
 }
