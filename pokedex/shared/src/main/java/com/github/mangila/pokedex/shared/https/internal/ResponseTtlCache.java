@@ -28,11 +28,9 @@ public class ResponseTtlCache {
         SCHEDULER.scheduleWithFixedDelay(this::evict, 10, 10, TimeUnit.SECONDS);
     }
 
-    private record TtlCacheEntry(String key,
-                                 Response value,
+    private record TtlCacheEntry(Response value,
                                  Instant timestamp) {
         TtlCacheEntry {
-            Objects.requireNonNull(key);
             Objects.requireNonNull(value);
             Objects.requireNonNull(timestamp);
         }
@@ -40,7 +38,7 @@ public class ResponseTtlCache {
     }
 
     public void put(String key, Response value) {
-        CACHE.put(key, new TtlCacheEntry(key, value, Instant.now()));
+        CACHE.put(key, new TtlCacheEntry(value, Instant.now()));
     }
 
     public Response get(String key) {
