@@ -11,6 +11,7 @@ import com.github.mangila.pokedex.shared.https.tls.TlsConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -19,7 +20,7 @@ class DefaultHttpsClient implements HttpsClient {
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpsClient.class);
     private static final JsonTokenizer JSON_TOKENIZER = new JsonTokenizer();
     private static final JsonParser JSON_PARSER = new JsonParser();
-    private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache();
+    private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache(Duration.ofMinutes(5));
 
     private final String host;
     private final int port;
@@ -74,7 +75,9 @@ class DefaultHttpsClient implements HttpsClient {
                     var body = ResponseHandler.readGzipBody(input, 5041);
                     var tokens = JSON_TOKENIZER.tokenizeFrom(body);
                     var parsed = JSON_PARSER.parse(tokens);
-                    return new Response(statusLine, headers, parsed.toString());
+                    var response = new Response(statusLine, headers, parsed.toString());
+                    TTL_CACHE.put(getRequest.path(), response);
+                    return response;
                 }
                 return null;
             } catch (Exception e) {

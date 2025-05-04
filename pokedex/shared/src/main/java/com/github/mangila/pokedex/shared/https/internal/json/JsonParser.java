@@ -14,6 +14,6 @@ public class JsonParser {
         tokens.forEach(jsonToken -> {
             log.debug("{} - {}", jsonToken.type(), jsonToken.value());
         });
-        return null;
+        return new Object();
     }
 }

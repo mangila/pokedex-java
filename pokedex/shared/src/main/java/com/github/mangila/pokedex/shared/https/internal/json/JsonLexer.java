@@ -72,7 +72,7 @@ public class JsonLexer {
                 if (nullToken != null) {
                     yield nullToken;
                 }
-                throw new InvalidJsonException(String.format("Invalid json data(invalid character): %s - %s", current, new String(data)));
+                throw new InvalidJsonException(String.format("Invalid json data cannot tokenize - invalid character: %s - %s", current, new String(data)));
             }
         };
     }

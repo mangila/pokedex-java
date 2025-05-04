@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.Objects;
 
 public class TlsConnection {
 
@@ -36,7 +35,6 @@ public class TlsConnection {
 
     public void disconnect() {
         try {
-            ensureOpen();
             socket.close();
         } catch (IOException e) {
             log.error("ERR", e);
@@ -53,14 +51,5 @@ public class TlsConnection {
 
     public String getHttpVersion() {
         return socket.getApplicationProtocol();
-    }
-
-    private void ensureOpen() throws IOException {
-        if (Objects.isNull(socket)) {
-            throw new IOException("Socket is null");
-        }
-        if (socket.isClosed()) {
-            throw new IOException("Socket is closed");
-        }
     }
 }
