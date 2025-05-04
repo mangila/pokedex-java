@@ -16,7 +16,7 @@ class JsonTokenizerTest {
                 "name": "Bulbasaur", \t
                 "weight": -6.97,
                 "success" : "escape\\"me\\""
-                "esacpe": " asdf\r "
+                "esacpe": " asdf\r "    ,
                 }
                 """);
         System.out.println(tokens);

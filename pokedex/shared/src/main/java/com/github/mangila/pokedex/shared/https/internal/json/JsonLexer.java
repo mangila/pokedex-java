@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.shared.https.internal.json;
 
 import java.util.Map;
 
+import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.*;
 
 public class JsonLexer {
@@ -51,6 +52,9 @@ public class JsonLexer {
             case ']' -> TOKEN_MAP.get(RIGHT_BRACKET);
             case ',' -> TOKEN_MAP.get(COMMA);
             case ':' -> TOKEN_MAP.get(COLON);
+            case 't' -> lexTrue(current);
+            case 'f' -> lexFalse(current);
+            case 'n' -> lexNull(current);
             default -> {
                 var numberToken = lexNumber(current);
                 if (numberToken != null) {
@@ -60,19 +64,7 @@ public class JsonLexer {
                 if (stringToken != null) {
                     yield stringToken;
                 }
-                var trueToken = lexTrue(current);
-                if (trueToken != null) {
-                    yield trueToken;
-                }
-                var falseToken = lexFalse(current);
-                if (falseToken != null) {
-                    yield falseToken;
-                }
-                var nullToken = lexNull(current);
-                if (nullToken != null) {
-                    yield nullToken;
-                }
-                throw new InvalidJsonException(String.format("Invalid json data cannot tokenize - invalid character: %s - %s", current, new String(data)));
+                throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
             }
         };
     }
@@ -123,9 +115,9 @@ public class JsonLexer {
     private JsonToken lexTrue(char current) {
         if (isTrue(current)) {
             nextChar(3);
-            return new JsonToken(TRUE, true);
+            return TOKEN_MAP.get(TRUE);
         }
-        return null;
+        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
     }
 
     private boolean isTrue(char current) {
@@ -135,9 +127,9 @@ public class JsonLexer {
     private JsonToken lexFalse(char current) {
         if (isFalse(current)) {
             nextChar(4);
-            return new JsonToken(FALSE, false);
+            return TOKEN_MAP.get(FALSE);
         }
-        return null;
+        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
     }
 
     private boolean isFalse(char current) {
@@ -147,9 +139,9 @@ public class JsonLexer {
     private JsonToken lexNull(char current) {
         if (isNull(current)) {
             nextChar(3);
-            return new JsonToken(NULL, null);
+            return TOKEN_MAP.get(NULL);
         }
-        return null;
+        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
     }
 
     private boolean isNull(char current) {
