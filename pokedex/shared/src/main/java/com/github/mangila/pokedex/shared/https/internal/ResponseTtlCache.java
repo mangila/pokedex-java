@@ -55,6 +55,10 @@ public class ResponseTtlCache {
         return entry.value;
     }
 
+    public boolean hasKey(String key) {
+        return CACHE.containsKey(key);
+    }
+
     private boolean isExpired(TtlCacheEntry entry) {
         return entry.timestamp
                 .plusMillis(ttl.toMillis())

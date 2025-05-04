@@ -58,6 +58,9 @@ class DefaultHttpsClient implements HttpsClient {
     public Function<GetRequest, Response> get() {
         return getRequest -> {
             try {
+                if (TTL_CACHE.hasKey(getRequest.path())) {
+                    return TTL_CACHE.get(getRequest.path());
+                }
                 var rawHttp = getRequest.toHttp(host, tlsConnection.getHttpVersion());
                 log.debug("{}", rawHttp);
                 tlsConnection.getOutputStream().write(rawHttp.getBytes());
@@ -72,7 +75,7 @@ class DefaultHttpsClient implements HttpsClient {
                 if (Objects.equals("gzip", encoding)
                         && Objects.equals("application/json; charset=utf-8", contentType)
                         && Objects.nonNull(contentLength)) {
-                    var body = ResponseHandler.readGzipBody(input, 5041);
+                    var body = ResponseHandler.readGzipBody(input, Integer.parseInt(contentLength));
                     var tokens = JSON_TOKENIZER.tokenizeFrom(body);
                     var parsed = JSON_PARSER.parse(tokens);
                     var response = new Response(statusLine, headers, parsed.toString());

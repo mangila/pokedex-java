@@ -12,6 +12,7 @@ class PokeApiClientTest {
         var https = new PokeApiClient(new PokeApiHost("pokeapi.co", 443));
         https.connect();
         var s = https.get().apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
+        s = https.get().apply(new GetRequest("/api/v2/pokemon-species/bulbasaur", new Header[]{}));
         System.out.println(s);
         https.disconnect();
     }
