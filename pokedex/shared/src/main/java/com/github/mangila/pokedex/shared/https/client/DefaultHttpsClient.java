@@ -33,28 +33,6 @@ class DefaultHttpsClient implements HttpsClient {
     }
 
     @Override
-    public VoidFunction disconnect() {
-        return () -> {
-            try {
-                tlsConnection.disconnect();
-            } catch (Exception e) {
-                log.error("ERR", e);
-            }
-        };
-    }
-
-    @Override
-    public VoidFunction connect() {
-        return () -> {
-            try {
-                tlsConnection.connect();
-            } catch (Exception e) {
-                log.error("ERR", e);
-            }
-        };
-    }
-
-    @Override
     public Function<GetRequest, Response> get() {
         return getRequest -> {
             try {
@@ -87,6 +65,28 @@ class DefaultHttpsClient implements HttpsClient {
                 log.error("ERR", e);
                 tlsConnection.disconnect();
                 return null;
+            }
+        };
+    }
+
+    @Override
+    public VoidFunction disconnect() {
+        return () -> {
+            try {
+                tlsConnection.disconnect();
+            } catch (Exception e) {
+                log.error("ERR", e);
+            }
+        };
+    }
+
+    @Override
+    public VoidFunction connect() {
+        return () -> {
+            try {
+                tlsConnection.connect();
+            } catch (Exception e) {
+                log.error("ERR", e);
             }
         };
     }
