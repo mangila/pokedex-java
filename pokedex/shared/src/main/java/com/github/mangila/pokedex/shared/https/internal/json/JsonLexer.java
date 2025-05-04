@@ -95,6 +95,7 @@ public class JsonLexer {
         if (current == '-' || Character.isDigit(current)) {
             StringBuilder line = new StringBuilder();
             // TODO check for exponential notation
+            // TODO ensure if floating point
             line.append(current);
             while (true) {
                 current = (char) data[nextChar()];
