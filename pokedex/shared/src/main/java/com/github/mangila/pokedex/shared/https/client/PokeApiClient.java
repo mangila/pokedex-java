@@ -17,9 +17,10 @@ public class PokeApiClient implements AutoCloseable {
         this.https = new DefaultHttpsClient(pokeApiHost.hostName(), pokeApiHost.port());
     }
 
-    public void disconnect() {
+    public PokeApiClient disconnect() {
         this.https.disconnect()
                 .apply();
+        return this;
     }
 
     public PokeApiClient connect() {

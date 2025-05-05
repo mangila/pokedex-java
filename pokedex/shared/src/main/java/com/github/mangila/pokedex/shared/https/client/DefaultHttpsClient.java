@@ -37,8 +37,9 @@ class DefaultHttpsClient implements HttpsClient {
     public Function<GetRequest, Response> get() {
         return getRequest -> {
             try {
-                if (TTL_CACHE.hasKey(getRequest.path())) {
-                    return TTL_CACHE.get(getRequest.path());
+                var path = getRequest.path();
+                if (TTL_CACHE.hasKey(path)) {
+                    return TTL_CACHE.get(path);
                 }
                 var rawHttp = getRequest.toHttp(host, tlsConnection.getHttpVersion());
                 log.debug("{}", rawHttp);
@@ -58,7 +59,7 @@ class DefaultHttpsClient implements HttpsClient {
                     var tokens = JSON_TOKENIZER.tokenizeFrom(body);
                     var parsed = JSON_PARSER.parse(tokens);
                     var response = new Response(statusLine, headers, parsed.toString());
-                    TTL_CACHE.put(getRequest.path(), response);
+                    TTL_CACHE.put(path, response);
                     return response;
                 }
                 return null;

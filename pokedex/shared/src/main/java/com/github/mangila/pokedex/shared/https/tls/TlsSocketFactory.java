@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.https.tls;
 
-import com.github.mangila.pokedex.shared.https.config.ConfigLoader;
 import com.github.mangila.pokedex.shared.https.config.SocketConfig;
 import com.github.mangila.pokedex.shared.https.config.TlsConfig;
 import org.slf4j.Logger;
@@ -18,8 +17,6 @@ public class TlsSocketFactory {
 
     private static final Logger log = LoggerFactory.getLogger(TlsSocketFactory.class);
     private static final SSLContext CONTEXT;
-    private static final SocketConfig socketConfig = ConfigLoader.socketConfig();
-    private static final TlsConfig tlsConfig = ConfigLoader.tlsConfig();
 
     static {
         /*
@@ -40,7 +37,10 @@ public class TlsSocketFactory {
         }
     }
 
-    public static SSLSocket createClientSocket() {
+    public static SSLSocket createClientSocket(
+            SocketConfig socketConfig,
+            TlsConfig tlsConfig
+    ) {
         try {
             var socket = (SSLSocket) CONTEXT.getSocketFactory().createSocket();
             socket.setKeepAlive(socketConfig.keepAlive());

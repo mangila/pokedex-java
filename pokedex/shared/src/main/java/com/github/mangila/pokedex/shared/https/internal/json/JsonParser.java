@@ -7,7 +7,6 @@ import java.util.List;
 
 public class JsonParser {
 
-
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
 
     public Object parse(List<JsonToken> tokens) {
