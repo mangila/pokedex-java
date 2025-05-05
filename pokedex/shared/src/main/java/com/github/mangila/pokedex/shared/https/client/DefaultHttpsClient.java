@@ -3,6 +3,7 @@ package com.github.mangila.pokedex.shared.https.client;
 import com.github.mangila.pokedex.shared.func.VoidFunction;
 import com.github.mangila.pokedex.shared.https.internal.ResponseHandler;
 import com.github.mangila.pokedex.shared.https.internal.ResponseTtlCache;
+import com.github.mangila.pokedex.shared.https.internal.ResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.internal.json.JsonParser;
 import com.github.mangila.pokedex.shared.https.internal.json.JsonTokenizer;
 import com.github.mangila.pokedex.shared.https.model.GetRequest;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -21,7 +23,7 @@ class DefaultHttpsClient implements HttpsClient {
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpsClient.class);
     private static final JsonTokenizer JSON_TOKENIZER = new JsonTokenizer();
     private static final JsonParser JSON_PARSER = new JsonParser();
-    private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache(Duration.ofMinutes(5));
+    private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache();
 
     private final String host;
     private final int port;

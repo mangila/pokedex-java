@@ -4,18 +4,27 @@ import com.github.mangila.pokedex.shared.https.model.Response;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 class ResponseTtlCacheTest {
 
     @Test
-    void abc() throws InterruptedException {
-        var cache = new ResponseTtlCache(Duration.ofSeconds(3));
+    void abc() {
+        var config = new ResponseTtlCacheConfig(
+                Duration.ofSeconds(3),
+                0,
+                10,
+                SECONDS
+        );
+        var cache = new ResponseTtlCache(config);
         cache.put("key", new Response("statusLine", null, null));
-        TimeUnit.SECONDS.sleep(20);
-        assertThat(cache.hasKey("key")).isFalse();
+        assertThat(cache.hasKey("key")).isTrue();
+        await()
+                .atMost(15, SECONDS)
+                .until(() -> !cache.hasKey("key"));
     }
 
 }

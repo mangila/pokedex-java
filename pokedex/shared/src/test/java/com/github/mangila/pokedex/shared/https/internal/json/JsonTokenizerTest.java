@@ -11,8 +11,6 @@ class JsonTokenizerTest {
         var tokenizer = new JsonTokenizer();
         var tokens = tokenizer.tokenizeFrom("""
                 {
-                
-                
                 "name": "Bulbasaur", \t
                 "weight": -6.97,
                 "success" : "escape\\"me\\""
@@ -22,6 +20,6 @@ class JsonTokenizerTest {
                 "null": "null",
                 }
                 """);
-        System.out.println(tokens);
+
     }
 }
