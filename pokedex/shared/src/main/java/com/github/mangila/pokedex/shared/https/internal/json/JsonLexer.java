@@ -61,13 +61,9 @@ public class JsonLexer {
             case 't' -> lexTrue();
             case 'f' -> lexFalse();
             case 'n' -> lexNull();
-            default -> {
-                var numberToken = lexNumber(current);
-                if (numberToken != null) {
-                    yield numberToken;
-                }
-                throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
-            }
+            case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> lexNumber(current);
+            default ->
+                    throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
         };
     }
 
@@ -92,26 +88,23 @@ public class JsonLexer {
     }
 
     private JsonToken lexNumber(char current) {
-        if (current == '-' || Character.isDigit(current)) {
-            StringBuilder line = new StringBuilder();
-            // TODO check for exponential notation
-            // TODO ensure if floating point
-            line.append(current);
-            next();
-            while (true) {
-                current = readAndNext();
-                if (current == '.') {
-                    line.append(current);
-                    continue;
-                }
-                if (!Character.isDigit(current)) {
-                    break;
-                }
+        // TODO check for exponential notation
+        // TODO ensure if floating point
+        StringBuilder line = new StringBuilder();
+        line.append(current);
+        next();
+        while (true) {
+            current = readAndNext();
+            if (current == '.') {
                 line.append(current);
+                continue;
             }
-            return new JsonToken(NUMBER, line.toString());
+            if (!Character.isDigit(current)) {
+                break;
+            }
+            line.append(current);
         }
-        return null;
+        return new JsonToken(NUMBER, line.toString());
     }
 
     private JsonToken lexTrue() {

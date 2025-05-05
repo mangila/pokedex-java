@@ -6,13 +6,13 @@
     <parent>
         <groupId>com.github.mangila</groupId>
         <artifactId>pokedex</artifactId>
-        <version>1.0.0</version>
+        <version>3.0.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.github.mangila.pokedex</groupId>
     <artifactId>shared</artifactId>
-    <version>1.0.0</version>
+    <version>3.0.0</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
