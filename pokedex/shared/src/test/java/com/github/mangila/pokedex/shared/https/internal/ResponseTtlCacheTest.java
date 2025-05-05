@@ -16,14 +16,14 @@ class ResponseTtlCacheTest {
         var config = new ResponseTtlCacheConfig(
                 Duration.ofSeconds(3),
                 0,
-                10,
+                3,
                 SECONDS
         );
         var cache = new ResponseTtlCache(config);
         cache.put("key", new Response("statusLine", null, null));
         assertThat(cache.hasKey("key")).isTrue();
         await()
-                .atMost(15, SECONDS)
+                .atMost(5, SECONDS)
                 .until(() -> !cache.hasKey("key"));
     }
 
