@@ -78,6 +78,7 @@ public class JsonLexer {
         while (read() != '"') {
             char current = readAndNext();
             if (current == '\\') {
+                line.append(current);
                 current = readAndNext();
                 if (current == '"') {
                     line.append(current);
