@@ -27,6 +27,7 @@ public class JsonLexer {
         this.data = data;
     }
 
+    // 	EAFP - Easier to Ask Forgiveness than Permission
     public char read() {
         try {
             return (char) data[cursor];
@@ -88,6 +89,7 @@ public class JsonLexer {
         return new JsonToken(STRING, line.toString());
     }
 
+    // LBYL - Look Before You Leap
     private JsonToken lexTrue() {
         if (isTrue()) {
             skip(3);
