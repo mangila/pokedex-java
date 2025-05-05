@@ -17,9 +17,7 @@ public class ResponseTtlCache {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseTtlCache.class);
     private static final Map<String, TtlCacheEntry> CACHE = new ConcurrentHashMap<>();
-    private static final ScheduledExecutorService EVICTION_SCHEDULER = Executors.newSingleThreadScheduledExecutor(Thread
-            .ofVirtual()
-            .factory());
+    private static final ScheduledExecutorService EVICTION_SCHEDULER = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
 
     private final Duration ttl;
 

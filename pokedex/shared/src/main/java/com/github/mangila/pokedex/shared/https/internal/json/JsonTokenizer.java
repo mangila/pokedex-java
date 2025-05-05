@@ -19,14 +19,14 @@ public class JsonTokenizer {
         var lexer = new JsonLexer(data);
         var tokens = new ArrayList<JsonToken>();
         while (!lexer.finishedReadingData()) {
-            var current = lexer.readChar();
+            var current = lexer.read();
             if (Character.isWhitespace(current)) {
-                lexer.nextChar();
+                lexer.next();
                 continue;
             }
             var token = lexer.lexChar(current);
             tokens.add(token);
-            lexer.nextChar();
+            lexer.next();
         }
 
         return tokens;

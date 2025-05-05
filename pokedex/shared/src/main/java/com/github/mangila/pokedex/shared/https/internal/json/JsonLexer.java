@@ -27,16 +27,21 @@ public class JsonLexer {
         this.data = data;
     }
 
-    public char readChar() {
+    public char read() {
         return (char) data[cursor];
     }
 
-    public int nextChar() {
+    public void next() {
         this.cursor = cursor + 1;
-        return cursor;
     }
 
-    public void nextChar(int count) {
+    public char readAndNext() {
+        char current = read();
+        next();
+        return current;
+    }
+
+    public void skip(int count) {
         this.cursor = cursor + count;
     }
 
@@ -52,43 +57,38 @@ public class JsonLexer {
             case ']' -> TOKEN_MAP.get(RIGHT_BRACKET);
             case ',' -> TOKEN_MAP.get(COMMA);
             case ':' -> TOKEN_MAP.get(COLON);
-            case 't' -> lexTrue(current);
-            case 'f' -> lexFalse(current);
-            case 'n' -> lexNull(current);
+            case '"' -> lexString();
+            case 't' -> lexTrue();
+            case 'f' -> lexFalse();
+            case 'n' -> lexNull();
             default -> {
                 var numberToken = lexNumber(current);
                 if (numberToken != null) {
                     yield numberToken;
-                }
-                var stringToken = lexString(current);
-                if (stringToken != null) {
-                    yield stringToken;
                 }
                 throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
             }
         };
     }
 
-    private JsonToken lexString(char current) {
-        if (current == '"') {
-            StringBuilder line = new StringBuilder();
-            while (true) {
-                current = (char) data[nextChar()];
-                if (current == '\\') {
-                    current = (char) data[nextChar()];
-                    if (current == '"') {
-                        line.append(current);
-                        continue;
-                    }
-                }
+    private JsonToken lexString() {
+        StringBuilder line = new StringBuilder();
+        next(); // skip the first double quote
+        while (true) {
+            char current = readAndNext();
+            if (current == '\\') {
+                current = readAndNext();
                 if (current == '"') {
-                    break;
+                    line.append(current);
+                    continue;
                 }
-                line.append(current);
             }
-            return new JsonToken(STRING, line.toString());
+            if (current == '"') {
+                break;
+            }
+            line.append(current);
         }
-        return null;
+        return new JsonToken(STRING, line.toString());
     }
 
     private JsonToken lexNumber(char current) {
@@ -97,8 +97,9 @@ public class JsonLexer {
             // TODO check for exponential notation
             // TODO ensure if floating point
             line.append(current);
+            next();
             while (true) {
-                current = (char) data[nextChar()];
+                current = readAndNext();
                 if (current == '.') {
                     line.append(current);
                     continue;
@@ -113,39 +114,39 @@ public class JsonLexer {
         return null;
     }
 
-    private JsonToken lexTrue(char current) {
-        if (isTrue(current)) {
-            nextChar(3);
+    private JsonToken lexTrue() {
+        if (isTrue()) {
+            skip(3);
             return TOKEN_MAP.get(TRUE);
         }
-        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
+        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
     }
 
-    private boolean isTrue(char current) {
-        return current == 't' && cursor + 3 < data.length && new String(data, cursor, 4).equals("true");
+    private boolean isTrue() {
+        return cursor + 3 < data.length && new String(data, cursor, 4).equals("true");
     }
 
-    private JsonToken lexFalse(char current) {
-        if (isFalse(current)) {
-            nextChar(4);
+    private JsonToken lexFalse() {
+        if (isFalse()) {
+            skip(4);
             return TOKEN_MAP.get(FALSE);
         }
-        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
+        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
     }
 
-    private boolean isFalse(char current) {
-        return current == 'f' && cursor + 4 < data.length && new String(data, cursor, 5).equals("false");
+    private boolean isFalse() {
+        return cursor + 4 < data.length && new String(data, cursor, 5).equals("false");
     }
 
-    private JsonToken lexNull(char current) {
-        if (isNull(current)) {
-            nextChar(3);
+    private JsonToken lexNull() {
+        if (isNull()) {
+            skip(3);
             return TOKEN_MAP.get(NULL);
         }
-        throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
+        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
     }
 
-    private boolean isNull(char current) {
-        return current == 'n' && cursor + 3 < data.length && new String(data, cursor, 4).equals("null");
+    private boolean isNull() {
+        return cursor + 3 < data.length && new String(data, cursor, 4).equals("null");
     }
 }
