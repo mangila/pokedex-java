@@ -34,7 +34,7 @@ public class ResponseTtlCache {
         this(new ResponseTtlCacheConfig(
                 Duration.ofMinutes(5),
                 10,
-                10,
+                30,
                 TimeUnit.SECONDS
         ));
     }
