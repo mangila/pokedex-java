@@ -14,12 +14,12 @@ class JsonTokenizerTest {
                 
                 
                 "name": "Bulbasaur", \t
-                "weight": -6.97.,
+                "weight": -6.97,
                 "success" : "escape\\"me\\""
                 "esacpe": " asdf\r "    ,
                 "true": true,
                 "false": false,
-                "null": null,
+                "null": "null",
                 }
                 """);
         System.out.println(tokens);

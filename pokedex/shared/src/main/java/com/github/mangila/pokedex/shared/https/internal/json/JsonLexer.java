@@ -28,7 +28,11 @@ public class JsonLexer {
     }
 
     public char read() {
-        return (char) data[cursor];
+        try {
+            return (char) data[cursor];
+        } catch (Exception e) {
+            throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
+        }
     }
 
     public void next() {
@@ -70,7 +74,7 @@ public class JsonLexer {
     private JsonToken lexString() {
         StringBuilder line = new StringBuilder();
         next(); // skip the first double quote
-        while (true) {
+        while (read() != '"') {
             char current = readAndNext();
             if (current == '\\') {
                 current = readAndNext();
@@ -79,32 +83,9 @@ public class JsonLexer {
                     continue;
                 }
             }
-            if (current == '"') {
-                break;
-            }
             line.append(current);
         }
         return new JsonToken(STRING, line.toString());
-    }
-
-    private JsonToken lexNumber(char current) {
-        // TODO check for exponential notation
-        // TODO ensure if floating point
-        StringBuilder line = new StringBuilder();
-        line.append(current);
-        next();
-        while (true) {
-            current = readAndNext();
-            if (current == '.') {
-                line.append(current);
-                continue;
-            }
-            if (!Character.isDigit(current)) {
-                break;
-            }
-            line.append(current);
-        }
-        return new JsonToken(NUMBER, line.toString());
     }
 
     private JsonToken lexTrue() {
@@ -141,5 +122,28 @@ public class JsonLexer {
 
     private boolean isNull() {
         return cursor + 3 < data.length && new String(data, cursor, 4).equals("null");
+    }
+
+    private JsonToken lexNumber(char current) {
+        // TODO check for exponential notation
+        StringBuilder line = new StringBuilder();
+        line.append(current);
+        next();
+        boolean isFloat = false;
+        while (Character.isDigit(read()) || read() == '.') {
+            current = readAndNext();
+            isFloat = checkIfFloat(current, isFloat);
+            line.append(current);
+        }
+        return new JsonToken(NUMBER, line.toString());
+    }
+
+    private boolean checkIfFloat(char current, boolean isFloat) {
+        if (current == '.' && !isFloat) {
+            return true;
+        } else if (current == '.') {
+            throw new InvalidJsonException(String.format("two '.' cannot be used as a decimal separator - %s", new String(data)));
+        }
+        return isFloat;
     }
 }
