@@ -63,9 +63,6 @@ public class JsonParser {
                 break;
             }
             reader.expect(JsonType.COMMA);
-            if (reader.peek().type() == RIGHT_BRACE) {
-                break;
-            }
         }
 
         return map;
