@@ -60,6 +60,7 @@ public class JsonParser {
             var value = parseValue(reader);
             map.put((String) key, value);
             if (reader.peek().type() == RIGHT_BRACE) {
+                reader.next();
                 break;
             }
             reader.expect(JsonType.COMMA);
