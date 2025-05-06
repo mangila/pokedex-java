@@ -19,6 +19,26 @@ public class JsonLexer {
             NULL, new JsonToken(NULL, null)
     );
 
+    private static final Map<String, JsonToken> TOKEN_MAP_NUMBER = Map.of(
+            "zero", new JsonToken(NUMBER, '0'),
+            "one", new JsonToken(NUMBER, '1'),
+            "two", new JsonToken(NUMBER, '2'),
+            "three", new JsonToken(NUMBER, '3'),
+            "four", new JsonToken(NUMBER, '4'),
+            "five", new JsonToken(NUMBER, '5'),
+            "six", new JsonToken(NUMBER, '6'),
+            "seven", new JsonToken(NUMBER, '7'),
+            "eight", new JsonToken(NUMBER, '8'),
+            "nine", new JsonToken(NUMBER, '9')
+    );
+
+    private static final Map<String, JsonToken> TOKEN_MAP_NUMBER_SPECIAL = Map.of(
+            "negative", new JsonToken(NUMBER, '-'),
+            "plus", new JsonToken(NUMBER, '+'),
+            "programmer-e", new JsonToken(NUMBER, 'E'),
+            "math-e", new JsonToken(NUMBER, 'e')
+    );
+
     private final byte[] data;
     private int cursor;
 
@@ -32,7 +52,7 @@ public class JsonLexer {
         try {
             return (char) data[cursor];
         } catch (Exception e) {
-            throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
+            throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
         }
     }
 
@@ -66,9 +86,21 @@ public class JsonLexer {
             case 't' -> lexTrue();
             case 'f' -> lexFalse();
             case 'n' -> lexNull();
-            case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> lexNumber(current);
-            default ->
-                    throw new InvalidJsonException(String.format("%s - %s - %s", TOKENIZE_ERROR_MESSAGE, current, new String(data)));
+            case '-' -> TOKEN_MAP_NUMBER_SPECIAL.get("negative");
+            case '+' -> TOKEN_MAP_NUMBER_SPECIAL.get("plus");
+            case '0' -> TOKEN_MAP_NUMBER.get("zero");
+            case '1' -> TOKEN_MAP_NUMBER.get("one");
+            case '2' -> TOKEN_MAP_NUMBER.get("two");
+            case '3' -> TOKEN_MAP_NUMBER.get("three");
+            case '4' -> TOKEN_MAP_NUMBER.get("four");
+            case '5' -> TOKEN_MAP_NUMBER.get("five");
+            case '6' -> TOKEN_MAP_NUMBER.get("six");
+            case '7' -> TOKEN_MAP_NUMBER.get("seven");
+            case '8' -> TOKEN_MAP_NUMBER.get("eight");
+            case '9' -> TOKEN_MAP_NUMBER.get("nine");
+            case 'E' -> TOKEN_MAP_NUMBER_SPECIAL.get("programmer-e");
+            case 'e' -> TOKEN_MAP_NUMBER_SPECIAL.get("math-e");
+            default -> throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
         };
     }
 
@@ -80,10 +112,8 @@ public class JsonLexer {
             if (current == '\\') {
                 line.append(current);
                 current = readAndNext();
-                if (current == '"') {
-                    line.append(current);
-                    continue;
-                }
+                line.append(current);
+                continue;
             }
             line.append(current);
         }
@@ -96,7 +126,7 @@ public class JsonLexer {
             skip(3);
             return TOKEN_MAP.get(TRUE);
         }
-        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
+        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
     }
 
     private boolean isTrue() {
@@ -108,7 +138,7 @@ public class JsonLexer {
             skip(4);
             return TOKEN_MAP.get(FALSE);
         }
-        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
+        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
     }
 
     private boolean isFalse() {
@@ -120,33 +150,10 @@ public class JsonLexer {
             skip(3);
             return TOKEN_MAP.get(NULL);
         }
-        throw new InvalidJsonException(String.format("%s - %s", TOKENIZE_ERROR_MESSAGE, new String(data)));
+        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
     }
 
     private boolean isNull() {
         return cursor + 3 < data.length && new String(data, cursor, 4).equals("null");
-    }
-
-    private JsonToken lexNumber(char current) {
-        // TODO check for exponential notation
-        StringBuilder line = new StringBuilder();
-        line.append(current);
-        next();
-        boolean isFloat = false;
-        while (Character.isDigit(read()) || read() == '.') {
-            current = readAndNext();
-            isFloat = checkIfFloat(current, isFloat);
-            line.append(current);
-        }
-        return new JsonToken(NUMBER, line.toString());
-    }
-
-    private boolean checkIfFloat(char current, boolean isFloat) {
-        if (current == '.' && !isFloat) {
-            return true;
-        } else if (current == '.') {
-            throw new InvalidJsonException(String.format("two '.' cannot be used as a decimal separator - %s", new String(data)));
-        }
-        return isFloat;
     }
 }

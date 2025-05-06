@@ -2,8 +2,6 @@ package com.github.mangila.pokedex.shared.https.internal.json;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class JsonTokenizerTest {
 
     @Test
@@ -11,15 +9,13 @@ class JsonTokenizerTest {
         var tokenizer = new JsonTokenizer();
         var tokens = tokenizer.tokenizeFrom("""
                 {
-                "name": "Bulbasaur", \t
-                "weight": -6.97,
-                "success" : "escape\\"me\\""
-                "esacpe": " asdf\r "    ,
-                "true": true,
-                "false": false,
-                "null": "null",
+                "n" : -1234,
+                "number": {
+                    "arrays": [1,2,3]
+                },
                 }
                 """);
-
+        var par = new JsonParser();
+        par.parse(tokens);
     }
 }
