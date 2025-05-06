@@ -18,8 +18,6 @@ import java.util.function.Supplier;
 class DefaultHttpsClient implements HttpsClient {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultHttpsClient.class);
-    private static final JsonTokenizer JSON_TOKENIZER = new JsonTokenizer();
-    private static final JsonParser JSON_PARSER = new JsonParser();
     private static final ResponseTtlCache TTL_CACHE = new ResponseTtlCache();
 
     private final String host;
@@ -55,8 +53,8 @@ class DefaultHttpsClient implements HttpsClient {
                         && Objects.equals("application/json; charset=utf-8", contentType)
                         && Objects.nonNull(contentLength)) {
                     var body = ResponseHandler.readGzipBody(input, Integer.parseInt(contentLength));
-                    var tokens = JSON_TOKENIZER.tokenizeFrom(body);
-                    var parsed = JSON_PARSER.parse(tokens);
+                    var tokens = JsonTokenizer.tokenizeFrom(body);
+                    var parsed = JsonParser.parse(tokens);
                     var response = new Response(statusLine, headers, parsed.toString());
                     TTL_CACHE.put(path, response);
                     return response;

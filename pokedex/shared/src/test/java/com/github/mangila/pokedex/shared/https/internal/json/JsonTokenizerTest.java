@@ -6,16 +6,14 @@ class JsonTokenizerTest {
 
     @Test
     void tokenizeFrom() {
-        var tokenizer = new JsonTokenizer();
-        var tokens = tokenizer.tokenizeFrom("""
+        var tokens = JsonTokenizer.tokenizeFrom("""
                 {
                 "n" : -1234,
-                "number": {
-                    "arrays": [1,2,3]
-                },
+                "b" : {
+                    "c" : "asd"
+                }
                 }
                 """);
-        var par = new JsonParser();
-        par.parse(tokens);
+        JsonParser.parse(tokens);
     }
 }

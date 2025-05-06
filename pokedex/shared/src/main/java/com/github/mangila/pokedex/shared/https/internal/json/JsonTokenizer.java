@@ -1,18 +1,20 @@
 package com.github.mangila.pokedex.shared.https.internal.json;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Objects;
+import java.util.Queue;
 
 public class JsonTokenizer {
 
-    public Queue<JsonToken> tokenizeFrom(byte[] data) {
+    public static Queue<JsonToken> tokenizeFrom(byte[] data) {
         return tokenize(data);
     }
 
-    public Queue<JsonToken> tokenizeFrom(String data) {
+    public static Queue<JsonToken> tokenizeFrom(String data) {
         return tokenize(data.getBytes());
     }
 
-    private Queue<JsonToken> tokenize(byte[] data) {
+    private static Queue<JsonToken> tokenize(byte[] data) {
         Objects.requireNonNull(data, "json data must not be null");
         var lexer = new JsonLexer(data);
         var tokens = new ArrayDeque<JsonToken>();
