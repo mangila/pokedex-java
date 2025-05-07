@@ -54,7 +54,7 @@ class DefaultHttpsClient implements HttpsClient {
                         && Objects.nonNull(contentLength)) {
                     var body = ResponseHandler.readGzipBody(input, Integer.parseInt(contentLength));
                     var tokens = JsonTokenizer.tokenizeFrom(body);
-                    var parsed = JsonParser.parse(tokens);
+                    var parsed = JsonParser.parseTree(tokens);
                     var response = new Response(statusLine, headers, parsed.toString());
                     TTL_CACHE.put(path, response);
                     return response;

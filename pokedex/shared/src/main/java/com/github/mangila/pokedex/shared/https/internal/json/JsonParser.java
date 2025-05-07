@@ -14,7 +14,7 @@ public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
 
-    public static Object parse(Queue<JsonToken> tokens) {
+    public static Object parseTree(Queue<JsonToken> tokens) {
         var reader = new JsonTokenReader(tokens);
         reader.expect(JsonType.LEFT_BRACE);
         while (!reader.isEmpty()) {

@@ -11,9 +11,12 @@ class JsonTokenizerTest {
                 "n" : -1234,
                 "b" : {
                     "c" : "asd"
-                }
+                },
+                "tr": true,
+                "fa": false,
+                "nu": null
                 }
                 """);
-        JsonParser.parse(tokens);
+        JsonParser.parseTree(tokens);
     }
 }

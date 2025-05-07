@@ -1,11 +1,18 @@
 package com.github.mangila.pokedex.shared.https.internal.json;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.*;
 
 public class JsonLexer {
+
+    private static final Logger log = LoggerFactory.getLogger(JsonLexer.class);
 
     private static final Map<JsonType, JsonToken> TOKEN_MAP = Map.of(
             LEFT_BRACE, new JsonToken(LEFT_BRACE, '{'),
@@ -39,42 +46,17 @@ public class JsonLexer {
             "math-e", new JsonToken(NUMBER, 'e')
     );
 
-    private final byte[] data;
-    private int cursor;
+    private final JsonStreamReader reader;
 
     public JsonLexer(byte[] data) {
-        this.cursor = 0;
-        this.data = data;
+        this.reader = new JsonStreamReader(data);
     }
 
-    // 	EAFP - Easier to Ask Forgiveness than Permission
-    public char read() {
-        try {
-            return (char) data[cursor];
-        } catch (Exception e) {
-            throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-        }
+    public JsonStreamReader getReader() {
+        return reader;
     }
 
-    public void next() {
-        this.cursor = cursor + 1;
-    }
-
-    public char readAndNext() {
-        char current = read();
-        next();
-        return current;
-    }
-
-    public void skip(int count) {
-        this.cursor = cursor + count;
-    }
-
-    public boolean finishedReadingData() {
-        return cursor >= data.length;
-    }
-
-    public JsonToken lexChar(char current) {
+    public JsonToken lexChar(int current) throws IOException {
         return switch (current) {
             case '{' -> TOKEN_MAP.get(LEFT_BRACE);
             case '}' -> TOKEN_MAP.get(RIGHT_BRACE);
@@ -83,9 +65,9 @@ public class JsonLexer {
             case ',' -> TOKEN_MAP.get(COMMA);
             case ':' -> TOKEN_MAP.get(COLON);
             case '"' -> lexString();
-            case 't' -> lexTrue();
-            case 'f' -> lexFalse();
-            case 'n' -> lexNull();
+            case 't' -> lexBooleanOrNull((char) current + "rue");
+            case 'f' -> lexBooleanOrNull((char) current + "alse");
+            case 'n' -> lexBooleanOrNull((char) current + "ull");
             case '-' -> TOKEN_MAP_NUMBER_SPECIAL.get("negative");
             case '+' -> TOKEN_MAP_NUMBER_SPECIAL.get("plus");
             case '0' -> TOKEN_MAP_NUMBER.get("zero");
@@ -100,60 +82,55 @@ public class JsonLexer {
             case '9' -> TOKEN_MAP_NUMBER.get("nine");
             case 'E' -> TOKEN_MAP_NUMBER_SPECIAL.get("programmer-e");
             case 'e' -> TOKEN_MAP_NUMBER_SPECIAL.get("math-e");
-            default -> throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+            default -> {
+                log.error("ERR - unexpected character {}", (char) current);
+                throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+            }
         };
     }
 
-    private JsonToken lexString() {
+    /**
+     * String lexing - iterate until a double quote is found
+     * if there is an escaping sequence (e.g. \") the next character is read and added to the string
+     */
+    private JsonToken lexString() throws IOException {
         StringBuilder line = new StringBuilder();
-        next(); // skip the first double quote
-        while (read() != '"') {
-            char current = readAndNext();
-            if (current == '\\') {
-                line.append(current);
-                current = readAndNext();
-                line.append(current);
-                continue;
+        while (true) {
+            int current = reader.read();
+            if (current == -1) {
+                log.error("ERR - end of stream unexpectedly");
+                throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
             }
-            line.append(current);
+            if (current == '"') {
+                break;
+            }
+            if (current == '\\') {
+                line.append((char) current);
+                current = reader.read();
+            }
+
+            line.append((char) current);
         }
         return new JsonToken(STRING, line.toString());
     }
 
-    // LBYL - Look Before You Leap
-    private JsonToken lexTrue() {
-        if (isTrue()) {
-            skip(3);
-            return TOKEN_MAP.get(TRUE);
+    /**
+     * Lex booleans or null with the one-off first char since it already have been read
+     * - "true" -> "rue"
+     * - "false" -> "alse"
+     * - "null" -> "ull"
+     */
+    private JsonToken lexBooleanOrNull(String value) throws IOException {
+        var peek = reader.peek(value.length() - 1).toString();
+        if (Objects.equals(peek, value.substring(1))) {
+            reader.skip(value.length() - 1);
+            return switch (value.toLowerCase()) {
+                case "true" -> TOKEN_MAP.get(TRUE);
+                case "false" -> TOKEN_MAP.get(FALSE);
+                case "null" -> TOKEN_MAP.get(NULL);
+                default -> throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+            };
         }
         throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-    }
-
-    private boolean isTrue() {
-        return cursor + 3 < data.length && new String(data, cursor, 4).equals("true");
-    }
-
-    private JsonToken lexFalse() {
-        if (isFalse()) {
-            skip(4);
-            return TOKEN_MAP.get(FALSE);
-        }
-        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-    }
-
-    private boolean isFalse() {
-        return cursor + 4 < data.length && new String(data, cursor, 5).equals("false");
-    }
-
-    private JsonToken lexNull() {
-        if (isNull()) {
-            skip(3);
-            return TOKEN_MAP.get(NULL);
-        }
-        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-    }
-
-    private boolean isNull() {
-        return cursor + 3 < data.length && new String(data, cursor, 4).equals("null");
     }
 }
