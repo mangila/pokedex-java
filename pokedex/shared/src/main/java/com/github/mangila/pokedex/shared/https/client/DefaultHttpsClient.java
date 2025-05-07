@@ -47,12 +47,10 @@ class DefaultHttpsClient implements HttpsClient {
                 log.debug("{}", statusLine);
                 var headers = ResponseHandler.readHeaders(input);
                 var encoding = headers.get("Content-Encoding");
-                var contentLength = headers.get("Content-Length");
                 var contentType = headers.get("Content-Type");
                 if (Objects.equals("gzip", encoding)
-                        && Objects.equals("application/json; charset=utf-8", contentType)
-                        && Objects.nonNull(contentLength)) {
-                    var body = ResponseHandler.readGzipBody(input, Integer.parseInt(contentLength));
+                        && Objects.equals("application/json; charset=utf-8", contentType)) {
+                    var body = ResponseHandler.readGzipBody(input);
                     var tokens = JsonTokenizer.tokenizeFrom(body);
                     var parsed = JsonParser.parseTree(tokens);
                     var response = new Response(statusLine, headers, parsed.toString());

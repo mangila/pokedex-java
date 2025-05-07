@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,21 +53,23 @@ public class ResponseHandler {
                 var parts = header.split(": ");
                 if (parts.length == 2) {
                     headers.put(parts[0], parts[1]);
-                    buffer.reset();
                 }
+                buffer.reset();
             }
             previous = current;
         }
         return headers;
     }
 
-    public static byte[] readGzipBody(InputStream inputStream, int contentLength) throws IOException {
+    public static byte[] readGzipBody(InputStream inputStream) throws IOException {
         var gzip = new GZIPInputStream(inputStream);
-        var writeBuffer = new ByteArrayOutputStream(contentLength);
-        var readBuffer = new byte[8 * 1024];
-        int len;
-        while ((len = gzip.read(readBuffer)) != END_OF_STREAM) {
-            writeBuffer.write(readBuffer, 0, len);
+        var writeBuffer = new ByteArrayOutputStream(8 * 1024);
+        var readBuffer = ByteBuffer.allocate(8 * 1024);
+        int byteCount;
+        while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
+            readBuffer.position(0);
+            writeBuffer.write(readBuffer.array(), 0, byteCount);
+            readBuffer.clear();
         }
         return writeBuffer.toByteArray();
     }
