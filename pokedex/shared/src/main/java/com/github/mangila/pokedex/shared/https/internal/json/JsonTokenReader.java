@@ -29,7 +29,7 @@ public class JsonTokenReader {
     public JsonToken expect(JsonType type) {
         var token = next();
         if (token == null || token.type() != type) {
-            throw new InvalidJsonException(InvalidJsonException.TOKENIZE_ERROR_MESSAGE);
+            throw new InvalidJsonException(InvalidJsonException.PARSE_ERROR_MESSAGE);
         }
         return token;
     }
