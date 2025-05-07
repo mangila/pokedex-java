@@ -121,10 +121,10 @@ public class JsonLexer {
      * - "null" -> "ull"
      */
     private JsonToken lexBooleanOrNull(String value) throws IOException {
-        int oneOff = value.length() - 1;
-        var peek = reader.peek(oneOff).toString();
+        int oneOffLength = value.length() - 1;
+        var peek = reader.peek(oneOffLength).toString();
         if (Objects.equals(peek, value.substring(1))) {
-            reader.skip(oneOff);
+            reader.skip(oneOffLength);
             return switch (value.toLowerCase()) {
                 case "true" -> TOKEN_MAP.get(TRUE);
                 case "false" -> TOKEN_MAP.get(FALSE);

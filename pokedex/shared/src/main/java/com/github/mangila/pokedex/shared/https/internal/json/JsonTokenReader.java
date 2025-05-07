@@ -10,7 +10,6 @@ public class JsonTokenReader {
         if (tokens.isEmpty()) {
             throw new InvalidJsonException(InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE);
         }
-        JsonValidator.ensureValidParentheses(tokens);
         this.tokens = tokens;
     }
 
