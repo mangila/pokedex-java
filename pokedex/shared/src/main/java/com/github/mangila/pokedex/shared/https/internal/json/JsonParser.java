@@ -3,10 +3,8 @@ package com.github.mangila.pokedex.shared.https.internal.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.RIGHT_BRACE;
@@ -16,22 +14,22 @@ public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
 
-    public static Object parseTree(Queue<JsonToken> tokens) {
-        var tree = new JsonTree();
+    public static Map<String, Object> parseTree(Queue<JsonToken> tokens) {
+        var map = new HashMap<String, Object>();
         var reader = new JsonTokenReader(tokens);
         reader.expect(JsonType.LEFT_BRACE);
         while (!reader.isEmpty()) {
             var token = reader.expect(JsonType.STRING);
             reader.expect(JsonType.COLON);
             var value = parseValue(reader);
-            tree.add((String) token.value(), value);
+            map.put((String) token.value(), value);
             if (reader.peek().type() == RIGHT_BRACE) {
                 reader.next();
                 break;
             }
             reader.expect(JsonType.COMMA);
         }
-        return tree;
+        return map;
     }
 
     private static Object parseValue(JsonTokenReader reader) {
@@ -45,7 +43,7 @@ public class JsonParser {
         };
     }
 
-    private static Object parseArray(JsonTokenReader reader) {
+    private static List<Object> parseArray(JsonTokenReader reader) {
         reader.expect(JsonType.LEFT_BRACKET);
         var list = new ArrayList<>();
         if (reader.peek().type() == RIGHT_BRACKET) {
@@ -95,6 +93,6 @@ public class JsonParser {
             var token = reader.next();
             sb.append(token.value());
         }
-        return sb.toString();
+        return new BigDecimal(sb.toString());
     }
 }
