@@ -14,7 +14,7 @@ import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACE;
 import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 
 /**
- * BFS (Breadth-First) traversal of the JSON tree
+ * DFS (Depth-First) traversal of the JSON tree
  */
 public class JsonParser {
 
