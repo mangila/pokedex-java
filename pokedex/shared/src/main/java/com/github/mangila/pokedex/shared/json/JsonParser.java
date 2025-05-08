@@ -55,9 +55,6 @@ public class JsonParser {
             queue.expect(JsonType.COLON);
             var value = parseValue();
             map.put((String) token.value(), value);
-            if (depth > 10) {
-                log.warn("JSON depth is greater than 10 - {} on key - {}", depth, token.value());
-            }
             this.depth = 0;
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();
