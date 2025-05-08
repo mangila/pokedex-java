@@ -19,18 +19,11 @@ public class JsonStreamReader implements AutoCloseable {
         return stream.read();
     }
 
-    public CharBuffer peek(int offset) throws IOException {
-        stream.mark(offset);
-        var peek = CharBuffer.allocate(offset);
+    public CharBuffer read(int length) throws IOException {
+        var buffer = CharBuffer.allocate(length);
         //noinspection ResultOfMethodCallIgnored
-        stream.read(peek.array(), 0, offset);
-        stream.reset();
-        return peek;
-    }
-
-    public void skip(int n) throws IOException {
-        //noinspection ResultOfMethodCallIgnored
-        stream.skip(n);
+        stream.read(buffer.array(), 0, length);
+        return buffer;
     }
 
     @Override

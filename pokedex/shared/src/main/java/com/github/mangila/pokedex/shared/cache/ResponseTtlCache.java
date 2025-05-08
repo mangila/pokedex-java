@@ -17,13 +17,13 @@ public class ResponseTtlCache {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseTtlCache.class);
 
-    private final Map<String, TtlCacheEntry> CACHE = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService EVICTION_THREAD = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+    private final Map<String, TtlCacheEntry> cache = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService evictionThread = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     private final Duration ttl;
 
     public ResponseTtlCache(ResponseTtlCacheConfig config) {
         this.ttl = config.ttl();
-        EVICTION_THREAD.scheduleWithFixedDelay(this::evict,
+        evictionThread.scheduleWithFixedDelay(this::evict,
                 config.initialDelay(),
                 config.delay(),
                 config.timeUnit());
@@ -48,11 +48,11 @@ public class ResponseTtlCache {
     }
 
     public void put(String key, Response value) {
-        CACHE.put(key, new TtlCacheEntry(value, Instant.now()));
+        cache.put(key, new TtlCacheEntry(value, Instant.now()));
     }
 
     public Response get(String key) {
-        var entry = CACHE.get(key);
+        var entry = cache.get(key);
         if (entry == null) {
             log.debug("Cache miss for key {}", key);
             return null;
@@ -66,17 +66,21 @@ public class ResponseTtlCache {
     }
 
     public boolean hasKey(String key) {
-        return CACHE.containsKey(key);
+        return cache.containsKey(key);
     }
 
     public void clear() {
-        CACHE.clear();
+        cache.clear();
         log.debug("Cache cleared");
     }
 
     public void shutdownEvictionThread() {
-        EVICTION_THREAD.shutdown();
+        evictionThread.shutdown();
         log.debug("Eviction thread shutdown");
+    }
+
+    public boolean isShutdownAndTerminated() {
+        return evictionThread.isShutdown() && evictionThread.isTerminated();
     }
 
     private boolean isExpired(TtlCacheEntry entry) {
@@ -87,7 +91,7 @@ public class ResponseTtlCache {
 
     private void evict() {
         log.debug("Evicting expired cache entries");
-        CACHE.entrySet()
+        cache.entrySet()
                 .removeIf(entry -> {
                     boolean isExpired = isExpired(entry.getValue());
                     if (isExpired) {

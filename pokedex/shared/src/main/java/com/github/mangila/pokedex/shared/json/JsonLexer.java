@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HexFormat;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.github.mangila.pokedex.shared.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.json.JsonType.*;
@@ -40,6 +40,7 @@ public class JsonLexer {
     );
 
     private static final Map<String, JsonToken> TOKEN_MAP_NUMBER_SPECIAL = Map.of(
+            "decimal-point", new JsonToken(NUMBER, '.'),
             "negative", new JsonToken(NUMBER, '-'),
             "plus", new JsonToken(NUMBER, '+'),
             "programmer-e", new JsonToken(NUMBER, 'E'),
@@ -65,9 +66,9 @@ public class JsonLexer {
             case ',' -> TOKEN_MAP.get(COMMA);
             case ':' -> TOKEN_MAP.get(COLON);
             case '"' -> lexString();
-            case 't' -> lexBooleanOrNull((char) current + "rue");
-            case 'f' -> lexBooleanOrNull((char) current + "alse");
-            case 'n' -> lexBooleanOrNull((char) current + "ull");
+            case 't', 'n' -> lexTrueOrNull();
+            case 'f' -> lexFalse();
+            case '.' -> TOKEN_MAP_NUMBER_SPECIAL.get("decimal-point");
             case '-' -> TOKEN_MAP_NUMBER_SPECIAL.get("negative");
             case '+' -> TOKEN_MAP_NUMBER_SPECIAL.get("plus");
             case '0' -> TOKEN_MAP_NUMBER.get("zero");
@@ -106,7 +107,19 @@ public class JsonLexer {
             }
             if (current == '\\') {
                 line.append((char) current);
-                current = reader.read();
+                char escapeChar = (char) reader.read();
+                if (isValidEscape(escapeChar)) {
+                    line.append(escapeChar);
+                    continue;
+                }
+                if (escapeChar == 'u') {
+                    line.append(escapeChar);
+                    var hex = reader.read(4);
+                    line.append(HexFormat.fromHexDigits(hex));
+                    continue;
+                } else {
+                    throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+                }
             }
 
             line.append((char) current);
@@ -114,23 +127,41 @@ public class JsonLexer {
         return new JsonToken(STRING, line.toString());
     }
 
+    private boolean isValidEscape(char escapeChar) {
+        return escapeChar == '"' ||
+                escapeChar == '\\' ||
+                escapeChar == '/' ||
+                escapeChar == 'b' ||
+                escapeChar == 'f' ||
+                escapeChar == 'n' ||
+                escapeChar == 'r' ||
+                escapeChar == 't';
+    }
+
     /**
-     * Lex booleans or null with the one-off first char since it already have been read
-     * - "true" -> "rue"
+     * Lex boolean false with the one-off first char since it already have been read
      * - "false" -> "alse"
+     */
+    private JsonToken lexFalse() throws IOException {
+        var read = reader.read(4).toString();
+        if (read.equals("alse")) {
+            return TOKEN_MAP.get(FALSE);
+        }
+        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+    }
+
+    /**
+     * Lex boolean true or null with the one-off first char since it already have been read
+     * - "true" -> "rue"
      * - "null" -> "ull"
      */
-    private JsonToken lexBooleanOrNull(String value) throws IOException {
-        int oneOffLength = value.length() - 1;
-        var peek = reader.peek(oneOffLength).toString();
-        if (Objects.equals(peek, value.substring(1))) {
-            reader.skip(oneOffLength);
-            return switch (value.toLowerCase()) {
-                case "true" -> TOKEN_MAP.get(TRUE);
-                case "false" -> TOKEN_MAP.get(FALSE);
-                case "null" -> TOKEN_MAP.get(NULL);
-                default -> throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-            };
+    private JsonToken lexTrueOrNull() throws IOException {
+        var read = reader.read(3).toString();
+        if (read.equals("rue")) {
+            return TOKEN_MAP.get(TRUE);
+        }
+        if (read.equals("ull")) {
+            return TOKEN_MAP.get(NULL);
         }
         throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
     }
