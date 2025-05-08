@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.https.internal.json;
 
+import com.github.mangila.pokedex.shared.json.JsonParser;
+import com.github.mangila.pokedex.shared.json.JsonTokenizer;
 import org.junit.jupiter.api.Test;
 
 class JsonTokenizerTest {

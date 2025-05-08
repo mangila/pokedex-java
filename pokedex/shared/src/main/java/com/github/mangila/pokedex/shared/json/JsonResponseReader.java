@@ -1,5 +1,6 @@
-package com.github.mangila.pokedex.shared.https.internal;
+package com.github.mangila.pokedex.shared.json;
 
+import com.github.mangila.pokedex.shared.tls.TlsConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +13,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-public class ResponseHandler {
+public class JsonResponseReader {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonResponseReader.class);
     private static final int END_OF_STREAM = -1;
+
+    private final TlsConnection tlsConnection;
+
+    public JsonResponseReader(TlsConnection tlsConnection) {
+        this.tlsConnection = tlsConnection;
+    }
+
+    public void readResponse() throws IOException {
+        var inputStream = tlsConnection.getInputStream();
+        var statusLine = readStatusLine(inputStream);
+        log.debug("Status line: {}", statusLine);
+        var headers = readHeaders(inputStream);
+    }
 
     public static String readStatusLine(InputStream inputStream) throws IOException {
         var buffer = new ByteArrayOutputStream();

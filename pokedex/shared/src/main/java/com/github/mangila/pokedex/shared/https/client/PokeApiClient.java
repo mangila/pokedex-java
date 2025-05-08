@@ -30,7 +30,7 @@ public class PokeApiClient implements AutoCloseable {
     }
 
     public Function<GetRequest, Response> get() {
-        return this.https.get();
+        return this.https.getJson();
     }
 
     @Override

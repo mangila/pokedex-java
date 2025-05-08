@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 public interface HttpsClient {
 
-    Function<GetRequest, Response> get();
+    Function<GetRequest, Response> getJson();
 
     Supplier<Boolean> isConnected();
 

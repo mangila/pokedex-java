@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.tls;
+package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.https.config.ConfigLoader;
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ public class TlsConnection {
     public TlsConnection(String host, int port) {
         this.host = host;
         this.port = port;
-        this.socket = TlsSocketFactory.createClientSocket(
+        this.socket = TlsClientSocketFactory.create(
                 ConfigLoader.socketConfig(), ConfigLoader.tlsConfig()
         );
     }

@@ -1,5 +1,6 @@
-package com.github.mangila.pokedex.shared.https.internal;
+package com.github.mangila.pokedex.shared.cache;
 
+import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +17,7 @@ public class ResponseTtlCache {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseTtlCache.class);
     private static final Map<String, TtlCacheEntry> CACHE = new ConcurrentHashMap<>();
-    private static final ScheduledExecutorService EVICTION_SCHEDULER = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
+    private static final ScheduledExecutorService EVICTION_SCHEDULER = VirtualThreadConfig.newSingleThreadScheduledExecutor();
 
     private final Duration ttl;
 

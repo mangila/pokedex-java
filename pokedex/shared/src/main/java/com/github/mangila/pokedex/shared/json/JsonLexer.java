@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.internal.json;
+package com.github.mangila.pokedex.shared.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
-import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.*;
+import static com.github.mangila.pokedex.shared.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
+import static com.github.mangila.pokedex.shared.json.JsonType.*;
 
 public class JsonLexer {
 

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.internal.json;
+package com.github.mangila.pokedex.shared.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

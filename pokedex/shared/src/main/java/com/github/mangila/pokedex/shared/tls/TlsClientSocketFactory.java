@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.tls;
+package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.https.config.SocketConfig;
 import com.github.mangila.pokedex.shared.https.config.TlsConfig;
@@ -13,9 +13,9 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-public class TlsSocketFactory {
+public class TlsClientSocketFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(TlsSocketFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(TlsClientSocketFactory.class);
     private static final SSLContext CONTEXT;
 
     static {
@@ -37,7 +37,7 @@ public class TlsSocketFactory {
         }
     }
 
-    public static SSLSocket createClientSocket(
+    public static SSLSocket create(
             SocketConfig socketConfig,
             TlsConfig tlsConfig
     ) {

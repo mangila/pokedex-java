@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.internal.json;
+package com.github.mangila.pokedex.shared.json;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,10 +7,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE;
-import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
-import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.RIGHT_BRACE;
-import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.RIGHT_BRACKET;
+import static com.github.mangila.pokedex.shared.json.InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE;
+import static com.github.mangila.pokedex.shared.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
+import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACE;
+import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 
 public class JsonParser {
 
@@ -22,6 +22,10 @@ public class JsonParser {
         }
         var map = new HashMap<String, Object>();
         queue.expect(JsonType.LEFT_BRACE);
+        if (queue.peek().type() == RIGHT_BRACE) {
+            queue.poll();
+            return map;
+        }
         while (!queue.isEmpty()) {
             var token = queue.expect(JsonType.STRING);
             queue.expect(JsonType.COLON);
@@ -91,6 +95,7 @@ public class JsonParser {
         return map;
     }
 
+    // EAFP — Easier to Ask Forgiveness than Permission
     private static Object parseNumber(JsonTokenQueue queue) {
         var sb = new StringBuilder();
         while (queue.peek().type() == JsonType.NUMBER) {
