@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.json;
 
+import com.github.mangila.pokedex.shared.config.JsonParserConfig;
 import org.junit.jupiter.api.Test;
 
 class JsonParserTest {
@@ -61,7 +62,7 @@ class JsonParserTest {
                 "null-value": null
                 }
                 """;
-        var jsonParser = new JsonParser(10);
+        var jsonParser = new JsonParser(new JsonParserConfig(10));
         var tree = jsonParser.parseTree(json);
         System.out.println(tree);
     }

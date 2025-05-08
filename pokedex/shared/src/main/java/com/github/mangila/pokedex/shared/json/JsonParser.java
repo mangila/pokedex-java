@@ -21,13 +21,13 @@ public class JsonParser {
     private JsonTokenQueue queue;
     private int depth;
 
-    public JsonParser(int maxDepth) {
+    public JsonParser(JsonParserConfig config) {
         this.depth = 0;
-        this.maxDepth = maxDepth;
+        this.maxDepth = config.maxDepth();
     }
 
     public JsonParser() {
-        this(JsonParserConfig.DEFAULT_MAX_DEPTH);
+        this(new JsonParserConfig(64));
     }
 
     public Map<String, Object> parseTree(byte[] data) {

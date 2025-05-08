@@ -1,7 +1,9 @@
 package com.github.mangila.pokedex.shared.config;
 
-public class JsonParserConfig {
-
-    public static final int DEFAULT_MAX_DEPTH = 64;
-
+public record JsonParserConfig(int maxDepth) {
+    public JsonParserConfig {
+        if (maxDepth <= 0) {
+            throw new IllegalArgumentException("maxDepth must be greater than 0");
+        }
+    }
 }
