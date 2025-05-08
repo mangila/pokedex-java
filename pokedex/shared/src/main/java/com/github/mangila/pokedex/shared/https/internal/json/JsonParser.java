@@ -3,7 +3,10 @@ package com.github.mangila.pokedex.shared.https.internal.json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.https.internal.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
@@ -13,6 +16,7 @@ import static com.github.mangila.pokedex.shared.https.internal.json.JsonType.RIG
 public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
+    private static final Pattern SCIENCE_OR_DECIMAL_NUMBER_PATTERN = Pattern.compile(".*[.eE].*");
 
     public static Map<String, Object> parseTree(JsonTokenQueue queue) {
         if (queue.isEmpty()) {
@@ -95,6 +99,10 @@ public class JsonParser {
             var token = queue.poll();
             sb.append(token.value());
         }
-        return sb.toString();
+        var number = sb.toString();
+        if (SCIENCE_OR_DECIMAL_NUMBER_PATTERN.matcher(number).matches()) {
+            return new BigDecimal(number);
+        }
+        return new BigInteger(number);
     }
 }

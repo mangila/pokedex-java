@@ -8,6 +8,7 @@ class JsonTokenizerTest {
     void tokenizeFrom() {
         var tokens = JsonTokenizer.tokenizeFrom("""
                 {
+                "number" : 234e-5,
                 "n" : -1234,
                 "b" : {
                     "c" : "asd"
@@ -17,9 +18,7 @@ class JsonTokenizerTest {
                 "nu": null
                 }
                 """);
-        JsonParser.parseTree(tokens);
-
-        JsonTokenizer.tokenizeFrom(new byte[]{1,2,3});
-
+       var tree =  JsonParser.parseTree(tokens);
+        System.out.println(tree);
     }
 }

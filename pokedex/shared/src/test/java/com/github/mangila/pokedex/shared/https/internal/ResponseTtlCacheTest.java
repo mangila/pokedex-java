@@ -20,7 +20,7 @@ class ResponseTtlCacheTest {
                 SECONDS
         );
         var cache = new ResponseTtlCache(config);
-        cache.put("key", new Response("statusLine", null, null));
+        cache.put("key", new Response(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();
         await()
                 .atMost(5, SECONDS)
