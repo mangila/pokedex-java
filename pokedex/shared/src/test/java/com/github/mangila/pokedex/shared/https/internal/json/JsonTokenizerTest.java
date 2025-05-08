@@ -18,5 +18,8 @@ class JsonTokenizerTest {
                 }
                 """);
         JsonParser.parseTree(tokens);
+
+        JsonTokenizer.tokenizeFrom(new byte[]{1,2,3});
+
     }
 }

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Objects;
 
 public class JsonTokenizer {
@@ -24,11 +24,12 @@ public class JsonTokenizer {
      * Try-with-resources is used to close the reader automatically
      * might be completely unnecessary, since we read an in-memory byte array
      * a good practice anyway.
+     * Allocate a queue with 1024 tokens to start with for some extra performance.
      */
     private static JsonTokenQueue tokenize(byte[] data) {
         Objects.requireNonNull(data, "json data must not be null");
         var lexer = new JsonLexer(data);
-        var queue = new JsonTokenQueue(new LinkedList<>());
+        var queue = new JsonTokenQueue(new ArrayDeque<>(1024));
         try (var reader = lexer.getReader()) {
             int current;
             while ((current = reader.read()) != -1) {
