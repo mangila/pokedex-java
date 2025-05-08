@@ -98,9 +98,14 @@ public class JsonParser {
             sb.append(token.value());
         }
         var number = sb.toString();
-        if (number.contains(".") || number.contains("e") || number.contains("E")) {
-            return new BigDecimal(number);
+        try {
+            if (number.contains(".") || number.contains("e") || number.contains("E")) {
+                return new BigDecimal(number);
+            }
+            return new BigInteger(number);
+        } catch (NumberFormatException e) {
+            log.error("ERR - number format exception - {}", number, e);
+            throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
         }
-        return new BigInteger(number);
     }
 }

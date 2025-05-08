@@ -8,7 +8,7 @@ class JsonTokenizerTest {
     void tokenizeFrom() {
         var tokens = JsonTokenizer.tokenizeFrom("""
                 {
-                "number" : 234e-5,
+                "number" : eee234e-5,
                 "n" : -1234,
                 "b" : {
                     "c" : "asd"
