@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.config;
+package com.github.mangila.pokedex.shared.config;
 
 public record SocketConfig(
         boolean keepAlive,

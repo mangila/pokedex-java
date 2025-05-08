@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.config;
+package com.github.mangila.pokedex.shared.config;
 
 import java.io.InputStream;
 import java.util.Properties;

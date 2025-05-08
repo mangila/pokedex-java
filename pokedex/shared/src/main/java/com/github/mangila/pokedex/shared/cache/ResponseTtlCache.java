@@ -16,14 +16,14 @@ import java.util.concurrent.TimeUnit;
 public class ResponseTtlCache {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseTtlCache.class);
-    private static final Map<String, TtlCacheEntry> CACHE = new ConcurrentHashMap<>();
-    private static final ScheduledExecutorService EVICTION_SCHEDULER = VirtualThreadConfig.newSingleThreadScheduledExecutor();
 
+    private final Map<String, TtlCacheEntry> CACHE = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService EVICTION_THREAD = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     private final Duration ttl;
 
     public ResponseTtlCache(ResponseTtlCacheConfig config) {
         this.ttl = config.ttl();
-        EVICTION_SCHEDULER.scheduleWithFixedDelay(this::evict,
+        EVICTION_THREAD.scheduleWithFixedDelay(this::evict,
                 config.initialDelay(),
                 config.delay(),
                 config.timeUnit());
@@ -67,6 +67,16 @@ public class ResponseTtlCache {
 
     public boolean hasKey(String key) {
         return CACHE.containsKey(key);
+    }
+
+    public void clear() {
+        CACHE.clear();
+        log.debug("Cache cleared");
+    }
+
+    public void shutdownEvictionThread() {
+        EVICTION_THREAD.shutdown();
+        log.debug("Eviction thread shutdown");
     }
 
     private boolean isExpired(TtlCacheEntry entry) {

@@ -19,8 +19,11 @@ public class Scheduler {
     public static void main(String[] args) {
         log.info("Starting scheduler");
         isRunning.set(true);
-        POKEMON_TASK.scheduleWithFixedDelay(() -> log.debug("pokemon-task"), 0, 1, TimeUnit.SECONDS);
-        MEDIA_TASK.scheduleWithFixedDelay(() -> log.debug("media-task"), 0, 1, TimeUnit.SECONDS);
+        var queueService = new QueueService();
+        queueService.createNewSetQueue("pokemon", 1024);
+        queueService.createNewSetQueue("media", 1024);
+        POKEMON_TASK.scheduleWithFixedDelay(new PokemonTask(queueService), 0, 1, TimeUnit.SECONDS);
+        MEDIA_TASK.scheduleWithFixedDelay(new MediaTask(queueService), 0, 1, TimeUnit.SECONDS);
 
         while (isRunning.get()) {
         }
