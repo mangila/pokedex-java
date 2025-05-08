@@ -6,17 +6,16 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.Objects;
-import java.util.Queue;
 
 public class JsonTokenizer {
 
     private static final Logger log = LoggerFactory.getLogger(JsonTokenizer.class);
 
-    public static Queue<JsonToken> tokenizeFrom(byte[] data) {
+    public static JsonTokenQueue tokenizeFrom(byte[] data) {
         return tokenize(data);
     }
 
-    public static Queue<JsonToken> tokenizeFrom(String data) {
+    public static JsonTokenQueue tokenizeFrom(String data) {
         return tokenize(data.getBytes(Charset.defaultCharset()));
     }
 
@@ -26,10 +25,10 @@ public class JsonTokenizer {
      * might be completely unnecessary, since we read an in-memory byte array
      * a good practice anyway.
      */
-    private static Queue<JsonToken> tokenize(byte[] data) {
+    private static JsonTokenQueue tokenize(byte[] data) {
         Objects.requireNonNull(data, "json data must not be null");
         var lexer = new JsonLexer(data);
-        var tokens = new LinkedList<JsonToken>();
+        var queue = new JsonTokenQueue(new LinkedList<>());
         try (var reader = lexer.getReader()) {
             int current;
             while ((current = reader.read()) != -1) {
@@ -37,13 +36,13 @@ public class JsonTokenizer {
                     continue;
                 }
                 var token = lexer.lexChar(current);
-                tokens.add(token);
+                queue.add(token);
             }
         } catch (Exception e) {
             log.error("ERR", e);
             throw new InvalidJsonException(InvalidJsonException.TOKENIZE_ERROR_MESSAGE);
         }
 
-        return tokens;
+        return queue;
     }
 }
