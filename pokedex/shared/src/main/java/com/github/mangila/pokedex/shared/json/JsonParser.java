@@ -21,6 +21,7 @@ public class JsonParser {
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
 
     private final int maxDepth;
+
     private JsonTokenQueue queue;
 
     public JsonParser(JsonParserConfig config) {
@@ -54,7 +55,7 @@ public class JsonParser {
         while (!queue.isEmpty()) {
             var token = queue.expect(JsonType.STRING);
             queue.expect(JsonType.COLON);
-            var value = parseValue(1);
+            var value = parseValue(0);
             map.put((String) token.value(), value);
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();
