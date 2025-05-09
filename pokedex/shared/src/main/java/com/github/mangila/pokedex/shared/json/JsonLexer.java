@@ -108,12 +108,10 @@ public class JsonLexer {
             if (current == '\\') {
                 line.append((char) current);
                 char escapeChar = (char) reader.read();
+                line.append(escapeChar);
                 if (isValidEscape(escapeChar)) {
-                    line.append(escapeChar);
                     continue;
-                }
-                if (escapeChar == 'u') {
-                    line.append(escapeChar);
+                } else if (escapeChar == 'u') {
                     var hex = reader.read(4);
                     line.append(HexFormat.fromHexDigits(hex));
                     continue;
@@ -159,8 +157,7 @@ public class JsonLexer {
         var read = reader.read(3).toString();
         if (read.equals("rue")) {
             return TOKEN_MAP.get(TRUE);
-        }
-        if (read.equals("ull")) {
+        } else if (read.equals("ull")) {
             return TOKEN_MAP.get(NULL);
         }
         throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);

@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.tls;
 
-import com.github.mangila.pokedex.shared.config.ConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +14,13 @@ public class TlsConnection {
     private static final Logger log = LoggerFactory.getLogger(TlsConnection.class);
     private final String host;
     private final int port;
-    private final SSLSocket socket;
+
+    private SSLSocket socket;
 
     public TlsConnection(String host, int port) {
         this.host = host;
         this.port = port;
-        this.socket = TlsClientSocketFactory.create(
-                ConfigLoader.socketConfig(), ConfigLoader.tlsConfig()
-        );
+        this.socket = TlsClientSocketFactory.create();
     }
 
     public boolean isConnected() {
@@ -30,6 +28,12 @@ public class TlsConnection {
                 !socket.isClosed() &&
                 !socket.isInputShutdown() &&
                 !socket.isOutputShutdown();
+    }
+
+    public void reconnect() {
+        log.debug("Reconnecting to {}:{}", host, port);
+        this.socket = TlsClientSocketFactory.create();
+        connect();
     }
 
     public void connect() {

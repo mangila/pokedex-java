@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 
 public class TlsClientSocketFactory {
 
@@ -27,7 +28,7 @@ public class TlsClientSocketFactory {
         ...
         *** Finished handshake
          */
-        System.setProperty("javax.net.debug", "ssl:handshake");
+      //  System.setProperty("javax.net.debug", "ssl:handshake");
         try {
             CONTEXT = SSLContext.getInstance("TLS");
             // Default Java Keystore with some well-known certificates
@@ -37,18 +38,31 @@ public class TlsClientSocketFactory {
         }
     }
 
+    public static SSLSocket create() {
+        return create(
+                new SocketConfig(
+                        new SocketConfig.KeepAlive(Boolean.TRUE),
+                        new SocketConfig.BufferSize(1024 * 8, 1024 * 8),
+                        new SocketConfig.SoTimeout(Duration.ofSeconds(5)),
+                        new SocketConfig.SoLinger(Boolean.TRUE, 1),
+                        new SocketConfig.TcpNoDelay(Boolean.TRUE)
+                ),
+                new TlsConfig(new String[]{"TLSv1.3"}, new String[]{"http/1.1"})
+        );
+    }
+
     public static SSLSocket create(
             SocketConfig socketConfig,
             TlsConfig tlsConfig
     ) {
         try {
             var socket = (SSLSocket) CONTEXT.getSocketFactory().createSocket();
-            socket.setKeepAlive(socketConfig.keepAlive());
-            socket.setSendBufferSize(socketConfig.sendBufferSize());
-            socket.setReceiveBufferSize(socketConfig.receiveBufferSize());
-            socket.setSoTimeout(socketConfig.soTimeoutMillis());
-            socket.setSoLinger(socketConfig.soLinger(), socketConfig.soLingerTimeSeconds());
-            socket.setTcpNoDelay(socketConfig.tcpNoDelay());
+            socket.setKeepAlive(socketConfig.keepAlive().active());
+            socket.setSendBufferSize(socketConfig.bufferSize().send());
+            socket.setReceiveBufferSize(socketConfig.bufferSize().receive());
+            socket.setSoTimeout(socketConfig.soTimeout().duration().toMillisPart());
+            socket.setSoLinger(socketConfig.soLinger().active(), socketConfig.soLinger().seconds());
+            socket.setTcpNoDelay(socketConfig.tcpNoDelay().active());
             SSLParameters params = socket.getSSLParameters();
             params.setEndpointIdentificationAlgorithm("HTTPS");
             params.setProtocols(tlsConfig.enabledProtocols());
