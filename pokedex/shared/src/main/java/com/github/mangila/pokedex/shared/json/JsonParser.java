@@ -71,12 +71,8 @@ public class JsonParser {
         return switch (token.type()) {
             case STRING, FALSE, TRUE, NULL -> queue.poll().value();
             case NUMBER -> parseNumber();
-            case LEFT_BRACE -> {
-                yield parseObject(depth + 1);
-            }
-            case LEFT_BRACKET -> {
-                yield parseArray(depth + 1);
-            }
+            case LEFT_BRACE -> parseObject(depth + 1);
+            case LEFT_BRACKET -> parseArray(depth + 1);
             default -> throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
         };
     }
