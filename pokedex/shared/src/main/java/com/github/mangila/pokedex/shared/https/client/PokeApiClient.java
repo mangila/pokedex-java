@@ -37,7 +37,6 @@ public class PokeApiClient {
         this.pool = new TlsConnectionPool(host.hostName(), host.port());
         this.cache = new ResponseTtlCache();
         this.jsonParser = new JsonParser();
-        //this.pool.connect();
     }
 
     public Function<JsonRequest, Optional<JsonResponse>> getJson(int retryCount) {
