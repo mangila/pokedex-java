@@ -62,8 +62,4 @@ public class TlsConnection {
     public OutputStream getOutputStream() throws IOException {
         return socket.getOutputStream();
     }
-
-    public String getHttpVersion() {
-        return socket.getApplicationProtocol();
-    }
 }

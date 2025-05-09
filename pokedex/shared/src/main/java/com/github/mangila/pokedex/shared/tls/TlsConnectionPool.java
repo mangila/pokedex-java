@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,35 +9,31 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TlsConnectionPool {
 
     private static final Logger log = LoggerFactory.getLogger(TlsConnectionPool.class);
-    private final ScheduledExecutorService healthProbe = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+
     private final String host;
     private final int port;
     private final int maxConnections;
-    private final BlockingQueue<PooledTlsConnection> pool;
-
     private final AtomicBoolean connected;
+    private final BlockingQueue<PooledTlsConnection> pool;
+    private final ScheduledExecutorService healthProbe;
 
-    public TlsConnectionPool(String host,
-                             int port,
-                             int maxConnections) {
-        this.host = host;
-        this.port = port;
-        this.maxConnections = maxConnections;
+    public TlsConnectionPool(TlsConnectionPoolConfig config) {
+        this.host = config.host();
+        this.port = config.port();
+        this.maxConnections = config.maxConnections();
         this.connected = new AtomicBoolean(Boolean.FALSE);
         this.pool = new ArrayBlockingQueue<>(maxConnections);
+        this.healthProbe = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     }
 
     public TlsConnectionPool(String host, int port) {
-        this(host, port, 5);
+        this(new TlsConnectionPoolConfig(host, port, 5));
     }
 
     public Optional<PooledTlsConnection> borrow(Duration timeout) throws InterruptedException {
@@ -53,7 +50,7 @@ public class TlsConnectionPool {
         return Optional.of(connection);
     }
 
-    public void put(PooledTlsConnection connection) {
+    public void giveBack(PooledTlsConnection connection) {
         log.debug("Returning connection to pool - {}", connection.id());
         if (connection.isConnected()) {
             pool.add(connection);
@@ -64,11 +61,11 @@ public class TlsConnectionPool {
         }
     }
 
-    public TlsConnectionPool connect() throws InterruptedException {
+    public TlsConnectionPool connect() {
         log.debug("Connecting to {}:{}", host, port);
         for (int i = 0; i < maxConnections; i++) {
             log.debug("Creating new connection - {} of {}", i + 1, maxConnections);
-            pool.put(Objects.requireNonNull(createNewConnection(i + 1)));
+            addNewConnection();
         }
         connected.set(Boolean.TRUE);
         healthProbe.scheduleWithFixedDelay(this::healthProbe, 0, 10, TimeUnit.SECONDS);
@@ -90,43 +87,17 @@ public class TlsConnectionPool {
         connected.set(Boolean.FALSE);
     }
 
-    public record PooledTlsConnection(TlsConnection connection,
-                                      int id,
-                                      Instant created) {
-        public PooledTlsConnection {
-            Objects.requireNonNull(connection);
-            Objects.requireNonNull(created);
-        }
-
-        public void disconnect() {
-            log.debug("Disconnecting connection {}", id);
-            connection.disconnect();
-        }
-
-        public boolean isConnected() {
-            return connection.isConnected();
-        }
-
-        public String getHttpVersion() {
-            return connection.getHttpVersion();
-        }
-
-        public Instant getCreated() {
-            return created;
-        }
-
-        public void reconnect() {
-            log.debug("Reconnecting connection {}", id);
-            connection.reconnect();
-        }
+    public void addNewConnection() {
+        var random = ThreadLocalRandom.current().nextInt(0, 100);
+        pool.add(Objects.requireNonNull(createNewConnection(random)));
     }
 
     private PooledTlsConnection createNewConnection(int id) {
         try {
             var connection = new TlsConnection(host, port);
             connection.connect();
-            var pooledConnection = new PooledTlsConnection(connection, id, Instant.now());
-            log.debug("Created new connection {} - {}", id, pooledConnection.getCreated());
+            var pooledConnection = new PooledTlsConnection(id, connection, Instant.now());
+            log.debug("Created new connection {} - {}", id, pooledConnection.created());
             return pooledConnection;
         } catch (Exception e) {
             log.error("ERR", e);
@@ -141,10 +112,10 @@ public class TlsConnectionPool {
     private void healthProbe() {
         for (var connection : pool) {
             if (!connection.isConnected()) {
-                log.debug("Connection {} is not connected, trying to reconnect", connection.id);
+                log.debug("Connection {} is not connected, trying to reconnect", connection.id());
                 connection.reconnect();
             } else {
-                log.debug("Connection {} is connected", connection.id);
+                log.debug("Connection {} is connected", connection.id());
             }
         }
     }

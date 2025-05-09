@@ -1,8 +1,8 @@
-package com.github.mangila.pokedex.shared.config;
+package com.github.mangila.pokedex.shared.tls.config;
 
 import java.time.Duration;
 
-public record SocketConfig(
+public record TlsSocketConfig(
         KeepAlive keepAlive,
         BufferSize bufferSize,
         SoTimeout soTimeout,

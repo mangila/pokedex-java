@@ -1,21 +1,25 @@
 package com.github.mangila.pokedex.shared.https.model;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public record GetRequest(
+public record JsonRequest(
+        String method,
         String path,
-        Header[] headers
+        List<Header> headers
 ) {
 
     public String toRequestLine(String version) {
         return String.format("GET %s %s", path, version.toUpperCase());
     }
 
-    public String toHttp(String host, String version) {
-        var headers = Arrays.stream(headers())
+    public String toHeaders() {
+        return headers().stream()
                 .map(Header::toHeaderLine)
                 .collect(Collectors.joining("\n"));
+    }
+
+    public String toHttp(String host, String version) {
         return """
                 %s
                 Host: %s
@@ -24,6 +28,6 @@ public record GetRequest(
                 Accept-Encoding: gzip
                 %s
                 
-                """.formatted(toRequestLine(version), host, headers);
+                """.formatted(toRequestLine(version), host, toHeaders());
     }
 }

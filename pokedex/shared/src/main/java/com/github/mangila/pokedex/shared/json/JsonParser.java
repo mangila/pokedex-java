@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.json;
 
-import com.github.mangila.pokedex.shared.config.JsonParserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +22,8 @@ public class JsonParser {
 
     private final int maxDepth;
     private JsonTokenQueue queue;
-    private int depth;
 
     public JsonParser(JsonParserConfig config) {
-        this.depth = 0;
         this.maxDepth = config.maxDepth();
     }
 
@@ -57,9 +54,8 @@ public class JsonParser {
         while (!queue.isEmpty()) {
             var token = queue.expect(JsonType.STRING);
             queue.expect(JsonType.COLON);
-            var value = parseValue();
+            var value = parseValue(1);
             map.put((String) token.value(), value);
-            this.depth = 0;
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();
                 break;
@@ -69,41 +65,38 @@ public class JsonParser {
         return map;
     }
 
-    private Object parseValue() {
-        ensureNotDepthMax();
+    private Object parseValue(int depth) {
+        ensureNotDepthMax(depth);
         var token = queue.peek();
         return switch (token.type()) {
             case STRING, FALSE, TRUE, NULL -> queue.poll().value();
             case NUMBER -> parseNumber();
             case LEFT_BRACE -> {
-                this.depth = depth + 1;
-                yield parseObject();
+                yield parseObject(depth + 1);
             }
             case LEFT_BRACKET -> {
-                this.depth = depth + 1;
-                yield parseArray();
+                yield parseArray(depth + 1);
             }
             default -> throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
         };
     }
 
-    private void ensureNotDepthMax() {
+    private void ensureNotDepthMax(int depth) {
         if (depth == maxDepth) {
             log.error("ERR - JSON depth is equal max depth - {}", maxDepth);
             throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
         }
     }
 
-    private List<Object> parseArray() {
+    private List<Object> parseArray(int depth) {
         queue.expect(JsonType.LEFT_BRACKET);
         var list = new ArrayList<>();
         if (queue.peek().type() == RIGHT_BRACKET) {
             queue.poll();
             return list;
         }
-
         while (true) {
-            var value = parseValue();
+            var value = parseValue(depth);
             list.add(value);
             if (queue.peek().type() == RIGHT_BRACKET) {
                 queue.poll();
@@ -111,11 +104,10 @@ public class JsonParser {
             }
             queue.expect(JsonType.COMMA);
         }
-
         return list;
     }
 
-    private Object parseObject() {
+    private Object parseObject(int depth) {
         queue.expect(JsonType.LEFT_BRACE);
         Map<String, Object> map = new LinkedHashMap<>();
         if (queue.peek().type() == RIGHT_BRACE) {
@@ -125,7 +117,7 @@ public class JsonParser {
         while (true) {
             var key = queue.expect(JsonType.STRING).value();
             queue.expect(JsonType.COLON);
-            var value = parseValue();
+            var value = parseValue(depth);
             map.put((String) key, value);
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();

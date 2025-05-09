@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.cache;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.https.model.Response;
+import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class ResponseTtlCache {
         ));
     }
 
-    private record TtlCacheEntry(Response value,
+    private record TtlCacheEntry(JsonResponse value,
                                  Instant timestamp) {
         TtlCacheEntry {
             Objects.requireNonNull(value);
@@ -47,11 +47,11 @@ public class ResponseTtlCache {
 
     }
 
-    public void put(String key, Response value) {
+    public void put(String key, JsonResponse value) {
         cache.put(key, new TtlCacheEntry(value, Instant.now()));
     }
 
-    public Response get(String key) {
+    public JsonResponse get(String key) {
         var entry = cache.get(key);
         if (entry == null) {
             log.debug("Cache miss for key {}", key);

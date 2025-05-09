@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.tls;
 
-import com.github.mangila.pokedex.shared.config.SocketConfig;
-import com.github.mangila.pokedex.shared.config.TlsConfig;
+import com.github.mangila.pokedex.shared.tls.config.TlsConfig;
+import com.github.mangila.pokedex.shared.tls.config.TlsSocketConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,29 +40,29 @@ public class TlsClientSocketFactory {
 
     public static SSLSocket create() {
         return create(
-                new SocketConfig(
-                        new SocketConfig.KeepAlive(Boolean.TRUE),
-                        new SocketConfig.BufferSize(1024 * 8, 1024 * 8),
-                        new SocketConfig.SoTimeout(Duration.ofSeconds(5)),
-                        new SocketConfig.SoLinger(Boolean.TRUE, 1),
-                        new SocketConfig.TcpNoDelay(Boolean.TRUE)
+                new TlsSocketConfig(
+                        new TlsSocketConfig.KeepAlive(Boolean.TRUE),
+                        new TlsSocketConfig.BufferSize(1024 * 8, 1024 * 8),
+                        new TlsSocketConfig.SoTimeout(Duration.ofSeconds(5)),
+                        new TlsSocketConfig.SoLinger(Boolean.TRUE, 1),
+                        new TlsSocketConfig.TcpNoDelay(Boolean.TRUE)
                 ),
                 new TlsConfig(new String[]{"TLSv1.3"}, new String[]{"http/1.1"})
         );
     }
 
     public static SSLSocket create(
-            SocketConfig socketConfig,
+            TlsSocketConfig tlsSocketConfig,
             TlsConfig tlsConfig
     ) {
         try {
             var socket = (SSLSocket) CONTEXT.getSocketFactory().createSocket();
-            socket.setKeepAlive(socketConfig.keepAlive().active());
-            socket.setSendBufferSize(socketConfig.bufferSize().send());
-            socket.setReceiveBufferSize(socketConfig.bufferSize().receive());
-            socket.setSoTimeout(socketConfig.soTimeout().duration().toMillisPart());
-            socket.setSoLinger(socketConfig.soLinger().active(), socketConfig.soLinger().seconds());
-            socket.setTcpNoDelay(socketConfig.tcpNoDelay().active());
+            socket.setKeepAlive(tlsSocketConfig.keepAlive().active());
+            socket.setSendBufferSize(tlsSocketConfig.bufferSize().send());
+            socket.setReceiveBufferSize(tlsSocketConfig.bufferSize().receive());
+            socket.setSoTimeout(tlsSocketConfig.soTimeout().duration().toMillisPart());
+            socket.setSoLinger(tlsSocketConfig.soLinger().active(), tlsSocketConfig.soLinger().seconds());
+            socket.setTcpNoDelay(tlsSocketConfig.tcpNoDelay().active());
             SSLParameters params = socket.getSSLParameters();
             params.setEndpointIdentificationAlgorithm("HTTPS");
             params.setProtocols(tlsConfig.enabledProtocols());

@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.json;
 
-import com.github.mangila.pokedex.shared.config.JsonParserConfig;
 import org.junit.jupiter.api.Test;
 
 class JsonParserTest {

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.config;
+package com.github.mangila.pokedex.shared.json;
 
 public record JsonParserConfig(int maxDepth) {
     public JsonParserConfig {
