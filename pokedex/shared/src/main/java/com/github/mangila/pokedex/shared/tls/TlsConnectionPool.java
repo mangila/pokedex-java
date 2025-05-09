@@ -9,7 +9,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TlsConnectionPool {
@@ -23,6 +26,8 @@ public class TlsConnectionPool {
     private final BlockingQueue<PooledTlsConnection> pool;
     private final ScheduledExecutorService healthProbe;
 
+    private int connectionCounter;
+
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.host = config.host();
         this.port = config.port();
@@ -30,6 +35,7 @@ public class TlsConnectionPool {
         this.connected = new AtomicBoolean(Boolean.FALSE);
         this.pool = new ArrayBlockingQueue<>(maxConnections);
         this.healthProbe = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        this.connectionCounter = 0;
     }
 
     public TlsConnectionPool(String host, int port) {
@@ -88,8 +94,8 @@ public class TlsConnectionPool {
     }
 
     public void addNewConnection() {
-        var random = ThreadLocalRandom.current().nextInt(0, 100);
-        pool.add(Objects.requireNonNull(createNewConnection(random)));
+        this.connectionCounter = connectionCounter + 1;
+        pool.add(Objects.requireNonNull(createNewConnection(connectionCounter)));
     }
 
     private PooledTlsConnection createNewConnection(int id) {
