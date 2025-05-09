@@ -63,6 +63,7 @@ public class PokeApiClient {
                 var httpStatus = readStatusLine()
                         .apply(connection.getInputStream());
                 if (httpStatus.code().startsWith("5")) {
+                    log.warn("Received error response: {}", httpStatus);
                     pool.giveBack(connection);
                     return getJson(retryCount - 1).apply(request);
                 }
