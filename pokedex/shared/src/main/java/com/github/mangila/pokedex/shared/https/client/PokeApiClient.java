@@ -63,7 +63,7 @@ public class PokeApiClient {
                 var headers = readHeaders()
                         .apply(connection.getInputStream());
                 var body = readGzipBody().apply(connection.getInputStream());
-                pool.putBack(connection);
+                pool.returnConnection(connection);
                 var response = new JsonResponse(
                         httpStatus,
                         headers,

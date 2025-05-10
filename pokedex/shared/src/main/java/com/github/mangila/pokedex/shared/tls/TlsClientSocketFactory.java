@@ -28,7 +28,7 @@ public class TlsClientSocketFactory {
         ...
         *** Finished handshake
          */
-        System.setProperty("javax.net.debug", "all");
+     //   System.setProperty("javax.net.debug", "all");
         try {
             CONTEXT = SSLContext.getInstance("TLS");
             // Default Java Keystore with some well-known certificates

@@ -81,14 +81,10 @@ public class TlsConnectionPool {
         return connection;
     }
 
-    public void putBack(PooledTlsConnection connection) {
+    public void returnConnection(PooledTlsConnection connection) throws IllegalStateException {
         ensureConnectionPoolIsInitialized();
         log.debug("Returning connection to pool - {}", connection.id());
-        try {
-            pool.put(connection);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        pool.add(connection);
     }
 
     public boolean isConnected() {

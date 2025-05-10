@@ -38,12 +38,12 @@ class TlsConnectionPoolTest {
     }
 
     @Test
-    void shouldBorrowAndPutBackConnections() {
+    void shouldBorrowAndReturnConnection() {
         GENERAL_PURPOSE_TESTING_EXECUTOR.submit(() -> {
             try {
                 var tlsConnection = GENERAL_PURPOSE_TESTING_POOL.borrow();
                 TimeUnit.SECONDS.sleep(1);
-                GENERAL_PURPOSE_TESTING_POOL.putBack(tlsConnection);
+                GENERAL_PURPOSE_TESTING_POOL.returnConnection(tlsConnection);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -52,7 +52,7 @@ class TlsConnectionPoolTest {
             try {
                 var tlsConnection = GENERAL_PURPOSE_TESTING_POOL.borrow();
                 TimeUnit.SECONDS.sleep(1);
-                GENERAL_PURPOSE_TESTING_POOL.putBack(tlsConnection);
+                GENERAL_PURPOSE_TESTING_POOL.returnConnection(tlsConnection);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
