@@ -22,7 +22,7 @@ public class JsonParser {
 
     private final int maxDepth;
 
-    private JsonTokenQueue queue;
+    private final ThreadLocal<JsonTokenQueue> threadLocalQueue = new ThreadLocal<>();
 
     public JsonParser(JsonParserConfig config) {
         this.maxDepth = config.maxDepth();
@@ -33,16 +33,17 @@ public class JsonParser {
     }
 
     public Map<String, Object> parseTree(byte[] data) {
-        this.queue = JsonTokenizer.tokenizeFrom(data);
+        threadLocalQueue.set(JsonTokenizer.tokenizeFrom(data));
         return parseTree();
     }
 
     public Map<String, Object> parseTree(String data) {
-        this.queue = JsonTokenizer.tokenizeFrom(data);
+        threadLocalQueue.set(JsonTokenizer.tokenizeFrom(data));
         return parseTree();
     }
 
     private Map<String, Object> parseTree() {
+        var queue = this.threadLocalQueue.get();
         if (queue.isEmpty()) {
             throw new InvalidJsonException(EMPTY_DATA_ERROR_MESSAGE);
         }
@@ -63,11 +64,13 @@ public class JsonParser {
             }
             queue.expect(JsonType.COMMA);
         }
+        this.threadLocalQueue.remove();
         return map;
     }
 
     private Object parseValue(int depth) {
         ensureNotDepthMax(depth);
+        var queue = threadLocalQueue.get();
         var token = queue.peek();
         return switch (token.type()) {
             case STRING, FALSE, TRUE, NULL -> queue.poll().value();
@@ -86,6 +89,7 @@ public class JsonParser {
     }
 
     private List<Object> parseArray(int depth) {
+        var queue = threadLocalQueue.get();
         queue.expect(JsonType.LEFT_BRACKET);
         var list = new ArrayList<>();
         if (queue.peek().type() == RIGHT_BRACKET) {
@@ -105,6 +109,7 @@ public class JsonParser {
     }
 
     private Object parseObject(int depth) {
+        var queue = threadLocalQueue.get();
         queue.expect(JsonType.LEFT_BRACE);
         Map<String, Object> map = new LinkedHashMap<>();
         if (queue.peek().type() == RIGHT_BRACE) {
@@ -127,6 +132,7 @@ public class JsonParser {
 
     // EAFP — Easier to Ask Forgiveness than Permission
     private Object parseNumber() {
+        var queue = threadLocalQueue.get();
         var sb = new StringBuilder();
         while (queue.peek().type() == JsonType.NUMBER) {
             var token = queue.poll();

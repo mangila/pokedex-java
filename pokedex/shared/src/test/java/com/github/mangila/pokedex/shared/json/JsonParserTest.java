@@ -2,10 +2,15 @@ package com.github.mangila.pokedex.shared.json;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.Executors;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 class JsonParserTest {
 
     @Test
-    void parseTree() {
+    void shouldParseJson() {
         String json = """
                 {
                 "escape-quotation-mark": "escape-\\"message\\"",
@@ -61,8 +66,44 @@ class JsonParserTest {
                 "null-value": null
                 }
                 """;
-        var jsonParser = new JsonParser(new JsonParserConfig(10));
-        var tree = jsonParser.parseTree(json);
-        System.out.println(tree);
+        assertThatThrownBy(() -> new JsonParser(new JsonParserConfig(10)).parseTree(json))
+                .isInstanceOf(InvalidJsonException.class);
+        assertThatThrownBy(() -> new JsonParser(new JsonParserConfig(11)).parseTree(json))
+                .isInstanceOf(InvalidJsonException.class);
+        assertThatCode(() -> new JsonParser(new JsonParserConfig(12)).parseTree(json))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldParseConcurrently() {
+        var threads = Executors.newFixedThreadPool(2, Thread.ofVirtual().factory());
+        var jsonParser = new JsonParser(new JsonParserConfig(2));
+        var t1 = threads.submit(() -> {
+            String json = """
+                    {
+                        "pokemon": "charmander",
+                        "type": "fire",
+                        "level": 7
+                    }
+                    """;
+            return jsonParser.parseTree(json);
+        });
+
+        var t2 = threads.submit(() -> {
+            String json = """
+                    {
+                        "pokemon": "bulbasaur",
+                        "type": "grass",
+                        "level": 5,
+                        "hp": 45,
+                        "isStarter": true
+                    }
+                    """;
+            return jsonParser.parseTree(json);
+        });
+        assertThatCode(() -> {
+            t1.get();
+            t2.get();
+        }).doesNotThrowAnyException();
     }
 }
