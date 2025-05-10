@@ -35,25 +35,23 @@ public class PokeApiClient {
     public PokeApiClient(PokeApiHost host) {
         this.host = host;
         this.pool = new TlsConnectionPool(host.hostName(), host.port());
+        pool.init();
         this.cache = new ResponseTtlCache();
+        cache.startEvictionThread();
         this.jsonParser = new JsonParser();
     }
 
-    public Function<JsonRequest, Optional<JsonResponse>> getJson(int retryCount) {
+    public Function<JsonRequest, Optional<JsonResponse>> getJson() {
         return request -> {
             try {
-                if (retryCount < 0) {
-                    log.warn("Retry count exceeded");
-                    return Optional.empty();
-                }
-                log.debug("retryCount: {}", retryCount);
                 var path = request.path();
                 if (cache.hasKey(path)) {
                     return Optional.of(cache.get(path));
                 }
-                var tlsConnectionOptional = pool.borrow(Duration.ofSeconds(5));
+                var tlsConnectionOptional = pool.borrow(Duration.ofSeconds(30));
                 if (tlsConnectionOptional.isEmpty()) {
-                    return getJson(retryCount - 1).apply(request);
+                    log.warn("Connection pool borrow failed");
+                    return Optional.empty();
                 }
                 var connection = tlsConnectionOptional.get();
                 var http = request.toHttp(host.hostName(), "HTTP/1.1");
@@ -62,14 +60,10 @@ public class PokeApiClient {
                 connection.getOutputStream().flush();
                 var httpStatus = readStatusLine()
                         .apply(connection.getInputStream());
-                if (httpStatus.code().startsWith("5")) {
-                    log.warn("Received error response: {}", httpStatus);
-                    pool.giveBack(connection);
-                    return getJson(retryCount - 1).apply(request);
-                }
                 var headers = readHeaders()
                         .apply(connection.getInputStream());
                 var body = readGzipBody().apply(connection.getInputStream());
+                pool.putBack(connection);
                 var response = new JsonResponse(
                         httpStatus,
                         headers,

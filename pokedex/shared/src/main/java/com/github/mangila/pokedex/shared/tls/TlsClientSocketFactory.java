@@ -28,7 +28,7 @@ public class TlsClientSocketFactory {
         ...
         *** Finished handshake
          */
-      //  System.setProperty("javax.net.debug", "ssl:handshake");
+        System.setProperty("javax.net.debug", "all");
         try {
             CONTEXT = SSLContext.getInstance("TLS");
             // Default Java Keystore with some well-known certificates
@@ -47,7 +47,7 @@ public class TlsClientSocketFactory {
                         new TlsSocketConfig.SoLinger(Boolean.TRUE, 1),
                         new TlsSocketConfig.TcpNoDelay(Boolean.TRUE)
                 ),
-                new TlsConfig(new String[]{"TLSv1.3"}, new String[]{"http/1.1"})
+                new TlsConfig(new String[]{"TLSv1.2", "TLSv1.3"}, new String[]{"http/1.1"})
         );
     }
 

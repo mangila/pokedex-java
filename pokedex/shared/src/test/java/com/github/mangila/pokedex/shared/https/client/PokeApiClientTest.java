@@ -11,7 +11,7 @@ class PokeApiClientTest {
     @Test
     void getJson() {
         var client = new PokeApiClient(new PokeApiHost("pokeapi.co", 443));
-        var optional = client.getJson(3)
+        var optional = client.getJson()
                 .apply(new JsonRequest("GET", "/api/v2/pokemon-species/bulbasaur", List.of()));
         assert optional.isPresent();
         System.out.println(optional.get());

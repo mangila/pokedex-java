@@ -19,14 +19,10 @@ public class ResponseTtlCache {
 
     private final Map<String, TtlCacheEntry> cache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService evictionThread = VirtualThreadConfig.newSingleThreadScheduledExecutor();
-    private final Duration ttl;
+    private final ResponseTtlCacheConfig config;
 
     public ResponseTtlCache(ResponseTtlCacheConfig config) {
-        this.ttl = config.ttl();
-        evictionThread.scheduleWithFixedDelay(this::evict,
-                config.initialDelay(),
-                config.delay(),
-                config.timeUnit());
+        this.config = config;
     }
 
     public ResponseTtlCache() {
@@ -74,6 +70,14 @@ public class ResponseTtlCache {
         log.debug("Cache cleared");
     }
 
+    public void startEvictionThread() {
+        log.debug("Starting eviction thread");
+        evictionThread.scheduleWithFixedDelay(this::evict,
+                config.initialDelay(),
+                config.delay(),
+                config.timeUnit());
+    }
+
     public void shutdownEvictionThread() {
         evictionThread.shutdown();
         log.debug("Eviction thread shutdown");
@@ -83,13 +87,7 @@ public class ResponseTtlCache {
         return evictionThread.isShutdown() && evictionThread.isTerminated();
     }
 
-    private boolean isExpired(TtlCacheEntry entry) {
-        return entry.timestamp
-                .plusMillis(ttl.toMillis())
-                .isBefore(Instant.now());
-    }
-
-    private void evict() {
+    public void evict() {
         log.debug("Evicting expired cache entries");
         cache.entrySet()
                 .removeIf(entry -> {
@@ -99,5 +97,11 @@ public class ResponseTtlCache {
                     }
                     return isExpired;
                 });
+    }
+
+    private boolean isExpired(TtlCacheEntry entry) {
+        return entry.timestamp
+                .plusMillis(config.ttl().toMillis())
+                .isBefore(Instant.now());
     }
 }
