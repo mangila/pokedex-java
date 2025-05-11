@@ -26,23 +26,15 @@ public class Application {
         var scheduler = new Scheduler(
                 new PokeApiClient(new PokeApiHost("pokeapi.co", 443)),
                 queueService);
+        scheduler.finishedProcessingTask(TaskConfig.TriggerConfig.from(
+                VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                1,
+                5,
+                TimeUnit.MINUTES
+        ));
         scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newVirtualThreadPerTaskExecutor());
-        scheduler.mediaTask(VirtualThreadConfig.newSingleThreadScheduledExecutor(), new ScheduledConfig(
-                1,
-                1,
-                TimeUnit.SECONDS
-        ));
-        scheduler.pokemonTask(VirtualThreadConfig.newSingleThreadScheduledExecutor(), new ScheduledConfig(
-                1,
-                1,
-                TimeUnit.SECONDS
-        ));
-        scheduler.finishedProcessing(VirtualThreadConfig.newSingleThreadScheduledExecutor(),
-                new ScheduledConfig(
-                        1,
-                        5,
-                        TimeUnit.MINUTES
-                ));
+        scheduler.mediaTask(TaskConfig.defaultConfig());
+        scheduler.pokemonTask(TaskConfig.defaultConfig());
         isRunning.set(Boolean.TRUE);
         while (isRunning.get()) {
         }
