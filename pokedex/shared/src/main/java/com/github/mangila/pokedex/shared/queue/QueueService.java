@@ -1,8 +1,9 @@
-package com.github.mangila.pokedex.scheduler;
+package com.github.mangila.pokedex.shared.queue;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 
 public class QueueService {
 
@@ -16,9 +17,16 @@ public class QueueService {
         return SET_QUEUES.get(name).add(entry);
     }
 
-    public QueueEntry poll(String name) {
-        return SET_QUEUES.get(name)
-                .removeFirst();
+    public Optional<QueueEntry> poll(String name) {
+        var queue = SET_QUEUES.get(name);
+        if (queue == null) {
+            throw new IllegalArgumentException("Queue not found");
+        }
+        try {
+            return Optional.of(queue.removeFirst());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public boolean isEmpty(String name) {
