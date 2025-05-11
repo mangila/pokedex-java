@@ -17,3 +17,9 @@ Experimental Low-level project with plain Java.
 - LBYL - Look Before You Leap
 
 ## Algorithms techniques (WIP)
+
+- Two pointers
+
+## Design Patterns (WIP)
+
+- Factory
