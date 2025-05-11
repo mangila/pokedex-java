@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
-import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
 import org.junit.jupiter.api.Test;
 
@@ -9,14 +8,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 class PokeApiClientTest {
 
-    private static final PokeApiHost HOST_DETAILS = new PokeApiHost("pokeapi.co", 443);
-    private static final String GENERAL_PURPOSE_PATH = "/api/v2/pokemon-species/bulbasaur";
-    private static final PokeApiClient GENERAL_PURPOSE_TEST_CLIENT = new PokeApiClient(HOST_DETAILS);
+    private static final PokeApiClient GENERAL_PURPOSE_TEST_CLIENT = new PokeApiClient(PokeApiHost.fromDefault());
 
     @Test
     void getJson() throws ExecutionException, InterruptedException {
@@ -30,9 +25,9 @@ class PokeApiClientTest {
         var response2 = t2.get();
         var response3 = t3.get();
 
-       var bulbasaur =  response1.get();
-       var charmander =  response2.get();
-       var squritle =  response3.get();
+        var bulbasaur = response1.get();
+        var charmander = response2.get();
+        var squritle = response3.get();
 
         System.out.println(bulbasaur);
 

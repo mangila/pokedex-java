@@ -24,7 +24,7 @@ public class Application {
         queueService.createNewSetQueue(POKEMON_SPECIES_URL_QUEUE, 1024);
         queueService.createNewSetQueue(MEDIA_URL_QUEUE, 1024);
         var scheduler = new Scheduler(
-                new PokeApiClient(new PokeApiHost("pokeapi.co", 443)),
+                new PokeApiClient(PokeApiHost.fromDefault()),
                 queueService);
         scheduler.finishedProcessingTask(TaskConfig.TriggerConfig.from(
                 VirtualThreadConfig.newSingleThreadScheduledExecutor(),
