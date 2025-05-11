@@ -7,7 +7,7 @@
         <groupId>com.github.mangila</groupId>
         <artifactId>pokedex</artifactId>
         <version>3.0.0</version>
-        <relativePath/>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>com.github.mangila.pokedex</groupId>

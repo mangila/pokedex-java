@@ -1,9 +1,11 @@
 package com.github.mangila.pokedex.shared.cache;
 
+import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.Collections;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +23,9 @@ class ResponseTtlCacheTest {
         );
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
-        cache.put("key", new JsonResponse(null, null, null));
+        cache.put("key", new JsonResponse(HttpStatus.fromString("HTTP 200 OK"),
+                Collections.emptyMap(),
+                Collections.emptyMap()));
         assertThat(cache.hasKey("key")).isTrue();
         await()
                 .atMost(5, SECONDS)
@@ -38,7 +42,9 @@ class ResponseTtlCacheTest {
         );
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
-        cache.put("key", new JsonResponse(null, null, null));
+        cache.put("key", new JsonResponse(HttpStatus.fromString("HTTP 200 OK"),
+                Collections.emptyMap(),
+                Collections.emptyMap()));
         assertThat(cache.hasKey("key")).isTrue();
         cache.shutdownEvictionThread();
         SECONDS.sleep(5);
