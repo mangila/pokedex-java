@@ -7,24 +7,42 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 
 public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
+    public static final String MEDIA_URL_QUEUE = "media-url-queue";
     public static final AtomicBoolean isRunning = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         var queueService = new QueueService();
-        queueService.createNewSetQueue("pokemon", 1024);
-        queueService.createNewSetQueue("media", 1024);
+        queueService.createNewSetQueue(POKEMON_SPECIES_URL_QUEUE, 1024);
+        queueService.createNewSetQueue(MEDIA_URL_QUEUE, 1024);
         var scheduler = new Scheduler(
                 new PokeApiClient(new PokeApiHost("pokeapi.co", 443)),
                 queueService);
         scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newVirtualThreadPerTaskExecutor());
-        scheduler.mediaTask(VirtualThreadConfig.newScheduledThreadPool(10));
-        scheduler.pokemonTask(VirtualThreadConfig.newSingleThreadScheduledExecutor());
+        scheduler.mediaTask(VirtualThreadConfig.newSingleThreadScheduledExecutor(), new ScheduledConfig(
+                1,
+                1,
+                TimeUnit.SECONDS
+        ));
+        scheduler.pokemonTask(VirtualThreadConfig.newSingleThreadScheduledExecutor(), new ScheduledConfig(
+                1,
+                1,
+                TimeUnit.SECONDS
+        ));
+        scheduler.finishedProcessing(VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                new ScheduledConfig(
+                        1,
+                        5,
+                        TimeUnit.MINUTES
+                ));
         isRunning.set(Boolean.TRUE);
         while (isRunning.get()) {
         }

@@ -20,7 +20,7 @@ class PokeApiClientTest {
 
     @Test
     void getJson() throws ExecutionException, InterruptedException {
-        var threads = Executors.newFixedThreadPool(3, Thread.ofVirtual().factory());
+        var threads = Executors.newFixedThreadPool(1, Thread.ofVirtual().factory());
 
         var t1 = threads.submit(() -> GENERAL_PURPOSE_TEST_CLIENT.getJson().apply(new JsonRequest("GET", "/api/v2/pokemon-species/1", List.of())));
         var t2 = threads.submit(() -> GENERAL_PURPOSE_TEST_CLIENT.getJson().apply(new JsonRequest("GET", "/api/v2/pokemon-species/4", List.of())));

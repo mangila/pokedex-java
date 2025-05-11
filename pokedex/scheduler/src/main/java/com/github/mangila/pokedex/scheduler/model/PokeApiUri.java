@@ -1,0 +1,25 @@
+package com.github.mangila.pokedex.scheduler.model;
+
+import java.net.URI;
+import java.util.Objects;
+
+public record PokeApiUri(URI uri) {
+
+    public PokeApiUri {
+        Objects.requireNonNull(uri);
+        ensureFromPokeApi(uri);
+    }
+
+    public String getPath() {
+        return uri.getPath();
+    }
+
+    private void ensureFromPokeApi(URI uri) {
+        if (!uri.getHost().equals("pokeapi.co")) {
+            throw new IllegalArgumentException("Host name must be 'pokeapi.co' - " + uri.getHost());
+        }
+        if (!uri.getPath().startsWith("/api/v2")) {
+            throw new IllegalArgumentException("Path must start with '/api/v2' - " + uri.getPath());
+        }
+    }
+}

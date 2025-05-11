@@ -1,5 +1,8 @@
 package com.github.mangila.pokedex.shared.queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -7,9 +10,11 @@ import java.util.Optional;
 
 public class QueueService {
 
+    private static final Logger log = LoggerFactory.getLogger(QueueService.class);
     private static final Map<String, LinkedHashSet<QueueEntry>> SET_QUEUES = new HashMap<>();
 
     public void createNewSetQueue(String name, int capacity) {
+        log.debug("Create new set queue {}, {}", name, capacity);
         SET_QUEUES.put(name, new LinkedHashSet<>(capacity));
     }
 
