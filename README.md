@@ -2,7 +2,7 @@
 
 Experimental Low-level project with plain Java.
 
-## Project Goal (WIP)
+## Project Goal
 
 - Utilize and pinpoint software engineering principles and techniques
 - Build software components from scratch
