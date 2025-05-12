@@ -2,6 +2,26 @@
 
 Experimental Low-level project with plain Java.
 
+## Project Goal (WIP)
+
+- Utilize and pinpoint software engineering principles and techniques
+- Build software components from scratch
+- For the sake of fun and love for programming, technologies and Pokemon
+
+## Project Structure (WIP)
+
+- Maven multi module project
+    - scheduler - Daemon Service
+    - web - Web Service
+    - shared — Common classes
+- Java 21
+
+## Paradigms (WIP)
+
+- Functional
+- Object Oriented
+- Concurrent
+
 ## Software Components (WIP)
 
 - Http Client
