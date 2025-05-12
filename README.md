@@ -1,6 +1,13 @@
-# Pokedex Java
+# pokedex-java
 
 Experimental Low-level project with plain Java.
+
+# Requirements
+
+- Multi-module (if possible) project with chosen Language
+- Daemon Service
+- Web Service
+- Common/Shared module
 
 ## Project Goal
 
