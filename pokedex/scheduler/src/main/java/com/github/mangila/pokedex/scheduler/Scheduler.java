@@ -42,7 +42,7 @@ public class Scheduler {
             if (queueService.isEmpty(Application.POKEMON_SPECIES_URL_QUEUE)
                     && queueService.isEmpty(Application.MEDIA_URL_QUEUE)) {
                 log.debug("Queues is empty will shutdown");
-                Application.isRunning.set(Boolean.FALSE);
+                Application.IS_RUNNING.set(Boolean.FALSE);
             }
         }, config.initialDelay(), config.delay(), config.timeUnit());
     }

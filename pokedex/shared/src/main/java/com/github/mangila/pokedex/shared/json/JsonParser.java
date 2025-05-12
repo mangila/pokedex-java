@@ -68,6 +68,7 @@ public class JsonParser {
         return map;
     }
 
+    // LBYL - Look Before You Leap
     private Object parseValue(int depth) {
         ensureNotDepthMax(depth);
         var queue = threadLocalQueue.get();

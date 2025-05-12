@@ -17,7 +17,7 @@ public class Application {
 
     public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
     public static final String MEDIA_URL_QUEUE = "media-url-queue";
-    public static final AtomicBoolean isRunning = new AtomicBoolean(Boolean.FALSE);
+    public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
 
     public static void main(String[] args) {
         var queueService = new QueueService();
@@ -35,8 +35,8 @@ public class Application {
         scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newVirtualThreadPerTaskExecutor());
         scheduler.mediaTask(TaskConfig.defaultConfig());
         scheduler.pokemonTask(TaskConfig.defaultConfig());
-        isRunning.set(Boolean.TRUE);
-        while (isRunning.get()) {
+        IS_RUNNING.set(Boolean.TRUE);
+        while (IS_RUNNING.get()) {
         }
     }
 }

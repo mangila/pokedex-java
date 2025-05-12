@@ -10,7 +10,7 @@ public record JsonRequest(
 ) {
 
     public String toRequestLine(String version) {
-        return String.format("GET %s %s", path, version.toUpperCase());
+        return String.format("%S %s %s", method, path, version.toUpperCase());
     }
 
     public String toHeaders() {

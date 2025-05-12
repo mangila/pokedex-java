@@ -2,7 +2,7 @@
 
 Experimental Low-level project with plain Java.
 
-## Features (WIP)
+## Software Components (WIP)
 
 - Http Client
     - HTTP/1.1
