@@ -2,6 +2,10 @@
 
 Experimental Low-level project with plain Java.
 
+This is the first project created in tbe Pokedex series,
+the biggest experiment is to know how easily it will be to adapt to new programming languages with simple engineering
+principles.
+
 # Requirements
 
 - Multi-module (if possible) project with chosen Language
