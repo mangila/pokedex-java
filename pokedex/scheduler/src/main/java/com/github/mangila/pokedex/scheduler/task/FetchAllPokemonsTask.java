@@ -3,7 +3,9 @@ package com.github.mangila.pokedex.scheduler.task;
 import com.github.mangila.pokedex.scheduler.Application;
 import com.github.mangila.pokedex.scheduler.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
+import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
                                    QueueService queueService) implements Runnable {
@@ -21,23 +24,18 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
     @SuppressWarnings("unchecked")
     @Override
     public void run() {
-        var optionalJsonResponse = pokeApiClient.getJson()
-                .apply(new JsonRequest("GET", "/api/v2/pokemon-species/?&limit=1025", List.of()));
-        if (optionalJsonResponse.isEmpty()) {
-            throw new IllegalStateException("Failed to fetch pokemons");
-        }
-        var response = optionalJsonResponse.get();
-        log.debug("{}", response);
-        if (response.httpStatus().code().startsWith("2")) {
-            var results = (List<LinkedHashMap<String, Object>>) response
-                    .body()
-                    .get("results");
-            results.stream()
-                    .map(map -> (String) map.get("url"))
-                    .map(URI::create)
-                    .map(PokeApiUri::new)
-                    .map(QueueEntry::new)
-                    .forEach(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry));
-        }
+        pokeApiClient.getJson()
+                .andThen(Optional::orElseThrow)
+                .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
+                .andThen(JsonResponse::body)
+                .andThen(jsonBody -> (List<LinkedHashMap<String, Object>>) jsonBody.get("results"))
+                .andThen(results -> results.stream()
+                        .map(map -> (String) map.get("url"))
+                        .map(URI::create)
+                        .map(PokeApiUri::new)
+                        .map(QueueEntry::new))
+                .apply(new JsonRequest("GET", "/api/v2/pokemon-species/?&limit=1025", List.of()))
+                .peek(queueEntry -> log.debug(queueEntry.data().toString()))
+                .forEach(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry));
     }
 }
