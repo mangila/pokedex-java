@@ -19,6 +19,7 @@ public class Application {
     public static final String MEDIA_URL_QUEUE = "media-url-queue";
     public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
 
+
     public static void main(String[] args) {
         var queueService = new QueueService();
         queueService.createNewSetQueue(POKEMON_SPECIES_URL_QUEUE, 1024);

@@ -1,0 +1,20 @@
+fail_fast: true
+repos:
+  - repo: local
+    hooks:
+      - id: test_web
+        name: Test Web Module
+        entry: python print.py
+        language: system
+        verbose: true
+        files: "^pokedex/web/src"
+        stages:
+          - pre-commit
+      - id: test_scheduler
+        name: Test Scheduler Module
+        entry: python print.py
+        language: system
+        verbose: true
+        files: "^pokedex/scheduler/src"
+        stages:
+          - pre-commit

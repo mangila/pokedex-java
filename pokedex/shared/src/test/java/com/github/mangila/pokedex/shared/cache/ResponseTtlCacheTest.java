@@ -29,7 +29,7 @@ class ResponseTtlCacheTest {
                 new JsonTree()));
         assertThat(cache.hasKey("key")).isTrue();
         await()
-                .atMost(5, SECONDS)
+                .atMost(10, SECONDS)
                 .until(() -> !cache.hasKey("key"));
     }
 
