@@ -13,11 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Application {
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
-
     public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
     public static final String MEDIA_URL_QUEUE = "media-url-queue";
     public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
+
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
         var queueService = new QueueService();

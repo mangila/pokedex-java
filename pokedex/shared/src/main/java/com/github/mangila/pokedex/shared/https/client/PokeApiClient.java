@@ -51,9 +51,9 @@ public class PokeApiClient {
     }
 
     public Function<JsonRequest, Optional<JsonResponse>> getJson() {
-        return request -> {
+        return jsonRequest -> {
             try {
-                var path = request.path();
+                var path = jsonRequest.path();
                 if (cache.hasKey(path)) {
                     return Optional.of(cache.get(path));
                 }
@@ -63,7 +63,7 @@ public class PokeApiClient {
                     return Optional.empty();
                 }
                 var connection = tlsConnectionOptional.get();
-                var http = request.toHttp(host.hostName(), "HTTP/1.1");
+                var http = jsonRequest.toHttp(host.hostName(), "HTTP/1.1");
                 log.debug("{}", http);
                 connection.getOutputStream().write(http.getBytes());
                 connection.getOutputStream().flush();
@@ -71,7 +71,8 @@ public class PokeApiClient {
                         .apply(connection.getInputStream());
                 var headers = readHeaders()
                         .apply(connection.getInputStream());
-                var body = readGzipBody().apply(connection.getInputStream());
+                var body = readJsonBody()
+                        .apply(connection.getInputStream());
                 pool.returnConnection(connection);
                 var response = new JsonResponse(
                         httpStatus,
@@ -148,17 +149,24 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, JsonTree> readGzipBody() {
+    private Function<InputStream, JsonTree> readJsonBody() {
         return inputStream -> {
             try {
-                var gzip = new GZIPInputStream(inputStream);
                 var writeBuffer = new ByteArrayOutputStream(8 * 1024);
                 var readBuffer = ByteBuffer.allocate(8 * 1024);
-                int byteCount;
-                while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
-                    readBuffer.position(0);
-                    writeBuffer.write(readBuffer.array(), 0, byteCount);
-                    readBuffer.clear();
+                var stream = new MagicNumberStream(inputStream);
+                var format = stream.getFormat();
+                if (format.equals(MagicNumberStream.GZIP)) {
+                    var gzip = new GZIPInputStream(stream.getInputStream());
+                    int byteCount;
+                    while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
+                        readBuffer.position(0);
+                        writeBuffer.write(readBuffer.array(), 0, byteCount);
+                        readBuffer.clear();
+                    }
+                } else {
+                    // TODO fallback read as JSON body directly
+                    throw new IOException("Could not read as a GZIP body");
                 }
                 return jsonParser.parseTree(writeBuffer.toByteArray());
             } catch (Exception e) {
