@@ -41,6 +41,7 @@ class ResponseTtlCacheTest {
                 3,
                 SECONDS
         );
+
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(HttpStatus.fromString("HTTP 200 OK"),
