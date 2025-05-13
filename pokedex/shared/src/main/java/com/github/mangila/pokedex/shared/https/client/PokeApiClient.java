@@ -6,6 +6,7 @@ import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
 import com.github.mangila.pokedex.shared.json.JsonParser;
+import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,7 +140,7 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, Map<String, Object>> readGzipBody() {
+    private Function<InputStream, JsonTree> readGzipBody() {
         return inputStream -> {
             try {
                 var gzip = new GZIPInputStream(inputStream);

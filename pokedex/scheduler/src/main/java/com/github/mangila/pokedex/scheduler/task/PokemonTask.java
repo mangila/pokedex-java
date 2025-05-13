@@ -28,8 +28,6 @@ public record PokemonTask(PokeApiClient pokeApiClient,
                     .apply(new JsonRequest("GET",
                             pokemonSpeciesUrl.getPath(),
                             List.of()));
-            pokemonSpecies
-                    .ifPresent(jsonResponse -> log.info("{}", jsonResponse.body().get("name")));
         } catch (Exception e) {
             log.error("ERR", e);
             queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry.get());

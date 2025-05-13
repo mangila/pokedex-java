@@ -6,13 +6,13 @@ import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
+import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,17 +24,22 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
     @SuppressWarnings("unchecked")
     @Override
     public void run() {
+        var request = new JsonRequest(
+                "GET",
+                "/api/v2/pokemon-species/?&limit=1025",
+                List.of());
         pokeApiClient.getJson()
                 .andThen(Optional::orElseThrow)
                 .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
                 .andThen(JsonResponse::body)
-                .andThen(jsonBody -> (List<LinkedHashMap<String, Object>>) jsonBody.get("results"))
-                .andThen(results -> results.stream()
-                        .map(map -> (String) map.get("url"))
+                .andThen(jsonBody -> jsonBody.getArray("results"))
+                .andThen(array -> array.values().stream()
+                        .map(JsonValue::getObject)
+                        .map(jsonObject -> jsonObject.getString("url"))
                         .map(URI::create)
                         .map(PokeApiUri::new)
                         .map(QueueEntry::new))
-                .apply(new JsonRequest("GET", "/api/v2/pokemon-species/?&limit=1025", List.of()))
+                .apply(request)
                 .peek(queueEntry -> log.debug(queueEntry.data().toString()))
                 .forEach(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry));
     }
