@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class QueueService {
 
@@ -22,16 +23,18 @@ public class QueueService {
         return SET_QUEUES.get(name).add(entry);
     }
 
-    public Optional<QueueEntry> poll(String name) {
-        var queue = SET_QUEUES.get(name);
-        if (queue == null) {
-            throw new IllegalArgumentException("Queue not found");
-        }
-        try {
-            return Optional.of(queue.removeFirst());
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+    public Function<String, Optional<QueueEntry>> poll() {
+        return queueName -> {
+            var queue = SET_QUEUES.get(queueName);
+            if (queue == null) {
+                return Optional.empty();
+            }
+            try {
+                return Optional.of(queue.removeFirst());
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        };
     }
 
     public boolean isEmpty(String name) {

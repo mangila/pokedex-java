@@ -19,13 +19,13 @@ public class Application {
     public static final String MEDIA_URL_QUEUE = "media-url-queue";
     public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
 
-
     public static void main(String[] args) {
         var queueService = new QueueService();
         queueService.createNewSetQueue(POKEMON_SPECIES_URL_QUEUE, 1024);
         queueService.createNewSetQueue(MEDIA_URL_QUEUE, 1024);
+        var pokeApiClient = new PokeApiClient(PokeApiHost.fromDefault());
         var scheduler = new Scheduler(
-                new PokeApiClient(PokeApiHost.fromDefault()),
+                pokeApiClient,
                 queueService);
         scheduler.finishedProcessingTask(TaskConfig.TriggerConfig.from(
                 VirtualThreadConfig.newSingleThreadScheduledExecutor(),
@@ -33,7 +33,7 @@ public class Application {
                 5,
                 TimeUnit.MINUTES
         ));
-        scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newVirtualThreadPerTaskExecutor());
+        scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newSingleThreadExecutor());
         scheduler.mediaTask(TaskConfig.defaultConfig());
         scheduler.pokemonTask(TaskConfig.defaultConfig());
         IS_RUNNING.set(Boolean.TRUE);

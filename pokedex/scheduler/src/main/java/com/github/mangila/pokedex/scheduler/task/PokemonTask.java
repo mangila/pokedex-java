@@ -1,14 +1,18 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.scheduler.Application;
-import com.github.mangila.pokedex.scheduler.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
+import com.github.mangila.pokedex.shared.https.model.JsonResponse;
+import com.github.mangila.pokedex.shared.model.PokeApiUri;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Future;
 
 public record PokemonTask(PokeApiClient pokeApiClient,
                           QueueService queueService) implements Runnable {
@@ -17,20 +21,51 @@ public record PokemonTask(PokeApiClient pokeApiClient,
 
     @Override
     public void run() {
-        var queueEntry = queueService.poll(Application.POKEMON_SPECIES_URL_QUEUE);
-        if (queueEntry.isEmpty()) {
+        var poll = queueService.poll()
+                .apply(Application.POKEMON_SPECIES_URL_QUEUE);
+        if (poll.isEmpty()) {
             log.debug("Queue is empty");
             return;
         }
+        var queueEntry = poll.get();
+        var url = (PokeApiUri) queueEntry.data();
+        log.debug("Queue entry {}", url);
         try {
-            var pokemonSpeciesUrl = (PokeApiUri) queueEntry.get().data();
-            var pokemonSpecies = pokeApiClient.getJson()
+            var tree = pokeApiClient.getJson()
+                    .andThen(Optional::orElseThrow)
+                    .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
+                    .andThen(JsonResponse::body)
                     .apply(new JsonRequest("GET",
-                            pokemonSpeciesUrl.getPath(),
+                            url.getPath(),
                             List.of()));
+            var evolutionChainFuture = pokeApiClient.getJsonAsync()
+                    .apply(new JsonRequest("GET",
+                            tree.getObject("evolution_chain")
+                                    .getString("url"),
+                            List.of()));
+            var varietyFutures = tree.getArray("varieties")
+                    .values()
+                    .stream()
+                    .map(jsonValue -> new JsonRequest("GET",
+                            jsonValue.getObject()
+                                    .getObject("pokemon")
+                                    .getString("url"),
+                            List.of()))
+                    .map(jsonRequest -> pokeApiClient.getJsonAsync()
+                            .apply(jsonRequest))
+                    .toList();
+
+            var evolutionChain = evolutionChainFuture.get();
+            log.info(evolutionChain.get().toString());
+            for (var varietyFuture : varietyFutures) {
+                if (varietyFuture.isDone()) {
+                    var variety = varietyFuture.get();
+                    log.info(variety.get().toString());
+                }
+            }
+
         } catch (Exception e) {
-            log.error("ERR", e);
-            queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry.get());
+            throw new RuntimeException(e);
         }
     }
 

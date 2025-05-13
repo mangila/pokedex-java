@@ -55,7 +55,7 @@ public class Scheduler {
 
     public void pokemonTask(TaskConfig config) {
         log.info("Scheduling pokemon task");
-        var task = new PokemonTask(pokeApiClient, queueService);
+        var task = new PokemonTask(pokeApiClient,queueService);
         scheduleTask(config, () -> task);
     }
 

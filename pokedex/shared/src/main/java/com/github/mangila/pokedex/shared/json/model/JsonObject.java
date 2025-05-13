@@ -17,4 +17,9 @@ public class JsonObject {
         return tree.get(key)
                 .getString();
     }
+
+    public JsonObject getObject(String key) {
+        return tree.get(key)
+                .getObject();
+    }
 }

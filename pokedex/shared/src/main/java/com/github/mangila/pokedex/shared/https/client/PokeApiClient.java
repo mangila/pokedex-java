@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
+import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -40,6 +42,12 @@ public class PokeApiClient {
         this.cache = new ResponseTtlCache();
         cache.startEvictionThread();
         this.jsonParser = new JsonParser();
+    }
+
+    public Function<JsonRequest, Future<Optional<JsonResponse>>> getJsonAsync() {
+        return jsonRequest -> VirtualThreadConfig.newSingleThreadExecutor()
+                .submit(() -> this.getJson()
+                        .apply(jsonRequest));
     }
 
     public Function<JsonRequest, Optional<JsonResponse>> getJson() {
@@ -123,7 +131,6 @@ public class PokeApiClient {
                         if (header.isBlank()) {
                             break;
                         }
-                        log.debug("Header: {}", header);
                         var parts = header.split(": ");
                         if (parts.length == 2) {
                             headers.put(parts[0], parts[1]);
@@ -132,6 +139,7 @@ public class PokeApiClient {
                     }
                     previous = current;
                 }
+                log.debug("Headers: {}", headers);
                 return headers;
             } catch (Exception e) {
                 log.error("ERR", e);

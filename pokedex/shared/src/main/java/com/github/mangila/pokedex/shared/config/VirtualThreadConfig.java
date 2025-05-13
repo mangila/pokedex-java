@@ -24,7 +24,7 @@ public class VirtualThreadConfig {
         return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
     }
 
-    public static ExecutorService newVirtualThreadPerTaskExecutor() {
-        return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
+    public static ExecutorService newSingleThreadExecutor() {
+        return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }
 }

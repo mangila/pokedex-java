@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.scheduler.model;
+package com.github.mangila.pokedex.shared.model;
 
 import java.net.URI;
 import java.util.Objects;
@@ -8,6 +8,10 @@ public record PokeApiUri(URI uri) {
     public PokeApiUri {
         Objects.requireNonNull(uri);
         ensureFromPokeApi(uri);
+    }
+
+    public static PokeApiUri fromString(String uri) {
+        return new PokeApiUri(URI.create(uri));
     }
 
     public String getPath() {
