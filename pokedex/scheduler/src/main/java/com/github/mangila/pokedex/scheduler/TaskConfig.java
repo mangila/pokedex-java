@@ -11,6 +11,10 @@ public record TaskConfig(TriggerConfig triggerConfig, WorkerConfig workerConfig)
         return new TaskConfig(triggerConfig, workerConfig);
     }
 
+    /**
+     *    I have no idea how the requested servers Default Requests per Keep-Alive Connection are configured.
+     *    Default might be 100 or unlimited or something like that.
+      */
     public static TaskConfig defaultConfig() {
         return TaskConfig.from(
                 TriggerConfig.from(
