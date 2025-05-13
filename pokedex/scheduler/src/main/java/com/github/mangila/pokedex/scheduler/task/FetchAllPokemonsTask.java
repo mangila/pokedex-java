@@ -32,7 +32,7 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
                 .andThen(Optional::orElseThrow)
                 .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
                 .andThen(JsonResponse::body)
-                .andThen(jsonBody -> jsonBody.getArray("results"))
+                .andThen(jsonTree -> jsonTree.getArray("results"))
                 .andThen(array -> array.values().stream()
                         .map(JsonValue::getObject)
                         .map(jsonObject -> jsonObject.getString("url"))
