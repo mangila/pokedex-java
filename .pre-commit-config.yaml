@@ -18,3 +18,11 @@ repos:
         files: "^pokedex/scheduler/src"
         stages:
           - pre-commit
+      - id: test_shared
+        name: Test Shared Module
+        entry: python print.py
+        language: system
+        verbose: true
+        files: "^pokedex/shared/src"
+        stages:
+          - pre-commit
