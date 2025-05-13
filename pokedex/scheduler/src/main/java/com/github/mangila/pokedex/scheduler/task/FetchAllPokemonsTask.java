@@ -21,7 +21,6 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
 
     private static final Logger log = LoggerFactory.getLogger(FetchAllPokemonsTask.class);
 
-    @SuppressWarnings("unchecked")
     @Override
     public void run() {
         var request = new JsonRequest(
@@ -32,7 +31,7 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
                 .andThen(Optional::orElseThrow)
                 .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
                 .andThen(JsonResponse::body)
-                .andThen(jsonTree -> jsonTree.getArray("results"))
+                .andThen(jsonBody -> jsonBody.getArray("results"))
                 .andThen(array -> array.values().stream()
                         .map(JsonValue::getObject)
                         .map(jsonObject -> jsonObject.getString("url"))

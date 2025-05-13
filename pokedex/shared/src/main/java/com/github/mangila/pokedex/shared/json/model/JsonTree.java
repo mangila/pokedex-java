@@ -18,4 +18,8 @@ public class JsonTree {
     public JsonObject getObject(String key) {
         return (JsonObject) tree.get(key).value();
     }
+
+    public int size() {
+        return tree.size();
+    }
 }
