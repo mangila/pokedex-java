@@ -167,12 +167,12 @@ public class PokeApiClient {
                             }
                             return jsonParser.parseTree(writeBuffer.toByteArray());
                         } else {
-                            log.error("Invalid gzip header: {}", format);
+                            log.error("Did not find gzip header: {}", format);
                             throw new IOException("Did not find gzip header: " + format);
                         }
                     }
                 } else {
-                    log.error("Invalid json content encoding");
+                    log.error("Only gzipped json content encoding is supported");
                     throw new IOException("Only gzipped json content encoding is supported");
                 }
             } catch (Exception e) {
