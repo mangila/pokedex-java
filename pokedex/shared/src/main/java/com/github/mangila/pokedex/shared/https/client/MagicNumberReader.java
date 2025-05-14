@@ -12,7 +12,6 @@ public class MagicNumberReader {
     public static final String PNG = "png";
     public static final String GIF87a = "gif87a";
     public static final String GIF89a = "gif89a";
-    public static final String GZIP = "gzip";
     public static final String OGG = "ogg";
 
     private static final int MAX_MAGIC_LENGTH = 16;
@@ -21,7 +20,6 @@ public class MagicNumberReader {
             PNG, new byte[]{(byte) 0x89, 'P', 'N', 'G'},
             GIF87a, "GIF87a".getBytes(),
             GIF89a, "GIF89a".getBytes(),
-            GZIP, new byte[]{(byte) 0x1F, (byte) 0x8B},
             OGG, "OggS".getBytes()
     );
 
@@ -31,7 +29,7 @@ public class MagicNumberReader {
         this.input = new PushbackInputStream(input, MAX_MAGIC_LENGTH);
     }
 
-    public String readFormat() throws IOException {
+    public String readMagicNumber() throws IOException {
         byte[] header = new byte[MAX_MAGIC_LENGTH];
         int bytesRead = input.read(header);
         if (bytesRead == -1) {

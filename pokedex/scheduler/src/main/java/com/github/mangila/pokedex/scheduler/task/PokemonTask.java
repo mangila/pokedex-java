@@ -55,11 +55,11 @@ public record PokemonTask(PokeApiClient pokeApiClient,
                     .toList();
 
             var evolutionChain = evolutionChainFuture.get();
-            log.info(evolutionChain.get().toString());
+         //   log.info(evolutionChain.get().toString());
             for (var varietyFuture : varietyFutures) {
                 if (varietyFuture.isDone()) {
                     var variety = varietyFuture.get();
-                    log.info(variety.get().toString());
+             //       log.info(variety.get().toString());
                 }
             }
 

@@ -9,11 +9,12 @@ import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Future;
@@ -108,7 +109,7 @@ public class PokeApiClient {
 
     private static Headers readHeaders(InputStream inputStream) {
         try {
-            var buffer = new ByteArrayOutputStream(8 * 1024);
+            var buffer = new ByteArrayOutputStream(2 * 1024);
             var headers = new Headers();
             int previous = -1;
             while (true) {
@@ -142,29 +143,45 @@ public class PokeApiClient {
                                              JsonParser jsonParser) {
         try {
             if (headers.isGzip() && headers.isJson()) {
-                var writeBuffer = new ByteArrayOutputStream(8 * 1024);
-                var readBuffer = ByteBuffer.allocate(8 * 1024);
-                var magicNumberReader = new MagicNumberReader(inputStream);
-                inputStream = magicNumberReader.getInputStream();
+                var writeBuffer = new ByteArrayOutputStream(2 * 1024);
+                var readBuffer = new byte[2 * 1024];
                 if (headers.isChunked()) {
-                    log.info(magicNumberReader.readFormat());
-                    // TODO read chunked gzip response body, some CDN/cache hits from the PokeAPI returns a chunked gzip response
-                    throw new UnsupportedOperationException("Not yet implemented");
-                } else {
-                    var format = magicNumberReader.readFormat();
-                    if (format.equals(MagicNumberReader.GZIP)) {
-                        var gzip = new GZIPInputStream(inputStream);
-                        int byteCount;
-                        while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
-                            readBuffer.position(0);
-                            writeBuffer.write(readBuffer.array(), 0, byteCount);
-                            readBuffer.clear();
+                    log.debug("Chunked GZIP encoding detected");
+                    var buffer = new ByteArrayOutputStream(2 * 1024);
+                    int previous = -1;
+                    while (true) {
+                        int current = inputStream.read();
+                        if (current == END_OF_STREAM) {
+                            break;
                         }
-                        return jsonParser.parseTree(writeBuffer.toByteArray());
-                    } else {
-                        throw new IOException("Did not find gzip header: " + format);
+                        buffer.write(current);
+                        if (isCrLf(previous, current)) {
+                            var crlf = buffer.toString(StandardCharsets.US_ASCII).trim();
+                            if (crlf.equals("0") || crlf.isBlank()) {
+                                buffer.reset();
+                            } else if (crlf.matches("[0-9a-fA-F]+")) {
+                                int chunkSize = Integer.parseInt(crlf, 16);
+                                writeBuffer.write(inputStream.readNBytes(chunkSize));
+                                buffer.reset();
+                            }
+                        }
+                        previous = current;
                     }
                 }
+                GZIPInputStream gzip;
+                if (writeBuffer.size() == 0) {
+                    gzip = new GZIPInputStream(inputStream);
+                } else {
+                    var allChunks = new ByteArrayInputStream(writeBuffer.toByteArray());
+                    writeBuffer.reset();
+                    gzip = new GZIPInputStream(allChunks);
+                }
+                int byteCount;
+                while ((byteCount = gzip.read(readBuffer)) != END_OF_STREAM) {
+                    writeBuffer.write(readBuffer, 0, byteCount);
+                }
+
+                return jsonParser.parseTree(writeBuffer.toByteArray());
             } else {
                 throw new IOException("Only gzipped json content encoding is supported");
             }
