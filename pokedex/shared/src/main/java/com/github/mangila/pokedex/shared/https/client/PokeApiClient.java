@@ -77,14 +77,11 @@ public class PokeApiClient {
     }
 
     private Function<InputStream, JsonResponse> readResponse() {
-        return inputStream -> {
-            var jsonResponseBuilder = JsonResponse.builder();
-            readStatusLine()
-                    .andThen(builder -> readHeaders().apply(inputStream, builder))
-                    .andThen(builder -> readGzipJsonBody().apply(inputStream, builder.headers(), builder))
-                    .apply(inputStream, jsonResponseBuilder);
-            return jsonResponseBuilder.build();
-        };
+        return inputStream -> readStatusLine()
+                .andThen(builder -> readHeaders().apply(inputStream, builder))
+                .andThen(builder -> readGzipJsonBody().apply(inputStream, builder.headers(), builder))
+                .apply(inputStream, JsonResponse.builder())
+                .build();
     }
 
     private BiFunction<InputStream, JsonResponse.Builder, JsonResponse.Builder> readStatusLine() {
