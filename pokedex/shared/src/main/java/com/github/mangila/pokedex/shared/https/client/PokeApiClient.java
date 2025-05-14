@@ -150,15 +150,15 @@ public class PokeApiClient {
                 if (headers.isGzip() && headers.isJson()) {
                     var writeBuffer = new ByteArrayOutputStream(8 * 1024);
                     var readBuffer = ByteBuffer.allocate(8 * 1024);
-                    var stream = new MagicNumberReader(inputStream);
+                    var magicNumberReader = new MagicNumberReader(inputStream);
+                    inputStream = magicNumberReader.getInputStream();
                     if (headers.isChunked()) {
                         // TODO read chunked gzip response body, some cache hits returns a chunked gzip response
-                        log.error("Chunked gzip response body is not supported yet");
                         throw new UnsupportedOperationException("Not yet implemented");
                     } else {
-                        var format = stream.getFormat();
+                        var format = magicNumberReader.getFormat();
                         if (format.equals(MagicNumberReader.GZIP)) {
-                            var gzip = new GZIPInputStream(stream.getInputStream());
+                            var gzip = new GZIPInputStream(inputStream);
                             int byteCount;
                             while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
                                 readBuffer.position(0);
@@ -167,12 +167,10 @@ public class PokeApiClient {
                             }
                             return jsonParser.parseTree(writeBuffer.toByteArray());
                         } else {
-                            log.error("Did not find gzip header: {}", format);
                             throw new IOException("Did not find gzip header: " + format);
                         }
                     }
                 } else {
-                    log.error("Only gzipped json content encoding is supported");
                     throw new IOException("Only gzipped json content encoding is supported");
                 }
             } catch (Exception e) {
