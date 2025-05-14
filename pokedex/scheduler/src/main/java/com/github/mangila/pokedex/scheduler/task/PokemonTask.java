@@ -33,7 +33,7 @@ public record PokemonTask(PokeApiClient pokeApiClient,
             var tree = pokeApiClient.getJson()
                     .andThen(Optional::orElseThrow)
                     .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
-                    .andThen(JsonResponse::body)
+                    .andThen(JsonResponse::getBody)
                     .apply(new JsonRequest("GET",
                             url.getPath(),
                             List.of()));

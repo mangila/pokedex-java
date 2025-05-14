@@ -2,9 +2,9 @@ package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.func.TriFunction;
 import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
-import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,18 +63,9 @@ public class PokeApiClient {
                 log.debug("{}", http);
                 connection.getOutputStream().write(http.getBytes());
                 connection.getOutputStream().flush();
-                var httpStatus = readStatusLine()
+                var response = readResponse()
                         .apply(connection.getInputStream());
-                var headers = readHeaders()
-                        .apply(connection.getInputStream());
-                var body = readGzipJsonBody()
-                        .apply(connection.getInputStream(), headers);
                 pool.returnConnection(connection);
-                var response = new JsonResponse(
-                        httpStatus,
-                        headers,
-                        body
-                );
                 cache.put(path, response);
                 return Optional.of(response);
             } catch (Exception e) {
@@ -85,8 +76,19 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, HttpStatus> readStatusLine() {
+    private Function<InputStream, JsonResponse> readResponse() {
         return inputStream -> {
+            var jsonResponseBuilder = JsonResponse.builder();
+            readStatusLine()
+                    .andThen(builder -> readHeaders().apply(inputStream, builder))
+                    .andThen(builder -> readGzipJsonBody().apply(inputStream, builder.headers(), builder))
+                    .apply(inputStream, jsonResponseBuilder);
+            return jsonResponseBuilder.build();
+        };
+    }
+
+    private BiFunction<InputStream, JsonResponse.Builder, JsonResponse.Builder> readStatusLine() {
+        return (inputStream, builder) -> {
             try {
                 var buffer = new ByteArrayOutputStream();
                 int previous = -1;
@@ -103,7 +105,7 @@ public class PokeApiClient {
                 }
                 var bufferString = buffer.toString(Charset.defaultCharset()).trim();
                 log.debug("Status line: {}", bufferString);
-                return HttpStatus.fromString(bufferString);
+                return builder.httpStatus(HttpStatus.fromString(bufferString));
             } catch (Exception e) {
                 log.error("ERR", e);
                 throw new RuntimeException(e);
@@ -111,8 +113,8 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, Headers> readHeaders() {
-        return inputStream -> {
+    private BiFunction<InputStream, JsonResponse.Builder, JsonResponse.Builder> readHeaders() {
+        return (inputStream, builder) -> {
             try {
                 var buffer = new ByteArrayOutputStream(8 * 1024);
                 var headers = new Headers();
@@ -136,7 +138,7 @@ public class PokeApiClient {
                     }
                     previous = current;
                 }
-                return headers;
+                return builder.headers(headers);
             } catch (Exception e) {
                 log.error("ERR", e);
                 throw new RuntimeException(e);
@@ -144,8 +146,8 @@ public class PokeApiClient {
         };
     }
 
-    private BiFunction<InputStream, Headers, JsonTree> readGzipJsonBody() {
-        return (inputStream, headers) -> {
+    private TriFunction<InputStream, Headers, JsonResponse.Builder, JsonResponse.Builder> readGzipJsonBody() {
+        return (inputStream, headers, builder) -> {
             try {
                 if (headers.isGzip() && headers.isJson()) {
                     var writeBuffer = new ByteArrayOutputStream(8 * 1024);
@@ -166,7 +168,7 @@ public class PokeApiClient {
                                 writeBuffer.write(readBuffer.array(), 0, byteCount);
                                 readBuffer.clear();
                             }
-                            return jsonParser.parseTree(writeBuffer.toByteArray());
+                            return builder.body(jsonParser.parseTree(writeBuffer.toByteArray()));
                         } else {
                             throw new IOException("Did not find gzip header: " + format);
                         }

@@ -7,7 +7,6 @@ import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
-import java.util.Collections;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +44,7 @@ class ResponseTtlCacheTest {
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(HttpStatus.fromString("HTTP 200 OK"),
-                Collections.emptyMap(),
+                new Headers(),
                 new JsonTree()));
         assertThat(cache.hasKey("key")).isTrue();
         cache.shutdownEvictionThread();

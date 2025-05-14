@@ -29,7 +29,7 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
         pokeApiClient.getJson()
                 .andThen(Optional::orElseThrow)
                 .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
-                .andThen(JsonResponse::body)
+                .andThen(JsonResponse::getBody)
                 .andThen(jsonTree -> jsonTree.getArray("results"))
                 .andThen(array -> array.values().stream()
                         .map(JsonValue::getObject)
