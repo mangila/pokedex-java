@@ -156,11 +156,11 @@ public class PokeApiClient {
                         }
                         buffer.write(current);
                         if (isCrLf(previous, current)) {
-                            var crlf = buffer.toString(StandardCharsets.US_ASCII).trim();
-                            if (crlf.equals("0") || crlf.isBlank()) {
+                            var chunkLine = buffer.toString(StandardCharsets.US_ASCII).trim();
+                            if (chunkLine.equals("0") || chunkLine.isBlank()) {
                                 buffer.reset();
-                            } else if (crlf.matches("[0-9a-fA-F]+")) {
-                                int chunkSize = Integer.parseInt(crlf, 16);
+                            } else if (chunkLine.matches("[0-9a-fA-F]+")) {
+                                int chunkSize = Integer.parseInt(chunkLine, 16);
                                 writeBuffer.write(inputStream.readNBytes(chunkSize));
                                 buffer.reset();
                             }
