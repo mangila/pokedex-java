@@ -153,10 +153,11 @@ public class PokeApiClient {
                     var magicNumberReader = new MagicNumberReader(inputStream);
                     inputStream = magicNumberReader.getInputStream();
                     if (headers.isChunked()) {
+                        log.info(magicNumberReader.readFormat());
                         // TODO read chunked gzip response body, some cache hits returns a chunked gzip response
                         throw new UnsupportedOperationException("Not yet implemented");
                     } else {
-                        var format = magicNumberReader.getFormat();
+                        var format = magicNumberReader.readFormat();
                         if (format.equals(MagicNumberReader.GZIP)) {
                             var gzip = new GZIPInputStream(inputStream);
                             int byteCount;

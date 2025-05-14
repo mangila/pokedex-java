@@ -31,7 +31,7 @@ public class MagicNumberReader {
         this.input = new PushbackInputStream(input, MAX_MAGIC_LENGTH);
     }
 
-    public String getFormat() throws IOException {
+    public String readFormat() throws IOException {
         byte[] header = new byte[MAX_MAGIC_LENGTH];
         int bytesRead = input.read(header);
         if (bytesRead == -1) {
@@ -49,7 +49,7 @@ public class MagicNumberReader {
             }
         }
 
-        return "Unknown";
+        return String.format("Unknown format: %s", new String(header));
     }
 
     public PushbackInputStream getInputStream() {
