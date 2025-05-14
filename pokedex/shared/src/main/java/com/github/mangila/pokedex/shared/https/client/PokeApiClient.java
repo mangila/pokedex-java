@@ -154,7 +154,7 @@ public class PokeApiClient {
                     inputStream = magicNumberReader.getInputStream();
                     if (headers.isChunked()) {
                         log.info(magicNumberReader.readFormat());
-                        // TODO read chunked gzip response body, some cache hits returns a chunked gzip response
+                        // TODO read chunked gzip response body, some CDN/cache hits from the PokeAPI returns a chunked gzip response
                         throw new UnsupportedOperationException("Not yet implemented");
                     } else {
                         var format = magicNumberReader.readFormat();
