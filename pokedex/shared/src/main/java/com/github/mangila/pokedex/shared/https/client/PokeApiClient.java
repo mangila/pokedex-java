@@ -165,7 +165,7 @@ public class PokeApiClient {
                         readBuffer.clear();
                     }
                 } else {
-                    // TODO fallback read as JSON body directly
+                    // CDN or cache might respond without a GZIP header. Trust no header from a CDN
                     throw new IOException("Could not read as a GZIP body");
                 }
                 return jsonParser.parseTree(writeBuffer.toByteArray());
