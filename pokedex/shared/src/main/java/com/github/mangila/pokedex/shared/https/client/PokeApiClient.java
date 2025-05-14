@@ -165,7 +165,7 @@ public class PokeApiClient {
                         readBuffer.clear();
                     }
                 } else {
-                    // TODO Read chunked response body, some cache hits returns a chunked response
+                    // TODO Read chunked gzip response body, some cache hits returns a chunked gzip response
                     throw new IOException("Could not read as a GZIP body");
                 }
                 return jsonParser.parseTree(writeBuffer.toByteArray());
