@@ -2,10 +2,7 @@ package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.https.model.HttpStatus;
-import com.github.mangila.pokedex.shared.https.model.JsonRequest;
-import com.github.mangila.pokedex.shared.https.model.JsonResponse;
-import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
+import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
@@ -18,10 +15,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -72,7 +68,7 @@ public class PokeApiClient {
                 var headers = readHeaders()
                         .apply(connection.getInputStream());
                 var body = readGzipJsonBody()
-                        .apply(connection.getInputStream());
+                        .apply(connection.getInputStream(), headers);
                 pool.returnConnection(connection);
                 var response = new JsonResponse(
                         httpStatus,
@@ -115,11 +111,11 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, Map<String, String>> readHeaders() {
+    private Function<InputStream, Headers> readHeaders() {
         return inputStream -> {
             try {
                 var buffer = new ByteArrayOutputStream(8 * 1024);
-                var headers = new HashMap<String, String>();
+                var headers = new Headers();
                 int previous = -1;
                 while (true) {
                     int current = inputStream.read();
@@ -140,7 +136,6 @@ public class PokeApiClient {
                     }
                     previous = current;
                 }
-                log.debug("Headers: {}", headers);
                 return headers;
             } catch (Exception e) {
                 log.error("ERR", e);
@@ -149,26 +144,37 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, JsonTree> readGzipJsonBody() {
-        return inputStream -> {
+    private BiFunction<InputStream, Headers, JsonTree> readGzipJsonBody() {
+        return (inputStream, headers) -> {
             try {
-                var writeBuffer = new ByteArrayOutputStream(8 * 1024);
-                var readBuffer = ByteBuffer.allocate(8 * 1024);
-                var stream = new MagicNumberStream(inputStream);
-                var format = stream.getFormat();
-                if (format.equals(MagicNumberStream.GZIP)) {
-                    var gzip = new GZIPInputStream(stream.getInputStream());
-                    int byteCount;
-                    while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
-                        readBuffer.position(0);
-                        writeBuffer.write(readBuffer.array(), 0, byteCount);
-                        readBuffer.clear();
+                if (headers.isGzip() && headers.isJson()) {
+                    var writeBuffer = new ByteArrayOutputStream(8 * 1024);
+                    var readBuffer = ByteBuffer.allocate(8 * 1024);
+                    var stream = new MagicNumberReader(inputStream);
+                    if (headers.isChunked()) {
+                        // TODO read chunked gzip response body, some cache hits returns a chunked gzip response
+                        log.error("Chunked gzip response body is not supported yet");
+                        throw new UnsupportedOperationException("Not yet implemented");
+                    } else {
+                        var format = stream.getFormat();
+                        if (format.equals(MagicNumberReader.GZIP)) {
+                            var gzip = new GZIPInputStream(stream.getInputStream());
+                            int byteCount;
+                            while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
+                                readBuffer.position(0);
+                                writeBuffer.write(readBuffer.array(), 0, byteCount);
+                                readBuffer.clear();
+                            }
+                            return jsonParser.parseTree(writeBuffer.toByteArray());
+                        } else {
+                            log.error("Invalid gzip header: {}", format);
+                            throw new IOException("Did not find gzip header: " + format);
+                        }
                     }
                 } else {
-                    // TODO Read chunked gzip response body, some cache hits returns a chunked gzip response
-                    throw new IOException("Could not read as a GZIP body");
+                    log.error("Invalid json content encoding");
+                    throw new IOException("Only gzipped json content encoding is supported");
                 }
-                return jsonParser.parseTree(writeBuffer.toByteArray());
             } catch (Exception e) {
                 log.error("ERR", e);
                 throw new RuntimeException(e);

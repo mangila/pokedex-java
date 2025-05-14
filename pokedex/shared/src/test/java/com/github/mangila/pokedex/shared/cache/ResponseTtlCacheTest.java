@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.cache;
 
+import com.github.mangila.pokedex.shared.https.model.Headers;
 import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
@@ -25,7 +26,7 @@ class ResponseTtlCacheTest {
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(HttpStatus.fromString("HTTP 200 OK"),
-                Collections.emptyMap(),
+                new Headers(),
                 new JsonTree()));
         assertThat(cache.hasKey("key")).isTrue();
         await()

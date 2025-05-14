@@ -6,7 +6,7 @@ import java.io.PushbackInputStream;
 import java.util.Arrays;
 import java.util.Map;
 
-public class MagicNumberStream {
+public class MagicNumberReader {
 
     public static final String JPEG = "jpeg";
     public static final String PNG = "png";
@@ -27,7 +27,7 @@ public class MagicNumberStream {
 
     private final PushbackInputStream input;
 
-    public MagicNumberStream(InputStream input) {
+    public MagicNumberReader(InputStream input) {
         this.input = new PushbackInputStream(input, MAX_MAGIC_LENGTH);
     }
 

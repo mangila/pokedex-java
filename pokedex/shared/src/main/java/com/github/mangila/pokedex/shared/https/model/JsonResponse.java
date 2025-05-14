@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public record JsonResponse(HttpStatus httpStatus,
-                           Map<String, String> headers,
+                           Headers headers,
                            JsonTree body) {
     public JsonResponse {
         Objects.requireNonNull(httpStatus, "httpStatus must not be null");
