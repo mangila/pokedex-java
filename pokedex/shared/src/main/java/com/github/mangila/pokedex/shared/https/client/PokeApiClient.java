@@ -71,7 +71,7 @@ public class PokeApiClient {
                         .apply(connection.getInputStream());
                 var headers = readHeaders()
                         .apply(connection.getInputStream());
-                var body = readJsonBody()
+                var body = readGzipJsonBody()
                         .apply(connection.getInputStream());
                 pool.returnConnection(connection);
                 var response = new JsonResponse(
@@ -149,7 +149,7 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, JsonTree> readJsonBody() {
+    private Function<InputStream, JsonTree> readGzipJsonBody() {
         return inputStream -> {
             try {
                 var writeBuffer = new ByteArrayOutputStream(8 * 1024);
@@ -165,7 +165,7 @@ public class PokeApiClient {
                         readBuffer.clear();
                     }
                 } else {
-                    // TODO Read chunked response body
+                    // TODO Read chunked response body, some cache hits returns a chunked response
                     throw new IOException("Could not read as a GZIP body");
                 }
                 return jsonParser.parseTree(writeBuffer.toByteArray());
