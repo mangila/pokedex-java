@@ -2,9 +2,9 @@ package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.func.TriFunction;
 import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
+import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,6 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -63,8 +62,15 @@ public class PokeApiClient {
                 log.debug("{}", http);
                 connection.getOutputStream().write(http.getBytes());
                 connection.getOutputStream().flush();
-                var response = readResponse()
-                        .apply(connection.getInputStream());
+                var inputStream = connection.getInputStream();
+                var httpStatus = readStatusLine(inputStream);
+                var headers = readHeaders(inputStream);
+                var body = readGzipJsonBody(inputStream, headers, jsonParser);
+                var response = JsonResponse.builder()
+                        .httpStatus(httpStatus)
+                        .headers(headers)
+                        .body(body)
+                        .build();
                 pool.returnConnection(connection);
                 cache.put(path, response);
                 return Optional.of(response);
@@ -76,108 +82,96 @@ public class PokeApiClient {
         };
     }
 
-    private Function<InputStream, JsonResponse> readResponse() {
-        return inputStream -> readStatusLine()
-                .andThen(builder -> readHeaders().apply(inputStream, builder))
-                .andThen(builder -> readGzipJsonBody().apply(inputStream, builder.headers(), builder))
-                .apply(inputStream, JsonResponse.builder())
-                .build();
+    private static HttpStatus readStatusLine(InputStream inputStream) {
+        try {
+            var buffer = new ByteArrayOutputStream();
+            int previous = -1;
+            while (true) {
+                int current = inputStream.read();
+                if (current == END_OF_STREAM) {
+                    throw new IOException("Stream ended unexpectedly");
+                }
+                buffer.write(current);
+                if (isCrLf(previous, current) && buffer.size() >= 8) {
+                    break;
+                }
+                previous = current;
+            }
+            var bufferString = buffer.toString(Charset.defaultCharset()).trim();
+            log.debug("Status line: {}", bufferString);
+            return HttpStatus.fromString(bufferString);
+        } catch (Exception e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
     }
 
-    private BiFunction<InputStream, JsonResponse.Builder, JsonResponse.Builder> readStatusLine() {
-        return (inputStream, builder) -> {
-            try {
-                var buffer = new ByteArrayOutputStream();
-                int previous = -1;
-                while (true) {
-                    int current = inputStream.read();
-                    if (current == END_OF_STREAM) {
-                        throw new IOException("Stream ended unexpectedly");
-                    }
-                    buffer.write(current);
-                    if (isCrLf(previous, current) && buffer.size() >= 8) {
+    private static Headers readHeaders(InputStream inputStream) {
+        try {
+            var buffer = new ByteArrayOutputStream(8 * 1024);
+            var headers = new Headers();
+            int previous = -1;
+            while (true) {
+                int current = inputStream.read();
+                if (current == END_OF_STREAM) {
+                    throw new IOException("Stream ended unexpectedly");
+                }
+                buffer.write(current);
+                if (isCrLf(previous, current)) {
+                    var header = buffer.toString(Charset.defaultCharset()).trim();
+                    if (header.isBlank()) {
                         break;
                     }
-                    previous = current;
+                    var parts = header.split(": ");
+                    if (parts.length == 2) {
+                        headers.put(parts[0], parts[1]);
+                    }
+                    buffer.reset();
                 }
-                var bufferString = buffer.toString(Charset.defaultCharset()).trim();
-                log.debug("Status line: {}", bufferString);
-                return builder.httpStatus(HttpStatus.fromString(bufferString));
-            } catch (Exception e) {
-                log.error("ERR", e);
-                throw new RuntimeException(e);
+                previous = current;
             }
-        };
+            return headers;
+        } catch (Exception e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
     }
 
-    private BiFunction<InputStream, JsonResponse.Builder, JsonResponse.Builder> readHeaders() {
-        return (inputStream, builder) -> {
-            try {
-                var buffer = new ByteArrayOutputStream(8 * 1024);
-                var headers = new Headers();
-                int previous = -1;
-                while (true) {
-                    int current = inputStream.read();
-                    if (current == END_OF_STREAM) {
-                        throw new IOException("Stream ended unexpectedly");
-                    }
-                    buffer.write(current);
-                    if (isCrLf(previous, current)) {
-                        var header = buffer.toString(Charset.defaultCharset()).trim();
-                        if (header.isBlank()) {
-                            break;
-                        }
-                        var parts = header.split(": ");
-                        if (parts.length == 2) {
-                            headers.put(parts[0], parts[1]);
-                        }
-                        buffer.reset();
-                    }
-                    previous = current;
-                }
-                return builder.headers(headers);
-            } catch (Exception e) {
-                log.error("ERR", e);
-                throw new RuntimeException(e);
-            }
-        };
-    }
-
-    private TriFunction<InputStream, Headers, JsonResponse.Builder, JsonResponse.Builder> readGzipJsonBody() {
-        return (inputStream, headers, builder) -> {
-            try {
-                if (headers.isGzip() && headers.isJson()) {
-                    var writeBuffer = new ByteArrayOutputStream(8 * 1024);
-                    var readBuffer = ByteBuffer.allocate(8 * 1024);
-                    var magicNumberReader = new MagicNumberReader(inputStream);
-                    inputStream = magicNumberReader.getInputStream();
-                    if (headers.isChunked()) {
-                        log.info(magicNumberReader.readFormat());
-                        // TODO read chunked gzip response body, some CDN/cache hits from the PokeAPI returns a chunked gzip response
-                        throw new UnsupportedOperationException("Not yet implemented");
-                    } else {
-                        var format = magicNumberReader.readFormat();
-                        if (format.equals(MagicNumberReader.GZIP)) {
-                            var gzip = new GZIPInputStream(inputStream);
-                            int byteCount;
-                            while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
-                                readBuffer.position(0);
-                                writeBuffer.write(readBuffer.array(), 0, byteCount);
-                                readBuffer.clear();
-                            }
-                            return builder.body(jsonParser.parseTree(writeBuffer.toByteArray()));
-                        } else {
-                            throw new IOException("Did not find gzip header: " + format);
-                        }
-                    }
+    private static JsonTree readGzipJsonBody(InputStream inputStream,
+                                             Headers headers,
+                                             JsonParser jsonParser) {
+        try {
+            if (headers.isGzip() && headers.isJson()) {
+                var writeBuffer = new ByteArrayOutputStream(8 * 1024);
+                var readBuffer = ByteBuffer.allocate(8 * 1024);
+                var magicNumberReader = new MagicNumberReader(inputStream);
+                inputStream = magicNumberReader.getInputStream();
+                if (headers.isChunked()) {
+                    log.info(magicNumberReader.readFormat());
+                    // TODO read chunked gzip response body, some CDN/cache hits from the PokeAPI returns a chunked gzip response
+                    throw new UnsupportedOperationException("Not yet implemented");
                 } else {
-                    throw new IOException("Only gzipped json content encoding is supported");
+                    var format = magicNumberReader.readFormat();
+                    if (format.equals(MagicNumberReader.GZIP)) {
+                        var gzip = new GZIPInputStream(inputStream);
+                        int byteCount;
+                        while ((byteCount = gzip.read(readBuffer.array())) != END_OF_STREAM) {
+                            readBuffer.position(0);
+                            writeBuffer.write(readBuffer.array(), 0, byteCount);
+                            readBuffer.clear();
+                        }
+                        return jsonParser.parseTree(writeBuffer.toByteArray());
+                    } else {
+                        throw new IOException("Did not find gzip header: " + format);
+                    }
                 }
-            } catch (Exception e) {
-                log.error("ERR", e);
-                throw new RuntimeException(e);
+            } else {
+                throw new IOException("Only gzipped json content encoding is supported");
             }
-        };
+        } catch (Exception e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
