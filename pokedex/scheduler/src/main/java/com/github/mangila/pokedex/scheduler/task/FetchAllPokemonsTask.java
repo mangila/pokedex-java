@@ -12,22 +12,19 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
 public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
                                    QueueService queueService) implements Callable<List<Boolean>> {
 
     private static final Logger log = LoggerFactory.getLogger(FetchAllPokemonsTask.class);
 
-
     @Override
     public List<Boolean> call() throws Exception {
         var request = new JsonRequest(
                 "GET",
-                "/api/v2/pokemon-species/?&limit=1025",
+                "/api/v2/pokemon-species/?&limit=10",
                 List.of());
         return pokeApiClient.getJson(request)
                 .map(PokeApiClientUtil::ensureSuccessStatusCode)
@@ -37,12 +34,10 @@ public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
                         .map(JsonValue::getObject)
                         .map(jsonObject -> jsonObject.getString("url"))
                         .map(PokeApiUri::fromString)
-                        .map(QueueEntry::new))
-                .map(Stream::toList)
-                .stream()
-                .flatMap(Collection::stream)
-                .peek(queueEntry -> log.debug("Push Queue entry {}", queueEntry.data()))
-                .map(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry))
+                        .map(QueueEntry::new)
+                        .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
+                        .map(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
+                .orElseThrow()
                 .toList();
     }
 }

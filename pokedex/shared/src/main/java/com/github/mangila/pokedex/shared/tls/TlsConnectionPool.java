@@ -34,7 +34,7 @@ public class TlsConnectionPool {
     }
 
     public TlsConnectionPool(String host, int port) {
-        this(new TlsConnectionPoolConfig(host, port, 5,
+        this(new TlsConnectionPoolConfig(host, port, 1,
                 new TlsConnectionPoolConfig.HealthCheckConfig(
                         0,
                         10,

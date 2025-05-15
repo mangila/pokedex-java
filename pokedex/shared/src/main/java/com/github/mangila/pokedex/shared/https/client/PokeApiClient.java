@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
 public class PokeApiClient {
@@ -39,9 +39,8 @@ public class PokeApiClient {
         this.jsonParser = new JsonParser();
     }
 
-    public Future<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {
-        return VirtualThreadConfig.newSingleThreadExecutor()
-                .submit(() -> this.getJson(jsonRequest));
+    public CompletableFuture<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {
+        return CompletableFuture.supplyAsync(() -> this.getJson(jsonRequest), VirtualThreadConfig.newSingleThreadExecutor());
     }
 
     public Optional<JsonResponse> getJson(JsonRequest jsonRequest) {
@@ -79,18 +78,18 @@ public class PokeApiClient {
         return Optional.empty();
     }
 
-
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
             var buffer = new ByteArrayOutputStream();
             int previous = -1;
             while (true) {
                 int current = inputStream.read();
+
                 if (current == END_OF_STREAM) {
                     throw new IOException("Stream ended unexpectedly");
                 }
                 buffer.write(current);
-                if (isCrLf(previous, current) && buffer.size() >= 8) {
+                if (isCrLf(previous, current)) {
                     break;
                 }
                 previous = current;
@@ -106,25 +105,24 @@ public class PokeApiClient {
 
     private static Headers readHeaders(InputStream inputStream) {
         try {
-            var buffer = new ByteArrayOutputStream(2 * 1024);
+            var lineBuffer = new ByteArrayOutputStream(1024);
             var headers = new Headers();
+            int current;
             int previous = -1;
             while (true) {
-                int current = inputStream.read();
+                current = inputStream.read();
                 if (current == END_OF_STREAM) {
                     throw new IOException("Stream ended unexpectedly");
                 }
-                buffer.write(current);
+                lineBuffer.write(current);
                 if (isCrLf(previous, current)) {
-                    var header = buffer.toString(Charset.defaultCharset()).trim();
+                    var header = lineBuffer.toString(Charset.defaultCharset()).trim();
                     if (header.isBlank()) {
                         break;
                     }
-                    var parts = header.split(": ");
-                    if (parts.length == 2) {
-                        headers.put(parts[0], parts[1]);
-                    }
-                    buffer.reset();
+                    var parts = header.split(": ", 2);
+                    headers.put(parts[0], parts[1]);
+                    lineBuffer.reset();
                 }
                 previous = current;
             }
@@ -140,45 +138,16 @@ public class PokeApiClient {
                                              JsonParser jsonParser) {
         try {
             if (headers.isGzip() && headers.isJson()) {
-                var writeBuffer = new ByteArrayOutputStream(2 * 1024);
-                var readBuffer = new byte[2 * 1024];
                 if (headers.isChunked()) {
                     log.debug("Chunked GZIP encoding detected");
-                    var buffer = new ByteArrayOutputStream(2 * 1024);
-                    int previous = -1;
-                    while (true) {
-                        int current = inputStream.read();
-                        if (current == END_OF_STREAM) {
-                            break;
-                        }
-                        buffer.write(current);
-                        if (isCrLf(previous, current)) {
-                            var chunkLine = buffer.toString(StandardCharsets.US_ASCII).trim();
-                            if (chunkLine.equals("0") || chunkLine.isBlank()) {
-                                buffer.reset();
-                            } else if (chunkLine.matches("[0-9a-fA-F]+")) {
-                                int chunkSize = Integer.parseInt(chunkLine, 16);
-                                writeBuffer.write(inputStream.readNBytes(chunkSize));
-                                buffer.reset();
-                            }
-                        }
-                        previous = current;
-                    }
+                    byte[] allChunks = readChunkedGzipJsonBody(inputStream);
+                    var decompressed = new GZIPInputStream(new ByteArrayInputStream(allChunks))
+                            .readAllBytes();
+                    return jsonParser.parseTree(decompressed);
                 }
-                GZIPInputStream gzip;
-                if (writeBuffer.size() == 0) {
-                    gzip = new GZIPInputStream(inputStream);
-                } else {
-                    var allChunks = new ByteArrayInputStream(writeBuffer.toByteArray());
-                    writeBuffer.reset();
-                    gzip = new GZIPInputStream(allChunks);
-                }
-                int byteCount;
-                while ((byteCount = gzip.read(readBuffer)) != END_OF_STREAM) {
-                    writeBuffer.write(readBuffer, 0, byteCount);
-                }
-
-                return jsonParser.parseTree(writeBuffer.toByteArray());
+                var decompressed = new GZIPInputStream(inputStream)
+                        .readAllBytes();
+                return jsonParser.parseTree(decompressed);
             } else {
                 throw new IOException("Only gzipped json content encoding is supported");
             }
@@ -186,6 +155,36 @@ public class PokeApiClient {
             log.error("ERR", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static byte[] readChunkedGzipJsonBody(InputStream inputStream) throws IOException {
+        var chunkLineBuffer = new ByteArrayOutputStream();
+        var chunkBuffer = new ByteArrayOutputStream(1024);
+        int previous = -1;
+        while (true) {
+            int current = inputStream.read();
+            if (current == END_OF_STREAM) {
+                break;
+            }
+            chunkLineBuffer.write(current);
+            if (isCrLf(previous, current)) {
+                var chunkLine = chunkLineBuffer.toString(StandardCharsets.US_ASCII).trim();
+                if (chunkLine.equals("0")) {
+                    inputStream.skipNBytes(chunkLineBuffer.size());
+                    chunkLineBuffer.reset();
+                } else if (chunkLine.isBlank()) {
+                    inputStream.skipNBytes(inputStream.available());
+                    break;
+                } else if (chunkLine.matches("^[0-9a-fA-F]+$")) {
+                    int chunkSize = Integer.parseInt(chunkLine, 16);
+                    chunkBuffer.write(inputStream.readNBytes(chunkSize));
+                    chunkLineBuffer.reset();
+                }
+            }
+            previous = current;
+        }
+
+        return chunkBuffer.toByteArray();
     }
 
     /**

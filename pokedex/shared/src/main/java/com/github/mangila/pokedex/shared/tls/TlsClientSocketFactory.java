@@ -28,7 +28,7 @@ public class TlsClientSocketFactory {
         ...
         *** Finished handshake
          */
-     //   System.setProperty("javax.net.debug", "all");
+        //   System.setProperty("javax.net.debug", "all");
         try {
             CONTEXT = SSLContext.getInstance("TLS");
             // Default Java Keystore with some well-known certificates
@@ -43,7 +43,7 @@ public class TlsClientSocketFactory {
                 new TlsSocketConfig(
                         new TlsSocketConfig.KeepAlive(Boolean.TRUE),
                         new TlsSocketConfig.BufferSize(1024 * 8, 1024 * 8),
-                        new TlsSocketConfig.SoTimeout(Duration.ofSeconds(5)),
+                        new TlsSocketConfig.SoTimeout(Duration.ofSeconds(30)),
                         new TlsSocketConfig.SoLinger(Boolean.TRUE, 1),
                         new TlsSocketConfig.TcpNoDelay(Boolean.TRUE)
                 ),
@@ -60,7 +60,7 @@ public class TlsClientSocketFactory {
             socket.setKeepAlive(tlsSocketConfig.keepAlive().active());
             socket.setSendBufferSize(tlsSocketConfig.bufferSize().send());
             socket.setReceiveBufferSize(tlsSocketConfig.bufferSize().receive());
-            socket.setSoTimeout(tlsSocketConfig.soTimeout().duration().toMillisPart());
+            socket.setSoTimeout((int) tlsSocketConfig.soTimeout().duration().toMillis());
             socket.setSoLinger(tlsSocketConfig.soLinger().active(), tlsSocketConfig.soLinger().seconds());
             socket.setTcpNoDelay(tlsSocketConfig.tcpNoDelay().active());
             SSLParameters params = socket.getSSLParameters();

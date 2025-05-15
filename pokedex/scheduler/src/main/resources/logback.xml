@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.github.mangila.pokedex" level="INFO"/>
+    <logger name="com.github.mangila.pokedex" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
