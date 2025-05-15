@@ -180,8 +180,8 @@ public class PokeApiClient {
                 } else if (HEX_DECIMAL.matcher(chunkLine).matches()) {
                     int chunkSize = Integer.parseInt(chunkLine, 16);
                     chunkBuffer.write(inputStream.readNBytes(chunkSize));
-                    chunkLineBuffer.reset();
                 }
+                chunkLineBuffer.reset();
             }
             previous = current;
         }

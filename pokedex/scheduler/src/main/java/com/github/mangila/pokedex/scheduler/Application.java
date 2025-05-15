@@ -30,7 +30,7 @@ public class Application {
                 new TlsConnectionPoolConfig(
                         pokeApiHost.host(),
                         pokeApiHost.port(),
-                        2,
+                        5,
                         new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
                 ));
         var mediaClient = new PokeApiMediaClient();
