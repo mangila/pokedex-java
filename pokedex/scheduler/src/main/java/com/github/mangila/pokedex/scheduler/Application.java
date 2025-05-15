@@ -33,7 +33,9 @@ public class Application {
                 5,
                 TimeUnit.MINUTES
         ));
-        scheduler.fetchAllPokemonsTask(VirtualThreadConfig.newSingleThreadExecutor());
+        scheduler.fetchNPokemons(
+                VirtualThreadConfig.newSingleThreadExecutor(),
+                10);
         scheduler.mediaTask(TaskConfig.defaultConfig());
         scheduler.pokemonTask(TaskConfig.defaultConfig());
         IS_RUNNING.set(Boolean.TRUE);

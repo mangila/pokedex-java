@@ -15,16 +15,18 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
-                                   QueueService queueService) implements Callable<List<Boolean>> {
+public record FetchNPokemons(PokeApiClient pokeApiClient,
+                             QueueService queueService,
+                             int count) implements Callable<List<Boolean>> {
 
-    private static final Logger log = LoggerFactory.getLogger(FetchAllPokemonsTask.class);
+    private static final Logger log = LoggerFactory.getLogger(FetchNPokemons.class);
 
     @Override
     public List<Boolean> call() throws Exception {
+
         var request = new JsonRequest(
                 "GET",
-                "/api/v2/pokemon-species/?&limit=10",
+                String.format("/api/v2/pokemon-species/?&limit=%d", count),
                 List.of());
         return pokeApiClient.getJson(request)
                 .map(PokeApiClientUtil::ensureSuccessStatusCode)
