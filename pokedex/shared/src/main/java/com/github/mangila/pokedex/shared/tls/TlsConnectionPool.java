@@ -33,15 +33,6 @@ public class TlsConnectionPool {
         this.connectionCounter = 0;
     }
 
-    public TlsConnectionPool(String host, int port) {
-        this(new TlsConnectionPoolConfig(host, port, 1,
-                new TlsConnectionPoolConfig.HealthCheckConfig(
-                        0,
-                        10,
-                        TimeUnit.SECONDS
-                )));
-    }
-
     public void init() {
         log.debug("Initializing connections to the connection pool");
         var maxConnections = config.maxConnections();

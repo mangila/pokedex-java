@@ -23,7 +23,6 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
 
     @Override
     public List<Boolean> call() throws Exception {
-
         var request = new JsonRequest(
                 "GET",
                 String.format("/api/v2/pokemon-species/?&limit=%d", pokemonCount),
@@ -38,7 +37,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                         .map(PokeApiUri::fromString)
                         .map(QueueEntry::new)
                         .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
-                        .map(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
+                        .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
                 .orElseThrow()
                 .toList();
     }

@@ -3,7 +3,10 @@ package com.github.mangila.pokedex.shared.tls.config;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public record TlsConnectionPoolConfig(String host, int port, int maxConnections, HealthCheckConfig healthCheckConfig) {
+public record TlsConnectionPoolConfig(String host,
+                                      int port,
+                                      int maxConnections,
+                                      HealthCheckConfig healthCheckConfig) {
 
     public record HealthCheckConfig(int initialDelay, int delay, TimeUnit timeUnit) {
 

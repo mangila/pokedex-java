@@ -1,11 +1,13 @@
 package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
+import com.github.mangila.pokedex.shared.cache.ResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
+import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,23 +20,26 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 public class PokeApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(PokeApiClient.class);
     private static final int END_OF_STREAM = -1;
+    private static final Pattern HEX_DECIMAL = Pattern.compile("^[0-9a-fA-F]+$");
 
     private final PokeApiHost host;
     private final TlsConnectionPool pool;
     private final ResponseTtlCache cache;
     private final JsonParser jsonParser;
 
-    public PokeApiClient(PokeApiHost host) {
+    public PokeApiClient(PokeApiHost host,
+                         TlsConnectionPoolConfig tlsConnectionPoolConfig) {
         this.host = host;
-        this.pool = new TlsConnectionPool(host.hostName(), host.port());
+        this.pool = new TlsConnectionPool(tlsConnectionPoolConfig);
         pool.init();
-        this.cache = new ResponseTtlCache();
+        this.cache = new ResponseTtlCache(ResponseTtlCacheConfig.fromDefaultConfig());
         cache.startEvictionThread();
         this.jsonParser = new JsonParser();
     }
@@ -55,7 +60,7 @@ public class PokeApiClient {
                 return Optional.empty();
             }
             var connection = tlsConnectionOptional.get();
-            var http = jsonRequest.toHttp(host.hostName(), "HTTP/1.1");
+            var http = jsonRequest.toHttp(host.host(), "HTTP/1.1");
             log.debug("{}", http);
             connection.getOutputStream().write(http.getBytes());
             connection.getOutputStream().flush();
@@ -169,10 +174,10 @@ public class PokeApiClient {
             chunkLineBuffer.write(current);
             if (isCrLf(previous, current)) {
                 var chunkLine = chunkLineBuffer.toString(StandardCharsets.US_ASCII).trim();
-                if (chunkLine.equals("0") || chunkLine.isBlank()) {
+                if (chunkLine.equals("0")) {
                     inputStream.skipNBytes(inputStream.available());
                     break;
-                } else if (chunkLine.matches("^[0-9a-fA-F]+$")) {
+                } else if (HEX_DECIMAL.matcher(chunkLine).matches()) {
                     int chunkSize = Integer.parseInt(chunkLine, 16);
                     chunkBuffer.write(inputStream.readNBytes(chunkSize));
                     chunkLineBuffer.reset();

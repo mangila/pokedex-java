@@ -2,8 +2,10 @@ package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
 import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
+import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +23,20 @@ public class Application {
 
     public static void main(String[] args) {
         var queueService = new QueueService();
-        queueService.createNewSetQueue(POKEMON_SPECIES_URL_QUEUE, 1024);
-        queueService.createNewSetQueue(MEDIA_URL_QUEUE, 1024);
-        var pokeApiClient = new PokeApiClient(PokeApiHost.fromDefault());
+        queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
+        queueService.createNewQueue(MEDIA_URL_QUEUE);
+        var pokeApiHost = PokeApiHost.fromDefault();
+        var pokeApiClient = new PokeApiClient(PokeApiHost.fromDefault(),
+                new TlsConnectionPoolConfig(
+                        pokeApiHost.host(),
+                        pokeApiHost.port(),
+                        2,
+                        new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
+                ));
+        var mediaClient = new PokeApiMediaClient();
         var scheduler = new Scheduler(
                 pokeApiClient,
+                mediaClient,
                 queueService);
         scheduler.finishedProcessingTask(TaskConfig.TriggerConfig.from(
                 VirtualThreadConfig.newSingleThreadScheduledExecutor(),
@@ -33,11 +44,28 @@ public class Application {
                 5,
                 TimeUnit.MINUTES
         ));
+        var pokemonCount = 1025;
         scheduler.queuePokemons(
                 VirtualThreadConfig.newSingleThreadExecutor(),
-                10);
-        scheduler.mediaTask(TaskConfig.defaultConfig());
-        scheduler.pokemonTask(TaskConfig.defaultConfig());
+                pokemonCount);
+        scheduler.insertMedia(TaskConfig.from(
+                TaskConfig.TriggerConfig.from(
+                        VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                        1,
+                        100,
+                        TimeUnit.MILLISECONDS
+                ),
+                TaskConfig.WorkerConfig.from(10)
+        ));
+        scheduler.insertPokemons(TaskConfig.from(
+                TaskConfig.TriggerConfig.from(
+                        VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                        1,
+                        100,
+                        TimeUnit.MILLISECONDS
+                ),
+                TaskConfig.WorkerConfig.from(10)
+        ));
         IS_RUNNING.set(Boolean.TRUE);
         while (IS_RUNNING.get()) {
         }

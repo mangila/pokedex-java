@@ -1,15 +1,15 @@
 package com.github.mangila.pokedex.scheduler;
 
+import com.github.mangila.pokedex.scheduler.task.InsertMediaTask;
+import com.github.mangila.pokedex.scheduler.task.InsertPokemonTask;
 import com.github.mangila.pokedex.scheduler.task.QueuePokemonsTask;
-import com.github.mangila.pokedex.scheduler.task.MediaTask;
-import com.github.mangila.pokedex.scheduler.task.PokemonTask;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
@@ -18,11 +18,14 @@ public class Scheduler {
     private static final Logger log = LoggerFactory.getLogger(Scheduler.class);
 
     private final PokeApiClient pokeApiClient;
+    private final PokeApiMediaClient mediaClient;
     private final QueueService queueService;
 
     public Scheduler(PokeApiClient pokeApiClient,
+                     PokeApiMediaClient mediaClient,
                      QueueService queueService) {
         this.pokeApiClient = pokeApiClient;
+        this.mediaClient = mediaClient;
         this.queueService = queueService;
     }
 
@@ -61,15 +64,15 @@ public class Scheduler {
         }, config.initialDelay(), config.delay(), config.timeUnit());
     }
 
-    public void mediaTask(TaskConfig config) {
+    public void insertMedia(TaskConfig config) {
         log.info("Scheduling media task");
-        var task = new MediaTask(pokeApiClient, queueService);
+        var task = new InsertMediaTask(pokeApiClient, queueService);
         scheduleTask(config, () -> task);
     }
 
-    public void pokemonTask(TaskConfig config) {
+    public void insertPokemons(TaskConfig config) {
         log.info("Scheduling pokemon task");
-        var task = new PokemonTask(pokeApiClient, queueService);
+        var task = new InsertPokemonTask(pokeApiClient, queueService);
         scheduleTask(config, () -> task);
     }
 

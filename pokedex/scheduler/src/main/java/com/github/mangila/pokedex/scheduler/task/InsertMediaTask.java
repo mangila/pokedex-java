@@ -5,12 +5,12 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public record MediaTask(
+public record InsertMediaTask(
         PokeApiClient pokeApiClient,
         QueueService queueService
 ) implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(MediaTask.class);
+    private static final Logger log = LoggerFactory.getLogger(InsertMediaTask.class);
 
     @Override
     public void run() {

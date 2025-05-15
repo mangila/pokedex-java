@@ -25,15 +25,6 @@ public class ResponseTtlCache {
         this.config = config;
     }
 
-    public ResponseTtlCache() {
-        this(new ResponseTtlCacheConfig(
-                Duration.ofMinutes(5),
-                10,
-                30,
-                TimeUnit.SECONDS
-        ));
-    }
-
     private record TtlCacheEntry(JsonResponse value,
                                  Instant timestamp) {
         TtlCacheEntry {
