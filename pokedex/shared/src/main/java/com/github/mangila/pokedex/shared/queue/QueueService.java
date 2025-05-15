@@ -25,13 +25,10 @@ public class QueueService {
     public Optional<QueueEntry> poll(String queueName) {
         var queue = QUEUES.get(queueName);
         if (queue == null) {
+            log.warn("Queue - {} not found", queueName);
             return Optional.empty();
         }
-        try {
-            return Optional.ofNullable(queue.poll());
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(queue.poll());
     }
 
     public boolean isEmpty(String name) {
