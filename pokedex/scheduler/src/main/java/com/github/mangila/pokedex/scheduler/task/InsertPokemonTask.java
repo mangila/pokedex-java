@@ -23,13 +23,13 @@ public record PokemonTask(PokeApiClient pokeApiClient,
 
     @Override
     public void run() {
-        var poll = queueService.poll(Application.POKEMON_SPECIES_URL_QUEUE);
+        var poll = queueService.pollArrayQueue(Application.POKEMON_SPECIES_URL_QUEUE);
         if (poll.isEmpty()) {
-            log.debug("Queue is empty");
+            log.info("Queue is empty");
             return;
         }
         var url = (PokeApiUri) poll.get().data();
-        log.debug("Queue entry {}", url);
+        log.info("Queue entry {}", url);
         try {
 
             var pokemonSpecies = pokeApiClient.getJson(new JsonRequest("GET", url.getPath(), List.of()))
@@ -44,7 +44,7 @@ public record PokemonTask(PokeApiClient pokeApiClient,
                     .map(jsonObject -> jsonObject.getObject("pokemon"))
                     .map(jsonObject -> jsonObject.getString("url"))
                     .map(PokeApiUri::fromString)
-                    .peek(pokeApiUri -> log.info("Queue entry {}", pokeApiUri.getPath()))
+                  //  .peek(pokeApiUri -> log.info("Queue entry {}", pokeApiUri.getPath()))
                     .map(pokeApiUri -> pokeApiClient.getJsonAsync(new JsonRequest("GET", pokeApiUri.getPath(), List.of())))
                     .toList();
 
@@ -74,7 +74,7 @@ public record PokemonTask(PokeApiClient pokeApiClient,
 
         } catch (Exception e) {
             log.error("Error fetching pokemon species", e);
-            queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, poll.get());
+            queueService.pushArrayQueue(Application.POKEMON_SPECIES_URL_QUEUE, poll.get());
         }
     }
 
