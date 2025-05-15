@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler;
 
-import com.github.mangila.pokedex.scheduler.task.FetchNPokemons;
+import com.github.mangila.pokedex.scheduler.task.QueuePokemonsTask;
 import com.github.mangila.pokedex.scheduler.task.MediaTask;
 import com.github.mangila.pokedex.scheduler.task.PokemonTask;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
@@ -9,6 +9,7 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
@@ -25,13 +26,13 @@ public class Scheduler {
         this.queueService = queueService;
     }
 
-    public void fetchNPokemons(ExecutorService executor, int count) {
+    public void queuePokemons(ExecutorService executor, int pokemonCount) {
         try {
             log.info("Scheduling fetch all pokemons task");
-            var task = new FetchNPokemons(
+            var task = new QueuePokemonsTask(
                     pokeApiClient,
                     queueService,
-                    count);
+                    pokemonCount);
             var future = executor.submit(task);
             var summary = future.get();
             int duplicate = 0;

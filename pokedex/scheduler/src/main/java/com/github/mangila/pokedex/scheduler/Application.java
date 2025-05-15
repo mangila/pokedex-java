@@ -33,7 +33,7 @@ public class Application {
                 5,
                 TimeUnit.MINUTES
         ));
-        scheduler.fetchNPokemons(
+        scheduler.queuePokemons(
                 VirtualThreadConfig.newSingleThreadExecutor(),
                 10);
         scheduler.mediaTask(TaskConfig.defaultConfig());

@@ -80,7 +80,7 @@ public class PokeApiClient {
 
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
-            var buffer = new ByteArrayOutputStream();
+            var lineBuffer = new ByteArrayOutputStream();
             int previous = -1;
             while (true) {
                 int current = inputStream.read();
@@ -88,13 +88,13 @@ public class PokeApiClient {
                 if (current == END_OF_STREAM) {
                     throw new IOException("Stream ended unexpectedly");
                 }
-                buffer.write(current);
-                if (isCrLf(previous, current)) {
+                lineBuffer.write(current);
+                if (isCrLf(previous, current) && lineBuffer.size() > 8) {
                     break;
                 }
                 previous = current;
             }
-            var bufferString = buffer.toString(Charset.defaultCharset()).trim();
+            var bufferString = lineBuffer.toString(Charset.defaultCharset()).trim();
             log.debug("Status line: {}", bufferString);
             return HttpStatus.fromString(bufferString);
         } catch (Exception e) {
@@ -169,10 +169,7 @@ public class PokeApiClient {
             chunkLineBuffer.write(current);
             if (isCrLf(previous, current)) {
                 var chunkLine = chunkLineBuffer.toString(StandardCharsets.US_ASCII).trim();
-                if (chunkLine.equals("0")) {
-                    inputStream.skipNBytes(chunkLineBuffer.size());
-                    chunkLineBuffer.reset();
-                } else if (chunkLine.isBlank()) {
+                if (chunkLine.equals("0") || chunkLine.isBlank()) {
                     inputStream.skipNBytes(inputStream.available());
                     break;
                 } else if (chunkLine.matches("^[0-9a-fA-F]+$")) {
