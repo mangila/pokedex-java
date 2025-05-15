@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 public class PokeApiClient {
@@ -40,48 +39,46 @@ public class PokeApiClient {
         this.jsonParser = new JsonParser();
     }
 
-    public Function<JsonRequest, Future<Optional<JsonResponse>>> getJsonAsync() {
-        return jsonRequest -> VirtualThreadConfig.newSingleThreadExecutor()
-                .submit(() -> this.getJson()
-                        .apply(jsonRequest));
+    public Future<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {
+        return VirtualThreadConfig.newSingleThreadExecutor()
+                .submit(() -> this.getJson(jsonRequest));
     }
 
-    public Function<JsonRequest, Optional<JsonResponse>> getJson() {
-        return jsonRequest -> {
-            try {
-                var path = jsonRequest.path();
-                if (cache.hasKey(path)) {
-                    return Optional.of(cache.get(path));
-                }
-                var tlsConnectionOptional = pool.borrow(Duration.ofSeconds(30));
-                if (tlsConnectionOptional.isEmpty()) {
-                    log.warn("Connection pool borrow failed");
-                    return Optional.empty();
-                }
-                var connection = tlsConnectionOptional.get();
-                var http = jsonRequest.toHttp(host.hostName(), "HTTP/1.1");
-                log.debug("{}", http);
-                connection.getOutputStream().write(http.getBytes());
-                connection.getOutputStream().flush();
-                var inputStream = connection.getInputStream();
-                var httpStatus = readStatusLine(inputStream);
-                var headers = readHeaders(inputStream);
-                var body = readGzipJsonBody(inputStream, headers, jsonParser);
-                var response = JsonResponse.builder()
-                        .httpStatus(httpStatus)
-                        .headers(headers)
-                        .body(body)
-                        .build();
-                pool.returnConnection(connection);
-                cache.put(path, response);
-                return Optional.of(response);
-            } catch (Exception e) {
-                log.error("ERR", e);
-                pool.addNewConnection();
+    public Optional<JsonResponse> getJson(JsonRequest jsonRequest) {
+        try {
+            var path = jsonRequest.path();
+            if (cache.hasKey(path)) {
+                return Optional.of(cache.get(path));
             }
-            return Optional.empty();
-        };
+            var tlsConnectionOptional = pool.borrow(Duration.ofSeconds(30));
+            if (tlsConnectionOptional.isEmpty()) {
+                log.warn("Connection pool borrow failed");
+                return Optional.empty();
+            }
+            var connection = tlsConnectionOptional.get();
+            var http = jsonRequest.toHttp(host.hostName(), "HTTP/1.1");
+            log.debug("{}", http);
+            connection.getOutputStream().write(http.getBytes());
+            connection.getOutputStream().flush();
+            var inputStream = connection.getInputStream();
+            var httpStatus = readStatusLine(inputStream);
+            var headers = readHeaders(inputStream);
+            var body = readGzipJsonBody(inputStream, headers, jsonParser);
+            var response = JsonResponse.builder()
+                    .httpStatus(httpStatus)
+                    .headers(headers)
+                    .body(body)
+                    .build();
+            pool.returnConnection(connection);
+            cache.put(path, response);
+            return Optional.of(response);
+        } catch (Exception e) {
+            log.error("ERR", e);
+            pool.addNewConnection();
+        }
+        return Optional.empty();
     }
+
 
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {

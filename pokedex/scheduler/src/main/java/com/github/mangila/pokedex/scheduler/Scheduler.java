@@ -30,7 +30,17 @@ public class Scheduler {
             log.info("Scheduling fetch all pokemons task");
             var task = new FetchAllPokemonsTask(pokeApiClient, queueService);
             var future = executor.submit(task);
-            future.get();
+            var summary = future.get();
+            int duplicate = 0;
+            int unique = 0;
+            for (var result : summary) {
+                if (result) {
+                    unique++;
+                } else {
+                    duplicate++;
+                }
+            }
+            log.info("Summary: unique: {}, duplicates: {}", unique, duplicate);
         } catch (Exception e) {
             log.error("Error fetching all pokemons", e);
         }
@@ -55,7 +65,7 @@ public class Scheduler {
 
     public void pokemonTask(TaskConfig config) {
         log.info("Scheduling pokemon task");
-        var task = new PokemonTask(pokeApiClient,queueService);
+        var task = new PokemonTask(pokeApiClient, queueService);
         scheduleTask(config, () -> task);
     }
 

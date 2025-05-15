@@ -12,32 +12,37 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 public record FetchAllPokemonsTask(PokeApiClient pokeApiClient,
-                                   QueueService queueService) implements Runnable {
+                                   QueueService queueService) implements Callable<List<Boolean>> {
 
     private static final Logger log = LoggerFactory.getLogger(FetchAllPokemonsTask.class);
 
+
     @Override
-    public void run() {
+    public List<Boolean> call() throws Exception {
         var request = new JsonRequest(
                 "GET",
                 "/api/v2/pokemon-species/?&limit=1025",
                 List.of());
-        pokeApiClient.getJson()
-                .andThen(Optional::orElseThrow)
-                .andThen(PokeApiClientUtil::ensureSuccessStatusCode)
-                .andThen(JsonResponse::getBody)
-                .andThen(jsonTree -> jsonTree.getArray("results"))
-                .andThen(array -> array.values().stream()
+        return pokeApiClient.getJson(request)
+                .map(PokeApiClientUtil::ensureSuccessStatusCode)
+                .map(JsonResponse::getBody)
+                .map(jsonTree -> jsonTree.getArray("results"))
+                .map(array -> array.values().stream()
                         .map(JsonValue::getObject)
                         .map(jsonObject -> jsonObject.getString("url"))
                         .map(PokeApiUri::fromString)
                         .map(QueueEntry::new))
-                .apply(request)
-                .peek(queueEntry -> log.debug(queueEntry.data().toString()))
-                .forEach(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry));
+                .map(Stream::toList)
+                .stream()
+                .flatMap(Collection::stream)
+                .peek(queueEntry -> log.debug("Push Queue entry {}", queueEntry.data()))
+                .map(queueEntry -> queueService.push(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry))
+                .toList();
     }
 }
