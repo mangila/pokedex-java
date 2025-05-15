@@ -10,6 +10,11 @@ public record QueueEntry(Object data) {
         Objects.requireNonNull(data);
     }
 
+    /**
+     * <summary>
+     * Convenient method cast data as the PokeApiUri type
+     * </summary>
+     */
     public PokeApiUri getDataAsPokeApiUri() {
         return (PokeApiUri) data;
     }
