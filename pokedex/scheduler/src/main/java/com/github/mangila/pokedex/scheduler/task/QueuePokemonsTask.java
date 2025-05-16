@@ -29,7 +29,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                 List.of());
         return pokeApiClient.getJson(request)
                 .map(PokeApiClientUtil::ensureSuccessStatusCode)
-                .map(JsonResponse::getBody)
+                .map(JsonResponse::body)
                 .map(jsonTree -> jsonTree.getArray("results"))
                 .map(array -> array.values().stream()
                         .map(JsonValue::getObject)

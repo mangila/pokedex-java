@@ -74,11 +74,7 @@ public class PokeApiClient {
             var httpStatus = readStatusLine(inputStream);
             var headers = readHeaders(inputStream);
             var body = readGzipJsonBody(inputStream, headers);
-            var response = JsonResponse.builder()
-                    .httpStatus(httpStatus)
-                    .headers(headers)
-                    .body(body)
-                    .build();
+            var response = new JsonResponse(httpStatus, headers, body);
             pool.returnConnection(connection);
             cache.put(path, response);
             return Optional.of(response);

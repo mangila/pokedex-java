@@ -32,7 +32,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
         try {
             var pokemonSpecies = pokeApiClient.getJson(new JsonRequest("GET", url.getPath(), List.of()))
                     .map(PokeApiClientUtil::ensureSuccessStatusCode)
-                    .map(JsonResponse::getBody)
+                    .map(JsonResponse::body)
                     .orElseThrow();
 
             var varieties = pokemonSpecies.getArray("varieties")

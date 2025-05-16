@@ -54,4 +54,5 @@ principles.
 
 ## Design Patterns (WIP)
 
+- Singleton
 - Factory

@@ -9,7 +9,7 @@ public final class PokeApiClientUtil {
     }
 
     public static JsonResponse ensureSuccessStatusCode(JsonResponse jsonResponse) {
-        if (jsonResponse.getHttpStatus().code().startsWith("2")) {
+        if (jsonResponse.httpStatus().code().startsWith("2")) {
             return jsonResponse;
         } else {
             throw new IllegalStateException("Failed to fetch pokemons");
