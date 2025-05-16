@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.time.Instant;
 
 public class TlsConnection {
 
@@ -21,6 +22,10 @@ public class TlsConnection {
         this.host = host;
         this.port = port;
         this.socket = TlsClientSocketFactory.create();
+    }
+
+    public PooledTlsConnection toPooledTlsConnection(int id) {
+        return new PooledTlsConnection(id, this, Instant.now());
     }
 
     public boolean isConnected() {

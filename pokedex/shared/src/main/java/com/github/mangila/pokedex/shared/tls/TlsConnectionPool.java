@@ -6,19 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TlsConnectionPool {
 
     private static final Logger log = LoggerFactory.getLogger(TlsConnectionPool.class);
 
-    private final BlockingQueue<PooledTlsConnection> pool;
+    private final BoundedTlsConnectionQueue queue;
     private final ScheduledExecutorService healthProbe;
     private final AtomicBoolean connected;
     private final TlsConnectionPoolConfig config;
@@ -28,7 +24,7 @@ public class TlsConnectionPool {
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.config = config;
         this.connected = new AtomicBoolean(Boolean.FALSE);
-        this.pool = new ArrayBlockingQueue<>(config.maxConnections());
+        this.queue = new BoundedTlsConnectionQueue(config.maxConnections());
         this.healthProbe = VirtualThreadConfig.newSingleThreadScheduledExecutor();
         this.connectionCounter = 0;
     }
@@ -50,7 +46,7 @@ public class TlsConnectionPool {
     public Optional<PooledTlsConnection> borrow(Duration timeout) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Getting connection from pool");
-        var connection = pool.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        var connection = queue.poll(timeout);
         if (connection == null) {
             log.debug("No connection available");
             return Optional.empty();
@@ -64,7 +60,7 @@ public class TlsConnectionPool {
 
     public PooledTlsConnection borrow() throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        var connection = pool.take();
+        var connection = queue.take();
         if (!connection.isConnected()) {
             connection.reconnect();
         }
@@ -72,10 +68,10 @@ public class TlsConnectionPool {
         return connection;
     }
 
-    public void returnConnection(PooledTlsConnection connection) throws IllegalStateException {
+    public void returnConnection(PooledTlsConnection connection) throws IllegalStateException, InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Returning connection to pool - {}", connection.id());
-        pool.add(connection);
+        queue.add(connection);
     }
 
     public boolean isConnected() {
@@ -83,29 +79,34 @@ public class TlsConnectionPool {
     }
 
     public int poolSize() {
-        return pool.size();
+        return queue.size();
     }
 
     public void shutdownConnectionPool() {
         log.debug("Shutting down connection pool");
         healthProbe.shutdown();
-        pool.forEach(PooledTlsConnection::disconnect);
-        pool.clear();
+        queue.clear();
         connected.set(Boolean.FALSE);
     }
 
     public void addNewConnection() {
         this.connectionCounter = connectionCounter + 1;
-        var connection = createNewConnection(connectionCounter);
-        pool.add(connection);
-        log.debug("Created new connection {} - {}", connectionCounter, connection.created());
+        boolean ok = createNewConnection(connectionCounter);
+        if (!ok) {
+            log.error("Could not create new connection");
+        }
     }
 
-    private PooledTlsConnection createNewConnection(int id) {
+    private boolean createNewConnection(int id) {
         try {
             var connection = new TlsConnection(config.host(), config.port());
             connection.connect();
-            return new PooledTlsConnection(id, connection, Instant.now());
+            var pooledTlsConnection = connection.toPooledTlsConnection(id);
+            log.debug("Created new connection {} - {}", connectionCounter, pooledTlsConnection.created());
+            return queue.add(pooledTlsConnection);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
         } catch (Exception e) {
             log.error("ERR", e);
             throw e;
@@ -123,11 +124,12 @@ public class TlsConnectionPool {
      * if unhealthy
      */
     private void healthProbe() {
-        if (pool.isEmpty()) {
+        log.info("Health probe started");
+        if (queue.isEmpty()) {
             log.debug("Pool is empty, no connections to check");
             return;
         }
-        for (var connection : pool) {
+        for (var connection : queue) {
             if (!connection.isConnected()) {
                 log.debug("Connection {} is not connected, trying to reconnect", connection.id());
                 connection.reconnect();
