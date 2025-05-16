@@ -11,6 +11,7 @@ class JsonParserTest {
 
     @Test
     void shouldParseJson() {
+        var jsonParser = JsonParser.getInstance();
         String json = """
                 {
                 "escape-quotation-mark": "escape-\\"message\\"",
@@ -66,7 +67,10 @@ class JsonParserTest {
                 "null-value": null
                 }
                 """;
-        assertThatThrownBy(() -> JsonParser.getInstance().parseTree(json))
+        assertThatThrownBy(() -> {
+            jsonParser.setMaxDepth(10);
+            jsonParser.parseTree(json);
+        })
                 .isInstanceOf(InvalidJsonException.class);
     }
 

@@ -28,10 +28,10 @@ public class JsonParser {
         return INSTANCE;
     }
 
-    private final int maxDepth;
+    private int maxDepth;
 
     private JsonParser(int maxDepth) {
-        log.info("Create new json parser with max depth {}", maxDepth);
+        log.info("Create new json parser with default max depth {}", maxDepth);
         this.maxDepth = maxDepth;
     }
 
@@ -43,6 +43,14 @@ public class JsonParser {
     public JsonTree parseTree(String data) {
         var tokens = JsonTokenizer.tokenizeFrom(data);
         return parseTree(tokens);
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
     }
 
     private JsonTree parseTree(JsonTokenQueue queue) {
