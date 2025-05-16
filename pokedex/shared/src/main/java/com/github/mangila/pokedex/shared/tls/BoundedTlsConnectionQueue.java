@@ -99,7 +99,7 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
 
         public void drainPermits() {
             semaphore.drainPermits();
-            available.set(capacity);
+            available.set(0);
         }
     }
 }
