@@ -34,7 +34,13 @@ public class TlsConnectionPool {
         var maxConnections = config.maxConnections();
         for (int i = 0; i < maxConnections; i++) {
             log.debug("Creating new connection - {} of {}", i + 1, maxConnections);
-            addNewConnection();
+            try {
+                addNewConnection();
+            } catch (InterruptedException e) {
+                log.error("ERR", e);
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
         connected.set(Boolean.TRUE);
         healthProbe.scheduleWithFixedDelay(this::healthProbe,
@@ -46,24 +52,20 @@ public class TlsConnectionPool {
     public Optional<PooledTlsConnection> borrow(Duration timeout) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Getting connection from pool");
-        var connection = queue.poll(timeout);
-        if (connection == null) {
+        var poll = queue.poll(timeout)
+                .map(PooledTlsConnection::reconnectIfUnHealthy);
+        if (poll.isEmpty()) {
             log.debug("No connection available");
             return Optional.empty();
         }
-        if (!connection.isConnected()) {
-            connection.reconnect();
-        }
+        var connection = poll.get();
         log.debug("Connection borrowed - {}", connection.id());
         return Optional.of(connection);
     }
 
     public PooledTlsConnection borrow() throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        var connection = queue.take();
-        if (!connection.isConnected()) {
-            connection.reconnect();
-        }
+        var connection = queue.take().reconnectIfUnHealthy();
         log.debug("Connection borrowed - {}", connection.id());
         return connection;
     }
@@ -89,24 +91,19 @@ public class TlsConnectionPool {
         connected.set(Boolean.FALSE);
     }
 
-    public void addNewConnection() {
+    public void addNewConnection() throws InterruptedException {
         this.connectionCounter = connectionCounter + 1;
-        boolean ok = createNewConnection(connectionCounter);
-        if (!ok) {
-            log.error("Could not create new connection");
-        }
+        var pooledTlsConnection = createNewConnection(connectionCounter);
+        queue.add(pooledTlsConnection);
     }
 
-    private boolean createNewConnection(int id) {
+    private PooledTlsConnection createNewConnection(int id) {
         try {
             var connection = new TlsConnection(config.host(), config.port());
             connection.connect();
             var pooledTlsConnection = connection.toPooledTlsConnection(id);
             log.debug("Created new connection {} - {}", connectionCounter, pooledTlsConnection.created());
-            return queue.add(pooledTlsConnection);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
+            return pooledTlsConnection;
         } catch (Exception e) {
             log.error("ERR", e);
             throw e;

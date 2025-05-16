@@ -45,10 +45,18 @@ public class PokeApiClient {
     }
 
     public CompletableFuture<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {
-        return CompletableFuture.supplyAsync(() -> this.getJson(jsonRequest), VirtualThreadConfig.newSingleThreadExecutor());
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.getJson(jsonRequest);
+            } catch (InterruptedException e) {
+                log.error("ERR", e);
+                Thread.currentThread().interrupt();
+                return Optional.empty();
+            }
+        }, VirtualThreadConfig.newSingleThreadExecutor());
     }
 
-    public Optional<JsonResponse> getJson(JsonRequest jsonRequest) {
+    public Optional<JsonResponse> getJson(JsonRequest jsonRequest) throws InterruptedException {
         try {
             var path = jsonRequest.path();
             if (cache.hasKey(path)) {
@@ -89,7 +97,6 @@ public class PokeApiClient {
             int previous = -1;
             while (true) {
                 int current = inputStream.read();
-
                 if (current == END_OF_STREAM) {
                     throw new IOException("Stream ended unexpectedly");
                 }

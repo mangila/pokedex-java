@@ -13,6 +13,14 @@ public record PooledTlsConnection(int id, TlsConnection connection, Instant crea
         Objects.requireNonNull(created);
     }
 
+    public PooledTlsConnection reconnectIfUnHealthy() {
+        if (!isConnected()) {
+            reconnect();
+            return this;
+        }
+        return this;
+    }
+
     public InputStream getInputStream() throws IOException {
         return connection.getInputStream();
     }

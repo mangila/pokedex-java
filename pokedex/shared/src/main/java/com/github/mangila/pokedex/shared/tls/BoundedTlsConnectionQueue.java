@@ -5,39 +5,44 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> {
 
     private static final Logger log = LoggerFactory.getLogger(BoundedTlsConnectionQueue.class);
 
-    private final Semaphore bound;
+    private final Bound bound;
     private final LinkedTransferQueue<PooledTlsConnection> queue;
 
     public BoundedTlsConnectionQueue(int capacity) {
-        this.bound = new Semaphore(capacity);
+        this.bound = new Bound(capacity);
         this.queue = new LinkedTransferQueue<>();
     }
 
-    public boolean add(PooledTlsConnection connection) throws InterruptedException {
+    public void add(PooledTlsConnection connection) throws InterruptedException {
         log.debug("Adding connection to queue - {}", connection.id());
-        boolean ok = queue.add(connection);
-        bound.release();
-        return ok;
+        queue.add(connection);
+        bound.increment();
     }
 
-    public PooledTlsConnection poll(Duration timeout) throws InterruptedException {
-        log.debug("Polling connection from queue");
-        bound.acquire();
-        return queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+    public Optional<PooledTlsConnection> poll(Duration timeout) throws InterruptedException {
+        log.debug("Poll connection from queue");
+        var connection = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        if (connection != null) {
+            bound.decrement();
+        }
+        return Optional.ofNullable(connection);
     }
 
     public PooledTlsConnection take() throws InterruptedException {
-        log.debug("Polling connection from queue");
-        bound.acquire();
-        return queue.take();
+        log.debug("Take connection from queue");
+        var connection = queue.take();
+        bound.decrement();
+        return connection;
     }
 
     public void clear() {
@@ -61,5 +66,40 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
     @Override
     public Iterator<PooledTlsConnection> iterator() {
         return queue.iterator();
+    }
+
+    private static class Bound {
+
+        private final int capacity;
+        private final AtomicInteger available;
+        private final Semaphore semaphore;
+
+        private Bound(int capacity) {
+            this.capacity = capacity;
+            semaphore = new Semaphore(capacity, Boolean.TRUE);
+            available = new AtomicInteger(0);
+        }
+
+        public void decrement() throws InterruptedException {
+            semaphore.acquire();
+            available.decrementAndGet();
+        }
+
+        public void increment() {
+            if (available.get() >= capacity) {
+                throw new IllegalStateException("Queue is full");
+            }
+            available.incrementAndGet();
+            semaphore.release();
+        }
+
+        public int availablePermits() {
+            return available.get();
+        }
+
+        public void drainPermits() {
+            semaphore.drainPermits();
+            available.set(capacity);
+        }
     }
 }

@@ -11,7 +11,7 @@ public final class TestUtil {
 
     private static final PokeApiHost POKE_API_HOST = PokeApiHost.fromDefault();
 
-    public static PokeApiClient createNewTestingPokeApiClient() {
+    public static PokeApiClient createNewTestingPokeApiClient() throws InterruptedException {
         int maxConnections = 2;
         return new PokeApiClient(
                 POKE_API_HOST,
