@@ -36,18 +36,8 @@ public class Scheduler {
                     pokeApiClient,
                     queueService,
                     pokemonCount);
-            var future = executor.submit(task);
-            var summary = future.get();
-            int duplicate = 0;
-            int unique = 0;
-            for (var result : summary) {
-                if (result) {
-                    unique++;
-                } else {
-                    duplicate++;
-                }
-            }
-            log.info("Summary: unique: {}, duplicates: {}", unique, duplicate);
+            executor.submit(task)
+                    .get();
         } catch (Exception e) {
             log.error("Error fetching all pokemons", e);
         }

@@ -13,21 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                                 QueueService queueService,
-                                int pokemonCount) implements Callable<List<Boolean>> {
+                                int pokemonCount) implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(QueuePokemonsTask.class);
 
     @Override
-    public List<Boolean> call() throws Exception {
+    public void run() {
         var request = new JsonRequest(
                 "GET",
                 String.format("/api/v2/pokemon-species/?&limit=%d", pokemonCount),
                 List.of());
-        return pokeApiClient.getJson(request)
+        pokeApiClient.getJson(request)
                 .map(PokeApiClientUtil::ensureSuccessStatusCode)
                 .map(JsonResponse::getBody)
                 .map(jsonTree -> jsonTree.getArray("results"))
@@ -38,7 +37,6 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                         .map(QueueEntry::new)
                         .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
                         .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
-                .orElseThrow()
-                .toList();
+                .orElseThrow();
     }
 }
