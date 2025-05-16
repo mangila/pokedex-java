@@ -48,11 +48,7 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
     public void clear() {
         queue.forEach(PooledTlsConnection::disconnect);
         queue.clear();
-        bound.drainPermits();
-    }
-
-    public int size() {
-        return queue.size();
+        bound.clear();
     }
 
     public boolean isEmpty() {
@@ -60,7 +56,7 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
     }
 
     public int availableConnections() {
-        return bound.availablePermits();
+        return bound.availableConnections();
     }
 
     @Override
@@ -93,11 +89,11 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
             semaphore.release();
         }
 
-        public int availablePermits() {
+        public int availableConnections() {
             return available.get();
         }
 
-        public void drainPermits() {
+        public void clear() {
             semaphore.drainPermits();
             available.set(0);
         }

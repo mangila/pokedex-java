@@ -81,7 +81,7 @@ public class TlsConnectionPool {
     }
 
     public int poolSize() {
-        return queue.size();
+        return queue.availableConnections();
     }
 
     public void shutdownConnectionPool() {

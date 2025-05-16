@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.https.model;
 
-public record Header(
+public record RequestHeader(
         String key,
         String value
 ) {

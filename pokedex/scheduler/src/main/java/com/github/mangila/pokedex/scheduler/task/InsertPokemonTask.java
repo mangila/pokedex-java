@@ -27,7 +27,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             log.info("Queue is empty");
             return;
         }
-        var url = poll.get().getDataAsPokeApiUri();
+        var url = poll.get().getDataAs(PokeApiUri.class);
         log.info("Queue entry {}", url);
         try {
             var pokemonSpecies = pokeApiClient.getJson(new JsonRequest("GET", url.getPath(), List.of()))

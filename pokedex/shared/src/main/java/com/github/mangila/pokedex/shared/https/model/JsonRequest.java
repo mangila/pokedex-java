@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public record JsonRequest(
         String method,
         String path,
-        List<Header> headers
+        List<RequestHeader> requestHeaders
 ) {
 
     public String toRequestLine(String version) {
@@ -14,8 +14,8 @@ public record JsonRequest(
     }
 
     public String toHeaders() {
-        return headers().stream()
-                .map(Header::toHeaderLine)
+        return requestHeaders().stream()
+                .map(RequestHeader::toHeaderLine)
                 .collect(Collectors.joining("\n"));
     }
 

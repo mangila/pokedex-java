@@ -1,7 +1,5 @@
 package com.github.mangila.pokedex.shared.queue;
 
-import com.github.mangila.pokedex.shared.model.PokeApiUri;
-
 import java.util.Objects;
 
 public record QueueEntry(Object data) {
@@ -12,11 +10,11 @@ public record QueueEntry(Object data) {
 
     /**
      * <summary>
-     * Convenient method cast data as the PokeApiUri type
+     * Convenient method cast data as the specified type
      * </summary>
      */
-    public PokeApiUri getDataAsPokeApiUri() {
-        return (PokeApiUri) data;
+    public <T> T getDataAs(Class<T> clazz) {
+        return clazz.cast(data);
     }
 
 }
