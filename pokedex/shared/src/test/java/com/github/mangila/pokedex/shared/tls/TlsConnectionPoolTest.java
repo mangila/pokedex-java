@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.tls;
 
-import com.github.mangila.pokedex.shared.TestUtil;
+import com.github.mangila.pokedex.shared.testutil.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

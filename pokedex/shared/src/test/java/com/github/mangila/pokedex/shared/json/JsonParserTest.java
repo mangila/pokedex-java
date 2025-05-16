@@ -66,18 +66,14 @@ class JsonParserTest {
                 "null-value": null
                 }
                 """;
-        assertThatThrownBy(() -> new JsonParser(new JsonParserConfig(10)).parseTree(json))
+        assertThatThrownBy(() -> JsonParser.getInstance().parseTree(json))
                 .isInstanceOf(InvalidJsonException.class);
-        assertThatThrownBy(() -> new JsonParser(new JsonParserConfig(11)).parseTree(json))
-                .isInstanceOf(InvalidJsonException.class);
-        assertThatCode(() -> new JsonParser(new JsonParserConfig(12)).parseTree(json))
-                .doesNotThrowAnyException();
     }
 
     @Test
     void shouldParseConcurrently() {
         var threads = Executors.newFixedThreadPool(2, Thread.ofVirtual().factory());
-        var jsonParser = new JsonParser(new JsonParserConfig(2));
+        var jsonParser = JsonParser.getInstance();
         var t1 = threads.submit(() -> {
             String json = """
                     {

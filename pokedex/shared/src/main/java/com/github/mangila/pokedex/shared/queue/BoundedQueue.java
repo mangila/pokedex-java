@@ -1,52 +1,43 @@
-package com.github.mangila.pokedex.shared.tls;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.github.mangila.pokedex.shared.queue;
 
 import java.time.Duration;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> {
-
-    private static final Logger log = LoggerFactory.getLogger(BoundedTlsConnectionQueue.class);
+public class BoundedQueue implements Iterable<QueueEntry> {
 
     private final Bound bound;
-    private final LinkedTransferQueue<PooledTlsConnection> queue;
+    private final LinkedTransferQueue<QueueEntry> queue;
 
-    public BoundedTlsConnectionQueue(int capacity) {
-        this.bound = new Bound(capacity);
+    public BoundedQueue(int capacity) {
+        this.bound = new BoundedQueue.Bound(capacity);
         this.queue = new LinkedTransferQueue<>();
     }
 
-    public void add(PooledTlsConnection connection) throws InterruptedException {
-        log.debug("Adding connection to queue - {}", connection.id());
-        queue.add(connection);
+    public boolean add(QueueEntry queueEntry) throws InterruptedException {
+        queue.add(queueEntry);
         bound.increment();
+        return true;
     }
 
-    public Optional<PooledTlsConnection> poll(Duration timeout) throws InterruptedException {
-        log.debug("Poll connection from queue");
+    public QueueEntry poll(Duration timeout) throws InterruptedException {
         var connection = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
         if (connection != null) {
             bound.decrement();
         }
-        return Optional.ofNullable(connection);
+        return connection;
     }
 
-    public PooledTlsConnection take() throws InterruptedException {
-        log.debug("Take connection from queue");
+    public QueueEntry take() throws InterruptedException {
         var connection = queue.take();
         bound.decrement();
         return connection;
     }
 
     public void clear() {
-        queue.forEach(PooledTlsConnection::disconnect);
         queue.clear();
         bound.clear();
     }
@@ -55,12 +46,12 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
         return queue.isEmpty();
     }
 
-    public int availableConnections() {
-        return bound.availableConnections();
+    public int available() {
+        return bound.available();
     }
 
     @Override
-    public Iterator<PooledTlsConnection> iterator() {
+    public Iterator<QueueEntry> iterator() {
         return queue.iterator();
     }
 
@@ -89,7 +80,7 @@ public class BoundedTlsConnectionQueue implements Iterable<PooledTlsConnection> 
             semaphore.release();
         }
 
-        public int availableConnections() {
+        public int available() {
             return available.get();
         }
 

@@ -11,27 +11,39 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class QueueService {
 
     private static final Logger log = LoggerFactory.getLogger(QueueService.class);
-    private static final Map<String, ConcurrentLinkedQueue<QueueEntry>> QUEUES = new ConcurrentHashMap<>();
+    private static final QueueService INSTANCE = new QueueService();
+
+    private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
+
+    public static QueueService getInstance() {
+        return INSTANCE;
+    }
+
+    private QueueService() {
+        log.info("Create new queue service");
+        this.queues = new ConcurrentHashMap<>();
+    }
 
     public void createNewQueue(String queueName) {
         log.debug("Create new queue {}", queueName);
-        QUEUES.put(queueName, new ConcurrentLinkedQueue<>());
+        queues.put(queueName, new ConcurrentLinkedQueue<>());
     }
 
     public boolean add(String queueName, QueueEntry entry) {
-        return QUEUES.get(queueName).add(entry);
+        log.debug("Add queueEntry to {} - {}", queueName, entry);
+        return queues.get(queueName).add(entry);
     }
 
     public Optional<QueueEntry> poll(String queueName) {
-        var queue = QUEUES.get(queueName);
+        log.debug("Poll queueEntry from {}", queueName);
+        var queue = queues.get(queueName);
         if (queue == null) {
-            log.warn("Queue - {} not found", queueName);
-            return Optional.empty();
+            throw new QueueNotFoundException(queueName);
         }
         return Optional.ofNullable(queue.poll());
     }
 
     public boolean isEmpty(String name) {
-        return QUEUES.get(name).isEmpty();
+        return queues.get(name).isEmpty();
     }
 }

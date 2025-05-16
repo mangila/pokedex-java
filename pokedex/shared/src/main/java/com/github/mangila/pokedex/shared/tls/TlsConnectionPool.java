@@ -1,6 +1,9 @@
 package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.queue.BoundedQueue;
+import com.github.mangila.pokedex.shared.queue.BoundedQueueService;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +17,7 @@ public class TlsConnectionPool {
 
     private static final Logger log = LoggerFactory.getLogger(TlsConnectionPool.class);
 
-    private final BoundedTlsConnectionQueue queue;
+    private final BoundedQueue queue;
     private final ScheduledExecutorService healthProbe;
     private final AtomicBoolean connected;
     private final TlsConnectionPoolConfig config;
@@ -24,14 +27,16 @@ public class TlsConnectionPool {
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.config = config;
         this.connected = new AtomicBoolean(Boolean.FALSE);
-        this.queue = new BoundedTlsConnectionQueue(config.maxConnections());
+        this.queue = BoundedQueueService.getInstance().createNewBoundedQueue(
+                config.poolConfig().poolName(),
+                config.poolConfig().maxConnections());
         this.healthProbe = VirtualThreadConfig.newSingleThreadScheduledExecutor();
         this.connectionCounter = 0;
     }
 
     public void init() {
         log.debug("Initializing connections to the connection pool");
-        var maxConnections = config.maxConnections();
+        var maxConnections = config.poolConfig().maxConnections();
         for (int i = 0; i < maxConnections; i++) {
             log.debug("Creating new connection - {} of {}", i + 1, maxConnections);
             try {
@@ -52,20 +57,21 @@ public class TlsConnectionPool {
     public Optional<PooledTlsConnection> borrow(Duration timeout) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Getting connection from pool");
-        var poll = queue.poll(timeout)
-                .map(PooledTlsConnection::reconnectIfUnHealthy);
-        if (poll.isEmpty()) {
+        var poll = queue.poll(timeout);
+        if (poll == null) {
             log.debug("No connection available");
             return Optional.empty();
         }
-        var connection = poll.get();
+        var connection = poll.getDataAs(PooledTlsConnection.class)
+                .reconnectIfUnHealthy();
         log.debug("Connection borrowed - {}", connection.id());
         return Optional.of(connection);
     }
 
     public PooledTlsConnection borrow() throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        var connection = queue.take().reconnectIfUnHealthy();
+        var connection = queue.take().getDataAs(PooledTlsConnection.class)
+                .reconnectIfUnHealthy();
         log.debug("Connection borrowed - {}", connection.id());
         return connection;
     }
@@ -73,7 +79,7 @@ public class TlsConnectionPool {
     public void returnConnection(PooledTlsConnection connection) throws IllegalStateException, InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Returning connection to pool - {}", connection.id());
-        queue.add(connection);
+        queue.add(new QueueEntry(connection));
     }
 
     public boolean isConnected() {
@@ -81,7 +87,7 @@ public class TlsConnectionPool {
     }
 
     public int poolSize() {
-        return queue.availableConnections();
+        return queue.available();
     }
 
     public void shutdownConnectionPool() {
@@ -94,7 +100,7 @@ public class TlsConnectionPool {
     public void addNewConnection() throws InterruptedException {
         this.connectionCounter = connectionCounter + 1;
         var pooledTlsConnection = createNewConnection(connectionCounter);
-        queue.add(pooledTlsConnection);
+        queue.add(new QueueEntry(pooledTlsConnection));
     }
 
     private PooledTlsConnection createNewConnection(int id) {
@@ -126,13 +132,12 @@ public class TlsConnectionPool {
             log.debug("Pool is empty, no connections to check");
             return;
         }
-        for (var connection : queue) {
+        queue.forEach(queueEntry -> {
+            var connection = queueEntry.getDataAs(PooledTlsConnection.class);
             if (!connection.isConnected()) {
-                log.debug("Connection {} is not connected, trying to reconnect", connection.id());
+                log.debug("Connection {} is unhealthy, reconnecting", connection.id());
                 connection.reconnect();
-            } else {
-                log.debug("Connection {} is connected", connection.id());
             }
-        }
+        });
     }
 }

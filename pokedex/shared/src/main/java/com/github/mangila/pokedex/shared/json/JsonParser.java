@@ -22,31 +22,30 @@ import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
+    private static final JsonParser INSTANCE = new JsonParser(64);
+
+    public static JsonParser getInstance() {
+        return INSTANCE;
+    }
 
     private final int maxDepth;
 
-    private final ThreadLocal<JsonTokenQueue> threadLocalQueue = new ThreadLocal<>();
-
-    public JsonParser(JsonParserConfig config) {
-        this.maxDepth = config.maxDepth();
-    }
-
-    public JsonParser() {
-        this(new JsonParserConfig(64));
+    private JsonParser(int maxDepth) {
+        log.info("Create new json parser with max depth {}", maxDepth);
+        this.maxDepth = maxDepth;
     }
 
     public JsonTree parseTree(byte[] data) {
-        threadLocalQueue.set(JsonTokenizer.tokenizeFrom(data));
-        return parseTree();
+        var tokens = JsonTokenizer.tokenizeFrom(data);
+        return parseTree(tokens);
     }
 
     public JsonTree parseTree(String data) {
-        threadLocalQueue.set(JsonTokenizer.tokenizeFrom(data));
-        return parseTree();
+        var tokens = JsonTokenizer.tokenizeFrom(data);
+        return parseTree(tokens);
     }
 
-    private JsonTree parseTree() {
-        var queue = this.threadLocalQueue.get();
+    private JsonTree parseTree(JsonTokenQueue queue) {
         if (queue.isEmpty()) {
             throw new InvalidJsonException(EMPTY_DATA_ERROR_MESSAGE);
         }
@@ -59,7 +58,7 @@ public class JsonParser {
         while (!queue.isEmpty()) {
             var key = queue.expect(JsonType.STRING);
             queue.expect(JsonType.COLON);
-            var value = parseValue(0);
+            var value = parseValue(queue, 0);
             tree.add((String) key.value(), value);
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();
@@ -67,20 +66,18 @@ public class JsonParser {
             }
             queue.expect(JsonType.COMMA);
         }
-        this.threadLocalQueue.remove();
         return tree;
     }
 
     // LBYL - Look Before You Leap
-    private JsonValue parseValue(int depth) {
+    private JsonValue parseValue(JsonTokenQueue queue, int depth) {
         ensureNotDepthMax(depth);
-        var queue = threadLocalQueue.get();
         var token = queue.peek();
         return switch (token.type()) {
             case STRING, FALSE, TRUE, NULL -> new JsonValue(queue.poll().value());
-            case NUMBER -> new JsonValue(parseNumber());
-            case LEFT_BRACE -> new JsonValue(parseObject(depth + 1));
-            case LEFT_BRACKET -> new JsonValue(parseArray(depth + 1));
+            case NUMBER -> new JsonValue(parseNumber(queue));
+            case LEFT_BRACE -> new JsonValue(parseObject(queue, depth + 1));
+            case LEFT_BRACKET -> new JsonValue(parseArray(queue, depth + 1));
             default -> throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
         };
     }
@@ -92,8 +89,7 @@ public class JsonParser {
         }
     }
 
-    private JsonArray parseArray(int depth) {
-        var queue = threadLocalQueue.get();
+    private JsonArray parseArray(JsonTokenQueue queue, int depth) {
         queue.expect(JsonType.LEFT_BRACKET);
         var jsonArray = new JsonArray();
         if (queue.peek().type() == RIGHT_BRACKET) {
@@ -101,7 +97,7 @@ public class JsonParser {
             return jsonArray;
         }
         while (true) {
-            var value = parseValue(depth);
+            var value = parseValue(queue, depth);
             jsonArray.add(value);
             if (queue.peek().type() == RIGHT_BRACKET) {
                 queue.poll();
@@ -112,8 +108,7 @@ public class JsonParser {
         return jsonArray;
     }
 
-    private JsonObject parseObject(int depth) {
-        var queue = threadLocalQueue.get();
+    private JsonObject parseObject(JsonTokenQueue queue, int depth) {
         queue.expect(JsonType.LEFT_BRACE);
         if (queue.peek().type() == RIGHT_BRACE) {
             queue.poll();
@@ -123,7 +118,7 @@ public class JsonParser {
         while (true) {
             var key = queue.expect(JsonType.STRING).value();
             queue.expect(JsonType.COLON);
-            var value = parseValue(depth);
+            var value = parseValue(queue, depth);
             jsonObject.add((String) key, value);
             if (queue.peek().type() == RIGHT_BRACE) {
                 queue.poll();
@@ -135,8 +130,7 @@ public class JsonParser {
     }
 
     // EAFP — Easier to Ask Forgiveness than Permission
-    private Number parseNumber() {
-        var queue = threadLocalQueue.get();
+    private Number parseNumber(JsonTokenQueue queue) {
         var sb = new StringBuilder();
         while (queue.peek().type() == JsonType.NUMBER) {
             var token = queue.poll();

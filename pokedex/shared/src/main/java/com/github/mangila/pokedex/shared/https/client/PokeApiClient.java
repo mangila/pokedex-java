@@ -32,7 +32,6 @@ public class PokeApiClient {
     private final PokeApiHost host;
     private final TlsConnectionPool pool;
     private final ResponseTtlCache cache;
-    private final JsonParser jsonParser;
 
     public PokeApiClient(PokeApiHost host,
                          TlsConnectionPoolConfig tlsConnectionPoolConfig) {
@@ -41,7 +40,6 @@ public class PokeApiClient {
         pool.init();
         this.cache = new ResponseTtlCache(ResponseTtlCacheConfig.fromDefaultConfig());
         cache.startEvictionThread();
-        this.jsonParser = new JsonParser();
     }
 
     public CompletableFuture<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {
@@ -75,7 +73,7 @@ public class PokeApiClient {
             var inputStream = connection.getInputStream();
             var httpStatus = readStatusLine(inputStream);
             var headers = readHeaders(inputStream);
-            var body = readGzipJsonBody(inputStream, headers, jsonParser);
+            var body = readGzipJsonBody(inputStream, headers);
             var response = JsonResponse.builder()
                     .httpStatus(httpStatus)
                     .headers(headers)
@@ -146,8 +144,7 @@ public class PokeApiClient {
     }
 
     private static JsonTree readGzipJsonBody(InputStream inputStream,
-                                             Headers headers,
-                                             JsonParser jsonParser) {
+                                             Headers headers) {
         try {
             if (headers.isGzip() && headers.isJson()) {
                 if (headers.isChunked()) {
@@ -155,11 +152,11 @@ public class PokeApiClient {
                     byte[] allChunks = readChunkedGzipJsonBody(inputStream);
                     var decompressed = new GZIPInputStream(new ByteArrayInputStream(allChunks))
                             .readAllBytes();
-                    return jsonParser.parseTree(decompressed);
+                    return JsonParser.getInstance().parseTree(decompressed);
                 }
                 var decompressed = new GZIPInputStream(inputStream)
                         .readAllBytes();
-                return jsonParser.parseTree(decompressed);
+                return JsonParser.getInstance().parseTree(decompressed);
             } else {
                 throw new IOException("Only gzipped json content encoding is supported");
             }

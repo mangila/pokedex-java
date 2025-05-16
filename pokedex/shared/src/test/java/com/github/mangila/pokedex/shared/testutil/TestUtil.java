@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared;
+package com.github.mangila.pokedex.shared.testutil;
 
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
@@ -18,7 +18,7 @@ public final class TestUtil {
                 new TlsConnectionPoolConfig(
                         POKE_API_HOST.host(),
                         POKE_API_HOST.port(),
-                        maxConnections,
+                        new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool", maxConnections),
                         new TlsConnectionPoolConfig.HealthCheckConfig(
                                 0,
                                 10,
@@ -36,7 +36,7 @@ public final class TestUtil {
                 new TlsConnectionPoolConfig(
                         host,
                         port,
-                        maxConnections,
+                        new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool", maxConnections),
                         new TlsConnectionPoolConfig.HealthCheckConfig(
                                 0,
                                 10,
