@@ -37,6 +37,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                         .map(QueueEntry::new)
                         .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
                         .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
-                .orElseThrow();
+                .orElseThrow()
+                .toList();
     }
 }

@@ -36,8 +36,11 @@ public class Scheduler {
                     pokeApiClient,
                     queueService,
                     pokemonCount);
-            executor.submit(task)
+            var future = executor.submit(task)
                     .get();
+            if (future == null) {
+                log.error("Error fetching all pokemons");
+            }
         } catch (Exception e) {
             log.error("Error fetching all pokemons", e);
         }
