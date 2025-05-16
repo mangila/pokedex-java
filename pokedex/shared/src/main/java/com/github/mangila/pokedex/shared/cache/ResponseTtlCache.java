@@ -5,13 +5,11 @@ import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class ResponseTtlCache {
 
@@ -31,7 +29,6 @@ public class ResponseTtlCache {
             Objects.requireNonNull(value);
             Objects.requireNonNull(timestamp);
         }
-
     }
 
     public void put(String key, JsonResponse value) {
