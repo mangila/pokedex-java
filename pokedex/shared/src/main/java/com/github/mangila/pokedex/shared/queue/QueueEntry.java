@@ -18,7 +18,7 @@ public record QueueEntry(Object data,
         failCounter.incrementAndGet();
     }
 
-    public boolean shouldNotBeProcessed(int maxRetries) {
+    public boolean equalsMaxRetries(int maxRetries) {
         return failCounter.get() == maxRetries;
     }
 
