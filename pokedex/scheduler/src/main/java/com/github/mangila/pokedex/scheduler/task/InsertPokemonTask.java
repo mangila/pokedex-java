@@ -25,9 +25,9 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
     /**
      * <summary>
      * Virtual Thread and CompletableFuture gymnastics <br>
-     * fail fast if anything goes wrong and put it to the tail of the Queue. max three re-runs<br>
+     * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs. No DLQ just forget it<br>
      * - evolutionChain could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
-     * - Varieties is fetched in parallel and block at the end <br>
+     * - Varieties are fetched in parallel and block at the end <br>
      * </summary>
      */
     @Override
@@ -112,7 +112,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             var pokemon = PokemonMapper.toPokemon(
                     pokemonSpecies,
                     pokemonVarieties,
-                    null);
+                    evolutionChain);
 
         } catch (Exception e) {
             var entry = poll.get();
