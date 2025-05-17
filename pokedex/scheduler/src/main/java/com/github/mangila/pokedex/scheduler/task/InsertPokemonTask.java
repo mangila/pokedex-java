@@ -27,7 +27,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
      * Virtual Thread and CompletableFuture gymnastics <br>
      * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs, then put-on a DLQ (WIP)<br>
      * - evolutionChain could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
-     * - Varieties are fetched in parallel and block when everything is completed <br>
+     * - Varieties are fetched in parallel and block until everything is completed <br>
      * </summary>
      */
     @Override
