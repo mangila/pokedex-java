@@ -17,7 +17,6 @@ public class JsonArray {
 
     public int size() {
         return list.size();
-
     }
 
     public boolean isEmpty() {
