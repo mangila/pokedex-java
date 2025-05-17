@@ -8,13 +8,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class BoundedQueueService {
 
     private static final Logger log = LoggerFactory.getLogger(BoundedQueueService.class);
     private static final BoundedQueueService INSTANCE = new BoundedQueueService();
 
-    private final Map<String, BoundedQueue> boundedQueues;
+    private final Map<String, LinkedBlockingQueue<QueueEntry>> boundedQueues;
 
     public static BoundedQueueService getInstance() {
         return INSTANCE;
@@ -25,13 +27,9 @@ public class BoundedQueueService {
         this.boundedQueues = new ConcurrentHashMap<>();
     }
 
-    public BoundedQueue createNewBoundedQueue(String queueName, int capacity) {
+    public LinkedBlockingQueue<QueueEntry> createNewBoundedQueue(String queueName, int capacity) {
         log.debug("Create new bounded queue {}", queueName);
-        boundedQueues.put(queueName, new BoundedQueue(capacity));
-        return boundedQueues.get(queueName);
-    }
-
-    public BoundedQueue getBoundedQueue(String queueName) {
+        boundedQueues.put(queueName, new LinkedBlockingQueue<>(capacity));
         return boundedQueues.get(queueName);
     }
 
@@ -46,7 +44,7 @@ public class BoundedQueueService {
         if (queue == null) {
             throw new QueueNotFoundException(queueName);
         }
-        return Optional.ofNullable(queue.poll(timeout));
+        return Optional.ofNullable(queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS));
     }
 
     public QueueEntry take(String queueName) throws InterruptedException {
@@ -62,8 +60,8 @@ public class BoundedQueueService {
         return boundedQueues.get(name).isEmpty();
     }
 
-    public int available(String name) {
-        return boundedQueues.get(name).available();
+    public int remainingCapacity(String name) {
+        return boundedQueues.get(name).remainingCapacity();
     }
 
     public void clear(String name) {

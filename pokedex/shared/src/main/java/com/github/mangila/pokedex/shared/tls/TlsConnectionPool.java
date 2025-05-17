@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.queue.BoundedQueue;
 import com.github.mangila.pokedex.shared.queue.BoundedQueueService;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
@@ -10,14 +9,16 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TlsConnectionPool {
 
     private static final Logger log = LoggerFactory.getLogger(TlsConnectionPool.class);
 
-    private final BoundedQueue queue;
+    private final LinkedBlockingQueue<QueueEntry> queue;
     private final ScheduledExecutorService healthProbe;
     private final AtomicBoolean connected;
     private final TlsConnectionPoolConfig config;
@@ -57,7 +58,7 @@ public class TlsConnectionPool {
     public Optional<PooledTlsConnection> borrow(Duration timeout) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
         log.debug("Getting connection from pool");
-        var poll = queue.poll(timeout);
+        var poll = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
         if (poll == null) {
             log.debug("No connection available");
             return Optional.empty();
@@ -87,7 +88,7 @@ public class TlsConnectionPool {
     }
 
     public int poolSize() {
-        return queue.available();
+        return queue.remainingCapacity();
     }
 
     public void shutdownConnectionPool() {
