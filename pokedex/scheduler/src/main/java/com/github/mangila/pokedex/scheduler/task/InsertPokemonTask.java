@@ -25,7 +25,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
     /**
      * <summary>
      * Virtual Thread and CompletableFuture gymnastics <br>
-     * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs. No DLQ just forget it<br>
+     * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs, then put-on a DLQ (WIP)<br>
      * - evolutionChain could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
      * - Varieties are fetched in parallel and block at the end <br>
      * </summary>
@@ -87,13 +87,17 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                             .thenApply(jsonTree -> {
                                 log.debug("Running side effect put sprites to queue");
                                 var sprites = jsonTree.getObject("sprites");
+                                sprites.add("name", jsonTree.getValue("name"));
+                                sprites.add("id", jsonTree.getValue("id"));
                                 queueService.add(Application.POKEMON_SPRITES_QUEUE, new QueueEntry(sprites));
                                 return jsonTree;
                             })
                             .thenApply(jsonTree -> {
                                 log.debug("Running side effect put cries to queue");
-                                var sprites = jsonTree.getObject("cries");
-                                queueService.add(Application.POKEMON_CRIES_QUEUE, new QueueEntry(sprites));
+                                var cries = jsonTree.getObject("cries");
+                                cries.add("name", jsonTree.getValue("name"));
+                                cries.add("id", jsonTree.getValue("id"));
+                                queueService.add(Application.POKEMON_CRIES_QUEUE, new QueueEntry(cries));
                                 return jsonTree;
                             })
                             .thenApply(PokemonMapper::toPokemonVariety))
