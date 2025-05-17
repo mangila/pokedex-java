@@ -51,6 +51,9 @@ principles.
 ## Datastructures (WIP)
 
 - Queue
+- Linked List
+- Array List
+- Hash Table
 
 ## Algorithms techniques (WIP)
 
