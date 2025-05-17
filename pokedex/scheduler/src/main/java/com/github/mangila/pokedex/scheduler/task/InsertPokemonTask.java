@@ -24,10 +24,10 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
     /**
      * <summary>
-     * Virtual Thread and CompletableFuture gymnastics <br>
+     * Virtual Thread, CompletableFuture, Optional and Java Stream gymnastics <br>
      * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs, then put-on a DLQ (WIP)<br>
-     * - evolutionChain could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
-     * - Varieties are fetched in parallel and block until everything is completed <br>
+     * - Evolution Chain api request could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
+     * - Pokémon varieties are fetched in parallel and block until everything is completed <br>
      * </summary>
      */
     @Override
