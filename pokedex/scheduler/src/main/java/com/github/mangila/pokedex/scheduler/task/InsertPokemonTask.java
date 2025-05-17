@@ -7,6 +7,8 @@ import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.model.PokeApiUri;
+import com.github.mangila.pokedex.shared.model.PokemonMapper;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +37,27 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .map(JsonResponse::body)
                     .orElseThrow();
 
-            var varieties = pokemonSpecies.getArray("varieties")
+            var evolutionChain = Stream.of(pokemonSpecies.getObject("evolution_chain"))
+                    .map(jsonObject -> jsonObject.getString("url"))
+                    .map(PokeApiUri::fromString)
+                    .peek(pokeApiUri -> log.info("evolution chain path {}", pokeApiUri.getPath()))
+                    .map(pokeApiUri -> pokeApiClient.getJsonAsync(new JsonRequest(
+                                    "GET",
+                                    pokeApiUri.getPath(),
+                                    List.of()))
+                            .thenApply(jsonResponse -> jsonResponse
+                                    .stream()
+                                    .peek(jsonTree -> log.debug("evolution chain response {}", jsonTree))
+                                    .map(PokeApiClientUtil::ensureSuccessStatusCode)
+                                    .map(JsonResponse::body)
+                                    .map(PokemonMapper::toPokemonEvolutionChain)
+                                    .findFirst()
+                                    .orElseThrow()))
+                    .map(CompletableFuture::join)
+                    .findFirst()
+                    .orElseThrow();
+
+            var varietyFutures = pokemonSpecies.getArray("varieties")
                     .values()
                     .stream()
                     .map(JsonValue::getObject)
@@ -43,36 +65,54 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .map(jsonObject -> jsonObject.getString("url"))
                     .map(PokeApiUri::fromString)
                     .peek(pokeApiUri -> log.debug("variety path {}", pokeApiUri.getPath()))
-                    .map(pokeApiUri -> pokeApiClient.getJsonAsync(new JsonRequest("GET", pokeApiUri.getPath(), List.of())))
+                    .map(pokeApiUri -> pokeApiClient.getJsonAsync(new JsonRequest(
+                                    "GET",
+                                    pokeApiUri.getPath(),
+                                    List.of()))
+                            .thenApply(jsonResponse -> jsonResponse
+                                    .stream()
+                                    .peek(jsonTree -> log.debug("variety response {}", jsonTree))
+                                    .map(PokeApiClientUtil::ensureSuccessStatusCode)
+                                    .map(JsonResponse::body)
+                                    .findFirst()
+                                    .orElseThrow())
+                            .thenApply(jsonTree -> {
+                                log.debug("Running side effect put sprites to queue");
+                                var sprites = jsonTree.getObject("sprites");
+                                queueService.add(Application.POKEMON_SPRITES_QUEUE, new QueueEntry(sprites));
+                                return jsonTree;
+                            })
+                            .thenApply(jsonTree -> {
+                                log.debug("Running side effect put cries to queue");
+                                var sprites = jsonTree.getObject("cries");
+                                queueService.add(Application.POKEMON_CRIES_QUEUE, new QueueEntry(sprites));
+                                return jsonTree;
+                            })
+                            .thenApply(PokemonMapper::toPokemonVariety))
                     .toList();
 
-            var evolutionChain = Stream.of(pokemonSpecies.getObject("evolution_chain"))
-                    .map(jsonObject -> jsonObject.getString("url"))
-                    .map(PokeApiUri::fromString)
-                    .peek(pokeApiUri -> log.debug("evolution chain path {}", pokeApiUri.getPath()))
-                    .map(pokeApiUri -> pokeApiClient.getJsonAsync(new JsonRequest("GET", pokeApiUri.getPath(), List.of())))
-                    .findFirst()
-                    .orElseThrow();
+            CompletableFuture.allOf(varietyFutures.toArray(CompletableFuture[]::new))
+                    .join();
 
-            var parallel = CompletableFuture.allOf(
-                    varieties.getFirst(),
-                    varieties.getLast(),
-                    evolutionChain
-            );
-            parallel.join();
+            var pokemonVarieties = varietyFutures.stream()
+                    .map(CompletableFuture::join)
+                    .peek(pokemonVariety -> log.debug("pokemon variety {} from species - {}", pokemonVariety.getName(), pokemonSpecies
+                            .getValue("name")
+                            .getString()))
+                    .toList();
 
-//            varieties.stream()
-//                    .map(CompletableFuture::join)
-//                    .map(PokeApiClientUtil::ensureSuccessStatusCode)
-//                    .map(JsonResponse::getBody)
-//                    .map(JsonValue::getObject)
-//                    .map(jsonObject -> jsonObject.getObject("pokemon"))
-//                    .map(JsonValue::getString)
-//                    .map(PokeApiUri::fromString)
-//                    .forEach(queueService::push);
+            var pokemon = PokemonMapper.toPokemon(
+                    pokemonSpecies,
+                    pokemonVarieties,
+                    null);
 
         } catch (Exception e) {
             var entry = poll.get();
+            if (entry.shouldNotBeProcessed(3)) {
+                log.info("{} - should not be processed again", entry.data());
+                return;
+            }
+            entry.incrementFailCounter();
             log.error("Error fetching pokemon species - {}", entry, e);
             queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, entry);
         }

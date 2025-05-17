@@ -48,6 +48,10 @@ principles.
 - EAFP — Easier to Ask Forgiveness than Permission
 - LBYL - Look Before You Leap
 
+## Datastructures (WIP)
+
+- Queue
+
 ## Algorithms techniques (WIP)
 
 - Two pointers

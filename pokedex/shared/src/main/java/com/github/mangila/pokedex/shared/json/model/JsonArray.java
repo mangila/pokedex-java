@@ -14,4 +14,12 @@ public class JsonArray {
     public List<JsonValue> values() {
         return list;
     }
+
+    public int size() {
+        return list.size();
+    }
+
+    public boolean isEmpty() {
+        return list.isEmpty();
+    }
 }

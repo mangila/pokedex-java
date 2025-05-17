@@ -10,4 +10,8 @@ public record JsonValue(Object value) {
         return (JsonObject) value;
     }
 
+    public JsonArray getArray() {
+        return (JsonArray) value;
+    }
+
 }

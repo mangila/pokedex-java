@@ -1,7 +1,8 @@
 package com.github.mangila.pokedex.scheduler;
 
-import com.github.mangila.pokedex.scheduler.task.InsertMediaTask;
+import com.github.mangila.pokedex.scheduler.task.InsertCriesTask;
 import com.github.mangila.pokedex.scheduler.task.InsertPokemonTask;
+import com.github.mangila.pokedex.scheduler.task.InsertSpritesTask;
 import com.github.mangila.pokedex.scheduler.task.QueuePokemonsTask;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
@@ -44,25 +45,31 @@ public class Scheduler {
         }
     }
 
-    public void finishedProcessingTask(TaskConfig.TriggerConfig config) {
+    public void scheduleFinishedProcessing(TaskConfig.TriggerConfig config) {
         log.info("Scheduling finished processing task");
         config.executor().scheduleAtFixedRate(() -> {
             if (queueService.isEmpty(Application.POKEMON_SPECIES_URL_QUEUE)
-                    && queueService.isEmpty(Application.MEDIA_URL_QUEUE)) {
+                    && queueService.isEmpty(Application.POKEMON_SPRITES_QUEUE)) {
                 log.debug("Queues is empty will shutdown");
                 Application.IS_RUNNING.set(Boolean.FALSE);
             }
         }, config.initialDelay(), config.delay(), config.timeUnit());
     }
 
-    public void insertMedia(TaskConfig config) {
-        log.info("Scheduling media task");
-        var task = new InsertMediaTask(pokeApiClient, queueService);
+    public void scheduleInsertSprites(TaskConfig config) {
+        log.info("Scheduling insert sprites task");
+        var task = new InsertSpritesTask(pokeApiClient, queueService);
         scheduleTask(config, () -> task);
     }
 
-    public void insertPokemons(TaskConfig config) {
-        log.info("Scheduling pokemon task");
+    public void scheduleInsertCries(TaskConfig config) {
+        log.info("Scheduling insert cries task");
+        var task = new InsertCriesTask(pokeApiClient, queueService);
+        scheduleTask(config, () -> task);
+    }
+
+    public void scheduleInsertPokemons(TaskConfig config) {
+        log.info("Scheduling insert pokemons task");
         var task = new InsertPokemonTask(pokeApiClient, queueService);
         scheduleTask(config, () -> task);
     }

@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Application {
 
     public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
-    public static final String MEDIA_URL_QUEUE = "media-url-queue";
+    public static final String POKEMON_SPRITES_QUEUE = "pokemon-sprites-queue";
+    public static final String POKEMON_CRIES_QUEUE = "pokemon-cries-queue";
     public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
 
     public static void main(String[] args) {

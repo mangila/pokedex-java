@@ -22,4 +22,9 @@ public class JsonObject {
         return tree.get(key)
                 .getObject();
     }
+
+    public JsonArray getArray(String key) {
+        return tree.get(key)
+                .getArray();
+    }
 }

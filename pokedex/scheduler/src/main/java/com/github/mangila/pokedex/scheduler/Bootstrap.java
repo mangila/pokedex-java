@@ -9,14 +9,14 @@ import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.mangila.pokedex.scheduler.Application.MEDIA_URL_QUEUE;
-import static com.github.mangila.pokedex.scheduler.Application.POKEMON_SPECIES_URL_QUEUE;
+import static com.github.mangila.pokedex.scheduler.Application.*;
 
 public class Bootstrap {
 
     public void initQueues() {
         QueueService.getInstance().createNewQueue(POKEMON_SPECIES_URL_QUEUE);
-        QueueService.getInstance().createNewQueue(MEDIA_URL_QUEUE);
+        QueueService.getInstance().createNewQueue(POKEMON_SPRITES_QUEUE);
+        QueueService.getInstance().createNewQueue(POKEMON_CRIES_QUEUE);
     }
 
     public PokeApiClient createPokeApiClient() {
@@ -48,7 +48,7 @@ public class Bootstrap {
                 5,
                 TimeUnit.MINUTES
         );
-        scheduler.finishedProcessingTask(finishedProcessingTaskConfig);
+        scheduler.scheduleFinishedProcessing(finishedProcessingTaskConfig);
         scheduler.queuePokemons(VirtualThreadConfig.newSingleThreadExecutor(), 1025);
         var insertMediaTaskConfig = TaskConfig.from(
                 TaskConfig.TriggerConfig.from(
@@ -59,7 +59,7 @@ public class Bootstrap {
                 ),
                 TaskConfig.WorkerConfig.from(5)
         );
-        scheduler.insertMedia(insertMediaTaskConfig);
+        scheduler.scheduleInsertSprites(insertMediaTaskConfig);
         var insertPokemonsTaskConfig = TaskConfig.from(
                 TaskConfig.TriggerConfig.from(
                         VirtualThreadConfig.newSingleThreadScheduledExecutor(),
@@ -69,6 +69,16 @@ public class Bootstrap {
                 ),
                 TaskConfig.WorkerConfig.from(5)
         );
-        scheduler.insertPokemons(insertPokemonsTaskConfig);
+        scheduler.scheduleInsertPokemons(insertPokemonsTaskConfig);
+        var insertCriesTaskConfig = TaskConfig.from(
+                TaskConfig.TriggerConfig.from(
+                        VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                        1,
+                        100,
+                        TimeUnit.MILLISECONDS
+                ),
+                TaskConfig.WorkerConfig.from(5)
+        );
+        scheduler.scheduleInsertCries(insertCriesTaskConfig);
     }
 }

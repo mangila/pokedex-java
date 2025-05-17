@@ -19,6 +19,10 @@ public class JsonTree {
         return (JsonObject) tree.get(key).value();
     }
 
+    public JsonValue getValue(String key) {
+        return tree.get(key);
+    }
+
     public int size() {
         return tree.size();
     }

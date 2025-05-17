@@ -24,11 +24,7 @@ class ResponseTtlCacheTest {
         );
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
-        cache.put("key", JsonResponse.builder()
-                .httpStatus(HttpStatus.fromString("HTTP 200 OK"))
-                .headers(new Headers())
-                .body(new JsonTree())
-                .build());
+        cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();
         await()
                 .atMost(10, SECONDS)
@@ -45,11 +41,7 @@ class ResponseTtlCacheTest {
         );
         var cache = new ResponseTtlCache(config);
         cache.startEvictionThread();
-        cache.put("key", JsonResponse.builder()
-                .httpStatus(HttpStatus.fromString("HTTP 200 OK"))
-                .headers(new Headers())
-                .body(new JsonTree())
-                .build());
+        cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();
         cache.shutdownEvictionThread();
         SECONDS.sleep(5);

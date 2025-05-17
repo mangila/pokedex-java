@@ -22,24 +22,29 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
     private static final Logger log = LoggerFactory.getLogger(QueuePokemonsTask.class);
 
     @Override
-    public Integer call() throws Exception {
-        var request = new JsonRequest(
-                "GET",
-                String.format("/api/v2/pokemon-species/?&limit=%d", pokemonCount),
-                List.of());
-        return pokeApiClient.getJson(request)
-                .map(PokeApiClientUtil::ensureSuccessStatusCode)
-                .map(JsonResponse::body)
-                .map(jsonTree -> jsonTree.getArray("results"))
-                .map(array -> array.values().stream()
-                        .map(JsonValue::getObject)
-                        .map(jsonObject -> jsonObject.getString("url"))
-                        .map(PokeApiUri::fromString)
-                        .map(QueueEntry::new)
-                        .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
-                        .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
-                .orElseThrow()
-                .toList()
-                .size();
+    public Integer call() {
+        try {
+            var request = new JsonRequest(
+                    "GET",
+                    String.format("/api/v2/pokemon-species/?&limit=%d", pokemonCount),
+                    List.of());
+            return pokeApiClient.getJson(request)
+                    .map(PokeApiClientUtil::ensureSuccessStatusCode)
+                    .map(JsonResponse::body)
+                    .map(jsonTree -> jsonTree.getArray("results"))
+                    .map(array -> array.values().stream()
+                            .map(JsonValue::getObject)
+                            .map(jsonObject -> jsonObject.getString("url"))
+                            .map(PokeApiUri::fromString)
+                            .map(QueueEntry::new)
+                            .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
+                            .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
+                    .orElseThrow()
+                    .toList()
+                    .size();
+        } catch (Exception e) {
+            log.error("ERR", e);
+            return -1;
+        }
     }
 }
