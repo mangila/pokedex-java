@@ -22,6 +22,14 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
     private static final Logger log = LoggerFactory.getLogger(InsertPokemonTask.class);
 
+    /**
+     * <summary>
+     * Virtual Thread and CompletableFuture gymnastics <br>
+     * fail fast if anything goes wrong and put it to the tail of the Queue. max three re-runs<br>
+     * - evolutionChain could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
+     * - Varieties is fetched in parallel and block at the end <br>
+     * </summary>
+     */
     @Override
     public void run() {
         var poll = queueService.poll(Application.POKEMON_SPECIES_URL_QUEUE);
