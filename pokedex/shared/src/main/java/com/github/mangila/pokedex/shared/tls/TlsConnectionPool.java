@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TlsConnectionPool {
 
@@ -94,6 +93,9 @@ public class TlsConnectionPool {
     public void shutdownConnectionPool() {
         log.debug("Shutting down connection pool");
         healthProbe.shutdown();
+        queue.forEach(queueEntry -> queueEntry
+                .getDataAs(PooledTlsConnection.class)
+                .disconnect());
         queue.clear();
         connected.set(Boolean.FALSE);
     }
