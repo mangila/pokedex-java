@@ -42,6 +42,7 @@ public class PokemonMapper {
     public static Pokemon toPokemon(JsonTree pokemonSpecies,
                                     List<PokemonVariety> varieties,
                                     PokemonEvolutionChain evolutionChain) {
+
         return null;
     }
 }

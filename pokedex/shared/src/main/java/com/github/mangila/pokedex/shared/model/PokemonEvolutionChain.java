@@ -7,7 +7,7 @@ public class PokemonEvolutionChain {
 
     public static final PokemonEvolutionChain EMPTY = new PokemonEvolutionChain();
 
-    private List<PokemonEvolution> evolutions;
+    private final List<PokemonEvolution> evolutions;
 
     public PokemonEvolutionChain() {
         this.evolutions = new ArrayList<>();

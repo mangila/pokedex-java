@@ -1,9 +1,6 @@
 package com.github.mangila.pokedex.shared.cache;
 
-import com.github.mangila.pokedex.shared.https.model.Headers;
-import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
-import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;

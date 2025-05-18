@@ -17,7 +17,7 @@ public final class TestUtil {
         var connectionPoolConfig = new TlsConnectionPoolConfig(
                 pokeApiHost.host(),
                 pokeApiHost.port(),
-                new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool", maxConnections),
+                new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool-1", maxConnections),
                 new TlsConnectionPoolConfig.HealthCheckConfig(0, 10, TimeUnit.SECONDS)
         );
         return new PokeApiClient(new PokeApiClientConfig(
@@ -33,7 +33,7 @@ public final class TestUtil {
                 new TlsConnectionPoolConfig(
                         host,
                         port,
-                        new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool", maxConnections),
+                        new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool-2", maxConnections),
                         new TlsConnectionPoolConfig.HealthCheckConfig(
                                 0,
                                 10,

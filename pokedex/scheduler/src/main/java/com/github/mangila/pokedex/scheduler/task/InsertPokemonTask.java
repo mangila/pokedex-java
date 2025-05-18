@@ -13,6 +13,7 @@ import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.MappedByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -26,7 +27,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
      * <summary>
      * Virtual Thread, CompletableFuture, Optional and Java Stream gymnastics <br>
      * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs, then put-on a DLQ (WIP)<br>
-     * - Evolution Chain api request could be blocking - but to keep it expressive in the stream pipeline its fetched in async <br>
+     * - Evolution Chain api request could be blocking - but to keep it declarative in the stream pipeline its fetched in async <br>
      * - Pokémon varieties are fetched in parallel and block until everything is completed <br>
      * </summary>
      */
@@ -119,6 +120,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     pokemonSpecies,
                     pokemonVarieties,
                     evolutionChain);
+
 
         } catch (Exception e) {
             var entry = poll.get();

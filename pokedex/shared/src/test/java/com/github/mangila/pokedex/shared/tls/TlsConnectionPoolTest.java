@@ -50,7 +50,7 @@ class TlsConnectionPoolTest {
         });
         await()
                 .atMost(Duration.ofSeconds(10))
-                .until(() -> TEST_CONNECTION_POOL.poolCapacity() == 2);
+                .until(() -> TEST_CONNECTION_POOL.remainingCapacity() == 2);
     }
 
     @Test

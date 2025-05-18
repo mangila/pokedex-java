@@ -2,9 +2,7 @@
 
 Experimental Low-level project with plain Java.
 
-This is the first project created in the Pokedex series,
-the biggest experiment is to know how easily it will be to adapt to new programming languages with simple engineering
-principles.
+This is the first project created in the Pokédex series;
 
 # Requirements
 
@@ -15,22 +13,29 @@ principles.
 
 ## Project Goal
 
-- Utilize and pinpoint software engineering principles and techniques
+- Implement and pinpoint software engineering principles and techniques
 - Build software components from scratch
-- For the sake of fun and love for programming, technologies and Pokemon
+- For the sake of fun and love for programming, technologies and Pokémon
 
 ## Project Structure (WIP)
 
+- Service Layer
 - Maven multi module project
     - scheduler - Daemon Service
     - web - Web Service
     - shared — Common classes
 - Java 21
 
+## System Architecture (WIP)
+
+- Domain Primitives with Service Layer
+
 ## Paradigms (WIP)
 
 - Functional
+- Imperative
 - Object Oriented
+- Declarative
 - Concurrent
 
 ## Software Components (WIP)
@@ -42,6 +47,8 @@ principles.
 - Json Parser
 - Time to Live(TTL) Cache
 - Scheduler
+- Key Value Database
+    - Persist to disk
 
 ## Engineering Principles (WIP)
 
@@ -51,6 +58,8 @@ principles.
 ## Datastructures (WIP)
 
 - Queue
+    - Bounded Queue
+    - Linked Queue
 - Linked List
 - Array List
 - Hash Table
