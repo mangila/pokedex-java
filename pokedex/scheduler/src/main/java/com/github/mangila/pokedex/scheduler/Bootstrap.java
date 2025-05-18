@@ -1,7 +1,9 @@
 package com.github.mangila.pokedex.scheduler;
 
+import com.github.mangila.pokedex.shared.cache.ResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
 import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -27,7 +29,11 @@ public class Bootstrap {
                 new TlsConnectionPoolConfig.PoolConfig("pokedex-pool-1", 5),
                 new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
         );
-        return new PokeApiClient(pokeApiHost, connectionPoolConfig);
+        return new PokeApiClient(new PokeApiClientConfig(
+                pokeApiHost,
+                connectionPoolConfig,
+                ResponseTtlCacheConfig.fromDefaultConfig()
+        ));
     }
 
     public PokeApiMediaClient createMediaClient() {

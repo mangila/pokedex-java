@@ -62,4 +62,5 @@ principles.
 ## Design Patterns (WIP)
 
 - Singleton
+    - Lazy Initialization
 - Factory

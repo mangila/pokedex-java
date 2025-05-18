@@ -87,8 +87,16 @@ public class TlsConnectionPool {
         return connected.get();
     }
 
-    public int poolSize() {
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
+    public int remainingCapacity() {
         return queue.remainingCapacity();
+    }
+
+    public int poolCapacity() {
+        return config.poolConfig().maxConnections();
     }
 
     public void shutdownConnectionPool() {
@@ -132,7 +140,7 @@ public class TlsConnectionPool {
      */
     private void healthProbe() {
         log.info("Health probe started");
-        if (queue.isEmpty()) {
+        if (isEmpty()) {
             log.debug("Pool is empty, no connections to check");
             return;
         }

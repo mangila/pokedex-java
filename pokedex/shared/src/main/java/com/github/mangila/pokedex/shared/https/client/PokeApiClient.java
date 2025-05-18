@@ -1,13 +1,11 @@
 package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.ResponseTtlCache;
-import com.github.mangila.pokedex.shared.cache.ResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
-import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +31,11 @@ public class PokeApiClient {
     private final TlsConnectionPool pool;
     private final ResponseTtlCache cache;
 
-    public PokeApiClient(PokeApiHost host,
-                         TlsConnectionPoolConfig tlsConnectionPoolConfig) {
-        this.host = host;
-        this.pool = new TlsConnectionPool(tlsConnectionPoolConfig);
+    public PokeApiClient(PokeApiClientConfig config) {
+        this.host = config.pokeApiHost();
+        this.pool = new TlsConnectionPool(config.tlsConnectionPoolConfig());
         pool.init();
-        this.cache = new ResponseTtlCache(ResponseTtlCacheConfig.fromDefaultConfig());
+        this.cache = new ResponseTtlCache(config.responseTtlCacheConfig());
         cache.startEvictionThread();
     }
 
