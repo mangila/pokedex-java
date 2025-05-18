@@ -20,10 +20,10 @@ public record PokeApiUriGithub(URI uri) {
 
     private void ensureFromPokeApi(URI uri) {
         if (!uri.getHost().equals("raw.githubusercontent.com")) {
-            throw new IllegalArgumentException("Host name must be 'pokeapi.co' - " + uri.getHost());
+            throw new IllegalArgumentException("Host name must be 'raw.githubusercontent.com' - " + uri.getHost());
         }
         if (!uri.getPath().startsWith("/PokeApi")) {
-            throw new IllegalArgumentException("Path must start with '/api/v2' - " + uri.getPath());
+            throw new IllegalArgumentException("Path must start with '/PokeApi' - " + uri.getPath());
         }
     }
 }
