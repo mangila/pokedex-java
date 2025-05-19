@@ -49,6 +49,7 @@ This is the first project created in the Pokédex series;
 - Scheduler
 - Key Value Database
     - Persist to disk
+    - .pokemon file format
 
 ## Engineering Principles (WIP)
 
