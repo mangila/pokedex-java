@@ -11,15 +11,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class QueueService {
 
     private static final Logger log = LoggerFactory.getLogger(QueueService.class);
-    private static QueueService INSTANCE = new QueueService();
+    private static QueueService instance = new QueueService();
 
     private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
 
     public static QueueService getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new QueueService();
+        if (instance == null) {
+            instance = new QueueService();
         }
-        return INSTANCE;
+        return instance;
     }
 
     private QueueService() {

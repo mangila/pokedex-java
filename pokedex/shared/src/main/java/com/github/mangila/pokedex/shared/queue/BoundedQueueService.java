@@ -14,15 +14,15 @@ import java.util.concurrent.TimeUnit;
 public class BoundedQueueService {
 
     private static final Logger log = LoggerFactory.getLogger(BoundedQueueService.class);
-    private static BoundedQueueService INSTANCE;
+    private static BoundedQueueService instance;
 
     private final Map<String, LinkedBlockingQueue<QueueEntry>> boundedQueues;
 
     public static BoundedQueueService getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new BoundedQueueService();
+        if (instance == null) {
+            instance = new BoundedQueueService();
         }
-        return INSTANCE;
+        return instance;
     }
 
     private BoundedQueueService() {

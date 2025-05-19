@@ -43,6 +43,6 @@ public class PokemonMapper {
                                     List<PokemonVariety> varieties,
                                     PokemonEvolutionChain evolutionChain) {
 
-        return null;
+        return new Pokemon(1, "b");
     }
 }

@@ -72,4 +72,5 @@ This is the first project created in the Pokédex series;
 
 - Singleton
     - Lazy Initialization
+    - Eager Initialization
 - Factory
