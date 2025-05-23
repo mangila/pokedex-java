@@ -26,3 +26,11 @@ repos:
         files: "^pokedex/shared/src"
         stages:
           - pre-commit
+      - id: validate_infrastructure
+        name: Terraform validate
+        entry: python print.py
+        language: system
+        verbose: true
+        files: "^infrastructure"
+        stages:
+          - pre-commit
