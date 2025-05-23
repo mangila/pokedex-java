@@ -1,13 +1,13 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
-import com.github.mangila.pokedex.shared.cache.LruCache;
+import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
 
 public class Engine {
 
-    private final LruCache cache;
+    private final PokemonLruCache cache;
     private final Storage storage;
 
-    public Engine(LruCache cache,
+    public Engine(PokemonLruCache cache,
                   Storage storage) {
         this.cache = cache;
         this.storage = storage;
