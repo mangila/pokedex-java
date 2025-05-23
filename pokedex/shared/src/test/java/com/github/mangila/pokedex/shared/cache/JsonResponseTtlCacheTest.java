@@ -9,17 +9,17 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class ResponseTtlCacheTest {
+class JsonResponseTtlCacheTest {
 
     @Test
     void shouldPutKeyAndRemoveAfterTtl() {
-        var config = new ResponseTtlCacheConfig(
+        var config = new JsonResponseTtlCacheConfig(
                 Duration.ofSeconds(3),
                 0,
                 3,
                 SECONDS
         );
-        var cache = new ResponseTtlCache(config);
+        var cache = new JsonResponseTtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();
@@ -30,13 +30,13 @@ class ResponseTtlCacheTest {
 
     @Test
     void shouldShutdownEvictionThreadAndNotRemoveKey() throws InterruptedException {
-        var config = new ResponseTtlCacheConfig(
+        var config = new JsonResponseTtlCacheConfig(
                 Duration.ofSeconds(3),
                 0,
                 3,
                 SECONDS
         );
-        var cache = new ResponseTtlCache(config);
+        var cache = new JsonResponseTtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();

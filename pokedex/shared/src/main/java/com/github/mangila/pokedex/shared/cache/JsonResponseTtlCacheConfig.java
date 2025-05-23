@@ -4,18 +4,18 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public record ResponseTtlCacheConfig(
+public record JsonResponseTtlCacheConfig(
         Duration ttl,
         long initialDelay,
         long delay,
         TimeUnit timeUnit
 ) {
 
-    public static ResponseTtlCacheConfig fromDefaultConfig() {
-        return new ResponseTtlCacheConfig(Duration.ofMinutes(5), 10, 30, TimeUnit.SECONDS);
+    public static JsonResponseTtlCacheConfig fromDefaultConfig() {
+        return new JsonResponseTtlCacheConfig(Duration.ofMinutes(5), 10, 30, TimeUnit.SECONDS);
     }
 
-    public ResponseTtlCacheConfig {
+    public JsonResponseTtlCacheConfig {
         if (initialDelay < 0) {
             throw new IllegalArgumentException("initialDelay must be greater than or equal to 0");
         }

@@ -11,15 +11,15 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class ResponseTtlCache {
+public class JsonResponseTtlCache {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseTtlCache.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonResponseTtlCache.class);
 
     private final Map<String, TtlCacheEntry> cache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService evictionThread = VirtualThreadConfig.newSingleThreadScheduledExecutor();
-    private final ResponseTtlCacheConfig config;
+    private final JsonResponseTtlCacheConfig config;
 
-    public ResponseTtlCache(ResponseTtlCacheConfig config) {
+    public JsonResponseTtlCache(JsonResponseTtlCacheConfig config) {
         this.config = config;
     }
 

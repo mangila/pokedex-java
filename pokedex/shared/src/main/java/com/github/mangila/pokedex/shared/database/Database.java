@@ -12,7 +12,7 @@ public class Database {
 
     private Database() {
         this.engine = new Engine(
-                new PokemonLruCache(),
+                new PokemonLruCache(10),
                 new Storage());
     }
 
