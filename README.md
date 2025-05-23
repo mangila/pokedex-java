@@ -25,6 +25,7 @@ This is the first project created in the Pokédex series;
     - web - Web Service
     - shared — Common classes
 - Java 21
+- Terraform (AWS provider)
 
 ## System Architecture (WIP)
 
