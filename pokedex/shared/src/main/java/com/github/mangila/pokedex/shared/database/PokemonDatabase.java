@@ -12,15 +12,19 @@ public class PokemonDatabase {
 
     private final Engine engine;
 
-    private PokemonDatabase() {
+    private PokemonDatabase(PokemonDatabaseConfig config) {
         this.engine = new Engine(
-                new PokemonLruCache(new PokemonLruCacheConfig(10)),
-                new Storage());
+                new PokemonLruCache(new PokemonLruCacheConfig(config.cacheCapacity())),
+                new Storage(config.fileName()));
     }
 
     public static PokemonDatabase getInstance() {
         if (instance == null) {
-            instance = new PokemonDatabase();
+            instance = new PokemonDatabase(
+                    new PokemonDatabaseConfig(
+                            "db.pokemon",
+                            10)
+            );
         }
         return instance;
     }
