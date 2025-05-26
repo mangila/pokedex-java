@@ -8,7 +8,7 @@ public final class PokeApiClientUtil {
         throw new IllegalStateException("Utility class");
     }
 
-    // Early Return
+    // Ensure Pattern / Fail fast
     public static JsonResponse ensureSuccessStatusCode(JsonResponse jsonResponse) {
         if (!jsonResponse.httpStatus().code().startsWith("2")) {
             throw new IllegalStateException("Failed to fetch pokemons");
