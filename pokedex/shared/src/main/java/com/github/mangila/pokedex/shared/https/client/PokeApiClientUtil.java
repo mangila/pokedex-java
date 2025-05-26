@@ -8,11 +8,11 @@ public final class PokeApiClientUtil {
         throw new IllegalStateException("Utility class");
     }
 
+    // Early Return
     public static JsonResponse ensureSuccessStatusCode(JsonResponse jsonResponse) {
-        if (jsonResponse.httpStatus().code().startsWith("2")) {
-            return jsonResponse;
-        } else {
+        if (!jsonResponse.httpStatus().code().startsWith("2")) {
             throw new IllegalStateException("Failed to fetch pokemons");
         }
+        return jsonResponse;
     }
 }

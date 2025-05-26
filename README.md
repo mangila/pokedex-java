@@ -56,6 +56,8 @@ This is the first project created in the Pokédex series;
 
 - EAFP — Easier to Ask Forgiveness than Permission
 - LBYL - Look Before You Leap
+- Defensive Programming
+  - Early Return
 
 ## Datastructures (WIP)
 
