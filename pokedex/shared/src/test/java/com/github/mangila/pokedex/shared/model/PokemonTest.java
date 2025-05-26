@@ -2,16 +2,16 @@ package com.github.mangila.pokedex.shared.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PokemonTest {
 
     @Test
-    void test() throws IOException {
-        var p = new Pokemon(1, "bulba");
-        //  var b =  p.toBytes();
-        // System.out.println(Arrays.toString(b));
-        // System.out.println(Pokemon.fromBytes(b).getName());
+    void shouldSerializeAndDeserializePokemon() {
+        var bulbaBytes = new Pokemon(1, "bulba").toBytes();
+        assertThat(Pokemon.fromBytes(bulbaBytes))
+                .isNotNull()
+                .extracting(Pokemon::id, Pokemon::name)
+                .contains(1, "bulba");
     }
-
 }
