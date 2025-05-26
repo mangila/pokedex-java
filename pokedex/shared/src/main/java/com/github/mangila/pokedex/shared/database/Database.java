@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.database;
 
 import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
+import com.github.mangila.pokedex.shared.cache.PokemonLruCacheConfig;
 import com.github.mangila.pokedex.shared.database.internal.Engine;
 import com.github.mangila.pokedex.shared.database.internal.Storage;
 
@@ -12,7 +13,7 @@ public class Database {
 
     private Database() {
         this.engine = new Engine(
-                new PokemonLruCache(10),
+                new PokemonLruCache(new PokemonLruCacheConfig(10)),
                 new Storage());
     }
 

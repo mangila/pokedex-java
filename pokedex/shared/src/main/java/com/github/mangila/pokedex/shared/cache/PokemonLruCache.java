@@ -26,11 +26,8 @@ public class PokemonLruCache {
         }
     }
 
-    public PokemonLruCache(int capacity) {
-        if (capacity <= 0 || capacity > MAX_SIZE) {
-            throw new IllegalArgumentException("Invalid cache capacity");
-        }
-        this.capacity = capacity;
+    public PokemonLruCache(PokemonLruCacheConfig config) {
+        this.capacity = config.capacity();
         this.head = new CacheEntry(null, null);
         this.tail = new CacheEntry(null, null);
         head.next = tail;
@@ -60,6 +57,11 @@ public class PokemonLruCache {
     }
 
     private void moveToHead(CacheEntry entry) {
+        if (entry.previous != null && entry.next != null) {
+            entry.previous.next = entry.next;
+            entry.next.previous = entry.previous;
+        }
+
         entry.previous = head;
         entry.next = head.next;
         head.next.previous = entry;
