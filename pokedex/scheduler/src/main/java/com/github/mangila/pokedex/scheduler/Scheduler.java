@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.scheduler.task.InsertPokemonTask;
 import com.github.mangila.pokedex.scheduler.task.InsertSpritesTask;
 import com.github.mangila.pokedex.scheduler.task.QueuePokemonsTask;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -20,13 +21,16 @@ public class Scheduler {
 
     private final PokeApiClient pokeApiClient;
     private final PokeApiMediaClient mediaClient;
+    private final PokemonDatabase pokemonDatabase;
     private final QueueService queueService;
 
     public Scheduler(PokeApiClient pokeApiClient,
                      PokeApiMediaClient mediaClient,
+                     PokemonDatabase pokemonDatabase,
                      QueueService queueService) {
         this.pokeApiClient = pokeApiClient;
         this.mediaClient = mediaClient;
+        this.pokemonDatabase = pokemonDatabase;
         this.queueService = queueService;
     }
 
@@ -70,7 +74,7 @@ public class Scheduler {
 
     public void scheduleInsertPokemons(TaskConfig config) {
         log.info("Scheduling insert pokemons task");
-        var task = new InsertPokemonTask(pokeApiClient, queueService);
+        var task = new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase);
         scheduleTask(config, () -> task);
     }
 

@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.shared.cache.JsonResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
@@ -44,7 +45,10 @@ public class Bootstrap {
             PokeApiClient pokeApiClient,
             PokeApiMediaClient mediaClient
     ) {
-        return new Scheduler(pokeApiClient, mediaClient, QueueService.getInstance());
+        return new Scheduler(pokeApiClient,
+                mediaClient,
+                PokemonDatabase.getInstance(),
+                QueueService.getInstance());
     }
 
     public void initScheduler(Scheduler scheduler) {
