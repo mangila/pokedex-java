@@ -27,6 +27,7 @@ class PokemonLruCacheTest {
         assertThat(value).isNotNull();
         cache.put("4", new Pokemon(4, "pikachu"));
         assertThat(cache.get("1")).isNotNull();
+        assertThat(cache.get("2")).isNull();
     }
 
 }
