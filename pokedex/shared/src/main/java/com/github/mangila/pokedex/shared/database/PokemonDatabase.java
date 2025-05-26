@@ -25,8 +25,8 @@ public class PokemonDatabase {
         return instance;
     }
 
-    public boolean put(String key, Pokemon value) {
-        return engine.put(key, value);
+    public void put(String key, Pokemon value) {
+        engine.put(key, value);
     }
 
     public Pokemon get(String key) {

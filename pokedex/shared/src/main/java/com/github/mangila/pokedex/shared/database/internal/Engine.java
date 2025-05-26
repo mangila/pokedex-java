@@ -21,7 +21,8 @@ public class Engine {
         return storage.get(key);
     }
 
-    public boolean put(String key, Pokemon value) {
-        return false;
+    public void put(String key, Pokemon value) {
+        cache.put(key, value);
+        storage.put(key, value);
     }
 }

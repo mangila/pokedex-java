@@ -7,4 +7,8 @@ public class Storage {
     public Pokemon get(String key) {
         return null;
     }
+
+    public void put(String key, Pokemon value) {
+
+    }
 }
