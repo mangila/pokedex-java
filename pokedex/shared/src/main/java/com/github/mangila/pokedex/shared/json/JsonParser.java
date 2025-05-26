@@ -79,7 +79,7 @@ public class JsonParser {
 
     // LBYL - Look Before You Leap
     private JsonValue parseValue(JsonTokenQueue queue, int depth) {
-        ensureNotDepthMax(depth);
+        checkMaxDepth(depth);
         var token = queue.peek();
         return switch (token.type()) {
             case STRING, FALSE, TRUE, NULL -> new JsonValue(queue.poll().value());
@@ -90,7 +90,8 @@ public class JsonParser {
         };
     }
 
-    private void ensureNotDepthMax(int depth) {
+    // Ensure Pattern / Fail fast
+    private void checkMaxDepth(int depth) {
         if (depth == maxDepth) {
             log.error("ERR - JSON depth is equal max depth - {}", maxDepth);
             throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
