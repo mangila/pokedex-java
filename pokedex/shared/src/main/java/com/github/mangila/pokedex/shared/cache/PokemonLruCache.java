@@ -7,8 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PokemonLruCache {
 
-    private static final int MAX_SIZE = 100;
-
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
     private final int capacity;
     private final CacheEntry head;
