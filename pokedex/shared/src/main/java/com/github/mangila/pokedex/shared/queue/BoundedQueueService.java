@@ -54,19 +54,6 @@ public class BoundedQueueService {
         return Optional.ofNullable(queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS));
     }
 
-    /**
-     * Dangerous blocking method when using Virtual Threads (Java 21), because of Thread Pinning.
-     * Mostly for testing purposes.
-     */
-    public QueueEntry take(String queueName) throws InterruptedException {
-        log.debug("Take queueEntry from {}", queueName);
-        var queue = boundedQueues.get(queueName);
-        if (queue == null) {
-            throw new QueueNotFoundException(queueName);
-        }
-        return queue.take();
-    }
-
     public boolean isEmpty(String name) {
         return boundedQueues.get(name).isEmpty();
     }
