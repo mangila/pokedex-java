@@ -12,6 +12,10 @@ public class PokemonLruCache {
     private final CacheEntry head;
     private final CacheEntry tail;
 
+    public boolean hasKey(String key) {
+        return cache.containsKey(key);
+    }
+
     private static class CacheEntry {
         private final String key;
         private final Pokemon value;

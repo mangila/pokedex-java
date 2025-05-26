@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.scheduler.Application;
+import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
@@ -18,7 +19,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public record InsertPokemonTask(PokeApiClient pokeApiClient,
-                                QueueService queueService) implements Runnable {
+                                QueueService queueService,
+                                PokemonDatabase pokemonDatabase) implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(InsertPokemonTask.class);
 
@@ -119,12 +121,11 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     pokemonSpecies,
                     pokemonVarieties,
                     evolutionChain);
-
-
+            pokemonDatabase.put(pokemon.name(), pokemon);
         } catch (Exception e) {
             var entry = poll.get();
             if (entry.equalsMaxRetries(3)) {
-                // TODO DLQ
+                queueService.add(Application.POKEMON_SPECIES_URL_DL_QUEUE, entry);
                 return;
             }
             entry.incrementFailCounter();

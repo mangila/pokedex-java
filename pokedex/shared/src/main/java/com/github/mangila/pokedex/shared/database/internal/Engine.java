@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
 import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
+import com.github.mangila.pokedex.shared.model.Pokemon;
 
 public class Engine {
 
@@ -13,11 +14,14 @@ public class Engine {
         this.storage = storage;
     }
 
-    public byte[] get(String key) {
-        return null;
+    public Pokemon get(String key) {
+        if (cache.hasKey(key)) {
+            return cache.get(key);
+        }
+        return storage.get(key);
     }
 
-    public boolean put(String key, byte[] value) {
+    public boolean put(String key, Pokemon value) {
         return false;
     }
 }
