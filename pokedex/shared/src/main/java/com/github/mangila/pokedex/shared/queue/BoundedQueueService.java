@@ -41,6 +41,10 @@ public class BoundedQueueService {
         return boundedQueues.get(queueName).add(entry);
     }
 
+    /**
+     * Dangerous blocking method when using Virtual Threads (Java 21), because of Thread Pinning.
+     * Very small blocking timeout should be used.
+     */
     public Optional<QueueEntry> poll(String queueName, Duration timeout) throws InterruptedException {
         log.debug("Poll queueEntry from {} - {}", queueName, timeout);
         var queue = boundedQueues.get(queueName);
@@ -50,6 +54,10 @@ public class BoundedQueueService {
         return Optional.ofNullable(queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS));
     }
 
+    /**
+     * Dangerous blocking method when using Virtual Threads (Java 21), because of Thread Pinning.
+     * Mostly for testing purposes.
+     */
     public QueueEntry take(String queueName) throws InterruptedException {
         log.debug("Take queueEntry from {}", queueName);
         var queue = boundedQueues.get(queueName);

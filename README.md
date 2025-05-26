@@ -46,7 +46,8 @@ This is the first project created in the Pokédex series;
     - Connection Pooling
     - SSL/TLS
 - Json Parser
-- Time to Live(TTL) Cache
+- Time To Live(TTL) Cache
+- Last Recently Used(LRU) Cache
 - Scheduler
 - Key Value Database
     - Persist to disk
@@ -57,7 +58,7 @@ This is the first project created in the Pokédex series;
 - EAFP — Easier to Ask Forgiveness than Permission
 - LBYL - Look Before You Leap
 - Defensive Programming
-  - Ensure pattern / Fail fast
+    - Ensure pattern / Fail fast
 
 ## Datastructures (WIP)
 
