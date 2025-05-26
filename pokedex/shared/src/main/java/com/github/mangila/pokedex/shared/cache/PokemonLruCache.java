@@ -34,15 +34,15 @@ public class PokemonLruCache {
 
     public void put(String key, Pokemon value) {
         if (cache.containsKey(key)) {
-            moveToHead(cache.get(key));
+            lastRecentlyUsed(cache.get(key));
             return;
         }
         if (cache.size() == capacity) {
-            removeOldest();
+            leastRecentlyUsed();
         }
         var entry = new CacheEntry(key, value);
         cache.put(key, entry);
-        moveToHead(entry);
+        lastRecentlyUsed(entry);
     }
 
     public Pokemon get(String key) {
@@ -50,11 +50,15 @@ public class PokemonLruCache {
         if (entry == null) {
             return null;
         }
-        moveToHead(entry);
+        lastRecentlyUsed(entry);
         return entry.value;
     }
 
-    private void moveToHead(CacheEntry entry) {
+    /**
+     * 1. detach if it has links
+     * 2. re-link to head
+     */
+    private void lastRecentlyUsed(CacheEntry entry) {
         if (entry.previous != null && entry.next != null) {
             entry.previous.next = entry.next;
             entry.next.previous = entry.previous;
@@ -66,7 +70,11 @@ public class PokemonLruCache {
         head.next = entry;
     }
 
-    private void removeOldest() {
+    /**
+     * 1. Remove from cache
+     * 2. Create a new tail link
+     */
+    private void leastRecentlyUsed() {
         var entry = tail.previous;
         cache.remove(entry.key);
         entry.previous.next = entry.next;
