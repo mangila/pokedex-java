@@ -87,19 +87,21 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                                     .findFirst()
                                     .orElseThrow())
                             .thenApply(jsonTree -> {
-                                log.debug("Running side effect put sprites to queue");
+                                var name = jsonTree.getValue("name");
+                                log.debug("Running side effect put - {} sprites to queue", name);
                                 var sprites = jsonTree.getObject("sprites");
                                 sprites.add("pokemon_id", pokemonSpecies.getValue("id"));
-                                sprites.add("name", jsonTree.getValue("name"));
+                                sprites.add("name", name);
                                 sprites.add("variety_id", jsonTree.getValue("id"));
                                 queueService.add(Application.POKEMON_SPRITES_QUEUE, new QueueEntry(sprites));
                                 return jsonTree;
                             })
                             .thenApply(jsonTree -> {
-                                log.debug("Running side effect put cries to queue");
+                                var name = jsonTree.getValue("name");
+                                log.debug("Running side effect put - {} cries to queue", name);
                                 var cries = jsonTree.getObject("cries");
                                 cries.add("pokemon_id", pokemonSpecies.getValue("id"));
-                                cries.add("name", jsonTree.getValue("name"));
+                                cries.add("name", name);
                                 cries.add("variety_id", jsonTree.getValue("id"));
                                 queueService.add(Application.POKEMON_CRIES_QUEUE, new QueueEntry(cries));
                                 return jsonTree;
