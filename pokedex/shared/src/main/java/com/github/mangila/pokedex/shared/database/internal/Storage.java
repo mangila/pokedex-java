@@ -9,6 +9,27 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * TODO WIP
+ * <summary>
+ * [HEADER]
+ * - Magic Number ("Pok3mon" bytes)
+ * - Version (n bytes)
+ * - Record Count (4 bytes)
+ * - Index Offset (8 bytes)
+ * - Data Offset (8 bytes)
+ * <p>
+ * [DATA SECTION]
+ * - Pokemon Record 1: Length (4 bytes) + Serialized Pokemon data
+ * - Pokemon Record 2: Length (4 bytes) + Serialized Pokemon data
+ * - ...
+ * <p>
+ * [INDEX SECTION]
+ * - Entry 1: Key length (4 bytes) + Key bytes + Data offset (8 bytes)
+ * - Entry 2: Key length (4 bytes) + Key bytes + Data offset (8 bytes)
+ * - ...
+ * </summary>
+ */
 public class Storage {
 
     public static final byte[] POKEMON_MAGIC_NUMBER = "Pok3mon".getBytes();

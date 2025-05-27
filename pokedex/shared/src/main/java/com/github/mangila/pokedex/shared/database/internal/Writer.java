@@ -29,7 +29,7 @@ public class Writer {
     /**
      * Write File Headers with initial values
      */
-    public static void init(File file) {
+    private static void init(File file) {
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
              FileChannel channel = raf.getChannel()) {
             MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, HEADER_SIZE);
