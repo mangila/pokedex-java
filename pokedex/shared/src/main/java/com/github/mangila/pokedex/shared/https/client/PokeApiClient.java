@@ -82,6 +82,7 @@ public class PokeApiClient {
         return Optional.empty();
     }
 
+    // Two Pointers Algorithm technique - From the same End - current and previous
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
             var lineBuffer = new ByteArrayOutputStream();
@@ -106,6 +107,7 @@ public class PokeApiClient {
         }
     }
 
+    // Two Pointers Algorithm technique - From the same End - current and previous
     private static Headers readHeaders(InputStream inputStream) {
         try {
             var lineBuffer = new ByteArrayOutputStream(1024);
@@ -159,6 +161,7 @@ public class PokeApiClient {
         }
     }
 
+    // Two Pointers Algorithm technique - From the same End - current and previous
     private static byte[] readChunkedGzipJsonBody(InputStream inputStream) throws IOException {
         var chunkLineBuffer = new ByteArrayOutputStream();
         var chunkBuffer = new ByteArrayOutputStream(1024);
