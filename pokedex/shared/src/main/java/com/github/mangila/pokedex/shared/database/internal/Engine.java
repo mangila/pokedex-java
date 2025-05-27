@@ -21,7 +21,9 @@ public class Engine {
             return cache.get(key);
         }
         var value = storage.get(key);
-        cache.put(key, value);
+        if (value != null) {
+            cache.put(key, value);
+        }
         return value;
     }
 
