@@ -18,7 +18,9 @@ public class Engine {
         if (cache.hasKey(key)) {
             return cache.get(key);
         }
-        return storage.get(key);
+        var value = storage.get(key);
+        cache.put(key, value);
+        return value;
     }
 
     public void put(String key, Pokemon value) {

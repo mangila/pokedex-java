@@ -16,9 +16,9 @@ public class Storage {
         try {
             var exist = new File(fileName).createNewFile();
             if (!exist) {
-                log.info("File {} already exists", fileName);
+                log.info("Database - {} - already exists", fileName);
             } else {
-                log.info("File {} created", fileName);
+                log.info("Database - {} - created", fileName);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
