@@ -29,6 +29,10 @@ public class PokemonDatabase {
         return instance;
     }
 
+    public void init() {
+        engine.init();
+    }
+
     public void put(String key, Pokemon value) {
         engine.put(key, value);
     }

@@ -14,6 +14,7 @@ public class Application {
     public static void main(String[] args) {
         var bootstrap = new Bootstrap();
         bootstrap.initQueues();
+        bootstrap.initDatabase();
         var scheduler = bootstrap.createScheduler(
                 bootstrap.createPokeApiClient(),
                 bootstrap.createMediaClient()

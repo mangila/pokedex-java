@@ -22,6 +22,10 @@ public class Bootstrap {
         QueueService.getInstance().createNewQueue(POKEMON_CRIES_QUEUE);
     }
 
+    public void initDatabase() {
+        PokemonDatabase.getInstance().init();
+    }
+
     public PokeApiClient createPokeApiClient() {
         var pokeApiHost = PokeApiHost.fromDefault();
         var connectionPoolConfig = new TlsConnectionPoolConfig(

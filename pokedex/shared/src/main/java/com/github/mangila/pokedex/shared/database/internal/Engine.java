@@ -3,6 +3,8 @@ package com.github.mangila.pokedex.shared.database.internal;
 import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 
+import java.io.IOException;
+
 public class Engine {
 
     private final PokemonLruCache cache;
@@ -26,5 +28,13 @@ public class Engine {
     public void put(String key, Pokemon value) {
         cache.put(key, value);
         storage.put(key, value);
+    }
+
+    public void init() {
+        try {
+            storage.init();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

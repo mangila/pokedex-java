@@ -59,6 +59,7 @@ This is the first project created in the Pokédex series;
 - LBYL - Look Before You Leap
 - Defensive Programming
     - Ensure pattern / Fail fast
+    - Try pattern / Fail safe
 
 ## Datastructures (WIP)
 
