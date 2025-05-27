@@ -12,9 +12,9 @@ import java.util.Map;
 public class Storage {
 
     public static final byte[] POKEMON_MAGIC_NUMBER = "Pok3mon".getBytes();
-    public static final byte VERSION = 1;
+    public static final byte[] VERSION = new byte[]{1};
     public static final int MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length;
-    public static final int VERSION_SIZE = 1;
+    public static final int VERSION_SIZE = VERSION.length;
     public static final int RECORD_COUNT_SIZE = 4;
     public static final int OFFSET_SIZE = 8;
     public static final int INDEX_OFFSET_SIZE = 8;
