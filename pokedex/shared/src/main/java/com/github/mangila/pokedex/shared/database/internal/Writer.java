@@ -7,7 +7,7 @@ import java.util.concurrent.*;
 
 public class Writer {
 
-    private final TransferQueue<WriteTransfer> writeQueue = new LinkedTransferQueue<>();
+    private final TransferQueue<WriteTransfer> writeTransfers = new LinkedTransferQueue<>();
     private final ExecutorService writerThread = VirtualThreadConfig.newSingleThreadExecutor();
     private final PokemonFile pokemonFile;
 
@@ -27,9 +27,9 @@ public class Writer {
      * </summary>
      */
     public CompletableFuture<Long> newRecord(String key, Pokemon pokemon) {
-        var writeTransfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
-        writeQueue.tryTransfer(writeTransfer);
-        return writeTransfer.result;
+        var transfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
+        writeTransfers.tryTransfer(transfer);
+        return transfer.result;
     }
 
     /**
@@ -41,9 +41,9 @@ public class Writer {
         writerThread.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    var poll = writeQueue.take();
-                    var result = pokemonFile.write(poll.key, poll.pokemon);
-                    poll.result.complete(result);
+                    var transfer = writeTransfers.take();
+                    var result = pokemonFile.write(transfer.key, transfer.pokemon);
+                    transfer.result.complete(result);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

@@ -86,4 +86,4 @@ This is the first project created in the Pokédex series;
 #### Concurrency
 
 - Fan Out and Fan In
-- Single Writer / Dedicated Writer Thread
+- Dedicated IO Thread
