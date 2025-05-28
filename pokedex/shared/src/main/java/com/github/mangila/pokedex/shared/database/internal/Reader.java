@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 public class Reader {
 
     private final TransferQueue<ReadTransfer> readTransfers = new LinkedTransferQueue<>();
+    private final Semaphore readPermits = new Semaphore(10_000);
     private final ExecutorService readerThread = VirtualThreadConfig.newSingleThreadExecutor();
     private final PokemonFile pokemonFile;
 
@@ -27,6 +28,7 @@ public class Reader {
      * </summary>
      */
     public CompletableFuture<Pokemon> get(String key) {
+        readPermits.acquireUninterruptibly();
         var transfer = new ReadTransfer(key, new CompletableFuture<>());
         readTransfers.tryTransfer(transfer);
         return transfer.result;
@@ -44,6 +46,7 @@ public class Reader {
                     var transfer = readTransfers.take();
                     var pokemon = pokemonFile.read(transfer.key);
                     transfer.result.complete(pokemon);
+                    readPermits.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 public class Writer {
 
     private final TransferQueue<WriteTransfer> writeTransfers = new LinkedTransferQueue<>();
+    private final Semaphore writePermits = new Semaphore(3000);
     private final ExecutorService writerThread = VirtualThreadConfig.newSingleThreadExecutor();
     private final PokemonFile pokemonFile;
 
@@ -27,6 +28,7 @@ public class Writer {
      * </summary>
      */
     public CompletableFuture<Long> newRecord(String key, Pokemon pokemon) {
+        writePermits.acquireUninterruptibly();
         var transfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
         writeTransfers.tryTransfer(transfer);
         return transfer.result;
@@ -44,6 +46,7 @@ public class Writer {
                     var transfer = writeTransfers.take();
                     var result = pokemonFile.write(transfer.key, transfer.pokemon);
                     transfer.result.complete(result);
+                    writePermits.release();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

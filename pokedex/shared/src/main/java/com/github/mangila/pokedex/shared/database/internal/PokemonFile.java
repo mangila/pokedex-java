@@ -45,19 +45,6 @@ public class PokemonFile {
         }
     }
 
-    public Long getKeyOffset(String key) {
-        return keyOffset.get(key);
-    }
-
-    public void putKeyOffset(String key, Long offset) {
-        keyOffset.put(key, offset);
-        pokemonCount.incrementAndGet();
-    }
-
-    public long getPokemonCount() {
-        return pokemonCount.get();
-    }
-
     public Long write(String key, Pokemon pokemon) {
         var crc32c = new CRC32C();
         if (keyOffset.containsKey(key)) {
