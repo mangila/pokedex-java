@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.shared.database;
 import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
 import com.github.mangila.pokedex.shared.cache.PokemonLruCacheConfig;
 import com.github.mangila.pokedex.shared.database.internal.Engine;
-import com.github.mangila.pokedex.shared.database.internal.Storage;
+import com.github.mangila.pokedex.shared.database.internal.DiskHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 
 public class PokemonDatabase {
@@ -15,7 +15,7 @@ public class PokemonDatabase {
     private PokemonDatabase(PokemonDatabaseConfig config) {
         this.engine = new Engine(
                 new PokemonLruCache(new PokemonLruCacheConfig(config.cacheCapacity())),
-                new Storage(config.fileName()));
+                new DiskHandler(config.fileName()));
     }
 
     public static PokemonDatabase getInstance() {

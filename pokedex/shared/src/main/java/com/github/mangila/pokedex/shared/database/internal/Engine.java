@@ -6,19 +6,19 @@ import com.github.mangila.pokedex.shared.model.Pokemon;
 public class Engine {
 
     private final PokemonLruCache cache;
-    private final Storage storage;
+    private final DiskHandler disk;
 
     public Engine(PokemonLruCache cache,
-                  Storage storage) {
+                  DiskHandler disk) {
         this.cache = cache;
-        this.storage = storage;
+        this.disk = disk;
     }
 
     public Pokemon get(String key) {
         if (cache.hasKey(key)) {
             return cache.get(key);
         }
-        var value = storage.get(key);
+        var value = disk.get(key);
         if (value != null) {
             cache.put(key, value);
         }
@@ -26,7 +26,7 @@ public class Engine {
     }
 
     public void put(String key, Pokemon value) {
-        storage.put(key, value);
+        disk.put(key, value);
         cache.put(key, value);
     }
 }

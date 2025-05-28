@@ -14,9 +14,39 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.github.mangila.pokedex.shared.database.internal.Storage.*;
 
+/**
+ * TODO WIP
+ * <summary>
+ * [HEADER]
+ * - Magic Number ("Pok3mon" bytes)
+ * - Version (n bytes)
+ * - Record Count (4 bytes)
+ * - Index Offset (8 bytes)
+ * - Data Offset (8 bytes)
+ * <p>
+ * [DATA SECTION]
+ * - Pokemon Record 1: Length (4 bytes) + Serialized Pokemon data
+ * - Pokemon Record 2: Length (4 bytes) + Serialized Pokemon data
+ * - ...
+ * <p>
+ * [INDEX SECTION]
+ * - Entry 1: Key length (4 bytes) + Key bytes + Data offset (8 bytes)
+ * - Entry 2: Key length (4 bytes) + Key bytes + Data offset (8 bytes)
+ * - ...
+ * </summary>
+ */
 public class PokemonFile {
+
+    public static final byte[] POKEMON_MAGIC_NUMBER = "Pok3mon".getBytes();
+    public static final byte[] VERSION = new byte[]{1};
+    public static final int MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length;
+    public static final int VERSION_SIZE = VERSION.length;
+    public static final int RECORD_COUNT_SIZE = 4;
+    public static final int OFFSET_SIZE = 8;
+    public static final int INDEX_OFFSET_SIZE = 8;
+    public static final int DATA_OFFSET_SIZE = 8;
+    public static final int HEADER_SIZE = MAGIC_NUMBER_SIZE + VERSION_SIZE + RECORD_COUNT_SIZE + INDEX_OFFSET_SIZE + DATA_OFFSET_SIZE;
 
     private static final Set<StandardOpenOption> CREATE_NEW_OPTIONS = EnumSet.of(
             StandardOpenOption.READ,
@@ -45,6 +75,36 @@ public class PokemonFile {
             init(fileExists);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public Long getKeyOffset(String key) {
+        return keyOffset.get(key);
+    }
+
+    public void putKeyOffset(String key, Long offset) {
+        keyOffset.put(key, offset);
+        pokemonCount.incrementAndGet();
+    }
+
+    public long getPokemonCount() {
+        return pokemonCount.get();
+    }
+
+    public Long write(String key, Pokemon pokemon) {
+        if (keyOffset.containsKey(key)) {
+            // update
+        } else {
+            // new insert
+        }
+        return -1L;
+    }
+
+    public Pokemon read(String key) {
+        if (!keyOffset.containsKey(key)) {
+            return null;
+        } else {
+            return new Pokemon(1, "bulba");
         }
     }
 
@@ -82,35 +142,5 @@ public class PokemonFile {
         buffer.putLong(INDEX_OFFSET_SIZE);
         buffer.putLong(DATA_OFFSET_SIZE);
         buffer.force();
-    }
-
-    public Long getKeyOffset(String key) {
-        return keyOffset.get(key);
-    }
-
-    public void putKeyOffset(String key, Long offset) {
-        keyOffset.put(key, offset);
-        pokemonCount.incrementAndGet();
-    }
-
-    public long getPokemonCount() {
-        return pokemonCount.get();
-    }
-
-    public Long write(String key, Pokemon pokemon) {
-        if (keyOffset.containsKey(key)) {
-            // update
-        } else {
-            // new insert
-        }
-        return -1L;
-    }
-
-    public Pokemon read(String key) {
-        if (!keyOffset.containsKey(key)) {
-            return null;
-        } else {
-            return new Pokemon(1, "bulba");
-        }
     }
 }

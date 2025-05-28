@@ -1,0 +1,31 @@
+package com.github.mangila.pokedex.shared.database.internal;
+
+import com.github.mangila.pokedex.shared.model.Pokemon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class DiskHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(DiskHandler.class);
+
+    private final PokemonFile file;
+    private final Reader reader;
+    private final Writer writer;
+
+    public DiskHandler(String fileName) {
+        this.file = new PokemonFile(fileName);
+        this.reader = new Reader(file);
+        this.writer = new Writer(file);
+    }
+
+    public Pokemon get(String key) {
+        var offset = file.getKeyOffset(key);
+        var pokemon = reader.get(offset);
+        return pokemon;
+    }
+
+    public void put(String key, Pokemon pokemon) {
+        var offset = writer.newRecord(key, pokemon)
+                .join();
+    }
+}
