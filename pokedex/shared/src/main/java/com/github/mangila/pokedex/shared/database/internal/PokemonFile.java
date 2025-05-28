@@ -1,16 +1,15 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
 import com.github.mangila.pokedex.shared.model.Pokemon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.CRC32C;
@@ -39,6 +38,8 @@ import java.util.zip.CRC32C;
  */
 public class PokemonFile {
 
+    private static final Logger log = LoggerFactory.getLogger(PokemonFile.class);
+
     public static final byte[] POKEMON_MAGIC_NUMBER = "Pok3mon".getBytes();
     public static final byte[] VERSION = new byte[]{1};
     public static final int MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length;
@@ -49,31 +50,26 @@ public class PokemonFile {
     public static final int DATA_OFFSET_SIZE = 8;
     public static final int HEADER_SIZE = MAGIC_NUMBER_SIZE + VERSION_SIZE + RECORD_COUNT_SIZE + INDEX_OFFSET_SIZE + DATA_OFFSET_SIZE;
 
-    private static final Set<StandardOpenOption> CREATE_NEW_OPTIONS = EnumSet.of(
-            StandardOpenOption.READ,
-            StandardOpenOption.WRITE,
-            StandardOpenOption.CREATE_NEW,
-            StandardOpenOption.DSYNC);
-
-    private static final Set<StandardOpenOption> OPEN_EXISTING_OPTIONS = EnumSet.of(
-            StandardOpenOption.READ,
-            StandardOpenOption.WRITE,
-            StandardOpenOption.CREATE,
-            StandardOpenOption.DSYNC);
-
+    private final String fileName;
     private final Map<String, Long> keyOffset = new ConcurrentHashMap<>();
     private final AtomicLong pokemonCount = new AtomicLong(0);
-    private final FileChannel fileChannel;
+    private final FileChannel writeChannel;
+    private final FileChannel readChannel;
 
     public PokemonFile(String fileName) {
         try {
+            this.fileName = fileName;
             var path = Paths.get(fileName);
             var fileExists = Files.exists(path);
-            this.fileChannel = FileChannel.open(
+            this.writeChannel = FileChannel.open(
                     path,
-                    fileExists ? OPEN_EXISTING_OPTIONS : CREATE_NEW_OPTIONS
+                    fileExists ? FileOptions.OPEN_EXISTING_WRITE_OPTIONS : FileOptions.CREATE_NEW_WRITE_OPTIONS
             );
             init(fileExists);
+            this.readChannel = FileChannel.open(
+                    path,
+                    FileOptions.READ_OPTIONS
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -113,8 +109,10 @@ public class PokemonFile {
 
     private void init(boolean fileExists) throws IOException {
         if (fileExists) {
+            log.info("{} - exists, loading indexes", fileName);
             loadOffsets();
         } else {
+            log.info("{} - does not exist, creating new file", fileName);
             newOffsets();
         }
     }
@@ -135,7 +133,7 @@ public class PokemonFile {
      * </summary>
      */
     private void newOffsets() throws IOException {
-        MappedByteBuffer buffer = fileChannel.map(
+        MappedByteBuffer buffer = writeChannel.map(
                 FileChannel.MapMode.READ_WRITE,
                 0,
                 HEADER_SIZE);
