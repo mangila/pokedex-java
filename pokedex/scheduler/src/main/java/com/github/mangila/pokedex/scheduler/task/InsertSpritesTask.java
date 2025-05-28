@@ -8,16 +8,22 @@ import org.slf4j.LoggerFactory;
 public record InsertSpritesTask(
         PokeApiClient pokeApiClient,
         QueueService queueService
-) implements Runnable {
+) implements Task<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(InsertSpritesTask.class);
 
     @Override
-    public void run() {
+    public String getTaskName() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public Void call() throws Exception {
         try {
             log.debug("Fetching sprites");
         } catch (Exception e) {
             log.error("Error fetching sprites", e);
         }
+        return null;
     }
 }

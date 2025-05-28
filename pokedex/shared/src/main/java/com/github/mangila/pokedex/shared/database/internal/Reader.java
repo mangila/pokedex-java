@@ -28,10 +28,16 @@ public class Reader {
      * </summary>
      */
     public CompletableFuture<Pokemon> get(String key) {
-        readPermits.acquireUninterruptibly();
-        var transfer = new ReadTransfer(key, new CompletableFuture<>());
-        readTransfers.tryTransfer(transfer);
-        return transfer.result;
+        try {
+            readPermits.acquire();
+            var readTransfer = new ReadTransfer(key, new CompletableFuture<>());
+            readTransfers.transfer(readTransfer);
+            return readTransfer.result;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            readPermits.release();
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**

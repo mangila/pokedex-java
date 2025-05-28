@@ -7,8 +7,8 @@ import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
-import com.github.mangila.pokedex.shared.model.primitives.PokeApiUri;
 import com.github.mangila.pokedex.shared.model.PokemonMapper;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiUri;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
@@ -20,9 +20,15 @@ import java.util.stream.Stream;
 
 public record InsertPokemonTask(PokeApiClient pokeApiClient,
                                 QueueService queueService,
-                                PokemonDatabase pokemonDatabase) implements Runnable {
+                                PokemonDatabase pokemonDatabase) implements Task<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(InsertPokemonTask.class);
+
+
+    @Override
+    public String getTaskName() {
+        return this.getClass().getSimpleName();
+    }
 
     /**
      * <summary>
@@ -33,11 +39,11 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
      * </summary>
      */
     @Override
-    public void run() {
+    public Void call() throws Exception {
         var poll = queueService.poll(Application.POKEMON_SPECIES_URL_QUEUE);
         if (poll.isEmpty()) {
             log.info("Queue is empty");
-            return;
+            return null;
         }
         var url = poll.get().getDataAs(PokeApiUri.class);
         log.info("Queue entry {}", url);
@@ -128,12 +134,12 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             var entry = poll.get();
             if (entry.equalsMaxRetries(3)) {
                 queueService.add(Application.POKEMON_SPECIES_URL_DL_QUEUE, entry);
-                return;
+                return null;
             }
             entry.incrementFailCounter();
             log.error("Error fetching pokemon species - {}", entry, e);
             queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, entry);
         }
+        return null;
     }
-
 }

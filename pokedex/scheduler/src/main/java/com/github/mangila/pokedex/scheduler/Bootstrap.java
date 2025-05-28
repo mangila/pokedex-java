@@ -27,7 +27,7 @@ public class Bootstrap {
         var connectionPoolConfig = new TlsConnectionPoolConfig(
                 pokeApiHost.host(),
                 pokeApiHost.port(),
-                new TlsConnectionPoolConfig.PoolConfig("pokedex-pool-1", 5),
+                5,
                 new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
         );
         return new PokeApiClient(new PokeApiClientConfig(

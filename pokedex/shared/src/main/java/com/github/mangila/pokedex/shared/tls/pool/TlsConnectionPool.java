@@ -25,7 +25,7 @@ public class TlsConnectionPool {
 
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.config = config;
-        this.maxConnections = config.poolConfig().maxConnections();
+        this.maxConnections = config.maxConnections();
         this.queue = new LinkedBlockingQueue<>(maxConnections);
         this.healthProbe = new HealthProbe(this.queue);
         this.initialized = new AtomicBoolean(Boolean.FALSE);
@@ -39,7 +39,10 @@ public class TlsConnectionPool {
             offer(connection);
         }
         VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .scheduleAtFixedRate(healthProbe, 1, 30, TimeUnit.SECONDS);
+                .scheduleAtFixedRate(healthProbe,
+                        config.healthCheckConfig().initialDelay(),
+                        config.healthCheckConfig().delay(),
+                        config.healthCheckConfig().timeUnit());
     }
 
     public void offer(TlsConnection connection) {

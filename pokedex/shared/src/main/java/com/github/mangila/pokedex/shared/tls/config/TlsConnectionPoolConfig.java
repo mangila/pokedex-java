@@ -5,15 +5,13 @@ import java.util.concurrent.TimeUnit;
 
 public record TlsConnectionPoolConfig(String host,
                                       int port,
-                                      PoolConfig poolConfig,
+                                      int maxConnections,
                                       HealthCheckConfig healthCheckConfig) {
 
-    public record PoolConfig(String poolName, int maxConnections) {
-        public PoolConfig {
-            Objects.requireNonNull(poolName, "poolName must not be null");
-            if (maxConnections <= 0) {
-                throw new IllegalArgumentException("maxConnections must be greater than 0");
-            }
+    public TlsConnectionPoolConfig {
+        Objects.requireNonNull(host, "host must not be null");
+        if (port <= 0) {
+            throw new IllegalArgumentException("port must be greater than 0");
         }
     }
 
@@ -28,7 +26,6 @@ public record TlsConnectionPoolConfig(String host,
             }
             Objects.requireNonNull(timeUnit, "timeUnit must not be null");
         }
-
     }
 
 }

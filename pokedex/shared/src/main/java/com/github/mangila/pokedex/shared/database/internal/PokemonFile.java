@@ -20,9 +20,10 @@ public class PokemonFile {
 
     private static final Logger log = LoggerFactory.getLogger(PokemonFile.class);
 
-    private final String fileName;
     private final Map<String, Long> keyOffset = new ConcurrentHashMap<>();
     private final AtomicLong pokemonCount = new AtomicLong(0);
+    private final CRC32C crc32c = new CRC32C();
+    private final String fileName;
     private final FileChannel writeChannel;
     private final FileChannel readChannel;
 
@@ -46,7 +47,7 @@ public class PokemonFile {
     }
 
     public Long write(String key, Pokemon pokemon) {
-        var crc32c = new CRC32C();
+        crc32c.reset();
         if (keyOffset.containsKey(key)) {
             // update
         } else {
@@ -59,7 +60,7 @@ public class PokemonFile {
         if (!keyOffset.containsKey(key)) {
             return null;
         } else {
-            var crc32c = new CRC32C();
+            crc32c.reset();
             return new Pokemon(1, "bulba");
         }
     }

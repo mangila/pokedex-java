@@ -11,12 +11,11 @@ import java.util.concurrent.TimeUnit;
 public final class TestUtil {
 
     public static PokeApiClient createNewTestingPokeApiClient() throws InterruptedException {
-        int maxConnections = 2;
         var pokeApiHost = PokeApiHost.fromDefault();
         var connectionPoolConfig = new TlsConnectionPoolConfig(
                 pokeApiHost.host(),
                 pokeApiHost.port(),
-                new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool-1", maxConnections),
+                2,
                 new TlsConnectionPoolConfig.HealthCheckConfig(0, 10, TimeUnit.SECONDS)
         );
         return new PokeApiClient(new PokeApiClientConfig(

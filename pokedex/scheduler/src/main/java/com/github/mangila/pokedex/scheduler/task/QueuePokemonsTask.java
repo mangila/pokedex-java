@@ -13,13 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                                 QueueService queueService,
-                                int pokemonCount) implements Callable<Integer> {
+                                int pokemonCount) implements Task<Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(QueuePokemonsTask.class);
+
+    @Override
+    public String getTaskName() {
+        return this.getClass().getSimpleName();
+    }
 
     @Override
     public Integer call() {

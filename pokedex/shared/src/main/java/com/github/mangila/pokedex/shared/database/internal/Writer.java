@@ -28,10 +28,16 @@ public class Writer {
      * </summary>
      */
     public CompletableFuture<Long> newRecord(String key, Pokemon pokemon) {
-        writePermits.acquireUninterruptibly();
-        var transfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
-        writeTransfers.tryTransfer(transfer);
-        return transfer.result;
+        try {
+            writePermits.acquire();
+            var writeTransfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
+            writeTransfers.transfer(writeTransfer);
+            return writeTransfer.result;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            writePermits.release();
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
     /**

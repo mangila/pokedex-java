@@ -8,16 +8,22 @@ import org.slf4j.LoggerFactory;
 public record InsertCriesTask(
         PokeApiClient pokeApiClient,
         QueueService queueService
-) implements Runnable {
+) implements Task<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(InsertCriesTask.class);
 
     @Override
-    public void run() {
+    public String getTaskName() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public Void call() throws Exception {
         try {
             log.debug("Fetching cries");
         } catch (Exception e) {
             log.error("Error fetching cries", e);
         }
+        return null;
     }
 }
