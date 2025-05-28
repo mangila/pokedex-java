@@ -1,7 +1,10 @@
-package com.github.mangila.pokedex.shared.https.model;
+package com.github.mangila.pokedex.shared.model.primitives;
 
 import java.util.Objects;
 
+/**
+ * Domain Primitive with Validation
+ */
 public record PokeApiHost(String host, int port) {
 
     public PokeApiHost {

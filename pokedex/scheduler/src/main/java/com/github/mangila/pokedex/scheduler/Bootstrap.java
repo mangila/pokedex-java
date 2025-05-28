@@ -6,7 +6,7 @@ import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
-import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 

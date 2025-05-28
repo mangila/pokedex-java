@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.shared.testutil;
 import com.github.mangila.pokedex.shared.cache.JsonResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
-import com.github.mangila.pokedex.shared.https.model.PokeApiHost;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 

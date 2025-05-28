@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.*;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

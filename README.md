@@ -32,6 +32,7 @@ Overengineering at its finest
 ## System Architecture (WIP)
 
 - Domain Primitives with Service Layer
+- Event Driven
 
 ## Paradigms (WIP)
 
