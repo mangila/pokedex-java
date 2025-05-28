@@ -4,10 +4,7 @@ import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * TODO WIP
@@ -44,36 +41,37 @@ public class Storage {
 
     private static final Logger log = LoggerFactory.getLogger(Storage.class);
 
-    private final File file;
+    private final PokemonFile file;
     private final Reader reader;
     private final Writer writer;
-    private final Map<String, Long> keyIndex = new HashMap<>();
-
-    private long recordCount = 0;
 
     public Storage(String fileName) {
-        this.file = new File(fileName);
+        this.file = new PokemonFile(fileName);
         this.reader = new Reader(file);
         this.writer = new Writer(file);
     }
 
     public Pokemon get(String key) {
-        return null;
+        var offset = file.getKeyOffset(key);
+        var pokemon = reader.get(offset);
+        log.trace("{} -> {}", key, pokemon);
+        return pokemon;
     }
 
     public void put(String key, Pokemon pokemon) {
-
-    }
-
-    public int size() {
-        return (int) recordCount;
-    }
-
-    public boolean containsKey(String key) {
-        return keyIndex.containsKey(key);
+        var offset = writer.newRecord(key, pokemon);
+        file.putKeyOffset(key, offset);
+        log.trace("{} -> {}", key, offset);
     }
 
     public void init() throws IOException {
-        writer.tryCreateNewFile();
+        var isCreated = file.tryCreateNewFile();
+        if (isCreated) {
+            log.info("Created new file {}", file.getIoFile().getName());
+            writer.init();
+        } else {
+            log.info("File {} already exists", file.getIoFile().getName());
+            writer.load();
+        }
     }
 }

@@ -21,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import static com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil.isCrLf;
+
 public class PokeApiClient {
 
     private static final Logger log = LoggerFactory.getLogger(PokeApiClient.class);
@@ -82,7 +84,10 @@ public class PokeApiClient {
         return Optional.empty();
     }
 
-    // Two Pointers Algorithm technique - From the same End - current and previous
+    /**
+     * Uses Two Pointers Algorithm technique - tracking current and previous characters
+     * from the same end to detect delimiters in the stream.
+     */
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
             var lineBuffer = new ByteArrayOutputStream();
@@ -107,7 +112,10 @@ public class PokeApiClient {
         }
     }
 
-    // Two Pointers Algorithm technique - From the same End - current and previous
+    /**
+     * Uses the Two Pointers Algorithm technique - tracking current and previous characters from the same end
+     * to detect delimiters in the input stream.
+     */
     private static Headers readHeaders(InputStream inputStream) {
         try {
             var lineBuffer = new ByteArrayOutputStream(1024);
@@ -161,7 +169,12 @@ public class PokeApiClient {
         }
     }
 
-    // Two Pointers Algorithm technique - From the same End - current and previous
+    /**
+     * <summary>
+     * The Two Pointers Algorithm technique is used here to parse HTTP protocol data from input stream.
+     * By comparing current and previous bytes we detect required delimiters (CRLF).
+     * </summary>
+     */
     private static byte[] readChunkedGzipJsonBody(InputStream inputStream) throws IOException {
         var chunkLineBuffer = new ByteArrayOutputStream();
         var chunkBuffer = new ByteArrayOutputStream(1024);
@@ -187,14 +200,6 @@ public class PokeApiClient {
         }
 
         return chunkBuffer.toByteArray();
-    }
-
-    /**
-     * CR (Carriage Return): ASCII value 13 (\r)
-     * LF (Line Feed): ASCII value 10 (\n)
-     */
-    private static boolean isCrLf(int carriageReturn, int lineFeed) {
-        return carriageReturn == '\r' && lineFeed == '\n';
     }
 
 }

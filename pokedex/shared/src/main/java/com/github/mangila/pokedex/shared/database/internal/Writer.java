@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
-import java.io.File;
+import com.github.mangila.pokedex.shared.model.Pokemon;
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -10,27 +11,23 @@ import static com.github.mangila.pokedex.shared.database.internal.Storage.*;
 
 public class Writer {
 
-    private final File file;
+    private final PokemonFile pokemonFile;
 
-    public Writer(File file) {
-        this.file = file;
+    public Writer(PokemonFile pokemonFile) {
+        this.pokemonFile = pokemonFile;
     }
 
-    // Try Pattern - Fail Safe
-    public void tryCreateNewFile() throws IOException {
-        if (!file.exists()) {
-            boolean isNewFile = file.createNewFile();
-            if (isNewFile) {
-                init(file);
-            }
-        }
+    public long newRecord(String key, Pokemon pokemon) {
+        return -1L;
     }
 
     /**
+     * <summary>
      * Write File Headers with initial values
+     * </summary>
      */
-    private static void init(File file) {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
+    public void init() {
+        try (RandomAccessFile raf = new RandomAccessFile(pokemonFile.getIoFile(), "rw");
              FileChannel channel = raf.getChannel()) {
             MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, HEADER_SIZE);
             buffer.put(POKEMON_MAGIC_NUMBER);
@@ -44,4 +41,12 @@ public class Writer {
         }
     }
 
+    /**
+     * <summary>
+     * Load indexes from file
+     * </summary>
+     */
+    public void load() {
+
+    }
 }
