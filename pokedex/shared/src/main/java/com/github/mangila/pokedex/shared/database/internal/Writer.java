@@ -1,52 +1,53 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
+import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-
-import static com.github.mangila.pokedex.shared.database.internal.Storage.*;
+import java.util.concurrent.*;
 
 public class Writer {
 
+    private final TransferQueue<WriteTransfer> writeQueue = new LinkedTransferQueue<>();
+    private final ExecutorService writerThread = VirtualThreadConfig.newSingleThreadExecutor();
     private final PokemonFile pokemonFile;
+
+    private record WriteTransfer(String key, Pokemon pokemon, CompletableFuture<Long> result) {
+    }
 
     public Writer(PokemonFile pokemonFile) {
         this.pokemonFile = pokemonFile;
-    }
-
-    public long newRecord(String key, Pokemon pokemon) {
-        return -1L;
-    }
-
-    /**
-     * <summary>
-     * Write File Headers with initial values
-     * </summary>
-     */
-    public void init() {
-        try (RandomAccessFile raf = new RandomAccessFile(pokemonFile.getIoFile(), "rw");
-             FileChannel channel = raf.getChannel()) {
-            MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_WRITE, 0, HEADER_SIZE);
-            buffer.put(POKEMON_MAGIC_NUMBER);
-            buffer.put(VERSION);
-            buffer.putInt(0);
-            buffer.putLong(INDEX_OFFSET_SIZE);
-            buffer.putLong(DATA_OFFSET_SIZE);
-            buffer.force();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        VirtualThreadConfig.newSingleThreadScheduledExecutor()
+                .schedule(this::write, 1, TimeUnit.SECONDS);
     }
 
     /**
      * <summary>
-     * Load indexes from file
+     * Fan-Out - Fan-In <br>
+     * The producer will wait for result
      * </summary>
      */
-    public void load() {
+    public CompletableFuture<Long> newRecord(String key, Pokemon pokemon) {
+        var writeTransfer = new WriteTransfer(key, pokemon, new CompletableFuture<>());
+        writeQueue.tryTransfer(writeTransfer);
+        return writeTransfer.result;
+    }
 
+    /**
+     * <summary>
+     * Dedicated Writer Thread
+     * </summary>
+     */
+    private void write() {
+        writerThread.submit(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    var poll = writeQueue.take();
+                    var result = pokemonFile.write(poll.key, poll.pokemon);
+                    poll.result.complete(result);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
     }
 }

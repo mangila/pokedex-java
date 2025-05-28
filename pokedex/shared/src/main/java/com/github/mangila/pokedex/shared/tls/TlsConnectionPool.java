@@ -71,7 +71,8 @@ public class TlsConnectionPool {
 
     public PooledTlsConnection borrow() throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        var connection = queue.take().getDataAs(PooledTlsConnection.class)
+        var connection = queue.take()
+                .getDataAs(PooledTlsConnection.class)
                 .reconnectIfUnHealthy();
         log.debug("Connection borrowed - {}", connection.id());
         return connection;

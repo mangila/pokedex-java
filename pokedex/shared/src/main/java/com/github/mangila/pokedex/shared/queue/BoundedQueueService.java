@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,10 +40,6 @@ public class BoundedQueueService {
         return boundedQueues.get(queueName).add(entry);
     }
 
-    /**
-     * Dangerous blocking method when using Virtual Threads (Java 21), because of Thread Pinning.
-     * Very small blocking timeout should be used.
-     */
     public Optional<QueueEntry> poll(String queueName, Duration timeout) throws InterruptedException {
         log.debug("Poll queueEntry from {} - {}", queueName, timeout);
         var queue = boundedQueues.get(queueName);
@@ -56,17 +51,5 @@ public class BoundedQueueService {
 
     public boolean isEmpty(String name) {
         return boundedQueues.get(name).isEmpty();
-    }
-
-    public int remainingCapacity(String name) {
-        return boundedQueues.get(name).remainingCapacity();
-    }
-
-    public void clear(String name) {
-        boundedQueues.get(name).clear();
-    }
-
-    public Iterator<QueueEntry> iterator(String name) {
-        return boundedQueues.get(name).iterator();
     }
 }

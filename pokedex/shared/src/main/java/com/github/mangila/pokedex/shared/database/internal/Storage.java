@@ -4,8 +4,6 @@ import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 /**
  * TODO WIP
  * <summary>
@@ -54,24 +52,13 @@ public class Storage {
     public Pokemon get(String key) {
         var offset = file.getKeyOffset(key);
         var pokemon = reader.get(offset);
-        log.trace("{} -> {}", key, pokemon);
+        log.debug("{} -> {}", key, pokemon);
         return pokemon;
     }
 
     public void put(String key, Pokemon pokemon) {
-        var offset = writer.newRecord(key, pokemon);
-        file.putKeyOffset(key, offset);
-        log.trace("{} -> {}", key, offset);
-    }
-
-    public void init() throws IOException {
-        var isCreated = file.tryCreateNewFile();
-        if (isCreated) {
-            log.info("Created new file {}", file.getIoFile().getName());
-            writer.init();
-        } else {
-            log.info("File {} already exists", file.getIoFile().getName());
-            writer.load();
-        }
+        var offset = writer.newRecord(key, pokemon)
+                .join();
+        log.debug("{} -> {} -> {}", key, pokemon.name(), offset);
     }
 }

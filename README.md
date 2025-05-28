@@ -76,7 +76,14 @@ This is the first project created in the Pokédex series;
 
 ## Design Patterns (WIP)
 
+#### Gang of Four
+
 - Singleton
     - Lazy Initialization
     - Eager Initialization
 - Factory
+
+#### Concurrency
+
+- Fan Out and Fan In
+- Single Writer / Dedicated Writer Thread

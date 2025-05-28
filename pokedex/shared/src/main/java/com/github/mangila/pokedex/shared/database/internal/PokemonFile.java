@@ -1,19 +1,87 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
-import java.io.File;
+import com.github.mangila.pokedex.shared.model.Pokemon;
+
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.github.mangila.pokedex.shared.database.internal.Storage.*;
+
 public class PokemonFile {
+
+    private static final Set<StandardOpenOption> CREATE_NEW_OPTIONS = EnumSet.of(
+            StandardOpenOption.READ,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE_NEW,
+            StandardOpenOption.DSYNC);
+
+    private static final Set<StandardOpenOption> OPEN_EXISTING_OPTIONS = EnumSet.of(
+            StandardOpenOption.READ,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.CREATE,
+            StandardOpenOption.DSYNC);
 
     private final Map<String, Long> keyOffset = new ConcurrentHashMap<>();
     private final AtomicLong pokemonCount = new AtomicLong(0);
-    private final File ioFile;
+    private final FileChannel fileChannel;
 
     public PokemonFile(String fileName) {
-        this.ioFile = new File(fileName);
+        try {
+            var path = Paths.get(fileName);
+            var fileExists = Files.exists(path);
+            this.fileChannel = FileChannel.open(
+                    path,
+                    fileExists ? OPEN_EXISTING_OPTIONS : CREATE_NEW_OPTIONS
+            );
+            init(fileExists);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void init(boolean fileExists) throws IOException {
+        if (fileExists) {
+            loadOffsets();
+        } else {
+            newOffsets();
+        }
+    }
+
+    /**
+     * <summary>
+     * Load indexes from file
+     * </summary>
+     */
+    private void loadOffsets() {
+
+    }
+
+
+    /**
+     * <summary>
+     * Write File Headers with initial values
+     * </summary>
+     */
+    private void newOffsets() throws IOException {
+        MappedByteBuffer buffer = fileChannel.map(
+                FileChannel.MapMode.READ_WRITE,
+                0,
+                HEADER_SIZE);
+        buffer.put(POKEMON_MAGIC_NUMBER);
+        buffer.put(VERSION);
+        buffer.putInt(0);
+        buffer.putLong(INDEX_OFFSET_SIZE);
+        buffer.putLong(DATA_OFFSET_SIZE);
+        buffer.force();
     }
 
     public Long getKeyOffset(String key) {
@@ -29,16 +97,20 @@ public class PokemonFile {
         return pokemonCount.get();
     }
 
-    /**
-     * <summary>
-     * Try Pattern - Fail Safe
-     * </summary>
-     */
-    public boolean tryCreateNewFile() throws IOException {
-        return ioFile.createNewFile();
+    public Long write(String key, Pokemon pokemon) {
+        if (keyOffset.containsKey(key)) {
+            // update
+        } else {
+            // new insert
+        }
+        return -1L;
     }
 
-    public File getIoFile() {
-        return ioFile;
+    public Pokemon read(String key) {
+        if (!keyOffset.containsKey(key)) {
+            return null;
+        } else {
+            return new Pokemon(1, "bulba");
+        }
     }
 }
