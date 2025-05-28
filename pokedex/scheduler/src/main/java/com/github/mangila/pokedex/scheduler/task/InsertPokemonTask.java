@@ -7,7 +7,7 @@ import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
-import com.github.mangila.pokedex.shared.model.PokeApiUri;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiUri;
 import com.github.mangila.pokedex.shared.model.PokemonMapper;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -114,7 +114,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
             var pokemonVarieties = varietyFutures.stream()
                     .map(CompletableFuture::join)
-                    .peek(pokemonVariety -> log.debug("pokemon variety {} from species - {}", pokemonVariety.getName(), pokemonSpecies
+                    .peek(pokemonVariety -> log.debug("pokemon variety {} from species - {}", pokemonVariety.name(), pokemonSpecies
                             .getValue("name")
                             .getString()))
                     .toList();

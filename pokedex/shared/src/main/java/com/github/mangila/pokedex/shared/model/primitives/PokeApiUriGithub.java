@@ -1,8 +1,11 @@
-package com.github.mangila.pokedex.shared.model;
+package com.github.mangila.pokedex.shared.model.primitives;
 
 import java.net.URI;
 import java.util.Objects;
 
+/**
+ * Domain Primitive with Validation
+ */
 public record PokeApiUriGithub(URI uri) {
 
     public PokeApiUriGithub {

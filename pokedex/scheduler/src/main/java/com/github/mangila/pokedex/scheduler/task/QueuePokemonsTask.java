@@ -6,7 +6,7 @@ import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
-import com.github.mangila.pokedex.shared.model.PokeApiUri;
+import com.github.mangila.pokedex.shared.model.primitives.PokeApiUri;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;

@@ -2,20 +2,21 @@ package com.github.mangila.pokedex.shared.database;
 
 import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
 import com.github.mangila.pokedex.shared.cache.PokemonLruCacheConfig;
-import com.github.mangila.pokedex.shared.database.internal.Engine;
 import com.github.mangila.pokedex.shared.database.internal.DiskHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
+
+import java.util.Objects;
 
 public class PokemonDatabase {
 
     private static PokemonDatabase instance;
 
-    private final Engine engine;
+    private final PokemonLruCache cache;
+    private final DiskHandler disk;
 
     private PokemonDatabase(PokemonDatabaseConfig config) {
-        this.engine = new Engine(
-                new PokemonLruCache(new PokemonLruCacheConfig(config.cacheCapacity())),
-                new DiskHandler(config.fileName()));
+        this.cache = new PokemonLruCache(new PokemonLruCacheConfig(config.cacheCapacity()));
+        this.disk = new DiskHandler(config.fileName());
     }
 
     public static PokemonDatabase getInstance() {
@@ -30,10 +31,21 @@ public class PokemonDatabase {
     }
 
     public void put(String key, Pokemon value) {
-        engine.put(key, value);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
+        cache.put(key, value);
+        disk.put(key, value);
     }
 
     public Pokemon get(String key) {
-        return engine.get(key);
+        Objects.requireNonNull(key);
+        if (cache.hasKey(key)) {
+            return cache.get(key);
+        }
+        var value = disk.get(key);
+        if (value != null) {
+            cache.put(key, value);
+        }
+        return value;
     }
 }
