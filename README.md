@@ -4,6 +4,8 @@ Experimental Low-level project with plain Java.
 
 This is the first project created in the Pokédex series;
 
+Overengineering at its finest
+
 # Requirements
 
 - Multi-module (if possible) project with chosen Language
