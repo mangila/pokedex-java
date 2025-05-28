@@ -20,8 +20,7 @@ public class DiskHandler {
 
     public Pokemon get(String key) {
         var offset = file.getKeyOffset(key);
-        var pokemon = reader.get(offset);
-        return pokemon;
+        return reader.get(offset);
     }
 
     public void put(String key, Pokemon pokemon) {
