@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.CRC32C;
 
 
 /**
@@ -26,8 +27,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * - Data Offset (8 bytes)
  * <p>
  * [DATA SECTION]
- * - Pokemon Record 1: Length (4 bytes) + Serialized Pokemon data
- * - Pokemon Record 2: Length (4 bytes) + Serialized Pokemon data
+ * - Pokemon Record 1: Length (4 bytes) + Serialized Pokemon data + CRC32C
+ * - Pokemon Record 2: Length (4 bytes) + Serialized Pokemon data + CRC32C
  * - ...
  * <p>
  * [INDEX SECTION]
@@ -92,6 +93,7 @@ public class PokemonFile {
     }
 
     public Long write(String key, Pokemon pokemon) {
+        var crc32c = new CRC32C();
         if (keyOffset.containsKey(key)) {
             // update
         } else {
@@ -104,6 +106,7 @@ public class PokemonFile {
         if (!keyOffset.containsKey(key)) {
             return null;
         } else {
+            var crc32c = new CRC32C();
             return new Pokemon(1, "bulba");
         }
     }
