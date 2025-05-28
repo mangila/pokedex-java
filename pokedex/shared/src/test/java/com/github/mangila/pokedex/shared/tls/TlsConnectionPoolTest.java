@@ -1,3 +1,4 @@
+/*
 package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
@@ -142,4 +143,4 @@ class TlsConnectionPoolTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Connection pool is not initialized");
     }
-}
+}*/

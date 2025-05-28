@@ -12,6 +12,7 @@ Overengineering at its finest
 - Daemon Service
 - Web Service
 - Common/Shared module
+- cwebp installed on the system
 
 ## Project Goal
 
@@ -84,9 +85,9 @@ Overengineering at its finest
 - Singleton
     - Lazy Initialization
     - Eager Initialization
-- Factory
+- Factory Method
 
 #### Concurrency
 
 - Fan Out and Fan In
-- Dedicated IO Thread
+- Dispatcher Tread

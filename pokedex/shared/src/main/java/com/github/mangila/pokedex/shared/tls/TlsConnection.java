@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.time.Instant;
 
 public class TlsConnection {
 
@@ -18,14 +17,14 @@ public class TlsConnection {
 
     private SSLSocket socket;
 
-    public TlsConnection(String host, int port) {
+    private TlsConnection(String host, int port) {
         this.host = host;
         this.port = port;
         this.socket = TlsClientSocketFactory.create();
     }
 
-    public PooledTlsConnection toPooledTlsConnection(int id) {
-        return new PooledTlsConnection(id, this, Instant.now());
+    public static TlsConnection create(String host, int port) {
+        return new TlsConnection(host, port);
     }
 
     public boolean isConnected() {
@@ -39,6 +38,14 @@ public class TlsConnection {
         log.debug("Reconnecting to {}:{}", host, port);
         this.socket = TlsClientSocketFactory.create();
         connect();
+    }
+
+    public TlsConnection reconnectIfUnHealthy() {
+        if (!isConnected()) {
+            reconnect();
+            return this;
+        }
+        return this;
     }
 
     public void connect() {

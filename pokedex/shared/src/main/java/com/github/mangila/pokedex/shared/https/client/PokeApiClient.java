@@ -2,11 +2,14 @@ package com.github.mangila.pokedex.shared.https.client;
 
 import com.github.mangila.pokedex.shared.cache.JsonResponseTtlCache;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.https.model.*;
+import com.github.mangila.pokedex.shared.https.model.Headers;
+import com.github.mangila.pokedex.shared.https.model.HttpStatus;
+import com.github.mangila.pokedex.shared.https.model.JsonRequest;
+import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
-import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
+import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -60,12 +62,7 @@ public class PokeApiClient {
             if (cache.hasKey(path)) {
                 return Optional.of(cache.get(path));
             }
-            var tlsConnectionOptional = pool.borrow(Duration.ofSeconds(30));
-            if (tlsConnectionOptional.isEmpty()) {
-                log.warn("Connection pool borrow failed");
-                return Optional.empty();
-            }
-            var connection = tlsConnectionOptional.get();
+            var connection = pool.borrow();
             var http = jsonRequest.toHttp(host.host(), "HTTP/1.1");
             log.debug("{}", http);
             connection.getOutputStream().write(http.getBytes());
@@ -75,12 +72,13 @@ public class PokeApiClient {
             var headers = readHeaders(inputStream);
             var body = readGzipJsonBody(inputStream, headers);
             var response = new JsonResponse(httpStatus, headers, body);
-            pool.returnConnection(connection);
+            pool.offer(connection);
             cache.put(path, response);
             return Optional.of(response);
         } catch (Exception e) {
             log.error("ERR", e);
-            pool.addNewConnection();
+            var connection = pool.createNewConnection();
+            pool.offer(connection);
         }
         return Optional.empty();
     }
