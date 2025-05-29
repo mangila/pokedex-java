@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class JsonParserTest {
+public class JsonParserTest {
 
     @Test
     void shouldParseJson() {

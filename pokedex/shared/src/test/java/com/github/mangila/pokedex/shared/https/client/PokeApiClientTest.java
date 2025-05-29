@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.ExecutionException;
 
 
-class PokeApiClientTest {
+public class PokeApiClientTest {
 
     @Test
     void getJson() throws ExecutionException, InterruptedException {
