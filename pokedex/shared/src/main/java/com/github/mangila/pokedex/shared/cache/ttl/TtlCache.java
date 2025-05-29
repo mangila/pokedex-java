@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.cache;
+package com.github.mangila.pokedex.shared.cache.ttl;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;

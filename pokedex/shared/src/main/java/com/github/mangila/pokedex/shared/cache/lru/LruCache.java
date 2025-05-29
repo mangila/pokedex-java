@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.cache;
+package com.github.mangila.pokedex.shared.cache.lru;
 
 import com.github.mangila.pokedex.shared.model.Pokemon;
 

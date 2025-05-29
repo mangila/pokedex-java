@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.cache;
+package com.github.mangila.pokedex.shared.cache.ttl;
 
 import java.time.Duration;
 import java.util.Objects;

@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.cache;
 
+import com.github.mangila.pokedex.shared.cache.lru.PokemonLruCache;
+import com.github.mangila.pokedex.shared.cache.lru.PokemonLruCacheConfig;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.junit.jupiter.api.Test;
 

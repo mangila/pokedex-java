@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.cache;
 
+import com.github.mangila.pokedex.shared.cache.ttl.JsonResponseTtlCache;
+import com.github.mangila.pokedex.shared.cache.ttl.JsonResponseTtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import org.junit.jupiter.api.Test;
 
