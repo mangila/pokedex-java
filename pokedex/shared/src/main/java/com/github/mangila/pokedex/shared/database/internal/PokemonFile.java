@@ -22,7 +22,7 @@ public class PokemonFile {
 
     private final Map<String, Long> keyOffset = new ConcurrentHashMap<>();
     private final AtomicLong pokemonCount = new AtomicLong(0);
-    private final CRC32C crc32c = new CRC32C();
+    private final ThreadLocal<CRC32C> crc32c = ThreadLocal.withInitial(CRC32C::new);
     private final String fileName;
     private final FileChannel writeChannel;
     private final FileChannel readChannel;
@@ -47,7 +47,7 @@ public class PokemonFile {
     }
 
     public Long write(String key, Pokemon pokemon) {
-        crc32c.reset();
+        crc32c.get().reset();
         if (keyOffset.containsKey(key)) {
             // update
         } else {
@@ -61,7 +61,7 @@ public class PokemonFile {
         if (!keyOffset.containsKey(key)) {
             return null;
         } else {
-            crc32c.reset();
+            crc32c.get().reset();
             return new Pokemon(1, "bulba");
         }
     }
@@ -102,5 +102,16 @@ public class PokemonFile {
         buffer.putLong(INDEX_OFFSET_SIZE);
         buffer.putLong(DATA_OFFSET_SIZE);
         buffer.force();
+    }
+
+    public void deleteFile() {
+        try {
+            log.info("Deleting file {}", fileName);
+            writeChannel.close();
+            readChannel.close();
+            Files.deleteIfExists(Paths.get(fileName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -3,20 +3,25 @@ package com.github.mangila.pokedex.shared.database.internal.write;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.database.internal.PokemonFile;
 import com.github.mangila.pokedex.shared.model.Pokemon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
 public class Writer {
 
+    private static final Logger log = LoggerFactory.getLogger(Writer.class);
+
     private final TransferQueue<WriteTransfer> writeTransfers;
     private final Semaphore writePermits;
+    private final WriterThread writerThread;
+    private final ScheduledExecutorService executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
 
     public Writer(PokemonFile pokemonFile) {
         this.writeTransfers = new LinkedTransferQueue<>();
-        this.writePermits = new Semaphore(50);
-        var writerThread = new WriterThread(pokemonFile, writeTransfers, writePermits);
-        VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .schedule(writerThread, 1, TimeUnit.SECONDS);
+        this.writePermits = new Semaphore(50, Boolean.TRUE);
+        this.writerThread = new WriterThread(pokemonFile, writeTransfers, writePermits);
+        executor.schedule(writerThread, 1, TimeUnit.SECONDS);
     }
 
     /**
@@ -36,5 +41,10 @@ public class Writer {
             writePermits.release();
             return CompletableFuture.failedFuture(e);
         }
+    }
+
+    public void shutdown() {
+        log.info("Shutting down writer thread");
+        executor.shutdown();
     }
 }

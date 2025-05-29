@@ -2,7 +2,10 @@ package com.github.mangila.pokedex.shared.cache;
 
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
+import com.github.mangila.pokedex.shared.https.model.Headers;
+import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
+import com.github.mangila.pokedex.shared.json.model.JsonTree;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -17,13 +20,14 @@ class TtlCacheTest {
     void shouldPutKeyAndRemoveAfterTtl() {
         var config = new TtlCacheConfig(
                 Duration.ofSeconds(3),
-                0,
-                3,
-                SECONDS
+                new TtlCacheConfig.EvictionConfig(0, 3, SECONDS)
         );
-        var cache = new TtlCache(config);
-        cache.startEvictionThread();
-        cache.put("key", new JsonResponse(null, null, null));
+        var cache = new TtlCache<String, JsonResponse>(config);
+        var httpStatus = new HttpStatus("HTTP/1.1", "200", "OK");
+        var headers = new Headers();
+        var jsonTree = new JsonTree();
+
+        cache.put("key", new JsonResponse(httpStatus, headers, jsonTree));
         assertThat(cache.hasKey("key")).isTrue();
         await()
                 .atMost(10, SECONDS)
@@ -31,20 +35,19 @@ class TtlCacheTest {
     }
 
     @Test
-    void shouldShutdownEvictionThreadAndNotRemoveKey() throws InterruptedException {
+    void shouldGetValueFromCache() {
         var config = new TtlCacheConfig(
-                Duration.ofSeconds(3),
-                0,
-                3,
-                SECONDS
+                Duration.ofSeconds(10),
+                new TtlCacheConfig.EvictionConfig(0, 3, SECONDS)
         );
-        var cache = new TtlCache(config);
-        cache.startEvictionThread();
-        cache.put("key", new JsonResponse(null, null, null));
+        var cache = new TtlCache<String, JsonResponse>(config);
+        var httpStatus = new HttpStatus("HTTP/1.1", "200", "OK");
+        var headers = new Headers();
+        var jsonTree = new JsonTree();
+
+        var response = new JsonResponse(httpStatus, headers, jsonTree);
+        cache.put("key", response);
         assertThat(cache.hasKey("key")).isTrue();
-        cache.shutdownEvictionThread();
-        SECONDS.sleep(5);
-        assertThat(cache.isShutdownAndTerminated()).isTrue();
-        assertThat(cache.hasKey("key")).isTrue();
+        assertThat(cache.get("key")).isEqualTo(response);
     }
 }

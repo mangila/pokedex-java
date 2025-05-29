@@ -85,6 +85,7 @@ Overengineering at its finest
 - Singleton
     - Lazy Initialization
     - Eager Initialization
+    - Bill Pugh with Configure method
 - Factory Method
 
 #### Concurrency

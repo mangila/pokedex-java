@@ -10,14 +10,14 @@ public class DiskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(DiskHandler.class);
 
-    private final PokemonFile file;
+    private final PokemonFile pokemonFile;
     private final Reader reader;
     private final Writer writer;
 
     public DiskHandler(String fileName) {
-        this.file = new PokemonFile(fileName);
-        this.reader = new Reader(file);
-        this.writer = new Writer(file);
+        this.pokemonFile = new PokemonFile(fileName);
+        this.reader = new Reader(pokemonFile);
+        this.writer = new Writer(pokemonFile);
     }
 
     public Pokemon get(String key) {
@@ -27,5 +27,11 @@ public class DiskHandler {
     public void put(String key, Pokemon pokemon) {
         var offset = writer.newRecord(key, pokemon)
                 .join();
+    }
+
+    public void deleteFile() {
+        reader.shutdown();
+        writer.shutdown();
+        pokemonFile.deleteFile();
     }
 }

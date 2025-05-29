@@ -38,6 +38,10 @@ public class TlsClientSocketFactory {
         }
     }
 
+    /**
+     * Creates a new SSLSocket with options <br>
+     * Only accepts TLSv1.2 and 1.3 using http/1.1 as protocol
+     */
     public static SSLSocket create() {
         return create(
                 new TlsSocketConfig(
@@ -51,7 +55,7 @@ public class TlsClientSocketFactory {
         );
     }
 
-    public static SSLSocket create(
+    private static SSLSocket create(
             TlsSocketConfig tlsSocketConfig,
             TlsConfig tlsConfig
     ) {

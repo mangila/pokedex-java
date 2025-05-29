@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Eager Singleton initialization and holds queues in a ConcurrentHashMap
+ */
 public class QueueService {
 
     private static final Logger log = LoggerFactory.getLogger(QueueService.class);

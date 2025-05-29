@@ -2,17 +2,16 @@ package com.github.mangila.pokedex.shared.tls.pool;
 
 import com.github.mangila.pokedex.shared.tls.TlsConnection;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Run a background virtual thread that checks health status and reconnects
- * if unhealthy
+ * Runs in the background periodically - reconnects disconnected sockets
  */
 public class HealthProbe implements Runnable {
 
-    private final BlockingQueue<TlsConnection> queue;
+    private final ConcurrentLinkedQueue<TlsConnection> queue;
 
-    public HealthProbe(BlockingQueue<TlsConnection> queue) {
+    public HealthProbe(ConcurrentLinkedQueue<TlsConnection> queue) {
         this.queue = queue;
     }
 

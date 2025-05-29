@@ -19,9 +19,10 @@ public class TtlCache<K, V> {
         this.config = config;
         EvictionThread<K> evictionThread = new EvictionThread<>(cache, config.ttl());
         VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(evictionThread, config.initialDelay(),
-                        config.delay(),
-                        config.timeUnit());
+                .scheduleWithFixedDelay(evictionThread,
+                        config.evictionConfig().initialDelay(),
+                        config.evictionConfig().delay(),
+                        config.evictionConfig().timeUnit());
     }
 
     public void put(K key, V value) {

@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
+import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,14 +25,14 @@ public final class TestUtil {
                 TtlCacheConfig.fromDefaultConfig()));
     }
 
-    /*public static TlsConnectionPool createNewTestingTlsConnectionPool(int maxConnections) {
+    public static TlsConnectionPool createNewTestingTlsConnectionPool(int maxConnections) {
         String host = "httpbin.org";
         int port = 443;
         return new TlsConnectionPool(
                 new TlsConnectionPoolConfig(
                         host,
                         port,
-                        new TlsConnectionPoolConfig.PoolConfig("pokedex-test-pool-2", maxConnections),
+                        maxConnections,
                         new TlsConnectionPoolConfig.HealthCheckConfig(
                                 0,
                                 10,
@@ -39,6 +40,6 @@ public final class TestUtil {
                         )
                 )
         );
-    }*/
+    }
 
 }

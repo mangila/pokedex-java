@@ -84,7 +84,7 @@ public class PokeApiClient {
 
     /**
      * Uses Two Pointers Algorithm technique - tracking current and previous characters
-     * from the same end to detect delimiters in the stream.
+     * from the same end to detect delimiters in the stream. Reads the HTTP status-line
      */
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
@@ -112,7 +112,7 @@ public class PokeApiClient {
 
     /**
      * Uses the Two Pointers Algorithm technique - tracking current and previous characters from the same end
-     * to detect delimiters in the input stream.
+     * to detect delimiters in the input stream and create an HTTP Headers object.
      */
     private static Headers readHeaders(InputStream inputStream) {
         try {
@@ -144,6 +144,9 @@ public class PokeApiClient {
         }
     }
 
+    /**
+     * Only accepts gzipped JSON -- Java GzipInputStream decompress the bytes and returns parsed JSON
+     */
     private static JsonTree readGzipJsonBody(InputStream inputStream,
                                              Headers headers) {
         try {
@@ -170,7 +173,9 @@ public class PokeApiClient {
     /**
      * <summary>
      * The Two Pointers Algorithm technique is used here to parse HTTP protocol data from input stream.
-     * By comparing current and previous bytes we detect required delimiters (CRLF).
+     * By comparing current and previous bytes we detect required delimiters (CRLF).<br>
+     * Reads HTTP 1.1 chunked transfer -- reads until '0' is found and skip the rest of the bytes in socket buffer<br>
+     * Fills chunkBuffer with every chunk and returns as a byte array
      * </summary>
      */
     private static byte[] readChunkedGzipJsonBody(InputStream inputStream) throws IOException {

@@ -26,6 +26,5 @@ public record ReaderThread(PokemonFile pokemonFile,
                 Thread.currentThread().interrupt();
             }
         }
-
     }
 }
