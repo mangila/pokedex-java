@@ -1,34 +1,32 @@
 package com.github.mangila.pokedex.shared.cache.lru;
 
-import com.github.mangila.pokedex.shared.model.Pokemon;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PokemonLruCache {
+public class LruCache<K, V> {
 
-    private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
+    private final Map<K, CacheEntry> cache = new ConcurrentHashMap<>();
     private final int capacity;
     private final CacheEntry head;
     private final CacheEntry tail;
 
-    public boolean hasKey(String key) {
+    public boolean hasKey(K key) {
         return cache.containsKey(key);
     }
 
-    private static class CacheEntry {
-        private final String key;
-        private final Pokemon value;
+    private class CacheEntry {
+        private final K key;
+        private final V value;
         private CacheEntry next;
         private CacheEntry previous;
 
-        private CacheEntry(String key, Pokemon value) {
+        private CacheEntry(K key, V value) {
             this.key = key;
             this.value = value;
         }
     }
 
-    public PokemonLruCache(PokemonLruCacheConfig config) {
+    public LruCache(LruCacheConfig config) {
         this.capacity = config.capacity();
         this.head = new CacheEntry(null, null);
         this.tail = new CacheEntry(null, null);
@@ -36,7 +34,7 @@ public class PokemonLruCache {
         tail.previous = head;
     }
 
-    public void put(String key, Pokemon value) {
+    public void put(K key, V value) {
         if (cache.containsKey(key)) {
             lastRecentlyUsed(cache.get(key));
             return;
@@ -49,7 +47,7 @@ public class PokemonLruCache {
         lastRecentlyUsed(entry);
     }
 
-    public Pokemon get(String key) {
+    public V get(K key) {
         var entry = cache.get(key);
         if (entry == null) {
             return null;

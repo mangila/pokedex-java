@@ -1,17 +1,17 @@
 package com.github.mangila.pokedex.shared.cache;
 
-import com.github.mangila.pokedex.shared.cache.lru.PokemonLruCache;
-import com.github.mangila.pokedex.shared.cache.lru.PokemonLruCacheConfig;
+import com.github.mangila.pokedex.shared.cache.lru.LruCache;
+import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PokemonLruCacheTest {
+class LruCacheTest {
 
     @Test
     void shouldEvictEntryWhenCacheIsFull() {
-        var cache = new PokemonLruCache(new PokemonLruCacheConfig(3));
+        var cache = new LruCache(new LruCacheConfig(3));
         cache.put("1", new Pokemon(1, "bulba"));
         cache.put("2", new Pokemon(2, "charmander"));
         cache.put("3", new Pokemon(3, "squirtle"));
@@ -21,7 +21,7 @@ class PokemonLruCacheTest {
 
     @Test
     void shouldLastRecentlyUsed() {
-        var cache = new PokemonLruCache(new PokemonLruCacheConfig(3));
+        var cache = new LruCache(new LruCacheConfig(3));
         cache.put("1", new Pokemon(1, "bulba"));
         cache.put("2", new Pokemon(2, "charmander"));
         cache.put("3", new Pokemon(3, "squirtle"));

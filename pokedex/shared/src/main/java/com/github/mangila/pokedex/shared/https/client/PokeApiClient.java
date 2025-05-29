@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.https.client;
 
-import com.github.mangila.pokedex.shared.cache.JsonResponseTtlCache;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.model.Headers;
 import com.github.mangila.pokedex.shared.https.model.HttpStatus;
@@ -34,14 +34,13 @@ public class PokeApiClient {
 
     private final PokeApiHost host;
     private final TlsConnectionPool pool;
-    private final JsonResponseTtlCache cache;
+    private final TtlCache<String, JsonResponse> cache;
 
     public PokeApiClient(PokeApiClientConfig config) {
         this.host = config.pokeApiHost();
         this.pool = new TlsConnectionPool(config.tlsConnectionPoolConfig());
         pool.init();
-        this.cache = new JsonResponseTtlCache(config.jsonResponseTtlCacheConfig());
-        cache.startEvictionThread();
+        this.cache = new TtlCache<>(config.ttlCacheConfig());
     }
 
     public CompletableFuture<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {

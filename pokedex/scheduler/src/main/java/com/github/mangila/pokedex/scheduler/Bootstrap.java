@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler;
 
-import com.github.mangila.pokedex.shared.cache.JsonResponseTtlCacheConfig;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
@@ -33,7 +33,7 @@ public class Bootstrap {
         return new PokeApiClient(new PokeApiClientConfig(
                 pokeApiHost,
                 connectionPoolConfig,
-                JsonResponseTtlCacheConfig.fromDefaultConfig()
+                TtlCacheConfig.fromDefaultConfig()
         ));
     }
 

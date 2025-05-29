@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.shared.cache.lru;
 
-public record PokemonLruCacheConfig(int capacity) {
+public record LruCacheConfig(int capacity) {
 
     private static final int MAX_SIZE = 100;
 
-    public PokemonLruCacheConfig {
+    public LruCacheConfig {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Cache capacity must be greater than 0");
         }

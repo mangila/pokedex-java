@@ -16,7 +16,6 @@ public final class FileOptions {
     public static final Set<StandardOpenOption> OPEN_EXISTING_WRITE_OPTIONS = EnumSet.of(
             StandardOpenOption.READ,
             StandardOpenOption.WRITE,
-            StandardOpenOption.CREATE,
             StandardOpenOption.SPARSE,
             StandardOpenOption.DSYNC);
 

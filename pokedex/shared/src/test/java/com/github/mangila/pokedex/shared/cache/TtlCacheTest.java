@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.cache;
 
-import com.github.mangila.pokedex.shared.cache.ttl.JsonResponseTtlCache;
-import com.github.mangila.pokedex.shared.cache.ttl.JsonResponseTtlCacheConfig;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
 import org.junit.jupiter.api.Test;
 
@@ -11,17 +11,17 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class JsonResponseTtlCacheTest {
+class TtlCacheTest {
 
     @Test
     void shouldPutKeyAndRemoveAfterTtl() {
-        var config = new JsonResponseTtlCacheConfig(
+        var config = new TtlCacheConfig(
                 Duration.ofSeconds(3),
                 0,
                 3,
                 SECONDS
         );
-        var cache = new JsonResponseTtlCache(config);
+        var cache = new TtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();
@@ -32,13 +32,13 @@ class JsonResponseTtlCacheTest {
 
     @Test
     void shouldShutdownEvictionThreadAndNotRemoveKey() throws InterruptedException {
-        var config = new JsonResponseTtlCacheConfig(
+        var config = new TtlCacheConfig(
                 Duration.ofSeconds(3),
                 0,
                 3,
                 SECONDS
         );
-        var cache = new JsonResponseTtlCache(config);
+        var cache = new TtlCache(config);
         cache.startEvictionThread();
         cache.put("key", new JsonResponse(null, null, null));
         assertThat(cache.hasKey("key")).isTrue();

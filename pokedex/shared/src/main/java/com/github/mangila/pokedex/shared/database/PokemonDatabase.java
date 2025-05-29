@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.database;
 
-import com.github.mangila.pokedex.shared.cache.PokemonLruCache;
-import com.github.mangila.pokedex.shared.cache.PokemonLruCacheConfig;
+import com.github.mangila.pokedex.shared.cache.lru.LruCache;
+import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.database.internal.DiskHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 
@@ -11,11 +11,11 @@ public class PokemonDatabase {
 
     private static PokemonDatabase instance;
 
-    private final PokemonLruCache cache;
+    private final LruCache<String, Pokemon> cache;
     private final DiskHandler disk;
 
     private PokemonDatabase(PokemonDatabaseConfig config) {
-        this.cache = new PokemonLruCache(new PokemonLruCacheConfig(config.cacheCapacity()));
+        this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
         this.disk = new DiskHandler(config.fileName());
     }
 
