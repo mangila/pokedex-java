@@ -7,13 +7,14 @@ import com.github.mangila.pokedex.shared.database.PokemonDatabaseConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
+import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClientConfig;
 import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.mangila.pokedex.scheduler.Application.*;
+import static com.github.mangila.pokedex.scheduler.SchedulerApplication.*;
 
 public class Bootstrap {
 
@@ -31,15 +32,30 @@ public class Bootstrap {
                 5,
                 new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
         );
-        return new PokeApiClient(new PokeApiClientConfig(
+        var config = new PokeApiClientConfig(
                 pokeApiHost,
                 connectionPoolConfig,
                 TtlCacheConfig.fromDefaultConfig()
-        ));
+        );
+        PokeApiClient.configure(config);
+        return PokeApiClient.getInstance();
     }
 
     public PokeApiMediaClient createMediaClient() {
-        return new PokeApiMediaClient();
+        var pokeApiHost = PokeApiHost.fromDefault();
+        var connectionPoolConfig = new TlsConnectionPoolConfig(
+                pokeApiHost.host(),
+                pokeApiHost.port(),
+                5,
+                new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
+        );
+        var config = new PokeApiMediaClientConfig(
+                pokeApiHost,
+                connectionPoolConfig,
+                TtlCacheConfig.fromDefaultConfig()
+        );
+        PokeApiMediaClient.configure(config);
+        return PokeApiMediaClient.getInstance();
     }
 
     public Scheduler createScheduler(

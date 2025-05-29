@@ -48,10 +48,10 @@ public class Scheduler {
 
     public void scheduleFinishedProcessing(TaskConfig.TriggerConfig config) {
         config.executor().scheduleAtFixedRate(() -> {
-            if (queueService.isEmpty(Application.POKEMON_SPECIES_URL_QUEUE)
-                    && queueService.isEmpty(Application.POKEMON_SPRITES_QUEUE)) {
+            if (queueService.isEmpty(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE)
+                    && queueService.isEmpty(SchedulerApplication.POKEMON_SPRITES_QUEUE)) {
                 log.debug("Queues is empty will shutdown");
-                Application.IS_RUNNING.set(Boolean.FALSE);
+                SchedulerApplication.IS_RUNNING.set(Boolean.FALSE);
             }
         }, config.initialDelay(), config.delay(), config.timeUnit());
     }

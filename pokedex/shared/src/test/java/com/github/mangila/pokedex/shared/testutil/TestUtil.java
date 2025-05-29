@@ -19,10 +19,12 @@ public final class TestUtil {
                 2,
                 new TlsConnectionPoolConfig.HealthCheckConfig(0, 10, TimeUnit.SECONDS)
         );
-        return new PokeApiClient(new PokeApiClientConfig(
+        var config = new PokeApiClientConfig(
                 pokeApiHost,
                 connectionPoolConfig,
-                TtlCacheConfig.fromDefaultConfig()));
+                TtlCacheConfig.fromDefaultConfig());
+        PokeApiClient.configure(config);
+        return PokeApiClient.getInstance();
     }
 
     public static TlsConnectionPool createNewTestingTlsConnectionPool(int maxConnections) {

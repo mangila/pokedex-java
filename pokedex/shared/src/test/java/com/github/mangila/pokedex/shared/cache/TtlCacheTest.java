@@ -14,7 +14,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class TtlCacheTest {
+public class TtlCacheTest {
 
     @Test
     void shouldPutKeyAndRemoveAfterTtl() {

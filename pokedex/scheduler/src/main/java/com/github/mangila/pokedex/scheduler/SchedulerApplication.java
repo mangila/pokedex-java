@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.scheduler;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class Application {
+public class SchedulerApplication {
 
     public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
     public static final String POKEMON_SPECIES_URL_DL_QUEUE = "pokemon-species-url-dl-queue";

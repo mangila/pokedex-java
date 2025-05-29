@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -32,15 +33,35 @@ public class PokeApiClient {
     private static final int END_OF_STREAM = -1;
     private static final Pattern HEX_DECIMAL = Pattern.compile("^[0-9a-fA-F]+$");
 
+    private static PokeApiClientConfig config;
+
     private final PokeApiHost host;
     private final TlsConnectionPool pool;
     private final TtlCache<String, JsonResponse> cache;
 
-    public PokeApiClient(PokeApiClientConfig config) {
+    private PokeApiClient(PokeApiClientConfig config) {
         this.host = config.pokeApiHost();
         this.pool = new TlsConnectionPool(config.tlsConnectionPoolConfig());
         pool.init();
         this.cache = new TtlCache<>(config.ttlCacheConfig());
+    }
+
+    public static void configure(PokeApiClientConfig config) {
+        Objects.requireNonNull(config, "PokeApiClientConfig must not be null");
+        if (PokeApiClient.config != null) {
+            throw new IllegalStateException("PokeApiClientConfig is already configured");
+        }
+        log.info("Configuring PokeApiClient with {}", config);
+        PokeApiClient.config = config;
+    }
+
+    private static final class Holder {
+        private static final PokeApiClient INSTANCE = new PokeApiClient(config);
+    }
+
+    public static PokeApiClient getInstance() {
+        Objects.requireNonNull(config, "PokeApiClient must be configured");
+        return Holder.INSTANCE;
     }
 
     public CompletableFuture<Optional<JsonResponse>> getJsonAsync(JsonRequest jsonRequest) {

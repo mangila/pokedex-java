@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: test_web
         name: Test Web Module
-        entry: python print.py
+        entry: python run_sub.py ".\mvnw -pl shared,web -am clean package" "pokedex"
         language: system
         verbose: true
         files: "^pokedex/web/src"
@@ -12,7 +12,7 @@ repos:
           - pre-commit
       - id: test_scheduler
         name: Test Scheduler Module
-        entry: python print.py
+        entry: python run_sub.py ".\mvnw -pl shared,scheduler -am clean package" "pokedex"
         language: system
         verbose: true
         files: "^pokedex/scheduler/src"
@@ -20,7 +20,7 @@ repos:
           - pre-commit
       - id: test_shared
         name: Test Shared Module
-        entry: python print.py
+        entry: python run_sub.py ".\mvnw -pl shared -am clean package" "pokedex"
         language: system
         verbose: true
         files: "^pokedex/shared/src"

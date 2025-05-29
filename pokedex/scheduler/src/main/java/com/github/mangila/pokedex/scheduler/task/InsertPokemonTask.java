@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import com.github.mangila.pokedex.scheduler.Application;
+import com.github.mangila.pokedex.scheduler.SchedulerApplication;
 import com.github.mangila.pokedex.shared.database.PokemonDatabase;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
@@ -40,7 +40,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
      */
     @Override
     public Void call() throws Exception {
-        var poll = queueService.poll(Application.POKEMON_SPECIES_URL_QUEUE);
+        var poll = queueService.poll(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE);
         if (poll.isEmpty()) {
             log.info("Queue is empty");
             return null;
@@ -99,7 +99,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                                 sprites.add("pokemon_id", pokemonSpecies.getValue("id"));
                                 sprites.add("name", name);
                                 sprites.add("variety_id", jsonTree.getValue("id"));
-                                queueService.add(Application.POKEMON_SPRITES_QUEUE, new QueueEntry(sprites));
+                                queueService.add(SchedulerApplication.POKEMON_SPRITES_QUEUE, new QueueEntry(sprites));
                                 return jsonTree;
                             })
                             .thenApply(jsonTree -> {
@@ -109,7 +109,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                                 cries.add("pokemon_id", pokemonSpecies.getValue("id"));
                                 cries.add("name", name);
                                 cries.add("variety_id", jsonTree.getValue("id"));
-                                queueService.add(Application.POKEMON_CRIES_QUEUE, new QueueEntry(cries));
+                                queueService.add(SchedulerApplication.POKEMON_CRIES_QUEUE, new QueueEntry(cries));
                                 return jsonTree;
                             })
                             .thenApply(PokemonMapper::toPokemonVariety))
@@ -133,12 +133,12 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
         } catch (Exception e) {
             var entry = poll.get();
             if (entry.equalsMaxRetries(3)) {
-                queueService.add(Application.POKEMON_SPECIES_URL_DL_QUEUE, entry);
+                queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_DL_QUEUE, entry);
                 return null;
             }
             entry.incrementFailCounter();
             log.error("Error fetching pokemon species - {}", entry, e);
-            queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, entry);
+            queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE, entry);
         }
         return null;
     }

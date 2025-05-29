@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import com.github.mangila.pokedex.scheduler.Application;
+import com.github.mangila.pokedex.scheduler.SchedulerApplication;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientUtil;
 import com.github.mangila.pokedex.shared.https.model.JsonRequest;
@@ -42,7 +42,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                             .map(PokeApiUri::fromString)
                             .map(QueueEntry::new)
                             .peek(queueEntry -> log.debug("Queue entry {}", queueEntry.data()))
-                            .map(queueEntry -> queueService.add(Application.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
+                            .map(queueEntry -> queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
                     .orElseThrow()
                     .toList()
                     .size();

@@ -25,6 +25,9 @@ public class PokemonDatabase {
 
     public static void configure(PokemonDatabaseConfig config) {
         Objects.requireNonNull(config, "PokemonDatabaseConfig must not be null");
+        if (PokemonDatabase.config != null) {
+            throw new IllegalStateException("PokemonDatabaseConfig is already configured");
+        }
         log.info("Configuring PokemonDatabase with {}", config);
         PokemonDatabase.config = config;
     }
