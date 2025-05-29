@@ -56,6 +56,7 @@ public class PokemonFile {
         return -1L;
     }
 
+    // TODO - implement partial reads recovery
     public Pokemon read(String key) {
         if (!keyOffset.containsKey(key)) {
             return null;
