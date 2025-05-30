@@ -27,6 +27,7 @@ public final class FormatOptions {
     public static final byte[] POKEMON_MAGIC_NUMBER_BYTES = POKEMON_MAGIC_NUMBER.getBytes();
     public static final int VERSION = 1;
 
+    // Header sizes
     public static final int POKEMON_MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length();
     public static final int VERSION_SIZE = 4;
     public static final int RECORD_COUNT_SIZE = 4;
