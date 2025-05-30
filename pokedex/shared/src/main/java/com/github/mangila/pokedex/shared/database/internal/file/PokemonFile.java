@@ -13,9 +13,9 @@ public class PokemonFile {
 
     private static final Logger log = LoggerFactory.getLogger(PokemonFile.class);
 
+    private final Path path;
     private FileChannel writeChannel;
     private FileChannel readChannel;
-    private final Path path;
 
     public PokemonFile(PokemonFileName pokemonFileName) {
         try {
