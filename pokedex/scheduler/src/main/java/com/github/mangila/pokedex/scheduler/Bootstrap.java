@@ -25,6 +25,7 @@ public class Bootstrap {
     public void initQueues() {
         var queueService = QueueService.getInstance();
         queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
+        queueService.createNewQueue(POKEMON_SPECIES_URL_DL_QUEUE);
         queueService.createNewQueue(POKEMON_SPRITES_QUEUE);
         queueService.createNewQueue(POKEMON_CRIES_QUEUE);
     }

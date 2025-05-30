@@ -26,7 +26,6 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
     private static final Logger log = LoggerFactory.getLogger(InsertPokemonTask.class);
 
-
     @Override
     public String getTaskName() {
         return this.getClass().getSimpleName();

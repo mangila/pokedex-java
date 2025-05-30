@@ -52,4 +52,10 @@ public class QueueService {
     public boolean isEmpty(String name) {
         return queues.get(name).isEmpty();
     }
+
+    public boolean allQueuesEmpty() {
+        return queues.values()
+                .stream()
+                .allMatch(ConcurrentLinkedQueue::isEmpty);
+    }
 }
