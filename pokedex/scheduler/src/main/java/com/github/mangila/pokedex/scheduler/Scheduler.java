@@ -43,26 +43,26 @@ public class Scheduler {
     }
 
     /**
-     * Trigger Thread with a Worker pool pattern
+     * Trigger Thread with a Worker pool
      */
     private void scheduleTask(Task task) {
         log.info("Scheduling {}", task.getTaskName());
         var taskConfig = task.getTaskConfig();
         var triggerConfig = taskConfig.triggerConfig();
         var workerConfig = taskConfig.workerConfig();
-        var workers = VirtualThreadConfig.newFixedThreadPool(workerConfig.poolSize());
+        var workerPool = VirtualThreadConfig.newFixedThreadPool(workerConfig.poolSize());
         switch (triggerConfig.taskType()) {
             case ONE_OFF -> triggerConfig.executor()
-                    .schedule(() -> workers.submit(task),
+                    .schedule(() -> workerPool.submit(task),
                             triggerConfig.initialDelay(),
                             triggerConfig.timeUnit());
             case FIXED_RATE -> triggerConfig.executor()
-                    .scheduleAtFixedRate(() -> workers.submit(task),
+                    .scheduleAtFixedRate(() -> workerPool.submit(task),
                             triggerConfig.initialDelay(),
                             triggerConfig.delay(),
                             triggerConfig.timeUnit());
             case FIXED_DELAY -> triggerConfig.executor()
-                    .scheduleWithFixedDelay(() -> workers.submit(task),
+                    .scheduleWithFixedDelay(() -> workerPool.submit(task),
                             triggerConfig.initialDelay(),
                             triggerConfig.delay(),
                             triggerConfig.timeUnit());

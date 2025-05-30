@@ -28,7 +28,6 @@ public class JsonParser {
     private final int maxDepth;
 
     private JsonParser(JsonParserConfig config) {
-        log.info("Create new json parser with max depth {}", config.maxDepth());
         this.maxDepth = config.maxDepth();
     }
 
@@ -61,6 +60,11 @@ public class JsonParser {
         return Holder.getInstance();
     }
 
+    /**
+     * <summary>
+     * For testing purposes, sets the singleton and config to null
+     * </summary>
+     */
     public static void reset() {
         config = null;
         Holder.reset();
