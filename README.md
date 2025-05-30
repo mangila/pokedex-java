@@ -84,9 +84,8 @@ Overengineering at its finest
 #### Gang of Four
 
 - Singleton
-    - Lazy Initialization
-    - Eager Initialization
     - Bill Pugh with Configure method
+    - Bill Pugh with Configure and Reset method
 - Factory Method
 
 #### Concurrency

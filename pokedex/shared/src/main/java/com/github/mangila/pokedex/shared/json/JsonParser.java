@@ -19,6 +19,8 @@ import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 /**
  * DFS (Depth-First) traversal of the JSON tree
  * O(2n) = O(n) since it has to tokenize and then traverse the whole tree
+ * <p>
+ * Bill Pugh Singleton with Configure and Reset method
  */
 public class JsonParser {
 
