@@ -22,4 +22,8 @@ public class JsonArray {
     public boolean isEmpty() {
         return list.isEmpty();
     }
+
+    public JsonValue get(int index) {
+        return list.get(index);
+    }
 }

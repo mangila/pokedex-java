@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 
 import static com.github.mangila.pokedex.shared.json.InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
@@ -22,17 +23,47 @@ import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
-    private static final JsonParser INSTANCE = new JsonParser(64);
+    private static JsonParserConfig config;
 
-    public static JsonParser getInstance() {
-        return INSTANCE;
+    private final int maxDepth;
+
+    private JsonParser(JsonParserConfig config) {
+        log.info("Create new json parser with max depth {}", config.maxDepth());
+        this.maxDepth = config.maxDepth();
     }
 
-    private int maxDepth;
+    private static class Holder {
+        private static JsonParser INSTANCE;
 
-    private JsonParser(int maxDepth) {
-        log.info("Create new json parser with default max depth {}", maxDepth);
-        this.maxDepth = maxDepth;
+        private static JsonParser getInstance() {
+            if (INSTANCE == null) {
+                INSTANCE = new JsonParser(config);
+            }
+            return INSTANCE;
+        }
+
+        private static void reset() {
+            INSTANCE = null;
+        }
+    }
+
+    public static void configure(JsonParserConfig config) {
+        Objects.requireNonNull(config, "JsonParserConfig must not be null");
+        if (JsonParser.config != null) {
+            throw new IllegalStateException("JsonParser is already configured");
+        }
+        log.info("Configuring JsonParser with {}", config);
+        JsonParser.config = config;
+    }
+
+    public static JsonParser getInstance() {
+        Objects.requireNonNull(config, "JsonParser must be configured");
+        return Holder.getInstance();
+    }
+
+    public static void reset() {
+        config = null;
+        Holder.reset();
     }
 
     public JsonTree parseTree(byte[] data) {
@@ -47,10 +78,6 @@ public class JsonParser {
 
     public int getMaxDepth() {
         return maxDepth;
-    }
-
-    public void setMaxDepth(int maxDepth) {
-        this.maxDepth = maxDepth;
     }
 
     private JsonTree parseTree(JsonTokenQueue queue) {

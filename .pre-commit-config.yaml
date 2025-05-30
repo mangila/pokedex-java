@@ -8,6 +8,7 @@ repos:
         language: system
         verbose: true
         files: "^pokedex/web/src"
+        require_serial: true
         stages:
           - pre-commit
       - id: test_scheduler
@@ -16,14 +17,16 @@ repos:
         language: system
         verbose: true
         files: "^pokedex/scheduler/src"
+        require_serial: true
         stages:
           - pre-commit
       - id: test_shared
         name: Test Shared Module
-        entry: python run_sub.py ".\mvnw -pl shared -am clean package" "pokedex"
+        entry: python run_sub.py ".\mvnw -pl shared -am -amd clean package" "pokedex"
         language: system
         verbose: true
         files: "^pokedex/shared/src"
+        require_serial: true
         stages:
           - pre-commit
       - id: validate_infrastructure
@@ -32,5 +35,6 @@ repos:
         language: system
         verbose: true
         files: "^infrastructure"
+        require_serial: true
         stages:
           - pre-commit

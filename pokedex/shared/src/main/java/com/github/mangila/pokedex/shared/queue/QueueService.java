@@ -9,20 +9,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Eager Singleton initialization and holds queues in a ConcurrentHashMap
+ * BillPugh Singleton implementation that holds queues in a ConcurrentHashMap
  */
 public class QueueService {
 
     private static final Logger log = LoggerFactory.getLogger(QueueService.class);
-    private static QueueService instance = new QueueService();
 
     private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
 
+    private static final class Holder {
+        private static final QueueService INSTANCE = new QueueService();
+    }
+
     public static QueueService getInstance() {
-        if (instance == null) {
-            instance = new QueueService();
-        }
-        return instance;
+        return Holder.INSTANCE;
     }
 
     private QueueService() {

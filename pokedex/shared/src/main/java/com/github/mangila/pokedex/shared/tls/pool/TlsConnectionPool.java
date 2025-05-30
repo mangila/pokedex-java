@@ -40,6 +40,7 @@ public class TlsConnectionPool {
         for (int i = 0; i < maxConnections; i++) {
             log.debug("Creating new connection - {} of {}", i + 1, maxConnections);
             var connection = createNewConnection();
+            connection.connect();
             queue.offer(connection);
         }
         VirtualThreadConfig.newSingleThreadScheduledExecutor()

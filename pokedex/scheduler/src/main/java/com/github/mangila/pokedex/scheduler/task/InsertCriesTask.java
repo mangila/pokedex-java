@@ -1,14 +1,17 @@
 package com.github.mangila.pokedex.scheduler.task;
 
+import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 public record InsertCriesTask(
         PokeApiClient pokeApiClient,
         QueueService queueService
-) implements Task<Void> {
+) implements Task {
 
     private static final Logger log = LoggerFactory.getLogger(InsertCriesTask.class);
 
@@ -18,12 +21,23 @@ public record InsertCriesTask(
     }
 
     @Override
-    public Void call() throws Exception {
+    public TaskConfig getTaskConfig() {
+        var trigger = TaskConfig.TriggerConfig.from(
+                VirtualThreadConfig.newSingleThreadScheduledExecutor(),
+                TaskConfig.TaskType.FIXED_RATE,
+                0,
+                100,
+                TimeUnit.MILLISECONDS);
+        var workers = TaskConfig.WorkerConfig.from(10);
+        return TaskConfig.from(trigger, workers);
+    }
+
+    @Override
+    public void run() {
         try {
             log.debug("Fetching cries");
         } catch (Exception e) {
             log.error("Error fetching cries", e);
         }
-        return null;
     }
 }

@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import java.util.concurrent.Callable;
-
-public interface Task<T> extends Callable<T> {
+public interface Task extends Runnable {
     String getTaskName();
+
+    TaskConfig getTaskConfig();
 }

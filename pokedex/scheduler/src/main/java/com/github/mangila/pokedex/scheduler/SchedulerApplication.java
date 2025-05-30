@@ -13,12 +13,13 @@ public class SchedulerApplication {
 
     public static void main(String[] args) {
         var bootstrap = new Bootstrap();
+        bootstrap.configureJsonParser();
+        bootstrap.configurePokeApiClient();
+        bootstrap.configurePokeApiMediaClient();
+        bootstrap.configurePokemonDatabase();
+        bootstrap.configureScheduler();
         bootstrap.initQueues();
-        var scheduler = bootstrap.createScheduler(
-                bootstrap.createPokeApiClient(),
-                bootstrap.createMediaClient()
-        );
-        bootstrap.initScheduler(scheduler);
+        bootstrap.initScheduler();
         IS_RUNNING.set(Boolean.TRUE);
         while (IS_RUNNING.get()) {
         }

@@ -1,82 +1,71 @@
 package com.github.mangila.pokedex.scheduler;
 
-import com.github.mangila.pokedex.scheduler.task.*;
+import com.github.mangila.pokedex.scheduler.task.Task;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.PokemonDatabase;
-import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
-import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
-import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.Objects;
 
 public class Scheduler {
 
     private static final Logger log = LoggerFactory.getLogger(Scheduler.class);
 
-    private final PokeApiClient pokeApiClient;
-    private final PokeApiMediaClient mediaClient;
-    private final PokemonDatabase pokemonDatabase;
-    private final QueueService queueService;
+    private static SchedulerConfig config;
 
-    public Scheduler(PokeApiClient pokeApiClient,
-                     PokeApiMediaClient mediaClient,
-                     PokemonDatabase pokemonDatabase,
-                     QueueService queueService) {
-        this.pokeApiClient = pokeApiClient;
-        this.mediaClient = mediaClient;
-        this.pokemonDatabase = pokemonDatabase;
-        this.queueService = queueService;
+    private final List<Task> tasks;
+
+    private Scheduler(SchedulerConfig config) {
+        this.tasks = config.tasks();
     }
 
-    public void queuePokemons(ExecutorService executor, int pokemonCount) {
-        try {
-            log.info("Scheduling fetch all pokemons task");
-            var task = new QueuePokemonsTask(
-                    pokeApiClient,
-                    queueService,
-                    pokemonCount);
-            var queueSize = executor.submit(task)
-                    .get();
-            log.info("Queued {} pokemons", queueSize);
-        } catch (Exception e) {
-            log.error("Error fetching all pokemons", e);
+    public static void configure(SchedulerConfig config) {
+        Objects.requireNonNull(config, "SchedulerConfig must not be null");
+        if (Scheduler.config != null) {
+            throw new IllegalStateException("SchedulerConfig is already configured");
         }
+        log.info("Configuring Scheduler with {}", config);
+        Scheduler.config = config;
     }
 
-    public void scheduleFinishedProcessing(TaskConfig.TriggerConfig config) {
-        config.executor().scheduleAtFixedRate(() -> {
-            if (queueService.isEmpty(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE)
-                    && queueService.isEmpty(SchedulerApplication.POKEMON_SPRITES_QUEUE)) {
-                log.debug("Queues is empty will shutdown");
-                SchedulerApplication.IS_RUNNING.set(Boolean.FALSE);
-            }
-        }, config.initialDelay(), config.delay(), config.timeUnit());
+    private static final class Holder {
+        private static final Scheduler INSTANCE = new Scheduler(config);
     }
 
-    public void scheduleInsertSprites(TaskConfig config) {
-        scheduleTask(config, () -> new InsertSpritesTask(pokeApiClient, queueService));
+    public static Scheduler getInstance() {
+        Objects.requireNonNull(config, "Scheduler must be configured");
+        return Holder.INSTANCE;
     }
 
-    public void scheduleInsertCries(TaskConfig config) {
-        scheduleTask(config, () -> new InsertCriesTask(pokeApiClient, queueService));
+    public void init() {
+        tasks.forEach(this::scheduleTask);
     }
 
-    public void scheduleInsertPokemons(TaskConfig config) {
-        scheduleTask(config, () -> new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase));
-    }
-
-    private void scheduleTask(TaskConfig config, Supplier<Task<?>> task) {
-        log.info("Scheduling {}", task.get().getTaskName());
-        var triggerConfig = config.triggerConfig();
-        var workerConfig = config.workerConfig();
+    /**
+     * Trigger Thread with a Worker pool pattern
+     */
+    private void scheduleTask(Task task) {
+        log.info("Scheduling {}", task.getTaskName());
+        var taskConfig = task.getTaskConfig();
+        var triggerConfig = taskConfig.triggerConfig();
+        var workerConfig = taskConfig.workerConfig();
         var workers = VirtualThreadConfig.newFixedThreadPool(workerConfig.poolSize());
-        triggerConfig.executor()
-                .scheduleAtFixedRate(() -> workers.submit(task.get()),
-                        triggerConfig.initialDelay(),
-                        triggerConfig.delay(),
-                        triggerConfig.timeUnit());
+        switch (triggerConfig.taskType()) {
+            case ONE_OFF -> triggerConfig.executor()
+                    .schedule(() -> workers.submit(task),
+                            triggerConfig.initialDelay(),
+                            triggerConfig.timeUnit());
+            case FIXED_RATE -> triggerConfig.executor()
+                    .scheduleAtFixedRate(() -> workers.submit(task),
+                            triggerConfig.initialDelay(),
+                            triggerConfig.delay(),
+                            triggerConfig.timeUnit());
+            case FIXED_DELAY -> triggerConfig.executor()
+                    .scheduleWithFixedDelay(() -> workers.submit(task),
+                            triggerConfig.initialDelay(),
+                            triggerConfig.delay(),
+                            triggerConfig.timeUnit());
+        }
     }
 }

@@ -23,6 +23,22 @@ public class JsonTree {
         return tree.get(key);
     }
 
+    public String getString(String key) {
+        return tree.get(key).getString();
+    }
+
+    public Number getNumber(String key) {
+        return tree.get(key).getNumber();
+    }
+
+    public Boolean getBoolean(String key) {
+        return tree.get(key).getBoolean();
+    }
+
+    public boolean isNull(String key) {
+        return tree.get(key).isNull();
+    }
+
     public int size() {
         return tree.size();
     }

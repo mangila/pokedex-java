@@ -3,7 +3,6 @@ package com.github.mangila.pokedex.shared.tls.pool;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.testutil.TestUtil;
 import com.github.mangila.pokedex.shared.tls.TlsConnection;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +27,7 @@ class TlsConnectionPoolTest {
     void shouldBorrowAndReturnConnection() {
         // Given
         var executor = VirtualThreadConfig.newFixedThreadPool(2);
-        
+
         // When
         executor.submit(() -> {
             try {
@@ -39,7 +38,7 @@ class TlsConnectionPoolTest {
                 throw new RuntimeException(e);
             }
         });
-        
+
         executor.submit(() -> {
             try {
                 var tlsConnection = pool.borrow();
@@ -49,29 +48,29 @@ class TlsConnectionPoolTest {
                 throw new RuntimeException(e);
             }
         });
-        
+
         // Then
         await()
                 .atMost(Duration.ofSeconds(10))
                 .until(() -> pool.availablePermits() == 2);
     }
-    
+
     @Test
     void shouldThrowExceptionWhenPoolNotInitialized() {
         // Given
         var uninitializedPool = TestUtil.createNewTestingTlsConnectionPool(1);
-        
+
         // Then
         assertThatThrownBy(uninitializedPool::borrow)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Connection pool is not initialized");
     }
-    
+
     @Test
     void shouldCreateNewConnection() {
         // When
         TlsConnection connection = pool.createNewConnection();
-        
+
         // Then
         assertThat(connection).isNotNull();
     }

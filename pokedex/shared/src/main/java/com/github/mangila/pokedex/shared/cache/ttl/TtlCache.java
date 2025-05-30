@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class TtlCache<K, V> {
 
@@ -14,15 +15,17 @@ public class TtlCache<K, V> {
 
     private final Map<K, TtlEntry> cache = new ConcurrentHashMap<>();
     private final TtlCacheConfig config;
+    private final EvictionThread<K> evictionThread;
+    private final ScheduledExecutorService executor;
 
     public TtlCache(TtlCacheConfig config) {
         this.config = config;
-        EvictionThread<K> evictionThread = new EvictionThread<>(cache, config.ttl());
-        VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(evictionThread,
-                        config.evictionConfig().initialDelay(),
-                        config.evictionConfig().delay(),
-                        config.evictionConfig().timeUnit());
+        this.evictionThread = new EvictionThread<>(cache, config.ttl());
+        this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        executor.scheduleWithFixedDelay(evictionThread,
+                config.evictionConfig().initialDelay(),
+                config.evictionConfig().delay(),
+                config.evictionConfig().timeUnit());
     }
 
     public void put(K key, V value) {
@@ -46,5 +49,13 @@ public class TtlCache<K, V> {
 
     public boolean hasKey(K key) {
         return cache.containsKey(key);
+    }
+
+    public boolean isEvictionThreadShutdown() {
+        return executor.isShutdown();
+    }
+
+    public void shutdownEvictionThread() {
+        executor.shutdown();
     }
 }

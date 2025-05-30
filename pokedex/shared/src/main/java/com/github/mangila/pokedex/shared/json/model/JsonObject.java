@@ -27,4 +27,23 @@ public class JsonObject {
         return tree.get(key)
                 .getArray();
     }
+
+    public Number getNumber(String key) {
+        return tree.get(key)
+                .getNumber();
+    }
+
+    public Boolean getBoolean(String key) {
+        return tree.get(key)
+                .getBoolean();
+    }
+
+    public boolean isNull(String key) {
+        return tree.get(key)
+                .isNull();
+    }
+
+    public JsonValue get(String key) {
+        return tree.get(key);
+    }
 }

@@ -92,25 +92,5 @@ Overengineering at its finest
 #### Concurrency
 
 - Fan Out and Fan In
-- Dispatcher Tread
-
-## Building the Project
-
-This project uses the Maven Wrapper to ensure consistent builds across different environments. You don't need to have Maven installed on your machine to build the project.
-
-### Using the Maven Wrapper
-
-On Unix-like systems (Linux, macOS):
-```bash
-# Make the script executable (first time only)
-chmod +x mvnw
-# Run Maven commands
-./mvnw clean install
-```
-
-On Windows:
-```bash
-mvnw.cmd clean install
-```
-
-The first time you run the wrapper, it will download the appropriate version of Maven automatically.
+- Dedicated Reader/Write Thread
+- Trigger Thread with a Worker pool pattern

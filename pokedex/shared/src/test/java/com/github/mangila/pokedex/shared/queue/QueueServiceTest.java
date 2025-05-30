@@ -9,6 +9,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QueueServiceTest {
 
     @Test
+    void shouldReturnSameInstanceForMultipleCalls() {
+        var instance1 = QueueService.getInstance();
+        var instance2 = QueueService.getInstance();
+
+        assertThat(instance1).isSameAs(instance2);
+    }
+
+    @Test
     void shouldCreateAndPollQueue() {
         var queueService = QueueService.getInstance();
         queueService.createNewQueue("test-queue");
