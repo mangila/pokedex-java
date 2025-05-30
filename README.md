@@ -93,4 +93,4 @@ Overengineering at its finest
 
 - Fan Out and Fan In
 - Dedicated Reader/Write Thread
-- Trigger Thread with a Worker pool pattern
+- Trigger Thread with a Worker pool
