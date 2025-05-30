@@ -31,7 +31,7 @@ repos:
           - pre-commit
       - id: validate_infrastructure
         name: Terraform validate
-        entry: python print.py
+        entry: python run_sub.py "terraform validate" "infrastructure"
         language: system
         verbose: true
         files: "^infrastructure"
