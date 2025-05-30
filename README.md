@@ -12,7 +12,8 @@ Overengineering at its finest
 - Daemon Service
 - Web Service
 - Common/Shared module
-- cwebp installed on the system
+- Python3 installed on the system (for pre-commit hooks)
+- cwebp installed on the system (when converting images to webp)
 
 ## Project Goal
 
