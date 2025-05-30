@@ -66,7 +66,7 @@ public class PokemonFileHandler {
      *   <li><b>Version</b>: 1 byte — file format version</li>
      *   <li><b>Record Count</b>: 4 bytes — number of records (initialized to 0)</li>
      *   <li><b>Index Offset</b>: 8 bytes — file offset where index section starts (initialized to 0)</li>
-     *   <li><b>Data Offset</b>: 8 bytes — file offset where data section starts (usually HEADER_SIZE)</li>
+     *   <li><b>Data Offset</b>: 8 bytes — file offset where data section starts (HEADER_SIZE)</li>
      * </ul>
      * <p>
      * Total header size is {@code HEADER_SIZE} bytes.
