@@ -1,4 +1,4 @@
-pokedex.pokemon
+*.pokemon
 __pycache__
 .idea
 # Compiled class file

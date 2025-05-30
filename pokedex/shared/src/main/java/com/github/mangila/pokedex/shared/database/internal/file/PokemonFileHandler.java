@@ -10,7 +10,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32C;
 
 import static com.github.mangila.pokedex.shared.database.internal.file.FormatOptions.*;
@@ -20,7 +20,7 @@ public class PokemonFileHandler {
     private static final Logger log = LoggerFactory.getLogger(PokemonFileHandler.class);
 
     private final Map<String, Long> keyOffset = new ConcurrentHashMap<>();
-    private final AtomicLong pokemonCount = new AtomicLong(0);
+    private final AtomicInteger pokemonCount = new AtomicInteger(0);
     private final ThreadLocal<CRC32C> crc32c = ThreadLocal.withInitial(CRC32C::new);
     private final PokemonFile pokemonFile;
 
@@ -84,9 +84,9 @@ public class PokemonFileHandler {
                 HEADER_SIZE);
         buffer.put(POKEMON_MAGIC_NUMBER_BYTES);
         buffer.putInt(VERSION);
-        buffer.putInt(0);
-        buffer.putLong(INDEX_OFFSET_SIZE);
-        buffer.putLong(DATA_OFFSET_SIZE);
+        buffer.putInt(pokemonCount.get());
+        buffer.putLong(keyOffset.size());
+        buffer.putLong(HEADER_SIZE);
         buffer.force();
     }
 
