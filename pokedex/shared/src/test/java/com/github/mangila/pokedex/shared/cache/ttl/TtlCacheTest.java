@@ -1,7 +1,5 @@
-package com.github.mangila.pokedex.shared.cache;
+package com.github.mangila.pokedex.shared.cache.ttl;
 
-import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
-import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.model.Headers;
 import com.github.mangila.pokedex.shared.https.model.HttpStatus;
 import com.github.mangila.pokedex.shared.https.model.JsonResponse;
@@ -14,7 +12,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class TtlCacheTest {
+class TtlCacheTest {
 
     @Test
     void shouldPutKeyAndRemoveAfterTtl() {
