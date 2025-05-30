@@ -20,7 +20,7 @@ public class PokemonDatabase {
 
     private PokemonDatabase(PokemonDatabaseConfig config) {
         this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
-        this.disk = new DiskHandler(config.fileName());
+        this.disk = new DiskHandler(config.pokemonFileName());
     }
 
     public static void configure(PokemonDatabaseConfig config) {

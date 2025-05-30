@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.read;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.internal.PokemonFile;
+import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,10 @@ public class Reader {
     private final ReaderThread readerThread;
     private final ScheduledExecutorService executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
 
-    public Reader(PokemonFile pokemonFile) {
+    public Reader(PokemonFileHandler handler) {
         this.readPermits = new Semaphore(100, Boolean.TRUE);
         this.readTransfers = new LinkedTransferQueue<>();
-        this.readerThread = new ReaderThread(pokemonFile, readTransfers, readPermits);
+        this.readerThread = new ReaderThread(handler, readTransfers, readPermits);
         executor.schedule(readerThread, 1, TimeUnit.SECONDS);
     }
 

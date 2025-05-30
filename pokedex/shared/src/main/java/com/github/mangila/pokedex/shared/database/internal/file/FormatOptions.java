@@ -1,11 +1,11 @@
-package com.github.mangila.pokedex.shared.database.internal;
+package com.github.mangila.pokedex.shared.database.internal.file;
 
 /**
  * TODO WIP
  * <summary>
  * [HEADER]
  * - Magic Number ("Pok3mon" bytes)
- * - Version (n bytes)
+ * - Version (4 bytes)
  * - Record Count (4 bytes)
  * - Index Offset (8 bytes)
  * - Data Offset (8 bytes)
@@ -23,14 +23,18 @@ package com.github.mangila.pokedex.shared.database.internal;
  */
 public final class FormatOptions {
 
-    public static final byte[] POKEMON_MAGIC_NUMBER = "Pok3mon".getBytes();
-    public static final byte[] VERSION = new byte[]{1};
-    public static final int MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length;
-    public static final int VERSION_SIZE = VERSION.length;
+    public static final String POKEMON_MAGIC_NUMBER = "Pok3mon";
+    public static final byte[] POKEMON_MAGIC_NUMBER_BYTES = POKEMON_MAGIC_NUMBER.getBytes();
+    public static final int VERSION = 1;
+
+    public static final int POKEMON_MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length();
+    public static final int VERSION_SIZE = 4;
     public static final int RECORD_COUNT_SIZE = 4;
-    public static final int OFFSET_SIZE = 8;
     public static final int INDEX_OFFSET_SIZE = 8;
     public static final int DATA_OFFSET_SIZE = 8;
-    public static final int HEADER_SIZE = MAGIC_NUMBER_SIZE + VERSION_SIZE + RECORD_COUNT_SIZE + INDEX_OFFSET_SIZE + DATA_OFFSET_SIZE;
-
+    public static final int HEADER_SIZE = POKEMON_MAGIC_NUMBER_SIZE +
+            VERSION_SIZE +
+            RECORD_COUNT_SIZE +
+            INDEX_OFFSET_SIZE +
+            DATA_OFFSET_SIZE;
 }

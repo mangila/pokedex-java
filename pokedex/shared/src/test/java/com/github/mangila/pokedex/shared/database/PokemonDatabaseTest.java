@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.database;
 
+import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileName;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ class PokemonDatabaseTest {
     @Disabled
     void shouldPutAndGetPokemon() {
         // Given
+        PokemonDatabase.configure(new PokemonDatabaseConfig(new PokemonFileName("test.pokemon"), 10));
         var database = PokemonDatabase.getInstance();
         var pokemon = new Pokemon(1, "Bulbasaur");
 

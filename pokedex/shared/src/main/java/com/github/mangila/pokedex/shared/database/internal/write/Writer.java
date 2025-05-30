@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.write;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.internal.PokemonFile;
+import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +17,10 @@ public class Writer {
     private final WriterThread writerThread;
     private final ScheduledExecutorService executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
 
-    public Writer(PokemonFile pokemonFile) {
+    public Writer(PokemonFileHandler handler) {
         this.writeTransfers = new LinkedTransferQueue<>();
         this.writePermits = new Semaphore(50, Boolean.TRUE);
-        this.writerThread = new WriterThread(pokemonFile, writeTransfers, writePermits);
+        this.writerThread = new WriterThread(handler, writeTransfers, writePermits);
         executor.schedule(writerThread, 1, TimeUnit.SECONDS);
     }
 

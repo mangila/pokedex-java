@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.database.internal;
+package com.github.mangila.pokedex.shared.database.internal.file;
 
 import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
@@ -13,7 +13,7 @@ public final class FileOptions {
             StandardOpenOption.SPARSE,
             StandardOpenOption.DSYNC);
 
-    public static final Set<StandardOpenOption> OPEN_EXISTING_WRITE_OPTIONS = EnumSet.of(
+    public static final Set<StandardOpenOption> WRITE_OPTIONS = EnumSet.of(
             StandardOpenOption.READ,
             StandardOpenOption.WRITE,
             StandardOpenOption.SPARSE,
