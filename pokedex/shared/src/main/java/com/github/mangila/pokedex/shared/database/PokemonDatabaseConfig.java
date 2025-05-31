@@ -1,9 +1,9 @@
 package com.github.mangila.pokedex.shared.database;
 
-import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileName;
+import com.github.mangila.pokedex.shared.database.internal.file.FileName;
 
 public record PokemonDatabaseConfig(
-        PokemonFileName pokemonFileName,
+        FileName fileName,
         int cacheCapacity
 ) {
 

@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
-public record PokemonFileName(String value) {
+public record FileName(String value) {
 
-    public PokemonFileName {
+    public FileName {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("database value must not be null or blank");
         }

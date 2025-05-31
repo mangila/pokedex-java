@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.read;
 
-import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileHandler;
+import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.TransferQueue;
  * Dedicated Reader Thread
  * </summary>
  */
-public record ReaderThread(PokemonFileHandler handler,
+public record ReaderThread(FileHandler handler,
                            TransferQueue<ReadTransfer> readTransfers,
                            Semaphore readPermits) implements Runnable {
 

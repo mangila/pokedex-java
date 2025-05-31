@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.write;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileHandler;
+import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +14,13 @@ public class Writer {
 
     private final TransferQueue<WriteTransfer> writeTransfers;
     private final Semaphore writePermits;
-    private final WriterThread writerThread;
-    private final ScheduledExecutorService executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService executor;
 
-    public Writer(PokemonFileHandler handler) {
+    public Writer(FileHandler handler) {
         this.writeTransfers = new LinkedTransferQueue<>();
         this.writePermits = new Semaphore(50, Boolean.TRUE);
-        this.writerThread = new WriterThread(handler, writeTransfers, writePermits);
+        var writerThread = new WriterThread(handler, writeTransfers, writePermits);
+        this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
         executor.schedule(writerThread, 1, TimeUnit.SECONDS);
     }
 

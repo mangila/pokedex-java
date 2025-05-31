@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.write;
 
-import com.github.mangila.pokedex.shared.database.internal.file.PokemonFileHandler;
+import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import java.util.concurrent.TransferQueue;
  * </summary>
  */
 public record WriterThread(
-        PokemonFileHandler handler,
+        FileHandler handler,
         TransferQueue<WriteTransfer> writeTransfers,
         Semaphore writePermits
 ) implements Runnable {
