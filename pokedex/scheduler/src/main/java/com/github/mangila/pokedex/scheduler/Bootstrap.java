@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.scheduler.task.*;
+import com.github.mangila.pokedex.shared.PokemonDatabase;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
-import com.github.mangila.pokedex.shared.database.PokemonDatabase;
-import com.github.mangila.pokedex.shared.database.PokemonDatabaseConfig;
-import com.github.mangila.pokedex.shared.database.internal.file.FileName;
+import com.github.mangila.pokedex.shared.database.DatabaseConfig;
+import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
@@ -68,11 +68,7 @@ public class Bootstrap {
     }
 
     public void configurePokemonDatabase() {
-        PokemonDatabase.configure(
-                new PokemonDatabaseConfig(
-                        new FileName("pokedex.pokemon"),
-                        10)
-        );
+        PokemonDatabase.configure(new DatabaseConfig(new DatabaseName("pokedex"), 10));
     }
 
     public void configureScheduler() {

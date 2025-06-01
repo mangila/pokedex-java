@@ -55,9 +55,13 @@ Overengineering at its finest
 - Time To Live(TTL) Cache
 - Last Recently Used(LRU) Cache
 - Scheduler
-- Key Value Database
+- Key Value Database (Yet Another Key Value Store)
     - Persist to disk
-    - .pokemon file format
+    - Lock Free read and writes
+    - .yakvs file format
+        - Binary format
+        - Index file
+        - Data file
 
 ## Engineering Principles (WIP)
 

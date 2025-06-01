@@ -1,16 +1,12 @@
 package com.github.mangila.pokedex.shared.database;
 
-import com.github.mangila.pokedex.shared.database.internal.file.FileName;
-
-public record PokemonDatabaseConfig(
-        FileName fileName,
+public record DatabaseConfig(
+        DatabaseName databaseName,
         int cacheCapacity
 ) {
-
-    public PokemonDatabaseConfig {
+    public DatabaseConfig {
         if (cacheCapacity <= 0) {
             throw new IllegalArgumentException("database cacheCapacity must be greater than 0");
         }
     }
-
 }

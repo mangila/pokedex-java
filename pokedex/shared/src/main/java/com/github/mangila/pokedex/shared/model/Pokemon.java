@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.shared.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import com.github.mangila.pokedex.shared.database.DatabaseObject;
 
-public record Pokemon(int id, String name) {
+import java.io.*;
 
-    public byte[] toBytes() {
+public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
+
+    @Override
+    public byte[] serialize() throws IOException {
         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream();
              DataOutputStream out = new DataOutputStream(buffer)) {
             out.writeInt(id);
@@ -19,8 +18,9 @@ public record Pokemon(int id, String name) {
         }
     }
 
-    public static Pokemon fromBytes(byte[] bytes) {
-        try (ByteArrayInputStream buffer = new ByteArrayInputStream(bytes);
+    @Override
+    public Pokemon deserialize(byte[] data) throws IOException {
+        try (ByteArrayInputStream buffer = new ByteArrayInputStream(data);
              DataInputStream in = new DataInputStream(buffer)) {
             int id = in.readInt();
             String name = in.readUTF();

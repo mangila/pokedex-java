@@ -1,4 +1,4 @@
-*.pokemon
+*.yakvs
 __pycache__
 .idea
 # Compiled class file

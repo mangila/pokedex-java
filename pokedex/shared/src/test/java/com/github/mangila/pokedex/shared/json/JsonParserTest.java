@@ -69,7 +69,7 @@ class JsonParserTest {
 
     private final String simpleJson = """
             {
-                "pokemon": "pikachu",
+                "value": "pikachu",
                 "type": "electric",
                 "level": 25,
                 "stats": {
@@ -96,7 +96,7 @@ class JsonParserTest {
         var jsonTree = jsonParser.parseTree(simpleJson);
 
         assertThat(jsonTree).isNotNull();
-        assertThat(jsonTree.getString("pokemon")).isEqualTo("pikachu");
+        assertThat(jsonTree.getString("value")).isEqualTo("pikachu");
         assertThat(jsonTree.getString("type")).isEqualTo("electric");
         assertThat(jsonTree.getNumber("level").intValue()).isEqualTo(25);
         assertThat(jsonTree.getBoolean("isStarter")).isFalse();
@@ -134,7 +134,7 @@ class JsonParserTest {
         var t1 = threads.submit(() -> {
             String json = """
                     {
-                        "pokemon": "charmander",
+                        "value": "charmander",
                         "type": "fire",
                         "level": 7
                     }
@@ -145,7 +145,7 @@ class JsonParserTest {
         var t2 = threads.submit(() -> {
             String json = """
                     {
-                        "pokemon": "bulbasaur",
+                        "value": "bulbasaur",
                         "type": "grass",
                         "level": 5,
                         "hp": 45,
@@ -159,10 +159,10 @@ class JsonParserTest {
             JsonTree result1 = t1.get();
             JsonTree result2 = t2.get();
 
-            assertThat(result1.getString("pokemon")).isEqualTo("charmander");
+            assertThat(result1.getString("value")).isEqualTo("charmander");
             assertThat(result1.getString("type")).isEqualTo("fire");
 
-            assertThat(result2.getString("pokemon")).isEqualTo("bulbasaur");
+            assertThat(result2.getString("value")).isEqualTo("bulbasaur");
             assertThat(result2.getString("type")).isEqualTo("grass");
             assertThat(result2.getBoolean("isStarter")).isTrue();
         }).doesNotThrowAnyException();

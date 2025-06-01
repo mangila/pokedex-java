@@ -46,7 +46,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                     "GET",
                     String.format("/api/v2/pokemon-species/?&limit=%d", pokemonCount),
                     List.of());
-            var l = pokeApiClient.getJson(request)
+            var queueEntries = pokeApiClient.getJson(request)
                     .map(PokeApiClientUtil::ensureSuccessStatusCode)
                     .map(JsonResponse::body)
                     .map(jsonTree -> jsonTree.getArray("results"))
@@ -59,7 +59,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
                             .map(queueEntry -> queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE, queueEntry)))
                     .orElseThrow()
                     .toList();
-            log.info("Queued {} pokemon species", l.size());
+            log.info("Queued {} pokemon species", queueEntries.size());
         } catch (Exception e) {
             log.error("ERR", e);
         }

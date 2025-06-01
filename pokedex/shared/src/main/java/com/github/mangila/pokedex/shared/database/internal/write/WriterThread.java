@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.shared.database.internal.write;
 
+import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TransferQueue;
 
@@ -13,9 +13,9 @@ import java.util.concurrent.TransferQueue;
  * Dedicated Writer Thread
  * </summary>
  */
-public record WriterThread(
-        FileHandler handler,
-        TransferQueue<WriteTransfer> writeTransfers,
+public record WriterThread<V extends DatabaseObject<V>>(
+        FileHandler<V> handler,
+        TransferQueue<WriteTransfer<V>> writeTransfers,
         Semaphore writePermits
 ) implements Runnable {
 
@@ -26,13 +26,12 @@ public record WriterThread(
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 var transfer = writeTransfers.take();
-                var result = handler.write(transfer.key(), transfer.pokemon());
+                var result = handler.write(transfer.key(), transfer.value());
                 transfer.result().complete(result);
                 writePermits.release();
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            } catch (IOException e) {
                 log.error("ERR", e);
+                Thread.currentThread().interrupt();
             }
         }
     }

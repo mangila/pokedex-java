@@ -9,29 +9,17 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * File structure layout:
  * <p>
- * [HEADER SECTION]
- * - Magic Number ("Pok3mon1" bytes) - File identifier
- * - Version (4 bytes) - File format version number
- * - Record Count (4 bytes) - Number of Pokemon records
- * - Index Offset (8 bytes) - Start position of the index section
- * - Data Offset (8 bytes) - Start position of the data section
- * <p>
- * [INDEX SECTION]
- * Sequential key-offset mapping entries:
- * - Entry Format:
- * - Key Length (4 bytes)
- * - Key Bytes (variable length)
- * - Data Offset (8 bytes) - Points to record in the data section
- * <p>
- * [DATA SECTION]
+ * [DATA FILE]
  * Sequential Pokemon record entries:
  * - Record Format:
- * - Length (4 bytes) - Size of serialized data
- * - Version (4 bytes) - Version of the record - if the version is an odd number, file write is ongoing
+ * - Length (4 bytes) - Size of serialized record
  * - Serialized Pokemon Data (variable length)
  * - CRC32C Checksum (8 bytes) - Data integrity validation
  */
@@ -39,21 +27,22 @@ public class File {
 
     private static final Logger log = LoggerFactory.getLogger(File.class);
 
+    public static final Set<StandardOpenOption> WRITE_OPTIONS = EnumSet.of(
+            StandardOpenOption.READ,
+            StandardOpenOption.WRITE,
+            StandardOpenOption.SPARSE,
+            StandardOpenOption.DSYNC);
+
+    public static final Set<StandardOpenOption> READ_OPTIONS = EnumSet.of(
+            StandardOpenOption.READ,
+            StandardOpenOption.DSYNC);
+
     private final Path path;
     private FileChannel writeChannel;
     private FileChannel readChannel;
 
-    public File(FileName fileName) {
-        try {
-            this.path = Paths.get(fileName.value());
-            if (!exists()) {
-                log.info("Creating new file {}", path.getFileName());
-                Files.createFile(path);
-            }
-        } catch (IOException e) {
-            log.error("ERR", e);
-            throw new RuntimeException(e);
-        }
+    public File(DatabaseFileName fileName) {
+        this.path = Paths.get(fileName.value());
     }
 
     public FileChannel getReadChannel() throws IOException {
@@ -61,7 +50,7 @@ public class File {
             log.debug("Opening read channel for {}", path.getFileName());
             this.readChannel = FileChannel.open(
                     path,
-                    FileOptions.READ_OPTIONS
+                    READ_OPTIONS
             );
         }
         return readChannel;
@@ -72,7 +61,7 @@ public class File {
             log.debug("Opening write channel for {}", path.getFileName());
             this.writeChannel = FileChannel.open(
                     path,
-                    FileOptions.WRITE_OPTIONS
+                    WRITE_OPTIONS
             );
         }
         return writeChannel;
@@ -100,6 +89,12 @@ public class File {
 
     public boolean isEmpty() {
         return exists() && path.toFile().length() == 0;
+    }
+
+    public void tryCreateFileIfNotExists() throws IOException {
+        if (!exists()) {
+            Files.createFile(path);
+        }
     }
 
     public void deleteFile() throws IOException {

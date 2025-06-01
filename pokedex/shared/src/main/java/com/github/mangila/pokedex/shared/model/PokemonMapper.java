@@ -43,6 +43,10 @@ public class PokemonMapper {
                                     List<PokemonVariety> varieties,
                                     PokemonEvolutionChain evolutionChain) {
 
-        return new Pokemon(1, "b");
+        var id = pokemonSpecies.getValue("id")
+                .getNumber();
+        var name = pokemonSpecies.getValue("name")
+                .getString();
+        return new Pokemon(id.intValue(), name);
     }
 }
