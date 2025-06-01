@@ -60,17 +60,18 @@ public class DataFileHandler<V extends DatabaseObject<V>> {
     }
 
     public void writeNewRecord(String key, V value) throws IOException {
-        var record = DataRecord.from(value.serialize(), crc32CThreadLocal.get(), 1);
+        var record = DataRecord.from(value.serialize(), crc32CThreadLocal.get());
         var size = record.getSize();
+        var offset = getOffset();
         var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_WRITE,
-                getOffset(),
+                offset,
                 size
         );
         record.fill(buffer);
         buffer.force();
-        long newOffset = getOffset() + size;
-        log.debug("Inserted record {} at {} -- new offset {}", key, getOffset(), newOffset);
+        long newOffset = offset + size;
+        log.debug("Inserted record {} at {} -- new offset {}", key, offset, newOffset);
         fileHeaderHandler.updateNewWrite(newOffset);
     }
 
@@ -88,5 +89,29 @@ public class DataFileHandler<V extends DatabaseObject<V>> {
     public void deleteFile() throws IOException {
         log.info("Deleting file {}", file.getPath().getFileName());
         file.deleteFile();
+    }
+
+    public byte[] read(long offset) throws IOException {
+        offset = offset + 4;
+        var buffer = file.getFileRegion(
+                FileChannel.MapMode.READ_ONLY,
+                offset,
+                Integer.BYTES
+        );
+        var length = buffer.getInt();
+        buffer = file.getFileRegion(
+                FileChannel.MapMode.READ_ONLY,
+                offset,
+                length
+        );
+        var data = new byte[length];
+        buffer.get(data);
+        buffer = file.getFileRegion(
+                FileChannel.MapMode.READ_ONLY,
+                offset,
+                Long.BYTES
+        );
+        var checksum = buffer.getLong();
+        return data;
     }
 }

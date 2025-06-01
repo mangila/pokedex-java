@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
+import com.github.mangila.pokedex.shared.database.internal.file.header.FileHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,28 +46,6 @@ public class File {
         this.path = Paths.get(fileName.value());
     }
 
-    public FileChannel getReadChannel() throws IOException {
-        if (readChannel == null || !readChannel.isOpen()) {
-            log.debug("Opening read channel for {}", path.getFileName());
-            this.readChannel = FileChannel.open(
-                    path,
-                    READ_OPTIONS
-            );
-        }
-        return readChannel;
-    }
-
-    public FileChannel getWriteChannel() throws IOException {
-        if (writeChannel == null || !writeChannel.isOpen()) {
-            log.debug("Opening write channel for {}", path.getFileName());
-            this.writeChannel = FileChannel.open(
-                    path,
-                    WRITE_OPTIONS
-            );
-        }
-        return writeChannel;
-    }
-
     public MappedByteBuffer getFileRegion(
             FileChannel.MapMode mode,
             long position,
@@ -79,6 +58,14 @@ public class File {
         };
     }
 
+    public long getFileSize() {
+        return path.toFile().length();
+    }
+
+    public long getFileSizeExcludingHeader() {
+        return getFileSize() - FileHeader.HEADER_SIZE;
+    }
+
     public Path getPath() {
         return path;
     }
@@ -88,7 +75,7 @@ public class File {
     }
 
     public boolean isEmpty() {
-        return exists() && path.toFile().length() == 0;
+        return exists() && getFileSize() == 0;
     }
 
     public void tryCreateFileIfNotExists() throws IOException {
@@ -98,8 +85,34 @@ public class File {
     }
 
     public void deleteFile() throws IOException {
-        writeChannel.close();
-        readChannel.close();
+        if (writeChannel != null) {
+            writeChannel.close();
+        }
+        if (readChannel != null) {
+            readChannel.close();
+        }
         Files.deleteIfExists(path);
+    }
+
+    private FileChannel getReadChannel() throws IOException {
+        if (readChannel == null || !readChannel.isOpen()) {
+            log.debug("Opening read channel for {}", path.getFileName());
+            this.readChannel = FileChannel.open(
+                    path,
+                    READ_OPTIONS
+            );
+        }
+        return readChannel;
+    }
+
+    private FileChannel getWriteChannel() throws IOException {
+        if (writeChannel == null || !writeChannel.isOpen()) {
+            log.debug("Opening write channel for {}", path.getFileName());
+            this.writeChannel = FileChannel.open(
+                    path,
+                    WRITE_OPTIONS
+            );
+        }
+        return writeChannel;
     }
 }

@@ -6,6 +6,8 @@ import java.io.*;
 
 public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
 
+    public static final Pokemon DEFAULT_INSTANCE = new Pokemon(0, "MissingNo");
+
     @Override
     public byte[] serialize() throws IOException {
         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream();

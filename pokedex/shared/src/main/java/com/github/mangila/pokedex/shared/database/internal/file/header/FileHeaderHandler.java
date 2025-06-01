@@ -37,8 +37,8 @@ public class FileHeaderHandler {
     }
 
     public void writeHeaderToFile() throws IOException {
-        log.debug("Writing header to file {}", file.getPath().getFileName());
-        var buffer = file.getWriteChannel().map(
+        log.debug("Writing header {} to file {}", header.getAcquire(), file.getPath().getFileName());
+        var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_WRITE,
                 0,
                 FileHeader.HEADER_SIZE
@@ -50,7 +50,7 @@ public class FileHeaderHandler {
 
     public void loadHeader() throws IOException {
         log.debug("Load header from file {}", file.getPath().getFileName());
-        var buffer = file.getReadChannel().map(
+        var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_ONLY,
                 0,
                 FileHeader.HEADER_SIZE

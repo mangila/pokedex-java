@@ -15,7 +15,7 @@ public record FileHeader(
     public static final int VERSION = 1;
 
     // Header sizes
-    public static final int POKEMON_MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER.length();
+    public static final int POKEMON_MAGIC_NUMBER_SIZE = POKEMON_MAGIC_NUMBER_BYTES.length;
     public static final int VERSION_SIZE = Integer.BYTES;
     public static final int RECORD_COUNT_SIZE = Integer.BYTES;
     public static final int OFFSET_SIZE = Long.BYTES;
@@ -23,9 +23,6 @@ public record FileHeader(
             VERSION_SIZE +
             RECORD_COUNT_SIZE +
             OFFSET_SIZE;
-    // Header fixed positions
-    public static final int RECORD_COUNT_POSITION = POKEMON_MAGIC_NUMBER_SIZE + VERSION_SIZE;
-    public static final int OFFSET_POSITION = RECORD_COUNT_POSITION + RECORD_COUNT_SIZE;
 
     public static FileHeader defaultValue() {
         return new FileHeader(POKEMON_MAGIC_NUMBER_BYTES, VERSION, 0, HEADER_SIZE);

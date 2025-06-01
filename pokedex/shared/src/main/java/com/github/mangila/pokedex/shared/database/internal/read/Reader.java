@@ -13,7 +13,7 @@ public class Reader<V extends DatabaseObject<V>> {
     private static final Logger log = LoggerFactory.getLogger(Reader.class);
 
     private final Semaphore readPermits;
-    private final TransferQueue<ReadTransfer<V>> readTransfers;
+    private final TransferQueue<ReadTransfer> readTransfers;
     private final ReaderThread<V> readerThread;
     private final ScheduledExecutorService executor;
 
@@ -30,10 +30,10 @@ public class Reader<V extends DatabaseObject<V>> {
      * Transfer to ReaderThread and return result
      * </summary>
      */
-    public CompletableFuture<V> get(String key) {
+    public CompletableFuture<byte[]> get(String key) {
         try {
             readPermits.acquire();
-            var readTransfer = new ReadTransfer<V>(key, new CompletableFuture<>());
+            var readTransfer = new ReadTransfer(key, new CompletableFuture<>());
             readTransfers.transfer(readTransfer);
             return readTransfer.result();
         } catch (InterruptedException e) {

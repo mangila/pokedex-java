@@ -13,12 +13,10 @@ public class FileHandler<V extends DatabaseObject<V>> {
 
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
 
-    private final DatabaseName databaseName;
     private final IndexFileHandler indexFileHandler;
     private final DataFileHandler<V> dataFileHandler;
 
     public FileHandler(DatabaseName databaseName) {
-        this.databaseName = databaseName;
         this.indexFileHandler = new IndexFileHandler(databaseName);
         this.dataFileHandler = new DataFileHandler<>(databaseName);
     }
@@ -28,7 +26,7 @@ public class FileHandler<V extends DatabaseObject<V>> {
             // update record
         } else {
             // insert record
-            var dataOffset = dataFileHandler.getOffset();
+            long dataOffset = dataFileHandler.getOffset();
             try {
                 dataFileHandler.writeNewRecord(key, value);
                 indexFileHandler.writeNewIndex(key, dataOffset);
@@ -40,11 +38,17 @@ public class FileHandler<V extends DatabaseObject<V>> {
         return 0;
     }
 
-    public V read(String key) {
+    public byte[] read(String key) {
         if (!indexFileHandler.hasIndex(key)) {
             return null;
         }
-        return null;
+        long offset = indexFileHandler.getOffset(key);
+        try {
+            return dataFileHandler.read(offset);
+        } catch (IOException e) {
+            log.error("ERR", e);
+            return null;
+        }
     }
 
     public void init() throws IOException {

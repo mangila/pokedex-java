@@ -66,20 +66,25 @@ public class IndexFileHandler {
         return indexOffsets.containsKey(key);
     }
 
+    public long getOffset(String key) {
+        return indexOffsets.get(key);
+    }
+
     public void writeNewIndex(String key, long dataOffset) throws IOException {
-        var index = IndexEntry.from(key.getBytes(), dataOffset);
-        var size = index.getSize();
+        var indexEntry = IndexEntry.from(key.getBytes(), dataOffset);
+        int size = indexEntry.getSize();
         var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_WRITE,
                 fileHeaderHandler.getOffset(),
                 size
         );
-        buffer.putInt(index.keyLength());
-        buffer.put(index.key());
-        buffer.putLong(index.dataOffset());
+        buffer.putInt(indexEntry.keyLength());
+        buffer.put(indexEntry.key());
+        buffer.putLong(indexEntry.dataOffset());
         long newOffset = fileHeaderHandler.getOffset() + size;
-        log.debug("Inserted index {} at {} -- new offset {}", index, fileHeaderHandler.getOffset(), newOffset);
+        log.debug("Inserted index {} at {} -- new offset {}", indexEntry, fileHeaderHandler.getOffset(), newOffset);
         fileHeaderHandler.updateNewWrite(newOffset);
+        indexOffsets.put(key, dataOffset);
     }
 
     public void init() throws IOException {
@@ -99,11 +104,11 @@ public class IndexFileHandler {
     }
 
     private Map<String, Long> loadIndexes() throws IOException {
-        var buffer = file.getReadChannel().map(
+        var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_ONLY,
                 FileHeader.HEADER_SIZE,
-                file.getReadChannel().size() - FileHeader.HEADER_SIZE);
-        var recordCount = fileHeaderHandler.getRecordCount();
+                file.getFileSizeExcludingHeader());
+        int recordCount = fileHeaderHandler.getRecordCount();
         var indexMap = new HashMap<String, Long>();
         for (int i = 0; i < recordCount; i++) {
             int keyLength = buffer.getInt();

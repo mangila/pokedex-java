@@ -20,7 +20,7 @@ public class PokemonDatabase {
     private final Database<Pokemon> database;
 
     private PokemonDatabase(DatabaseConfig config) {
-        this.database = new Database<>(config);
+        this.database = new Database<>(config, () -> Pokemon.DEFAULT_INSTANCE);
     }
 
     public static void configure(DatabaseConfig config) {
