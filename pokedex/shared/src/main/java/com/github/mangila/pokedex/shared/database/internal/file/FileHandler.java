@@ -34,10 +34,10 @@ public class FileHandler<V extends DatabaseObject<V>> {
                 indexFileHandler.putIndex(key, dataOffset);
             } catch (IOException e) {
                 log.error("ERR", e);
-                return 1;
+                return -1;
             }
         }
-        return -1;
+        return 1;
     }
 
     public byte[] read(String key) {
