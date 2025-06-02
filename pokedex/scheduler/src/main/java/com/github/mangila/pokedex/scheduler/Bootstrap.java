@@ -69,6 +69,9 @@ public class Bootstrap {
 
     public void configurePokemonDatabase() {
         PokemonDatabase.configure(new DatabaseConfig(new DatabaseName("pokedex"), 10));
+        PokemonDatabase.getInstance()
+                .get()
+                .init();
     }
 
     public void configureScheduler() {
