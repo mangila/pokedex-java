@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.database.internal.file.data;
+package com.github.mangila.pokedex.shared.database.internal.file;
 
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32C;

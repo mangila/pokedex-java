@@ -42,13 +42,19 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         try {
             return instanceCreator.get().deserialize(bytes);
         } catch (IOException e) {
+            log.error("ERR", e);
             return instanceCreator.get();
         }
     }
 
     public void put(String key, V value) {
-        int offset = writer.put(key, value)
+        var result = writer.put(key, value)
                 .join();
+        if (result == 1) {
+            log.warn("Record {} written", key);
+        } else {
+            log.debug("Record {} not written", key);
+        }
     }
 
     public void init() throws IOException {
@@ -57,14 +63,14 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         writer.init();
     }
 
-    public void deleteFile() throws IOException {
+    public void deleteFiles() throws IOException {
         reader.shutdown();
         writer.shutdown();
-        fileHandler.deleteFile();
+        fileHandler.deleteFiles();
     }
 
-    public void truncate() throws IOException, InterruptedException {
-        fileHandler.truncate();
+    public void truncateFiles() throws IOException, InterruptedException {
+        fileHandler.truncateFiles();
     }
 
     public boolean isEmpty() {

@@ -58,19 +58,20 @@ public class Database<V extends DatabaseObject<V>> {
         return cache.isEmpty() && disk.isEmpty();
     }
 
-    public void truncate() {
+    public void truncateDatabase() {
         try {
             cache.truncate();
-            disk.truncate();
+            disk.truncateFiles();
         } catch (IOException | InterruptedException e) {
             log.error("ERR", e);
             throw new RuntimeException(e);
         }
     }
 
-    public void deleteFile() {
+    public void deleteDatabase() {
         try {
-            disk.deleteFile();
+            cache.truncate();
+            disk.deleteFiles();
         } catch (IOException e) {
             log.error("ERR", e);
             throw new RuntimeException(e);

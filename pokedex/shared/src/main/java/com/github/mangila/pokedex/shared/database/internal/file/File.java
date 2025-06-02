@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class File {
 
@@ -55,12 +54,14 @@ public class File {
     }
 
     public void tryCreateFileIfNotExists() throws IOException {
+        log.debug("Trying to create file {}", path.getFileName());
         if (!exists()) {
             Files.createFile(path);
         }
     }
 
-    public void deleteFile() throws IOException {
+    public void tryDeleteFile() throws IOException {
+        log.info("Trying to delete file {}", path.getFileName());
         if (writeChannel != null) {
             writeChannel.close();
         }
@@ -89,8 +90,12 @@ public class File {
                 .map(FileChannel.MapMode.READ_ONLY, position, size);
     }
 
+    private static boolean isOpen(FileChannel channel) {
+        return channel != null && channel.isOpen();
+    }
+
     private FileChannel getReadChannel() throws IOException {
-        if (readChannel == null || !readChannel.isOpen()) {
+        if (!isOpen(readChannel)) {
             log.debug("Opening read channel for {}", path.getFileName());
             this.readChannel = FileChannel.open(
                     path,
@@ -101,7 +106,7 @@ public class File {
     }
 
     private FileChannel getWriteChannel() throws IOException {
-        if (writeChannel == null || !writeChannel.isOpen()) {
+        if (!isOpen(writeChannel)) {
             log.debug("Opening write channel for {}", path.getFileName());
             this.writeChannel = FileChannel.open(
                     path,
@@ -111,11 +116,16 @@ public class File {
         return writeChannel;
     }
 
-    public void truncate() throws IOException, InterruptedException {
+    public void truncate() throws IOException {
+        log.debug("Truncating file {}", path.getFileName());
         System.gc();
-        TimeUnit.SECONDS.sleep(3);
-        getWriteChannel().close();
-        getReadChannel().close();
-        getWriteChannel().truncate(0);
+        if (isOpen(writeChannel)) {
+            writeChannel.truncate(0);
+            writeChannel.force(true);
+            writeChannel.close();
+        }
+        if (isOpen(readChannel)) {
+            readChannel.close();
+        }
     }
 }
