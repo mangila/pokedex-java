@@ -62,7 +62,7 @@ public class Database<V extends DatabaseObject<V>> {
         try {
             cache.truncate();
             disk.truncateFiles();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             log.error("ERR", e);
             throw new RuntimeException(e);
         }

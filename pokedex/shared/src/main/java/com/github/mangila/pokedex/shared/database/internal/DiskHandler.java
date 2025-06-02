@@ -69,7 +69,7 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         fileHandler.deleteFiles();
     }
 
-    public void truncateFiles() throws IOException, InterruptedException {
+    public void truncateFiles() throws IOException {
         fileHandler.truncateFiles();
     }
 
