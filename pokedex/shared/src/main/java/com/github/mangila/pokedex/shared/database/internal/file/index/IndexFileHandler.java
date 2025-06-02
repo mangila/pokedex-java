@@ -3,14 +3,12 @@ package com.github.mangila.pokedex.shared.database.internal.file.index;
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.database.internal.file.DatabaseFileName;
 import com.github.mangila.pokedex.shared.database.internal.file.File;
-import com.github.mangila.pokedex.shared.database.internal.file.header.FileHeader;
-import com.github.mangila.pokedex.shared.database.internal.file.header.FileHeaderHandler;
+import com.github.mangila.pokedex.shared.database.internal.file.index.header.IndexFileHeaderHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * +---------------+------------+--------------------------------+
  * | Field         | Size       | Description                    |
  * +---------------+------------+--------------------------------+
- * | Magic Number  | 8 bytes    | File identifier ("Pok3mon1")   |
+ * | Magic Number  | 8 bytes    | File identifier ("yakvsidx")   |
  * | Version       | 4 bytes    | File format version number     |
  * | Record Count  | 4 bytes    | Number of index records        |
  * | Offset        | 8 bytes    | Next write position            |
@@ -50,8 +48,10 @@ public class IndexFileHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IndexFileHandler.class);
 
-    private final Map<String, Long> indexOffsets = new ConcurrentHashMap<>();
-    private final FileHeaderHandler fileHeaderHandler;
+    private final Map<String, Long> dataOffsets = new ConcurrentHashMap<>();
+    private final IndexFileHeaderHandler indexFileHeaderHandler;
+    private final IndexReader indexReader;
+    private final IndexWriter indexWriter;
     private final File file;
 
     public IndexFileHandler(DatabaseName databaseName) {
@@ -59,65 +59,51 @@ public class IndexFileHandler {
                 .concat(".index")
                 .concat(".yakvs");
         this.file = new File(new DatabaseFileName(fileName));
-        this.fileHeaderHandler = new FileHeaderHandler(file);
+        this.indexFileHeaderHandler = new IndexFileHeaderHandler(file);
+        this.indexReader = new IndexReader(file);
+        this.indexWriter = new IndexWriter(file);
     }
 
     public boolean hasIndex(String key) {
-        return indexOffsets.containsKey(key);
+        return dataOffsets.containsKey(key);
     }
 
-    public long getOffset(String key) {
-        return indexOffsets.get(key);
+    public long getDataOffset(String key) {
+        return dataOffsets.get(key);
     }
 
     public void writeNewIndex(String key, long dataOffset) throws IOException {
         var indexEntry = IndexEntry.from(key.getBytes(), dataOffset);
+        var offset = indexFileHeaderHandler.getOffset();
         int size = indexEntry.getSize();
         var buffer = file.getFileRegion(
                 FileChannel.MapMode.READ_WRITE,
-                fileHeaderHandler.getOffset(),
+                offset,
                 size
         );
         buffer.putInt(indexEntry.keyLength());
         buffer.put(indexEntry.key());
         buffer.putLong(indexEntry.dataOffset());
-        long newOffset = fileHeaderHandler.getOffset() + size;
-        log.debug("Inserted index {} at {} -- new offset {}", indexEntry, fileHeaderHandler.getOffset(), newOffset);
-        fileHeaderHandler.updateNewWrite(newOffset);
-        indexOffsets.put(key, dataOffset);
+        long newOffset = offset + size;
+        log.debug("Inserted index {} at {} -- new offset {}", indexEntry, offset, newOffset);
+        indexFileHeaderHandler.update(newOffset);
+        dataOffsets.put(key, dataOffset);
     }
 
     public void init() throws IOException {
         file.tryCreateFileIfNotExists();
         if (file.isEmpty()) {
-            fileHeaderHandler.writeHeaderToFile();
+            indexFileHeaderHandler.write();
         } else {
-            fileHeaderHandler.loadHeader();
-            indexOffsets.putAll(loadIndexes());
-            log.info("Loaded {} index entries", indexOffsets.size());
+            indexFileHeaderHandler.loadHeader();
+            var map = indexFileHeaderHandler.loadIndexes();
+            dataOffsets.putAll(map);
+            log.info("Loaded {} index entries", dataOffsets.size());
         }
     }
 
     public void deleteFile() throws IOException {
         log.info("Deleting file {}", file.getPath().getFileName());
         file.deleteFile();
-    }
-
-    private Map<String, Long> loadIndexes() throws IOException {
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_ONLY,
-                FileHeader.HEADER_SIZE,
-                file.getFileSizeExcludingHeader());
-        int recordCount = fileHeaderHandler.getRecordCount();
-        var indexMap = new HashMap<String, Long>();
-        for (int i = 0; i < recordCount; i++) {
-            int keyLength = buffer.getInt();
-            byte[] keyBytes = new byte[keyLength];
-            buffer.get(keyBytes);
-            long dataPos = buffer.getLong();
-            String key = new String(keyBytes);
-            indexMap.put(key, dataPos);
-        }
-        return indexMap;
     }
 }

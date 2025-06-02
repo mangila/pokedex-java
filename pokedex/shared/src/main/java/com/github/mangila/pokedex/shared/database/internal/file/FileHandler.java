@@ -4,6 +4,7 @@ import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.database.internal.file.data.DataFileHandler;
 import com.github.mangila.pokedex.shared.database.internal.file.index.IndexFileHandler;
+import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +40,15 @@ public class FileHandler<V extends DatabaseObject<V>> {
     }
 
     public byte[] read(String key) {
-        if (!indexFileHandler.hasIndex(key)) {
-            return null;
-        }
-        long offset = indexFileHandler.getOffset(key);
         try {
+            if (!indexFileHandler.hasIndex(key)) {
+                return ArrayUtils.EMPTY_BYTE_ARRAY;
+            }
+            long offset = indexFileHandler.getDataOffset(key);
             return dataFileHandler.read(offset);
         } catch (IOException e) {
             log.error("ERR", e);
-            return null;
+            return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
     }
 

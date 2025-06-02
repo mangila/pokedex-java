@@ -5,6 +5,8 @@ import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.model.Pokemon;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class PokemonDatabaseTest {
 
     @Test
@@ -16,10 +18,12 @@ class PokemonDatabaseTest {
         db.get().init();
         db.get().put("ivysaur", new Pokemon(22, "ivysaur"));
         db.get().put("venosaur", new Pokemon(33, "venosaur"));
-        db.get().put("chraizard", new Pokemon(77, "chraizard"));
+        db.get().put("charizard", new Pokemon(77, "charizard"));
         var b = db.get().get("venosaur");
-        System.out.println(b.id());
-        System.out.println(b.name());
+        assertThat(b)
+                .isNotNull()
+                .extracting(Pokemon::id, Pokemon::name)
+                .contains(33, "venosaur");
         db.get().deleteFile();
     }
 

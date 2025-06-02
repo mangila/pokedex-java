@@ -22,7 +22,7 @@ public class Database<V extends DatabaseObject<V>> {
                     Supplier<V> instanceCreator) {
         this.instanceCreator = instanceCreator;
         this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
-        this.disk = new DiskHandler<V>(config.databaseName(), instanceCreator);
+        this.disk = new DiskHandler<>(config.databaseName(), instanceCreator);
     }
 
     public void init() {

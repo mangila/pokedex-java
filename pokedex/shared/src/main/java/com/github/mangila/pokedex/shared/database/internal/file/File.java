@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
-import com.github.mangila.pokedex.shared.database.internal.file.header.FileHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +13,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
 import java.util.Set;
 
-/**
- * File structure layout:
- * <p>
- * [DATA FILE]
- * Sequential Pokemon record entries:
- * - Record Format:
- * - Length (4 bytes) - Size of serialized record
- * - Serialized Pokemon Data (variable length)
- * - CRC32C Checksum (8 bytes) - Data integrity validation
- */
 public class File {
 
     private static final Logger log = LoggerFactory.getLogger(File.class);
@@ -60,10 +49,6 @@ public class File {
 
     public long getFileSize() {
         return path.toFile().length();
-    }
-
-    public long getFileSizeExcludingHeader() {
-        return getFileSize() - FileHeader.HEADER_SIZE;
     }
 
     public Path getPath() {
