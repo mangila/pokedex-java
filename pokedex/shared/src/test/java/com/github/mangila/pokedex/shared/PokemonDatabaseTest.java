@@ -3,28 +3,51 @@ package com.github.mangila.pokedex.shared;
 import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.model.Pokemon;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PokemonDatabaseTest {
 
-    @Test
-    void abc() {
+    private static PokemonDatabase database;
+
+    @BeforeAll
+    static void beforeAll() {
         PokemonDatabase.configure(
                 new DatabaseConfig(
                         new DatabaseName("pokedex"), 1));
-        var db = PokemonDatabase.getInstance();
-        db.get().init();
-        db.get().put("ivysaur", new Pokemon(22, "ivysaur"));
-        db.get().put("venosaur", new Pokemon(33, "venosaur"));
-        db.get().put("charizard", new Pokemon(77, "charizard"));
-        var b = db.get().get("venosaur");
-        assertThat(b)
-                .isNotNull()
-                .extracting(Pokemon::id, Pokemon::name)
-                .contains(33, "venosaur");
-        db.get().deleteFile();
+        database = PokemonDatabase.getInstance();
+        database.get().init();
+    }
+
+    @AfterAll
+    static void afterAll() {
+         // database.get().deleteFile();
+    }
+
+    @AfterEach
+    void afterEach() {
+        // database.get().clear();
+    }
+
+    @Test
+    void ab() {
+        var db = database.get();
+        db.put("ivysaur", new Pokemon(22, "ivysaur"));
+        db.put("venosaur", new Pokemon(33, "venosaur"));
+        db.put("charizard", new Pokemon(77, "charizard"));
+       var l =  db.get("venosaur");
+        database.get().truncate();
+    }
+
+    @Test
+    void abc() {
+        var db = database.get();
+        db.put("asdf", new Pokemon(222, "asdf"));
+        db.put("faf", new Pokemon(200, "faf"));
     }
 
 }

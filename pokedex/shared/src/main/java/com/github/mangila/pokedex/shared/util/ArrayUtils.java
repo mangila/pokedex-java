@@ -16,4 +16,8 @@ public final class ArrayUtils {
             throw new IllegalStateException("Arrays are not equal");
         }
     }
+
+    public static boolean isEmptyOrNull(byte[] a) {
+        return a == null || a.length == 0;
+    }
 }

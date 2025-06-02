@@ -29,7 +29,7 @@ public class FileHandler<V extends DatabaseObject<V>> {
             // insert record
             long dataOffset = dataFileHandler.getOffset();
             try {
-                dataFileHandler.writeNewRecord(key, value);
+                dataFileHandler.writeNewRecord(value);
                 indexFileHandler.writeNewIndex(key, dataOffset);
             } catch (IOException e) {
                 log.error("ERR", e);
@@ -60,5 +60,10 @@ public class FileHandler<V extends DatabaseObject<V>> {
     public void deleteFile() throws IOException {
         indexFileHandler.deleteFile();
         dataFileHandler.deleteFile();
+    }
+
+    public void truncate() throws IOException, InterruptedException {
+        indexFileHandler.truncate();
+        dataFileHandler.truncate();
     }
 }

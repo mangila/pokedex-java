@@ -6,4 +6,6 @@ public class IndexWriter {
 
     public IndexWriter(File file) {
     }
+
+
 }

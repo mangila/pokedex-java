@@ -56,6 +56,12 @@ public class LruCache<K, V> {
         return entry.value;
     }
 
+    public void truncate() {
+        cache.clear();
+        head.next = tail;
+        tail.previous = head;
+    }
+
     /**
      * 1. detach if it has links
      * 2. re-link to head

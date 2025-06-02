@@ -1,9 +1,11 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class File {
 
@@ -31,20 +34,8 @@ public class File {
     private FileChannel writeChannel;
     private FileChannel readChannel;
 
-    public File(DatabaseFileName fileName) {
+    public File(FileName fileName) {
         this.path = Paths.get(fileName.value());
-    }
-
-    public MappedByteBuffer getFileRegion(
-            FileChannel.MapMode mode,
-            long position,
-            long size
-    ) throws IOException {
-        return switch (mode.toString()) {
-            case "READ_ONLY" -> getReadChannel().map(mode, position, size);
-            case "READ_WRITE" -> getWriteChannel().map(mode, position, size);
-            default -> throw new IllegalArgumentException("Unsupported MapMode: " + mode);
-        };
     }
 
     public long getFileSize() {
@@ -79,6 +70,25 @@ public class File {
         Files.deleteIfExists(path);
     }
 
+    public long write(ByteBuffer buffer, long position) throws IOException {
+        long written = getWriteChannel()
+                .write(buffer, position);
+        getWriteChannel().force(true);
+        return written;
+    }
+
+    public ByteBuffer readAndFlip(long position, int size) throws IOException {
+        var buffer = BufferUtils.newByteBuffer(size);
+        getReadChannel().read(buffer, position);
+        buffer.flip();
+        return buffer;
+    }
+
+    public MappedByteBuffer readFileRegion(long position, long size) throws IOException {
+        return getReadChannel()
+                .map(FileChannel.MapMode.READ_ONLY, position, size);
+    }
+
     private FileChannel getReadChannel() throws IOException {
         if (readChannel == null || !readChannel.isOpen()) {
             log.debug("Opening read channel for {}", path.getFileName());
@@ -99,5 +109,13 @@ public class File {
             );
         }
         return writeChannel;
+    }
+
+    public void truncate() throws IOException, InterruptedException {
+        System.gc();
+        TimeUnit.SECONDS.sleep(3);
+        getWriteChannel().close();
+        getReadChannel().close();
+        getWriteChannel().truncate(0);
     }
 }

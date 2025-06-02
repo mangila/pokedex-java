@@ -36,7 +36,7 @@ public class DiskHandler<V extends DatabaseObject<V>> {
                     return ArrayUtils.EMPTY_BYTE_ARRAY;
                 })
                 .join();
-        if (bytes.length == 0) {
+        if (ArrayUtils.isEmptyOrNull(bytes)) {
             return instanceCreator.get();
         }
         try {
@@ -61,5 +61,9 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         reader.shutdown();
         writer.shutdown();
         fileHandler.deleteFile();
+    }
+
+    public void truncate() throws IOException, InterruptedException {
+        fileHandler.truncate();
     }
 }

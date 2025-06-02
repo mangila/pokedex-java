@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.file.data;
 
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 import java.util.zip.CRC32C;
 
 public record DataRecord(int dataLength,
@@ -17,9 +17,10 @@ public record DataRecord(int dataLength,
         return Integer.BYTES + data.length + Long.BYTES;
     }
 
-    public void fill(MappedByteBuffer buffer) {
+    public void fillAndFlip(ByteBuffer buffer) {
         buffer.putInt(dataLength);
         buffer.put(data);
         buffer.putLong(checksum);
+        buffer.flip();
     }
 }

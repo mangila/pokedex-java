@@ -1,9 +1,9 @@
 package com.github.mangila.pokedex.shared.database.internal.file.data;
 
 import com.github.mangila.pokedex.shared.database.internal.file.File;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.zip.CRC32C;
 
 public class DataWriter {
@@ -14,16 +14,12 @@ public class DataWriter {
         this.file = file;
     }
 
-    public long write(String key, byte[] data, long offset, CRC32C crc32C) throws IOException {
+    public long write(byte[] data, long offset, CRC32C crc32C) throws IOException {
         var record = DataRecord.from(data, crc32C);
         int size = record.getSize();
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_WRITE,
-                offset,
-                size
-        );
-        record.fill(buffer);
-        buffer.force();
+        var buffer = BufferUtils.newByteBuffer(size);
+        record.fillAndFlip(buffer);
+        file.write(buffer, offset);
         return offset + size;
     }
 }

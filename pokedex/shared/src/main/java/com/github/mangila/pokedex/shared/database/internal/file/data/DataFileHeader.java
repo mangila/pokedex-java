@@ -1,6 +1,6 @@
-package com.github.mangila.pokedex.shared.database.internal.file.data.header;
+package com.github.mangila.pokedex.shared.database.internal.file.data;
 
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 
 public record DataFileHeader(
         byte[] magicNumber,
@@ -27,11 +27,12 @@ public record DataFileHeader(
         return new DataFileHeader(MAGIC_NUMBER_BYTES, VERSION, 0, HEADER_SIZE);
     }
 
-    public void fill(MappedByteBuffer buffer) {
+    public void fillAndFlip(ByteBuffer buffer) {
         buffer.put(magicNumber);
         buffer.putInt(version);
         buffer.putInt(recordCount);
         buffer.putLong(offset);
+        buffer.flip();
     }
 
     public int incrementRecordCount() {

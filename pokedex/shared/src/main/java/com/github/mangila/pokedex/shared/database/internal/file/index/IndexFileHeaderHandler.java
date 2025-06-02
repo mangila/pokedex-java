@@ -1,13 +1,12 @@
-package com.github.mangila.pokedex.shared.database.internal.file.index.header;
+package com.github.mangila.pokedex.shared.database.internal.file.index;
 
 import com.github.mangila.pokedex.shared.database.internal.file.File;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
-import com.github.mangila.pokedex.shared.database.internal.file.data.header.DataFileHeader;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,14 +24,10 @@ public class IndexFileHeaderHandler {
 
     public void write() throws IOException {
         log.debug("Writing header {} to file {}", header.get(), file.getPath().getFileName());
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_WRITE,
-                0,
-                DataFileHeader.HEADER_SIZE
-        );
-        var h = getHeader();
-        h.fill(buffer);
-        buffer.force();
+        var buffer = BufferUtils.newByteBuffer(IndexFileHeader.HEADER_SIZE);
+        var fileHeader = getHeader();
+        fileHeader.fillAndFlip(buffer);
+        file.write(buffer, 0);
     }
 
     public void update(long newOffset) throws IOException {
@@ -51,11 +46,7 @@ public class IndexFileHeaderHandler {
 
     public void loadHeader() throws IOException {
         log.debug("Load header from file {}", file.getPath().getFileName());
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_ONLY,
-                0,
-                IndexFileHeader.HEADER_SIZE
-        );
+        var buffer = file.readAndFlip(0, IndexFileHeader.HEADER_SIZE);
         header.updateAndGet(fileHeader -> {
             var magic = new byte[IndexFileHeader.MAGIC_NUMBER_SIZE];
             buffer.get(magic);
@@ -71,11 +62,11 @@ public class IndexFileHeaderHandler {
         });
     }
 
+    // TODO: read chunked
     public Map<String, Long> loadIndexes() throws IOException {
         log.debug("Load indexes from file {}", file.getPath().getFileName());
         long size = file.getFileSize() - IndexFileHeader.HEADER_SIZE;
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_ONLY,
+        var buffer = file.readFileRegion(
                 IndexFileHeader.HEADER_SIZE,
                 size);
         int recordCount = getHeader().recordCount();
@@ -93,5 +84,10 @@ public class IndexFileHeaderHandler {
 
     public long getOffset() {
         return getHeader().offset();
+    }
+
+    public void truncate() throws IOException {
+        header.set(IndexFileHeader.defaultValue());
+        write();
     }
 }

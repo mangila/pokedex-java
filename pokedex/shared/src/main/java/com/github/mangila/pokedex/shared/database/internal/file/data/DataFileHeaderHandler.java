@@ -1,12 +1,12 @@
-package com.github.mangila.pokedex.shared.database.internal.file.data.header;
+package com.github.mangila.pokedex.shared.database.internal.file.data;
 
 import com.github.mangila.pokedex.shared.database.internal.file.File;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DataFileHeaderHandler {
@@ -30,20 +30,15 @@ public class DataFileHeaderHandler {
 
     public void write() throws IOException {
         log.debug("Writing header {} to file {}", getHeader(), file.getPath().getFileName());
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_WRITE,
-                0,
-                DataFileHeader.HEADER_SIZE
-        );
-        var h = getHeader();
-        h.fill(buffer);
-        buffer.force();
+        var buffer = BufferUtils.newByteBuffer(DataFileHeader.HEADER_SIZE);
+        var fileHeader = getHeader();
+        fileHeader.fillAndFlip(buffer);
+        file.write(buffer, 0);
     }
 
     public void load() throws IOException {
         log.debug("Load header from file {}", file.getPath().getFileName());
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_ONLY,
+        var buffer = file.readAndFlip(
                 0,
                 DataFileHeader.HEADER_SIZE
         );
@@ -69,6 +64,11 @@ public class DataFileHeaderHandler {
                 fileHeader.incrementRecordCount(),
                 newOffset
         ));
+        write();
+    }
+
+    public void truncate() throws IOException {
+        header.set(DataFileHeader.defaultValue());
         write();
     }
 }

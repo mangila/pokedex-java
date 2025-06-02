@@ -171,7 +171,7 @@ public class PokeApiClient {
     private static JsonTree readGzipJsonBody(InputStream inputStream,
                                              Headers headers) {
         try {
-            if (headers.isGzip()) {
+            if (headers.isGzip() && headers.isJson()) {
                 if (headers.isChunked()) {
                     log.debug("Chunked GZIP encoding detected");
                     byte[] allChunks = readChunkedGzipJsonBody(inputStream);

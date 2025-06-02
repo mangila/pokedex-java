@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.shared.database.internal.file.index;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.database.internal.file.DatabaseFileName;
+import com.github.mangila.pokedex.shared.database.internal.file.FileName;
 import com.github.mangila.pokedex.shared.database.internal.file.File;
-import com.github.mangila.pokedex.shared.database.internal.file.index.header.IndexFileHeaderHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,7 +57,7 @@ public class IndexFileHandler {
         var fileName = databaseName.value()
                 .concat(".index")
                 .concat(".yakvs");
-        this.file = new File(new DatabaseFileName(fileName));
+        this.file = new File(new FileName(fileName));
         this.indexFileHeaderHandler = new IndexFileHeaderHandler(file);
         this.indexReader = new IndexReader(file);
         this.indexWriter = new IndexWriter(file);
@@ -76,14 +75,12 @@ public class IndexFileHandler {
         var indexEntry = IndexEntry.from(key.getBytes(), dataOffset);
         var offset = indexFileHeaderHandler.getOffset();
         int size = indexEntry.getSize();
-        var buffer = file.getFileRegion(
-                FileChannel.MapMode.READ_WRITE,
-                offset,
-                size
-        );
+        var buffer = ByteBuffer.allocate(size);
         buffer.putInt(indexEntry.keyLength());
         buffer.put(indexEntry.key());
         buffer.putLong(indexEntry.dataOffset());
+        buffer.flip();
+        file.write(buffer, offset);
         long newOffset = offset + size;
         log.debug("Inserted index {} at {} -- new offset {}", indexEntry, offset, newOffset);
         indexFileHeaderHandler.update(newOffset);
@@ -105,5 +102,11 @@ public class IndexFileHandler {
     public void deleteFile() throws IOException {
         log.info("Deleting file {}", file.getPath().getFileName());
         file.deleteFile();
+    }
+
+    public void truncate() throws IOException, InterruptedException {
+        file.truncate();
+        indexFileHeaderHandler.truncate();
+        dataOffsets.clear();
     }
 }

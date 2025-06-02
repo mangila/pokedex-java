@@ -2,9 +2,8 @@ package com.github.mangila.pokedex.shared.database.internal.file.data;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.database.DatabaseObject;
-import com.github.mangila.pokedex.shared.database.internal.file.DatabaseFileName;
 import com.github.mangila.pokedex.shared.database.internal.file.File;
-import com.github.mangila.pokedex.shared.database.internal.file.data.header.DataFileHeaderHandler;
+import com.github.mangila.pokedex.shared.database.internal.file.FileName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,20 +38,21 @@ public class DataFileHandler<V extends DatabaseObject<V>> {
 
     private static final Logger log = LoggerFactory.getLogger(DataFileHandler.class);
 
-    private final ThreadLocal<CRC32C> crc32CThreadLocal = ThreadLocal.withInitial(CRC32C::new);
     private final File file;
     private final DataFileHeaderHandler headerHandler;
     private final DataReader dataReader;
     private final DataWriter dataWriter;
+    private final CRC32C crc32c;
 
     public DataFileHandler(DatabaseName databaseName) {
         var fileName = databaseName.value()
                 .concat(".data")
                 .concat(".yakvs");
-        this.file = new File(new DatabaseFileName(fileName));
+        this.file = new File(new FileName(fileName));
         this.headerHandler = new DataFileHeaderHandler(file);
         this.dataReader = new DataReader(file);
         this.dataWriter = new DataWriter(file);
+        this.crc32c = new CRC32C();
     }
 
     public void init() throws IOException {
@@ -64,14 +64,14 @@ public class DataFileHandler<V extends DatabaseObject<V>> {
         }
     }
 
-    public void writeNewRecord(String key, V value) throws IOException {
+    public void writeNewRecord(V value) throws IOException {
         long offset = headerHandler.getOffset();
-        long newOffset = dataWriter.write(key,
+        long newOffset = dataWriter.write(
                 value.serialize(),
                 offset,
-                crc32CThreadLocal.get());
+                crc32c);
         headerHandler.update(newOffset);
-        log.debug("Inserted record {} at {} -- new offset {}", key, offset, newOffset);
+        log.debug("Inserted record at {} -- new offset {}", offset, newOffset);
     }
 
     public void deleteFile() throws IOException {
@@ -86,5 +86,10 @@ public class DataFileHandler<V extends DatabaseObject<V>> {
 
     public long getOffset() {
         return headerHandler.getOffset();
+    }
+
+    public void truncate() throws IOException, InterruptedException {
+        file.truncate();
+        headerHandler.truncate();
     }
 }

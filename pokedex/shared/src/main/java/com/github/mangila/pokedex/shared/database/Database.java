@@ -54,6 +54,16 @@ public class Database<V extends DatabaseObject<V>> {
         return value;
     }
 
+    public void truncate() {
+        try {
+            cache.truncate();
+            disk.truncate();
+        } catch (IOException | InterruptedException e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void deleteFile() {
         try {
             disk.deleteFile();
