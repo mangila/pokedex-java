@@ -54,6 +54,10 @@ public class Database<V extends DatabaseObject<V>> {
         return value;
     }
 
+    public boolean isEmpty() {
+        return cache.isEmpty() && disk.isEmpty();
+    }
+
     public void truncate() {
         try {
             cache.truncate();

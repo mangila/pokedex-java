@@ -66,4 +66,8 @@ public class DiskHandler<V extends DatabaseObject<V>> {
     public void truncate() throws IOException, InterruptedException {
         fileHandler.truncate();
     }
+
+    public boolean isEmpty() {
+        return fileHandler.isEmpty();
+    }
 }

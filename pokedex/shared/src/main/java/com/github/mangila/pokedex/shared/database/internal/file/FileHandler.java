@@ -66,4 +66,8 @@ public class FileHandler<V extends DatabaseObject<V>> {
         indexFileHandler.truncate();
         dataFileHandler.truncate();
     }
+
+    public boolean isEmpty() {
+        return indexFileHandler.isEmpty();
+    }
 }

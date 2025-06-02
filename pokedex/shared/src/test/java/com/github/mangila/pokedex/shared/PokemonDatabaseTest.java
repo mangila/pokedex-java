@@ -25,12 +25,13 @@ class PokemonDatabaseTest {
 
     @AfterAll
     static void afterAll() {
-         // database.get().deleteFile();
+        database.get().deleteFile();
     }
 
     @AfterEach
     void afterEach() {
-        // database.get().clear();
+        database.get().truncate();
+        assertThat(database.get().isEmpty()).isTrue();
     }
 
     @Test
@@ -39,8 +40,7 @@ class PokemonDatabaseTest {
         db.put("ivysaur", new Pokemon(22, "ivysaur"));
         db.put("venosaur", new Pokemon(33, "venosaur"));
         db.put("charizard", new Pokemon(77, "charizard"));
-       var l =  db.get("venosaur");
-        database.get().truncate();
+        var l = db.get("venosaur");
     }
 
     @Test

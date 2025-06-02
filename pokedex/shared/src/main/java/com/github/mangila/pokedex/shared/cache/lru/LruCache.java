@@ -14,6 +14,10 @@ public class LruCache<K, V> {
         return cache.containsKey(key);
     }
 
+    public boolean isEmpty() {
+        return cache.isEmpty();
+    }
+
     private class CacheEntry {
         private final K key;
         private final V value;

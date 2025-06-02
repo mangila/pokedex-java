@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.shared.database.internal.file.index;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.database.internal.file.FileName;
 import com.github.mangila.pokedex.shared.database.internal.file.File;
+import com.github.mangila.pokedex.shared.database.internal.file.FileName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,5 +108,9 @@ public class IndexFileHandler {
         file.truncate();
         indexFileHeaderHandler.truncate();
         dataOffsets.clear();
+    }
+
+    public boolean isEmpty() {
+        return dataOffsets.isEmpty();
     }
 }
