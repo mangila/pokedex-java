@@ -13,9 +13,9 @@ import java.util.concurrent.TransferQueue;
  * Dedicated Reader Thread
  * </summary>
  */
-public record ReaderThread<V extends DatabaseObject<V>>(FileHandler<V> handler,
-                                                        TransferQueue<ReadTransfer> readTransfers,
-                                                        Semaphore readPermits) implements Runnable {
+public record ReaderThread(FileHandler handler,
+                           TransferQueue<ReadTransfer> readTransfers,
+                           Semaphore readPermits) implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ReaderThread.class);
 

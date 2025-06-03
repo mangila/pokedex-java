@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class FileHandler<V extends DatabaseObject<V>> {
+public class FileHandler {
 
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
 
@@ -20,12 +19,12 @@ public class FileHandler<V extends DatabaseObject<V>> {
         this.indexFileHandler = new IndexFileHandler(databaseName);
     }
 
-    public int write(String key, V value) {
+    public int write(String key, byte[] value) {
         if (indexFileHandler.hasIndex(key)) {
             // update record
         } else {
             try {
-                var pair = dataFileHandler.write(value.serialize());
+                var pair = dataFileHandler.write(value);
                 long dataOffset = pair.first();
                 long newDataOffset = pair.second();
                 dataFileHandler.updateHeader(newDataOffset);

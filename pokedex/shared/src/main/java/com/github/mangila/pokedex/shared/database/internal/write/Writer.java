@@ -1,26 +1,25 @@
 package com.github.mangila.pokedex.shared.database.internal.write;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
-public class Writer<V extends DatabaseObject<V>> {
+public class Writer {
 
     private static final Logger log = LoggerFactory.getLogger(Writer.class);
 
-    private final TransferQueue<WriteTransfer<V>> writeTransfers;
+    private final TransferQueue<WriteTransfer> writeTransfers;
     private final Semaphore writePermits;
-    private final WriterThread<V> writerThread;
+    private final WriterThread writerThread;
     private final ScheduledExecutorService executor;
 
-    public Writer(FileHandler<V> handler) {
+    public Writer(FileHandler handler) {
         this.writeTransfers = new LinkedTransferQueue<>();
         this.writePermits = new Semaphore(50, Boolean.TRUE);
-        this.writerThread = new WriterThread<V>(handler, writeTransfers, writePermits);
+        this.writerThread = new WriterThread(handler, writeTransfers, writePermits);
         this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     }
 
@@ -30,10 +29,10 @@ public class Writer<V extends DatabaseObject<V>> {
      * Transfer to WriterThread and return result
      * </summary>
      */
-    public CompletableFuture<Integer> put(String key, V value) {
+    public CompletableFuture<Integer> put(String key, byte[] value) {
         try {
             writePermits.acquire();
-            var writeTransfer = new WriteTransfer<>(key, value, new CompletableFuture<>());
+            var writeTransfer = new WriteTransfer(key, value, new CompletableFuture<>());
             writeTransfers.transfer(writeTransfer);
             return writeTransfer.result();
         } catch (InterruptedException e) {

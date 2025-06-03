@@ -1,26 +1,25 @@
 package com.github.mangila.pokedex.shared.database.internal.read;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
-public class Reader<V extends DatabaseObject<V>> {
+public class Reader {
 
     private static final Logger log = LoggerFactory.getLogger(Reader.class);
 
     private final Semaphore readPermits;
     private final TransferQueue<ReadTransfer> readTransfers;
-    private final ReaderThread<V> readerThread;
+    private final ReaderThread readerThread;
     private final ScheduledExecutorService executor;
 
-    public Reader(FileHandler<V> handler) {
+    public Reader(FileHandler handler) {
         this.readPermits = new Semaphore(100, Boolean.TRUE);
         this.readTransfers = new LinkedTransferQueue<>();
-        this.readerThread = new ReaderThread<V>(handler, readTransfers, readPermits);
+        this.readerThread = new ReaderThread(handler, readTransfers, readPermits);
         this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     }
 

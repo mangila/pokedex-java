@@ -3,6 +3,7 @@ package com.github.mangila.pokedex.shared.database;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.database.internal.DiskHandler;
+import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,12 +17,14 @@ public class Database<V extends DatabaseObject<V>> {
     private static final Logger log = LoggerFactory.getLogger(Database.class);
 
     private final LruCache<String, V> cache;
-    private final DiskHandler<V> disk;
+    private final DiskHandler disk;
+    private final Supplier<V> instanceCreator;
 
     public Database(DatabaseConfig config,
                     Supplier<V> instanceCreator) {
         this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
-        this.disk = new DiskHandler<>(config.databaseName(), instanceCreator);
+        this.disk = new DiskHandler(config.databaseName());
+        this.instanceCreator = instanceCreator;
     }
 
     public void init() {
@@ -37,8 +40,23 @@ public class Database<V extends DatabaseObject<V>> {
     public void put(String key, V value) {
         Objects.requireNonNull(key, "key must not be null");
         Objects.requireNonNull(value, "value must not be null");
-        disk.put(key, value);
-        cache.put(key, value);
+        try {
+            var bytes = value.serialize();
+            var integer = disk.put(key, bytes)
+                    .exceptionally(throwable -> {
+                        log.error("ERR", throwable);
+                        return -1;
+                    })
+                    .join();
+            if (integer == -1) {
+                log.error("ERR - could not write record to disk");
+                throw new RuntimeException("could not write record to disk");
+            }
+            cache.put(key, value);
+        } catch (IOException e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<V> get(String key) {
@@ -46,9 +64,20 @@ public class Database<V extends DatabaseObject<V>> {
         if (cache.hasKey(key)) {
             return cache.get(key);
         }
-        var value = disk.get(key);
-        value.ifPresent(v -> cache.put(key, v));
-        return value;
+        var bytes = disk.get(key)
+                .exceptionally(throwable -> {
+                    log.error("ERR", throwable);
+                    return ArrayUtils.EMPTY_BYTE_ARRAY;
+                }).join();
+        if (ArrayUtils.isEmptyOrNull(bytes)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(instanceCreator.get().deserialize(bytes));
+        } catch (IOException e) {
+            log.error("ERR", e);
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isEmpty() {
