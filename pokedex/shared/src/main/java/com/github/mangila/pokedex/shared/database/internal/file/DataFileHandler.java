@@ -70,10 +70,6 @@ public class DataFileHandler {
         return Pair.of(record, OffsetBoundary.from(offset, newOffset));
     }
 
-    public void write(DataRecord record, long dataOffset) throws IOException {
-        file.write(record.toByteBuffer(), dataOffset);
-    }
-
     public Pair<Boolean, Integer> updateIfSameSize(long dataOffset, byte[] data) throws IOException {
         var record = DataRecord.from(data, crc32c);
         int size = record.getSize();
@@ -96,7 +92,7 @@ public class DataFileHandler {
                 dataOffset + Integer.BYTES + length,
                 Long.BYTES);
         var checksum = buffer.getLong();
-        return new DataRecord(data.length, data, checksum);
+        return DataRecord.from(data, checksum);
     }
 
     public void updateHeader(long newOffset) throws IOException {
@@ -112,5 +108,9 @@ public class DataFileHandler {
         file.truncate();
         header = FileHeader.defaultValue();
         file.write(header.toByteBuffer(), 0);
+    }
+
+    private void write(DataRecord record, long dataOffset) throws IOException {
+        file.write(record.toByteBuffer(), dataOffset);
     }
 }

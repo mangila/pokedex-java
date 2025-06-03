@@ -15,6 +15,10 @@ public record DataRecord(int dataLength,
         return new DataRecord(data.length, data, crc32C.getValue());
     }
 
+    public static DataRecord from(byte[] data, long checksum) {
+        return new DataRecord(data.length, data, checksum);
+    }
+
     public int getSize() {
         return Integer.BYTES + data.length + Long.BYTES;
     }
