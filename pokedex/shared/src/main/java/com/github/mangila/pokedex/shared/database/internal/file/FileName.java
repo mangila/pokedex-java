@@ -7,7 +7,7 @@ public record FileName(String value) {
             throw new IllegalArgumentException("database value must not be null or blank");
         }
         if (!value.endsWith(".yakvs")) {
-            throw new IllegalArgumentException("database value must end with .db");
+            throw new IllegalArgumentException("database value must newOffset with .db");
         }
     }
 

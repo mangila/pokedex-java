@@ -61,16 +61,16 @@ public class DataFileHandler {
         }
     }
 
-    public Pair<Long, Long> write(byte[] data) throws IOException {
+    public Pair<DataRecord, OffsetBoundary> write(byte[] data) throws IOException {
         long offset = header.offset();
         var record = DataRecord.from(data, crc32c);
         int size = record.getSize();
-        file.write(record.toByteBuffer(), offset);
+        write(record, offset);
         long newOffset = offset + size;
-        return new Pair<>(offset, newOffset);
+        return new Pair<>(record, new OffsetBoundary(offset, newOffset));
     }
 
-    public void write(long dataOffset, DataRecord record) throws IOException {
+    public void write(DataRecord record, long dataOffset) throws IOException {
         file.write(record.toByteBuffer(), dataOffset);
     }
 
@@ -79,7 +79,7 @@ public class DataFileHandler {
         int size = record.getSize();
         var existingRecord = read(dataOffset);
         if (existingRecord.getSize() == size) {
-            write(dataOffset, record);
+            write(record, dataOffset);
             return new Pair<>(true, size);
         }
         return new Pair<>(false, size);

@@ -99,7 +99,7 @@ public class JsonLexer {
         while (true) {
             int current = reader.read();
             if (current == -1) {
-                log.error("ERR - end of stream unexpectedly");
+                log.error("ERR - newOffset of stream unexpectedly");
                 throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
             }
             if (current == '"') {

@@ -44,12 +44,13 @@ public class FileHandler {
 
     private void writeNewRecord(String key, byte[] value) throws IOException {
         var pair = dataFileHandler.write(value);
-        long dataOffset = pair.first();
-        long newDataOffset = pair.second();
-        dataFileHandler.updateHeader(newDataOffset);
-        long newIndexOffset = indexFileHandler.write(key, dataOffset);
+        var record = pair.first();
+        var boundary = pair.second();
+        dataFileHandler.updateHeader(boundary.newOffset());
+        long newIndexOffset = indexFileHandler.write(key, boundary.oldOffset());
         indexFileHandler.updateHeader(newIndexOffset);
-        indexFileHandler.putIndex(key, dataOffset);
+        indexFileHandler.putIndex(key, boundary.oldOffset());
+        log.debug("Wrote new record with key {} and offset {} -- {}", key, boundary.oldOffset(), record);
     }
 
     public byte[] read(String key) {
@@ -59,7 +60,6 @@ public class FileHandler {
             }
             long dataOffset = indexFileHandler.getDataOffset(key);
             var record = dataFileHandler.read(dataOffset);
-            log.debug("Read record {}", record);
             return record.data();
         } catch (IOException e) {
             log.error("ERR", e);

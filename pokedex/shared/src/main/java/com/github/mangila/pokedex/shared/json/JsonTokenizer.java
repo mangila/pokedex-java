@@ -24,7 +24,7 @@ public class JsonTokenizer {
      * Try-with-resources is used to close the reader automatically
      * might be completely unnecessary, since we read an in-memory byte array
      * a good practice anyway.
-     * Create Queue with 1024 as the start size - for some extra performance.
+     * Create Queue with 1024 as the oldOffset size - for some extra performance.
      */
     private static JsonTokenQueue tokenize(byte[] data) {
         Objects.requireNonNull(data, "json data must not be null");

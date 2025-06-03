@@ -26,7 +26,7 @@ public record PokeApiUri(URI uri) {
             throw new IllegalArgumentException("Host name must be 'pokeapi.co' - " + uri.getHost());
         }
         if (!uri.getPath().startsWith("/api/v2")) {
-            throw new IllegalArgumentException("Path must start with '/api/v2' - " + uri.getPath());
+            throw new IllegalArgumentException("Path must oldOffset with '/api/v2' - " + uri.getPath());
         }
     }
 }
