@@ -74,16 +74,16 @@ public class DataFileHandler {
     }
 
     public DataRecord read(long dataOffset) throws IOException {
-        var lengthBuffer = file.readAndFlip(dataOffset, Integer.BYTES);
-        var length = lengthBuffer.getInt();
-        var dataBuffer = file.readAndFlip(
+        var buffer = file.readAndFlip(dataOffset, Integer.BYTES);
+        var length = buffer.getInt();
+        buffer = file.readAndFlip(
                 dataOffset + Integer.BYTES,
                 length);
-        var data = dataBuffer.array();
-        var checksumBuffer = file.readAndFlip(
+        var data = buffer.array();
+        buffer = file.readAndFlip(
                 dataOffset + Integer.BYTES + length,
                 Long.BYTES);
-        var checksum = checksumBuffer.getLong();
+        var checksum = buffer.getLong();
         return new DataRecord(data.length, data, checksum);
     }
 

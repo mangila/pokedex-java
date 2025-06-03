@@ -3,13 +3,11 @@ package com.github.mangila.pokedex.shared;
 import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.model.Pokemon;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PokemonDatabaseTest {
 
     private static PokemonDatabase database;
@@ -36,20 +34,32 @@ class PokemonDatabaseTest {
     }
 
     @Test
-    void ab() {
+    @Order(1)
+    @DisplayName("Should insert new records")
+    void shouldInsertNewRecords() {
         var db = database.get();
         db.put("ivysaur", new Pokemon(22, "ivysaur"));
         db.put("venosaur", new Pokemon(33, "venosaur"));
         db.put("charizard", new Pokemon(77, "charizard"));
-        var l = db.get("venosaur");
-        System.out.println(l.name());
+        assertThat(db.get("venosaur"))
+                .isNotEmpty()
+                .get()
+                .extracting(Pokemon::id, Pokemon::name)
+                .contains(33, "venosaur");
     }
 
     @Test
-    void abc() {
+    @Order(2)
+    @DisplayName("Should insert new records after truncate")
+    void shouldInsertNewRecordsAfterTruncate() {
         var db = database.get();
-        db.put("asdf", new Pokemon(222, "asdf"));
-        db.put("faf", new Pokemon(200, "faf"));
+        db.put("mewtwo", new Pokemon(151, "mewtwo"));
+        db.put("mew", new Pokemon(152, "mew"));
+        assertThat(db.get("mewtwo"))
+                .isNotEmpty()
+                .get()
+                .extracting(Pokemon::id, Pokemon::name)
+                .contains(151, "mewtwo");
     }
 
 }

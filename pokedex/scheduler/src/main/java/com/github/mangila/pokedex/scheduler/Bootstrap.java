@@ -85,9 +85,6 @@ public class Bootstrap {
         tasks.add(new QueuePokemonsTask(pokeApiClient, queueService, 1025));
         tasks.add(new ShutdownTask(queueService));
         Scheduler.configure(new SchedulerConfig(tasks));
-    }
-
-    public void initScheduler() {
         Scheduler.getInstance().init();
     }
 }

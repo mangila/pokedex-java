@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DiskHandler<V extends DatabaseObject<V>> {
@@ -29,7 +30,7 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         this.writer = new Writer<>(fileHandler);
     }
 
-    public V get(String key) {
+    public Optional<V> get(String key) {
         var bytes = reader.get(key)
                 .exceptionally(throwable -> {
                     log.error("ERR", throwable);
@@ -37,13 +38,14 @@ public class DiskHandler<V extends DatabaseObject<V>> {
                 })
                 .join();
         if (ArrayUtils.isEmptyOrNull(bytes)) {
-            return instanceCreator.get();
+            return Optional.empty();
         }
         try {
-            return instanceCreator.get().deserialize(bytes);
+            return Optional.ofNullable(instanceCreator.get()
+                    .deserialize(bytes));
         } catch (IOException e) {
             log.error("ERR", e);
-            return instanceCreator.get();
+            return Optional.empty();
         }
     }
 
@@ -51,9 +53,9 @@ public class DiskHandler<V extends DatabaseObject<V>> {
         var result = writer.put(key, value)
                 .join();
         if (result == 1) {
-            log.warn("Record {} written", key);
+            log.debug("Record {} written", key);
         } else {
-            log.debug("Record {} not written", key);
+            log.error("Record {} not written", key);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.cache.lru;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LruCache<K, V> {
@@ -51,13 +52,13 @@ public class LruCache<K, V> {
         lastRecentlyUsed(entry);
     }
 
-    public V get(K key) {
+    public Optional<V> get(K key) {
         var entry = cache.get(key);
         if (entry == null) {
-            return null;
+            return Optional.empty();
         }
         lastRecentlyUsed(entry);
-        return entry.value;
+        return Optional.ofNullable(entry.value);
     }
 
     public void truncate() {

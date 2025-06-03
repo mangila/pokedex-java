@@ -1,11 +1,11 @@
 package com.github.mangila.pokedex.shared.cache.lru;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LruCacheTest {
 
@@ -21,18 +21,22 @@ class LruCacheTest {
 
         // Then
         assertThat(cache.hasKey("key1")).isTrue();
-        assertThat(cache.get("key1")).isEqualTo("value1");
+        assertThat(cache.get("key1"))
+                .isNotEmpty()
+                .get()
+                .isEqualTo("value1");
     }
 
     @Test
-    @DisplayName("Should return null when key not found")
-    void shouldReturnNullWhenKeyNotFound() {
+    @DisplayName("Should return empty when key not found")
+    void shouldReturnEmptyWhenKeyNotFound() {
         // Given
         var config = new LruCacheConfig(5);
         var cache = new LruCache<String, String>(config);
 
         // When/Then
-        assertThat(cache.get("nonexistent")).isNull();
+        assertThat(cache.get("nonexistent"))
+                .isEmpty();
         assertThat(cache.hasKey("nonexistent")).isFalse();
     }
 
@@ -48,7 +52,10 @@ class LruCacheTest {
         cache.put("key1", "value2");
 
         // Then
-        assertThat(cache.get("key1")).isEqualTo("value1"); // Value doesn't change as per implementation
+        assertThat(cache.get("key1"))
+                .isNotEmpty()
+                .get()
+                .isEqualTo("value1"); // Value doesn't change as per implementation
     }
 
     @Test

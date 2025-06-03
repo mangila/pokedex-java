@@ -19,7 +19,6 @@ public class SchedulerApplication {
         bootstrap.configurePokemonDatabase();
         bootstrap.configureScheduler();
         bootstrap.initQueues();
-        bootstrap.initScheduler();
         IS_RUNNING.set(Boolean.TRUE);
         while (IS_RUNNING.get()) {
         }

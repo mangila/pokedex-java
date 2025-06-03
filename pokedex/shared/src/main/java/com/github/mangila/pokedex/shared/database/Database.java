@@ -8,19 +8,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class Database<V extends DatabaseObject<V>> {
 
     private static final Logger log = LoggerFactory.getLogger(Database.class);
 
-    private final Supplier<V> instanceCreator;
     private final LruCache<String, V> cache;
     private final DiskHandler<V> disk;
 
     public Database(DatabaseConfig config,
                     Supplier<V> instanceCreator) {
-        this.instanceCreator = instanceCreator;
         this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
         this.disk = new DiskHandler<>(config.databaseName(), instanceCreator);
     }
@@ -42,15 +41,13 @@ public class Database<V extends DatabaseObject<V>> {
         cache.put(key, value);
     }
 
-    public V get(String key) {
+    public Optional<V> get(String key) {
         Objects.requireNonNull(key, "key must not be null");
         if (cache.hasKey(key)) {
             return cache.get(key);
         }
         var value = disk.get(key);
-        if (!value.equals(instanceCreator.get())) {
-            cache.put(key, value);
-        }
+        value.ifPresent(v -> cache.put(key, v));
         return value;
     }
 
