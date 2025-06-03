@@ -52,7 +52,7 @@ public class Database<V extends DatabaseObject<V>> {
                         if (throwable != null) {
                             log.error("ERR", throwable);
                         }
-                        if (ok) {
+                        if (Boolean.TRUE.equals(ok)) {
                             cache.put(key, value);
                         }
                     });

@@ -32,8 +32,8 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
         var trigger = TaskConfig.TriggerConfig.from(
                 VirtualThreadConfig.newSingleThreadScheduledExecutor(),
                 TaskConfig.TaskType.ONE_OFF,
-                10,
-                10,
+                5,
+                5,
                 TimeUnit.SECONDS);
         var workers = TaskConfig.WorkerConfig.from(1);
         return TaskConfig.from(trigger, workers);

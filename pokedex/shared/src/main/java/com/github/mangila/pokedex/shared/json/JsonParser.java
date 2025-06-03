@@ -25,6 +25,7 @@ import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 public class JsonParser {
 
     private static final Logger log = LoggerFactory.getLogger(JsonParser.class);
+
     private static JsonParserConfig config;
 
     private final int maxDepth;
