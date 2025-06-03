@@ -15,8 +15,6 @@ public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
             out.writeInt(id);
             out.writeUTF(name);
             return buffer.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to convert Pokemon to bytes", e);
         }
     }
 
@@ -27,8 +25,6 @@ public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
             int id = in.readInt();
             String name = in.readUTF();
             return new Pokemon(id, name);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to create Pokemon from bytes", e);
         }
     }
 }

@@ -19,7 +19,7 @@ public class FileHandler {
         this.indexFileHandler = new IndexFileHandler(databaseName);
     }
 
-    public int write(String key, byte[] value) {
+    public boolean write(String key, byte[] value) {
         if (indexFileHandler.hasIndex(key)) {
             // update record
         } else {
@@ -33,10 +33,10 @@ public class FileHandler {
                 indexFileHandler.putIndex(key, dataOffset);
             } catch (IOException e) {
                 log.error("ERR", e);
-                return -1;
+                return Boolean.FALSE;
             }
         }
-        return 1;
+        return Boolean.TRUE;
     }
 
     public byte[] read(String key) {

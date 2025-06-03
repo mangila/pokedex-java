@@ -38,10 +38,10 @@ class PokemonDatabaseTest {
     @DisplayName("Should insert new records")
     void shouldInsertNewRecords() {
         var db = database.get();
-        db.put("ivysaur", new Pokemon(22, "ivysaur"));
-        db.put("venosaur", new Pokemon(33, "venosaur"));
-        db.put("charizard", new Pokemon(77, "charizard"));
-        assertThat(db.get("venosaur"))
+        db.putAsync("ivysaur", new Pokemon(22, "ivysaur")).join();
+        db.putAsync("venosaur", new Pokemon(33, "venosaur")).join();
+        db.putAsync("charizard", new Pokemon(77, "charizard")).join();
+        assertThat(db.getAsync("venosaur").join())
                 .isNotEmpty()
                 .get()
                 .extracting(Pokemon::id, Pokemon::name)
@@ -53,9 +53,9 @@ class PokemonDatabaseTest {
     @DisplayName("Should insert new records after truncate")
     void shouldInsertNewRecordsAfterTruncate() {
         var db = database.get();
-        db.put("mewtwo", new Pokemon(151, "mewtwo"));
-        db.put("mew", new Pokemon(152, "mew"));
-        assertThat(db.get("mewtwo"))
+        db.putAsync("mewtwo", new Pokemon(151, "mewtwo")).join();
+        db.putAsync("mew", new Pokemon(152, "mew")).join();
+        assertThat(db.getAsync("mewtwo").join())
                 .isNotEmpty()
                 .get()
                 .extracting(Pokemon::id, Pokemon::name)

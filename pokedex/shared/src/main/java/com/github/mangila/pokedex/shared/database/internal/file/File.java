@@ -22,12 +22,10 @@ public class File {
     public static final Set<StandardOpenOption> WRITE_OPTIONS = EnumSet.of(
             StandardOpenOption.READ,
             StandardOpenOption.WRITE,
-            StandardOpenOption.SPARSE,
-            StandardOpenOption.DSYNC);
+            StandardOpenOption.SYNC);
 
     public static final Set<StandardOpenOption> READ_OPTIONS = EnumSet.of(
-            StandardOpenOption.READ,
-            StandardOpenOption.DSYNC);
+            StandardOpenOption.READ);
 
     private final Path path;
     private FileChannel writeChannel;
@@ -39,10 +37,6 @@ public class File {
 
     public long getFileSize() {
         return path.toFile().length();
-    }
-
-    public Path getPath() {
-        return path;
     }
 
     public boolean exists() {
@@ -72,10 +66,7 @@ public class File {
     }
 
     public long write(ByteBuffer buffer, long position) throws IOException {
-        long written = getWriteChannel()
-                .write(buffer, position);
-        getWriteChannel().force(true);
-        return written;
+        return getWriteChannel().write(buffer, position);
     }
 
     public ByteBuffer readAndFlip(long position, int size) throws IOException {
@@ -86,8 +77,7 @@ public class File {
     }
 
     public MappedByteBuffer readFileRegion(long position, long size) throws IOException {
-        return getReadChannel()
-                .map(FileChannel.MapMode.READ_ONLY, position, size);
+        return getReadChannel().map(FileChannel.MapMode.READ_ONLY, position, size);
     }
 
     private static boolean isOpen(FileChannel channel) {
@@ -118,10 +108,8 @@ public class File {
 
     public void truncate() throws IOException {
         log.debug("Truncating file {}", path.getFileName());
-        System.gc();
         if (isOpen(writeChannel)) {
             writeChannel.truncate(0);
-            writeChannel.force(true);
             writeChannel.close();
         }
         if (isOpen(readChannel)) {

@@ -29,7 +29,7 @@ public class Writer {
      * Transfer to WriterThread and return result
      * </summary>
      */
-    public CompletableFuture<Integer> put(String key, byte[] value) {
+    public CompletableFuture<Boolean> put(String key, byte[] value) {
         try {
             writePermits.acquire();
             var writeTransfer = new WriteTransfer(key, value, new CompletableFuture<>());

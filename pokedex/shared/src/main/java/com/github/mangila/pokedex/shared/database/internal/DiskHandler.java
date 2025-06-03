@@ -28,7 +28,7 @@ public class DiskHandler {
         return reader.get(key);
     }
 
-    public CompletableFuture<Integer> put(String key, byte[] value) {
+    public CompletableFuture<Boolean> put(String key, byte[] value) {
         return writer.put(key, value);
     }
 

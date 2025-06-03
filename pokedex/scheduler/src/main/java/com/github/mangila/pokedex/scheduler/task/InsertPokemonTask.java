@@ -142,8 +142,12 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     pokemonSpecies,
                     pokemonVarieties,
                     evolutionChain);
-            database.get()
-                    .put(pokemon.name(), pokemon);
+            boolean ok = database.get().
+                    putAsync(pokemon.name(), pokemon)
+                    .join();
+            if (ok) {
+                log.info("Pokemon {} has been successfully added", pokemon.name());
+            }
         } catch (Exception e) {
             var entry = poll.get();
             if (entry.equalsMaxRetries(3)) {
