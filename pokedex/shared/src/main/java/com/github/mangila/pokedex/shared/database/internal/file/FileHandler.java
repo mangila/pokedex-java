@@ -46,11 +46,11 @@ public class FileHandler {
         var pair = dataFileHandler.write(value);
         var record = pair.first();
         var boundary = pair.second();
-        dataFileHandler.updateHeader(boundary.newOffset());
-        long newIndexOffset = indexFileHandler.write(key, boundary.oldOffset());
+        dataFileHandler.updateHeader(boundary.end());
+        long newIndexOffset = indexFileHandler.write(key, boundary.start());
         indexFileHandler.updateHeader(newIndexOffset);
-        indexFileHandler.putIndex(key, boundary.oldOffset());
-        log.debug("Wrote new record with key {} and offset {} -- {}", key, boundary.oldOffset(), record);
+        indexFileHandler.putIndex(key, boundary.start());
+        log.debug("Wrote new record with key {} and offset {} -- {}", key, boundary.start(), record);
     }
 
     public byte[] read(String key) {

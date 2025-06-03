@@ -105,7 +105,7 @@ public class PokeApiClient {
 
     /**
      * Uses Two Pointers Algorithm technique - tracking current and previous characters
-     * from the same newOffset to detect delimiters in the stream. Reads the HTTP status-line
+     * from the same end to detect delimiters in the stream. Reads the HTTP status-line
      */
     private static HttpStatus readStatusLine(InputStream inputStream) {
         try {
@@ -132,7 +132,7 @@ public class PokeApiClient {
     }
 
     /**
-     * Uses the Two Pointers Algorithm technique - tracking current and previous characters from the same newOffset
+     * Uses the Two Pointers Algorithm technique - tracking current and previous characters from the same end
      * to detect delimiters in the input stream and create an HTTP Headers object.
      */
     private static Headers readHeaders(InputStream inputStream) {

@@ -67,7 +67,7 @@ public class DataFileHandler {
         int size = record.getSize();
         write(record, offset);
         long newOffset = offset + size;
-        return new Pair<>(record, new OffsetBoundary(offset, newOffset));
+        return Pair.of(record, OffsetBoundary.from(offset, newOffset));
     }
 
     public void write(DataRecord record, long dataOffset) throws IOException {
@@ -80,9 +80,9 @@ public class DataFileHandler {
         var existingRecord = read(dataOffset);
         if (existingRecord.getSize() == size) {
             write(record, dataOffset);
-            return new Pair<>(true, size);
+            return Pair.of(true, size);
         }
-        return new Pair<>(false, size);
+        return Pair.of(false, size);
     }
 
     public DataRecord read(long dataOffset) throws IOException {

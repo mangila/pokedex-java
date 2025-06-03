@@ -26,7 +26,7 @@ public record PokeApiUriGithub(URI uri) {
             throw new IllegalArgumentException("Host name must be 'raw.githubusercontent.com' - " + uri.getHost());
         }
         if (!uri.getPath().startsWith("/PokeApi")) {
-            throw new IllegalArgumentException("Path must oldOffset with '/PokeApi' - " + uri.getPath());
+            throw new IllegalArgumentException("Path must start with '/PokeApi' - " + uri.getPath());
         }
     }
 }
