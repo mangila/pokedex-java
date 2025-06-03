@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +68,7 @@ public class IndexFileHandler {
         ByteBuffer buffer;
         file.tryCreateFileIfNotExists();
         if (file.isEmpty()) {
-            buffer = BufferUtils.newByteBuffer(FileHeader.HEADER_SIZE);
-            header.fillAndFlip(buffer);
-            file.write(buffer, 0);
+            file.write(header.toByteBuffer(), 0);
         } else {
             buffer = file.readAndFlip(0, FileHeader.HEADER_SIZE);
             this.header = FileHeader.from(buffer);
@@ -84,9 +81,7 @@ public class IndexFileHandler {
         var indexEntry = IndexEntry.from(key.getBytes(), dataOffset);
         var offset = header.offset();
         int size = indexEntry.getSize();
-        var buffer = ByteBuffer.allocate(size);
-        indexEntry.fillAndFlip(buffer);
-        file.write(buffer, offset);
+        file.write(indexEntry.toByteBuffer(), offset);
         return offset + size;
     }
 

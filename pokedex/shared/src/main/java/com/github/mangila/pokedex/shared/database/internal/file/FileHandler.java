@@ -20,23 +20,36 @@ public class FileHandler {
     }
 
     public boolean write(String key, byte[] value) {
-        if (indexFileHandler.hasIndex(key)) {
-            // update record
-        } else {
-            try {
-                var pair = dataFileHandler.write(value);
-                long dataOffset = pair.first();
-                long newDataOffset = pair.second();
-                dataFileHandler.updateHeader(newDataOffset);
-                long newIndexOffset = indexFileHandler.write(key, dataOffset);
-                indexFileHandler.updateHeader(newIndexOffset);
-                indexFileHandler.putIndex(key, dataOffset);
-            } catch (IOException e) {
-                log.error("ERR", e);
-                return Boolean.FALSE;
+        try {
+            boolean shouldUpdate = indexFileHandler.hasIndex(key);
+            if (shouldUpdate) {
+                long dataOffset = indexFileHandler.getDataOffset(key);
+                var resultPair = dataFileHandler.updateIfSameSize(dataOffset, value);
+                boolean result = resultPair.first();
+                int sizeOfRecord = resultPair.second();
+                if (!result) {
+                    // TODO flag space as free
+                    writeNewRecord(key, value);
+                    result = true;
+                }
+                return result;
             }
+            writeNewRecord(key, value);
+            return Boolean.TRUE;
+        } catch (IOException e) {
+            log.error("ERR", e);
+            return Boolean.FALSE;
         }
-        return Boolean.TRUE;
+    }
+
+    private void writeNewRecord(String key, byte[] value) throws IOException {
+        var pair = dataFileHandler.write(value);
+        long dataOffset = pair.first();
+        long newDataOffset = pair.second();
+        dataFileHandler.updateHeader(newDataOffset);
+        long newIndexOffset = indexFileHandler.write(key, dataOffset);
+        indexFileHandler.updateHeader(newIndexOffset);
+        indexFileHandler.putIndex(key, dataOffset);
     }
 
     public byte[] read(String key) {

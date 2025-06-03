@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
+import com.github.mangila.pokedex.shared.util.BufferUtils;
+
 import java.nio.ByteBuffer;
 import java.util.zip.CRC32C;
 
@@ -22,5 +24,11 @@ public record DataRecord(int dataLength,
         buffer.put(data);
         buffer.putLong(checksum);
         buffer.flip();
+    }
+
+    public ByteBuffer toByteBuffer() {
+        var buffer = BufferUtils.newByteBuffer(getSize());
+        fillAndFlip(buffer);
+        return buffer;
     }
 }

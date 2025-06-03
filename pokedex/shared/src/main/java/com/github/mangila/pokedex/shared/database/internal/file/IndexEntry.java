@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
+import com.github.mangila.pokedex.shared.util.BufferUtils;
+
 import java.nio.ByteBuffer;
 
 public record IndexEntry(int keyLength, byte[] key, long dataOffset) {
@@ -17,5 +19,11 @@ public record IndexEntry(int keyLength, byte[] key, long dataOffset) {
         buffer.put(key);
         buffer.putLong(dataOffset);
         buffer.flip();
+    }
+
+    public ByteBuffer toByteBuffer() {
+        var buffer = BufferUtils.newByteBuffer(getSize());
+        fillAndFlip(buffer);
+        return buffer;
     }
 }

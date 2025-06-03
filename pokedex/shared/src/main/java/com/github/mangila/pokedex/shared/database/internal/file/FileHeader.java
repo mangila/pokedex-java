@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.nio.ByteBuffer;
 
@@ -56,7 +57,7 @@ public record FileHeader(
     }
 
     public ByteBuffer toByteBuffer() {
-        var buffer = ByteBuffer.allocate(HEADER_SIZE);
+        var buffer = BufferUtils.newByteBuffer(HEADER_SIZE);
         fillAndFlip(buffer);
         return buffer;
     }

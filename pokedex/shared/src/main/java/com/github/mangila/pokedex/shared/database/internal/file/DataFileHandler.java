@@ -2,7 +2,6 @@ package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import com.github.mangila.pokedex.shared.model.Pair;
-import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.io.IOException;
 import java.util.zip.CRC32C;
@@ -66,11 +65,24 @@ public class DataFileHandler {
         long offset = header.offset();
         var record = DataRecord.from(data, crc32c);
         int size = record.getSize();
-        var buffer = BufferUtils.newByteBuffer(size);
-        record.fillAndFlip(buffer);
-        file.write(buffer, offset);
+        file.write(record.toByteBuffer(), offset);
         long newOffset = offset + size;
         return new Pair<>(offset, newOffset);
+    }
+
+    public void write(long dataOffset, DataRecord record) throws IOException {
+        file.write(record.toByteBuffer(), dataOffset);
+    }
+
+    public Pair<Boolean, Integer> updateIfSameSize(long dataOffset, byte[] data) throws IOException {
+        var record = DataRecord.from(data, crc32c);
+        int size = record.getSize();
+        var existingRecord = read(dataOffset);
+        if (existingRecord.getSize() == size) {
+            write(dataOffset, record);
+            return new Pair<>(true, size);
+        }
+        return new Pair<>(false, size);
     }
 
     public DataRecord read(long dataOffset) throws IOException {

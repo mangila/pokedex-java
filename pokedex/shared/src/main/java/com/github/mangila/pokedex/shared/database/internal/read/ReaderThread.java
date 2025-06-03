@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.database.internal.read;
 
-import com.github.mangila.pokedex.shared.database.DatabaseObject;
 import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
