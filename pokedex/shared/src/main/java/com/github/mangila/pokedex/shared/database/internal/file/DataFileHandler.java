@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.model.Pair;
+import com.github.mangila.pokedex.shared.util.Pair;
 
 import java.io.IOException;
-import java.util.zip.CRC32C;
+import java.nio.file.Path;
 
 /**
  * File Structure Layout for Data
@@ -12,7 +12,7 @@ import java.util.zip.CRC32C;
  * File Header Section:
  * <pre>
  * +----------------+--------------------+----------------+
- * | Magic Number   | "yakvs" bytes  | File identifier|
+ * | Magic Number   | "yakvs" bytes     | File identifier|
  * | Version        | 4 bytes           | Format version |
  * | Record Count   | 4 bytes           | Num records    |
  * | Next Offset    | 8 bytes           | Write position |
@@ -24,16 +24,14 @@ import java.util.zip.CRC32C;
  * +-----------------+----------------------+
  * | Record Length   | 4 bytes             |
  * | Data            | Variable length     |
- * | CRC32C Checksum | 8 bytes            |
  * +-----------------+----------------------+
  * </pre>
  * <p>
- * Records are stored sequentially with CRC32C checksums for data integrity.
+ * Records are stored sequentially
  */
 public class DataFileHandler {
 
     private final File file;
-    private final CRC32C crc32c;
     private FileHeader header;
 
     public DataFileHandler(DatabaseName databaseName) {
@@ -42,7 +40,6 @@ public class DataFileHandler {
                 .concat(".yakvs");
         this.file = new File(new FileName(fileName));
         this.header = FileHeader.defaultValue();
-        this.crc32c = new CRC32C();
     }
 
     /**
@@ -63,36 +60,19 @@ public class DataFileHandler {
 
     public Pair<DataRecord, OffsetBoundary> write(byte[] data) throws IOException {
         long offset = header.offset();
-        var record = DataRecord.from(data, crc32c);
+        var record = DataRecord.from(data);
         int size = record.getSize();
         write(record, offset);
         long newOffset = offset + size;
         return Pair.of(record, OffsetBoundary.from(offset, newOffset));
     }
 
-    public Pair<Boolean, Integer> updateIfSameSize(long dataOffset, byte[] data) throws IOException {
-        var record = DataRecord.from(data, crc32c);
-        int size = record.getSize();
-        var existingRecord = read(dataOffset);
-        if (existingRecord.getSize() == size) {
-            write(record, dataOffset);
-            return Pair.of(true, size);
-        }
-        return Pair.of(false, size);
-    }
-
     public DataRecord read(long dataOffset) throws IOException {
         var buffer = file.readAndFlip(dataOffset, Integer.BYTES);
         var length = buffer.getInt();
-        buffer = file.readAndFlip(
-                dataOffset + Integer.BYTES,
-                length);
+        buffer = file.readAndFlip(dataOffset + Integer.BYTES, length);
         var data = buffer.array();
-        buffer = file.readAndFlip(
-                dataOffset + Integer.BYTES + length,
-                Long.BYTES);
-        var checksum = buffer.getLong();
-        return DataRecord.from(data, checksum);
+        return DataRecord.from(data);
     }
 
     public void updateHeader(long newOffset) throws IOException {
@@ -108,6 +88,10 @@ public class DataFileHandler {
         file.truncate();
         header = FileHeader.defaultValue();
         file.write(header.toByteBuffer(), 0);
+    }
+
+    public Path getPath() {
+        return file.getPath();
     }
 
     private void write(DataRecord record, long dataOffset) throws IOException {

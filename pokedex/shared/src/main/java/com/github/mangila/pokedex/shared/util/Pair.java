@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.model;
+package com.github.mangila.pokedex.shared.util;
 
 public record Pair<A, B>(A first, B second) {
 

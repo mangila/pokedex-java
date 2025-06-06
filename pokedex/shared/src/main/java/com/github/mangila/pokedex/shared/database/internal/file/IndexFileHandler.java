@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Index File Structure Layout
@@ -54,7 +55,7 @@ public class IndexFileHandler {
                 .concat(".index")
                 .concat(".yakvs");
         this.file = new File(new FileName(fileName));
-        this.dataOffsets = new HashMap<>();
+        this.dataOffsets = new ConcurrentHashMap<>();
         this.header = FileHeader.defaultValue();
     }
 
@@ -133,5 +134,9 @@ public class IndexFileHandler {
 
     public boolean isEmpty() {
         return dataOffsets.isEmpty();
+    }
+
+    public Map<String, Long> getIndexMap() {
+        return dataOffsets;
     }
 }

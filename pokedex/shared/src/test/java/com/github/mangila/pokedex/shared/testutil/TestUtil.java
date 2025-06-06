@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class TestUtil {
 
-    public static PokeApiClient createNewTestingPokeApiClient() throws InterruptedException {
+    public static PokeApiClient createNewTestingPokeApiClient() {
         var pokeApiHost = PokeApiHost.fromDefault();
         var connectionPoolConfig = new TlsConnectionPoolConfig(
                 pokeApiHost.host(),

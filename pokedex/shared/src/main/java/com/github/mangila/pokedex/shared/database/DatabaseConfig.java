@@ -1,5 +1,11 @@
 package com.github.mangila.pokedex.shared.database;
 
+/**
+ * TODO
+ * Compact Thread Config
+ * Reader Thread Config
+ * Write Thread Config
+ */
 public record DatabaseConfig(
         DatabaseName databaseName,
         int cacheCapacity

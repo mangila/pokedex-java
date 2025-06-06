@@ -116,4 +116,8 @@ public class File {
             readChannel.close();
         }
     }
+
+    public Path getPath() {
+        return path;
+    }
 }
