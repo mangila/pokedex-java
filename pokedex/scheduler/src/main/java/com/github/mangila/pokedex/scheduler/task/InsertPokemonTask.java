@@ -152,6 +152,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             var entry = poll.get();
             if (entry.equalsMaxRetries(3)) {
                 queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_DL_QUEUE, entry);
+                return;
             }
             entry.incrementFailCounter();
             log.error("Error fetching pokemon species - {}", entry, e);
