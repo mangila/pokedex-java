@@ -22,16 +22,18 @@ public class FileHandler {
 
     public FileHandler(DatabaseConfig config) {
         var databaseName = config.databaseName();
+        var readThreadConfig = config.readerThreadConfig();
         this.dataFileHandler = new DataFileHandler(databaseName);
         this.indexFileHandler = new IndexFileHandler(databaseName);
         this.compactWritePermit = new Semaphore(1, Boolean.TRUE);
-        this.compactReadPermit = new Semaphore(1, Boolean.TRUE);
+        this.compactReadPermit = new Semaphore(readThreadConfig.nThreads(), Boolean.TRUE);
         this.compactThreadConfig = config.compactThreadConfig();
         this.compactThread = new CompactThread(
                 databaseName,
                 indexFileHandler,
                 dataFileHandler,
                 compactWritePermit,
+                readThreadConfig,
                 compactReadPermit);
     }
 

@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
+import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.database.DatabaseName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ public record CompactThread(DatabaseName databaseName,
                             IndexFileHandler indexFileHandler,
                             DataFileHandler dataFileHandler,
                             Semaphore compactWritePermit,
+                            DatabaseConfig.ReaderThreadConfig readThreadConfig,
                             Semaphore compactReadPermit) implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(CompactThread.class);
@@ -42,7 +44,7 @@ public record CompactThread(DatabaseName databaseName,
                     databaseName,
                     dataFileHandler.getFileSize(),
                     dataFileHandlerTmp.getFileSize());
-            compactReadPermit.acquireUninterruptibly();
+            compactReadPermit.acquireUninterruptibly(readThreadConfig.nThreads());
             indexFileHandler.setDataOffsets(indexFileHandlerTmp.getDataOffsets());
             indexFileHandlerTmp.closeFileChannels();
             indexFileHandler.closeFileChannels();
@@ -60,7 +62,7 @@ public record CompactThread(DatabaseName databaseName,
         } catch (IOException e) {
             log.error("ERR", e);
         }
+        compactReadPermit.release(readThreadConfig.nThreads());
         compactWritePermit.release();
-        compactReadPermit.release();
     }
 }
