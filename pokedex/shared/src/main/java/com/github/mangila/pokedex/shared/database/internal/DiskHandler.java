@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal;
 
-import com.github.mangila.pokedex.shared.database.DatabaseName;
+import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import com.github.mangila.pokedex.shared.database.internal.read.Reader;
 import com.github.mangila.pokedex.shared.database.internal.write.Writer;
@@ -18,10 +18,10 @@ public class DiskHandler {
     private final Reader reader;
     private final Writer writer;
 
-    public DiskHandler(DatabaseName databaseName) {
-        this.fileHandler = new FileHandler(databaseName);
-        this.reader = new Reader(fileHandler);
-        this.writer = new Writer(fileHandler);
+    public DiskHandler(DatabaseConfig config) {
+        this.fileHandler = new FileHandler(config);
+        this.reader = new Reader(config.readerThreadConfig(), fileHandler);
+        this.writer = new Writer(config.writeThreadConfig(), fileHandler);
     }
 
     public CompletableFuture<byte[]> get(String key) {

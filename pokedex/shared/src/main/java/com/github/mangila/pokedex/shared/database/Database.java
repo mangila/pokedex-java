@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.database;
 
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
-import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.database.internal.DiskHandler;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
@@ -23,8 +22,8 @@ public class Database<V extends DatabaseObject<V>> {
 
     public Database(DatabaseConfig config,
                     Supplier<V> instanceCreator) {
-        this.cache = new LruCache<>(new LruCacheConfig(config.cacheCapacity()));
-        this.disk = new DiskHandler(config.databaseName());
+        this.cache = new LruCache<>(config.lruCacheConfig());
+        this.disk = new DiskHandler(config);
         this.instanceCreator = instanceCreator;
     }
 

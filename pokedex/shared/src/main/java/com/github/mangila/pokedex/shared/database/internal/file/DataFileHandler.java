@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.util.Pair;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -42,6 +41,11 @@ public class DataFileHandler {
         this.header = FileHeader.defaultValue();
     }
 
+    public DataFileHandler(File file) {
+        this.file = file;
+        this.header = FileHeader.defaultValue();
+    }
+
     /**
      * Initializes the data file. If the file does not exist, it will be created. If the file is empty,
      * a default header will be written to it. Otherwise, the method will read and parse the existing header from the file.
@@ -58,13 +62,12 @@ public class DataFileHandler {
         }
     }
 
-    public Pair<DataRecord, OffsetBoundary> write(byte[] data) throws IOException {
+    public OffsetBoundary write(DataRecord record) throws IOException {
         long offset = header.offset();
-        var record = DataRecord.from(data);
         int size = record.getSize();
         write(record, offset);
         long newOffset = offset + size;
-        return Pair.of(record, OffsetBoundary.from(offset, newOffset));
+        return OffsetBoundary.from(offset, newOffset);
     }
 
     public DataRecord read(long dataOffset) throws IOException {
@@ -96,5 +99,13 @@ public class DataFileHandler {
 
     private void write(DataRecord record, long dataOffset) throws IOException {
         file.write(record.toByteBuffer(), dataOffset);
+    }
+
+    public void closeFileChannels() {
+        file.closeChannels();
+    }
+
+    public long getFileSize() {
+        return file.getFileSize();
     }
 }

@@ -1,14 +1,13 @@
 package com.github.mangila.pokedex.shared.database.internal.file;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.database.DatabaseName;
+import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 public class FileHandler {
 
@@ -16,18 +15,24 @@ public class FileHandler {
 
     private final DataFileHandler dataFileHandler;
     private final IndexFileHandler indexFileHandler;
-    private final Semaphore compactPermits;
+    private final Semaphore compactWritePermit;
+    private final Semaphore compactReadPermit;
+    private final DatabaseConfig.CompactThreadConfig compactThreadConfig;
     private final CompactThread compactThread;
 
-    public FileHandler(DatabaseName databaseName) {
+    public FileHandler(DatabaseConfig config) {
+        var databaseName = config.databaseName();
         this.dataFileHandler = new DataFileHandler(databaseName);
         this.indexFileHandler = new IndexFileHandler(databaseName);
-        this.compactPermits = new Semaphore(1, Boolean.TRUE);
+        this.compactWritePermit = new Semaphore(1, Boolean.TRUE);
+        this.compactReadPermit = new Semaphore(1, Boolean.TRUE);
+        this.compactThreadConfig = config.compactThreadConfig();
         this.compactThread = new CompactThread(
                 databaseName,
                 indexFileHandler,
                 dataFileHandler,
-                compactPermits);
+                compactWritePermit,
+                compactReadPermit);
     }
 
     /**
@@ -35,20 +40,20 @@ public class FileHandler {
      */
     public boolean write(String key, byte[] value) {
         try {
-            compactPermits.acquireUninterruptibly();
-            var pair = dataFileHandler.write(value);
-            var record = pair.first();
-            var boundary = pair.second();
-            dataFileHandler.updateHeader(boundary.end());
-            long newIndexOffset = indexFileHandler.write(key, boundary.start());
-            indexFileHandler.updateHeader(newIndexOffset);
-            indexFileHandler.putIndex(key, boundary.start());
-            log.debug("Wrote new record with key {} and offset {} -- {}", key, boundary.start(), record);
-            compactPermits.release();
+            compactWritePermit.acquireUninterruptibly();
+            var record = DataRecord.from(value);
+            var dataOffsetBoundary = dataFileHandler.write(record);
+            dataFileHandler.updateHeader(dataOffsetBoundary.endOffset());
+            var entry = IndexEntry.from(key.getBytes(), dataOffsetBoundary.startOffset());
+            var indexOffsetBoundary = indexFileHandler.write(entry);
+            indexFileHandler.updateHeader(indexOffsetBoundary.endOffset());
+            indexFileHandler.putIndex(key, entry.dataOffset());
+            log.debug("Wrote new record with key {} and offset {} - {} -- {}", key, dataOffsetBoundary.startOffset(), dataOffsetBoundary.endOffset(), record);
+            compactWritePermit.release();
             return Boolean.TRUE;
         } catch (IOException e) {
             log.error("ERR", e);
-            compactPermits.release();
+            compactWritePermit.release();
             return Boolean.FALSE;
         }
     }
@@ -58,11 +63,14 @@ public class FileHandler {
             if (!indexFileHandler.hasIndex(key)) {
                 return ArrayUtils.EMPTY_BYTE_ARRAY;
             }
+            compactReadPermit.acquireUninterruptibly();
             long dataOffset = indexFileHandler.getDataOffset(key);
             var record = dataFileHandler.read(dataOffset);
+            compactReadPermit.release();
             return record.data();
         } catch (IOException e) {
             log.error("ERR", e);
+            compactReadPermit.release();
             return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
     }
@@ -72,9 +80,9 @@ public class FileHandler {
         dataFileHandler.init();
         VirtualThreadConfig.newSingleThreadScheduledExecutor()
                 .scheduleWithFixedDelay(compactThread,
-                        12,
-                        12,
-                        TimeUnit.HOURS);
+                        compactThreadConfig.initialDelay(),
+                        compactThreadConfig.delay(),
+                        compactThreadConfig.timeUnit());
     }
 
     public void deleteFiles() throws IOException {

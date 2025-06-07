@@ -120,4 +120,20 @@ public class File {
     public Path getPath() {
         return path;
     }
+
+    public void closeChannels() {
+        try {
+            if (isOpen(writeChannel)) {
+                log.debug("Closing write channel for {}", path.getFileName());
+                writeChannel.force(true);
+                writeChannel.close();
+            }
+            if (isOpen(readChannel)) {
+                log.debug("Closing read channel for {}", path.getFileName());
+                readChannel.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

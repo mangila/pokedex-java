@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.PokemonDatabase;
+import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.database.DatabaseName;
@@ -68,7 +69,12 @@ public class Bootstrap {
     }
 
     public void configurePokemonDatabase() {
-        PokemonDatabase.configure(new DatabaseConfig(new DatabaseName("pokedex"), 10));
+        PokemonDatabase.configure(new DatabaseConfig(
+                new DatabaseName("pokedex"),
+                new LruCacheConfig(10),
+                new DatabaseConfig.CompactThreadConfig(10, 5, TimeUnit.HOURS),
+                new DatabaseConfig.ReaderThreadConfig(3, 50),
+                new DatabaseConfig.WriteThreadConfig(10)));
         PokemonDatabase.getInstance()
                 .get()
                 .init();

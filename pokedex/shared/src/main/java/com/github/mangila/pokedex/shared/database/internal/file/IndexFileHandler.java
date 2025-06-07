@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,7 @@ public class IndexFileHandler {
     private static final Logger log = LoggerFactory.getLogger(IndexFileHandler.class);
 
     private final File file;
-    private final Map<String, Long> dataOffsets;
+    private Map<String, Long> dataOffsets;
     private FileHeader header;
 
     public IndexFileHandler(DatabaseName databaseName) {
@@ -55,6 +56,12 @@ public class IndexFileHandler {
                 .concat(".index")
                 .concat(".yakvs");
         this.file = new File(new FileName(fileName));
+        this.dataOffsets = new ConcurrentHashMap<>();
+        this.header = FileHeader.defaultValue();
+    }
+
+    public IndexFileHandler(File file) {
+        this.file = file;
         this.dataOffsets = new ConcurrentHashMap<>();
         this.header = FileHeader.defaultValue();
     }
@@ -78,12 +85,12 @@ public class IndexFileHandler {
         }
     }
 
-    public long write(String key, long dataOffset) throws IOException {
-        var indexEntry = IndexEntry.from(key.getBytes(), dataOffset);
+    public OffsetBoundary write(IndexEntry entry) throws IOException {
         var offset = header.offset();
-        int size = indexEntry.getSize();
-        file.write(indexEntry.toByteBuffer(), offset);
-        return offset + size;
+        int size = entry.getSize();
+        file.write(entry.toByteBuffer(), offset);
+        long newOffset = offset + size;
+        return OffsetBoundary.from(offset, newOffset);
     }
 
     public void updateHeader(long newOffset) throws IOException {
@@ -136,7 +143,19 @@ public class IndexFileHandler {
         return dataOffsets.isEmpty();
     }
 
-    public Map<String, Long> getIndexMap() {
+    public Map<String, Long> getDataOffsets() {
         return dataOffsets;
+    }
+
+    public void setDataOffsets(Map<String, Long> indexMap) {
+        this.dataOffsets = indexMap;
+    }
+
+    public Path getPath() {
+        return file.getPath();
+    }
+
+    public void closeFileChannels() {
+        file.closeChannels();
     }
 }
