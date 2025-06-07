@@ -19,6 +19,24 @@ public record CompactThread(DatabaseName databaseName,
 
     private static final Logger log = LoggerFactory.getLogger(CompactThread.class);
 
+    /**
+     * Executes the compaction process for a database.
+     * This involves consolidating the data and index files to reduce file size
+     * and eliminate unnecessary entries, ensuring optimal performance.
+     *
+     * The method works by:
+     * - Acquiring necessary permits to synchronize write and read operations.
+     * - Creating temporary data and index files for the compaction.
+     * - Reading existing records from the current data file and writing them to the temporary files.
+     * - Updating file headers and index mappings in the temporary files as entries are written.
+     * - Logging the results of the compaction process, including the size difference.
+     * - Replacing the old data and index files with the newly compacted versions atomically.
+     * - Handling any `IOException` that may occur during file operations.
+     * - Releasing the acquired permits after the process is completed.
+     *
+     * This method ensures data consistency and integrity even when the application
+     * is actively reading and writing to the database by using synchronization mechanisms.
+     */
     @Override
     public void run() {
         log.info("Compacting database {}", databaseName);
