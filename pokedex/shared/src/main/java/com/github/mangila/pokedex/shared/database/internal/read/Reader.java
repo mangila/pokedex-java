@@ -6,22 +6,29 @@ import com.github.mangila.pokedex.shared.database.internal.file.FileHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class Reader {
 
     private static final Logger log = LoggerFactory.getLogger(Reader.class);
 
+    private final DatabaseConfig.ReaderThreadConfig config;
     private final Semaphore readPermits;
     private final TransferQueue<ReadTransfer> readTransfers;
     private final ReaderThread readerThread;
-    private final ScheduledExecutorService executor;
+    private final List<ScheduledExecutorService> executors;
 
     public Reader(DatabaseConfig.ReaderThreadConfig readerThreadConfig, FileHandler handler) {
-        this.readPermits = new Semaphore(100, Boolean.TRUE);
+        this.config = readerThreadConfig;
+        this.readPermits = new Semaphore(config.permits(), Boolean.TRUE);
         this.readTransfers = new LinkedTransferQueue<>();
         this.readerThread = new ReaderThread(handler, readTransfers, readPermits);
-        this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        this.executors = new ArrayList<>(config.nThreads());
+        for (int i = 0; i < config.nThreads(); i++) {
+            this.executors.add(VirtualThreadConfig.newSingleThreadScheduledExecutor());
+        }
     }
 
     /**
@@ -43,12 +50,16 @@ public class Reader {
     }
 
     public void init() {
-        log.info("Starting reader thread");
-        executor.schedule(readerThread, 1, TimeUnit.SECONDS);
+        for (var executor : executors) {
+            log.info("Starting executor thread -- {}", executor.toString());
+            executor.scheduleAtFixedRate(readerThread, 1, 1, TimeUnit.SECONDS);
+        }
     }
 
     public void shutdown() {
-        log.info("Shutting down reader thread");
-        executor.shutdown();
+        for (var executor : executors) {
+            log.info("Shutting down executor thread -- {}", executor.toString());
+            executor.shutdown();
+        }
     }
 }
