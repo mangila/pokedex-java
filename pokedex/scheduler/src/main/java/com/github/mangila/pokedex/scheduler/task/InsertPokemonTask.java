@@ -43,13 +43,32 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
         return TaskConfig.from(trigger, workers);
     }
 
+
     /**
-     * <summary>
-     * Virtual Thread, CompletableFuture, Optional and Java Stream gymnastics <br>
-     * Fail fast if anything goes wrong and put it to the tail of the Queue. Max three re-runs, then put-on a DLQ (WIP)<br>
-     * - Evolution Chain api request could be blocking - but to keep it declarative in the stream pipeline its fetched in async <br>
-     * - Pokémon varieties are fetched in parallel and block until everything is completed <br>
-     * </summary>
+     * Executes the task of processing Pokémon species data by interacting with the Pokémon API and internal services.
+     * The method performs the following steps:
+     *
+     * 1. Polls the Pokémon species URL queue for an entry.
+     *    - If the queue is empty, logs the status and exits.
+     *    - Extracts and validates the URL from the polled entry.
+     *
+     * 2. Fetches the Pokémon species details from the Pokémon API.
+     *    - Retrieves the JSON response and validates its success status.
+     *    - Processes the "evolution_chain" data, fetching and mapping it into an internal representation.
+     *
+     * 3. Processes all Pokémon varieties associated with the species.
+     *    - Asynchronously fetches data for each variety from the Pokémon API.
+     *    - Maps the fetched JSON into internal representations and handles side effects, such as:
+     *       - Adding sprite data to the Pokémon sprites queue.
+     *       - Adding cries data to the Pokémon cries queue.
+     *
+     * 4. Constructs the Pokémon object from the species, varieties, and evolution chain data.
+     *    - Persists the Pokémon object to the database asynchronously.
+     *    - Logs success or failure of the persistence operation.
+     *
+     * 5. Handles errors during API interaction or data processing.
+     *    - Retries or requeues entries with incremental failure counters.
+     *    - Logs errors and updates queue entries as needed.
      */
     @Override
     public void run() {
@@ -147,6 +166,8 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .join();
             if (ok) {
                 log.info("Pokemon {} has been successfully added", pokemon.name());
+            } else {
+                throw new IllegalStateException("Failed to add Pokemon " + pokemon.name() + " to database");
             }
         } catch (Exception e) {
             var entry = poll.get();

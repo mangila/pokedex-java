@@ -51,14 +51,14 @@ public class Reader {
 
     public void init() {
         for (var executor : executors) {
-            log.info("Starting executor thread -- {}", executor.toString());
+            log.info("Starting Reader thread -- {}", executor.toString());
             executor.scheduleAtFixedRate(readerThread, 1, 1, TimeUnit.SECONDS);
         }
     }
 
     public void shutdown() {
         for (var executor : executors) {
-            log.info("Shutting down executor thread -- {}", executor.toString());
+            log.info("Shutting down Reader thread -- {}", executor.toString());
             executor.shutdown();
         }
     }
