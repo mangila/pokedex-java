@@ -43,7 +43,6 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
         return TaskConfig.from(trigger, workers);
     }
 
-
     /**
      * Executes the task of processing Pokémon species data by interacting with the Pokémon API and internal services.
      * The method performs the following steps:

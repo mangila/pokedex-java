@@ -14,19 +14,17 @@ public class Reader {
 
     private static final Logger log = LoggerFactory.getLogger(Reader.class);
 
-    private final DatabaseConfig.ReaderThreadConfig config;
     private final Semaphore readPermits;
     private final TransferQueue<ReadTransfer> readTransfers;
     private final ReaderThread readerThread;
     private final List<ScheduledExecutorService> executors;
 
     public Reader(DatabaseConfig.ReaderThreadConfig readerThreadConfig, FileHandler handler) {
-        this.config = readerThreadConfig;
-        this.readPermits = new Semaphore(config.permits(), Boolean.TRUE);
+        this.readPermits = new Semaphore(readerThreadConfig.permits(), Boolean.TRUE);
         this.readTransfers = new LinkedTransferQueue<>();
         this.readerThread = new ReaderThread(handler, readTransfers, readPermits);
-        this.executors = new ArrayList<>(config.nThreads());
-        for (int i = 0; i < config.nThreads(); i++) {
+        this.executors = new ArrayList<>(readerThreadConfig.nThreads());
+        for (int i = 0; i < readerThreadConfig.nThreads(); i++) {
             this.executors.add(VirtualThreadConfig.newSingleThreadScheduledExecutor());
         }
     }

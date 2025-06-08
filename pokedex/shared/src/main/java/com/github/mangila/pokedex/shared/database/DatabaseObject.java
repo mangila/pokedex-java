@@ -8,4 +8,6 @@ public interface DatabaseObject<T> extends Serializable {
     byte[] serialize() throws IOException;
 
     T deserialize(byte[] data) throws IOException;
+
+    double schemaVersion();
 }

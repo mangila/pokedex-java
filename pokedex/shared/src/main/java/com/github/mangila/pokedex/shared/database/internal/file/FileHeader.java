@@ -40,14 +40,6 @@ public record FileHeader(
         return new FileHeader(MAGIC_NUMBER_BYTES, VERSION, 0, HEADER_SIZE);
     }
 
-    public void fillAndFlip(ByteBuffer buffer) {
-        buffer.put(magicNumber);
-        buffer.putInt(version);
-        buffer.putInt(recordCount);
-        buffer.putLong(offset);
-        buffer.flip();
-    }
-
     public int incrementRecordCount() {
         return recordCount + 1;
     }
@@ -60,5 +52,13 @@ public record FileHeader(
         var buffer = BufferUtils.newByteBuffer(HEADER_SIZE);
         fillAndFlip(buffer);
         return buffer;
+    }
+
+    public void fillAndFlip(ByteBuffer buffer) {
+        buffer.put(magicNumber);
+        buffer.putInt(version);
+        buffer.putInt(recordCount);
+        buffer.putLong(offset);
+        buffer.flip();
     }
 }

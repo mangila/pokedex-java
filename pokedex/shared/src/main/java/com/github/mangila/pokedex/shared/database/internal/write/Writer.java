@@ -19,7 +19,7 @@ public class Writer {
 
     public Writer(DatabaseConfig.WriteThreadConfig writeThreadConfig, FileHandler handler) {
         this.writeTransfers = new LinkedTransferQueue<>();
-        this.writePermits = new Semaphore(50, Boolean.TRUE);
+        this.writePermits = new Semaphore(writeThreadConfig.permits(), Boolean.TRUE);
         this.writerThread = new WriterThread(handler, writeTransfers, writePermits);
         this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     }

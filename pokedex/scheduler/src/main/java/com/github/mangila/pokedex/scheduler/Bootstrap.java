@@ -72,7 +72,7 @@ public class Bootstrap {
         PokemonDatabase.configure(new DatabaseConfig(
                 new DatabaseName("pokedex"),
                 new LruCacheConfig(10),
-                new DatabaseConfig.CompactThreadConfig(10, 5, TimeUnit.HOURS),
+                new DatabaseConfig.CompactThreadConfig(10, 5, TimeUnit.SECONDS),
                 new DatabaseConfig.ReaderThreadConfig(3, 50),
                 new DatabaseConfig.WriteThreadConfig(10)));
         PokemonDatabase.getInstance()

@@ -27,4 +27,9 @@ public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
             return new Pokemon(id, name);
         }
     }
+
+    @Override
+    public double schemaVersion() {
+        return 1.0;
+    }
 }

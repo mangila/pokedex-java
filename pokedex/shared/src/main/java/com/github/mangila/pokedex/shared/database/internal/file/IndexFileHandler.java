@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * +---------------+------------+--------------------------------+
  * | Field         | Size       | Description                    |
  * +---------------+------------+--------------------------------+
- * | Magic Number  | n bytes    | File identifier ("yakvs")   |
+ * | Magic Number  | n bytes    | File identifier ("yakvs")      |
  * | Version       | 4 bytes    | File format version number     |
  * | Record Count  | 4 bytes    | Number of index records        |
  * | Offset        | 8 bytes    | Next write position            |
