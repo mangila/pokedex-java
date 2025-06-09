@@ -26,12 +26,12 @@ public class QueueService {
     }
 
     private QueueService() {
-        log.info("Create new queue service");
+        log.info("Initializing QueueService");
         this.queues = new ConcurrentHashMap<>();
     }
 
     public void createNewQueue(String queueName) {
-        log.debug("Create new queue {}", queueName);
+        log.info("Create new queue '{}'", queueName);
         queues.put(queueName, new ConcurrentLinkedQueue<>());
     }
 

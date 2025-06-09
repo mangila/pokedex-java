@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <summary>
@@ -15,16 +17,19 @@ import java.util.concurrent.TransferQueue;
 public record WriterThread(
         FileHandler handler,
         TransferQueue<WriteTransfer> writeTransfers,
-        Semaphore writePermits
-) implements Runnable {
+        Semaphore writePermits,
+        AtomicBoolean shutdown) implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(WriterThread.class);
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!shutdown.get()) {
             try {
-                var transfer = writeTransfers.take();
+                var transfer = writeTransfers.poll(1, TimeUnit.SECONDS);
+                if (transfer == null) {
+                    continue;
+                }
                 var result = handler.write(transfer.key(), transfer.value());
                 transfer.result().complete(result);
                 writePermits.release();

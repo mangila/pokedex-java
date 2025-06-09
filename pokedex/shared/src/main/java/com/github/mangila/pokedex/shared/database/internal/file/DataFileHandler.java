@@ -30,19 +30,19 @@ import java.nio.file.Path;
  */
 public class DataFileHandler {
 
-    private final File file;
+    private final DatabaseFile databaseFile;
     private FileHeader header;
 
     public DataFileHandler(DatabaseName databaseName) {
         String fileName = databaseName.value()
                 .concat(".data")
                 .concat(".yakvs");
-        this.file = new File(new FileName(fileName));
+        this.databaseFile = new DatabaseFile(new FileName(fileName));
         this.header = FileHeader.defaultValue();
     }
 
-    public DataFileHandler(File file) {
-        this.file = file;
+    public DataFileHandler(DatabaseFile databaseFile) {
+        this.databaseFile = databaseFile;
         this.header = FileHeader.defaultValue();
     }
 
@@ -53,11 +53,11 @@ public class DataFileHandler {
      * @throws IOException if there is an issue, creating the file, reading from it, or writing to it.
      */
     public void init() throws IOException {
-        file.tryCreateFileIfNotExists();
-        if (file.isEmpty()) {
-            file.write(header.toByteBuffer(), 0);
+        databaseFile.tryCreateFileIfNotExists();
+        if (databaseFile.isEmpty()) {
+            databaseFile.write(header.toByteBuffer(), 0);
         } else {
-            var buffer = file.readAndFlip(0, FileHeader.HEADER_SIZE);
+            var buffer = databaseFile.readAndFlip(0, FileHeader.HEADER_SIZE);
             this.header = FileHeader.from(buffer);
         }
     }
@@ -71,41 +71,41 @@ public class DataFileHandler {
     }
 
     public DataRecord read(long dataOffset) throws IOException {
-        var buffer = file.readAndFlip(dataOffset, Integer.BYTES);
+        var buffer = databaseFile.readAndFlip(dataOffset, Integer.BYTES);
         var length = buffer.getInt();
-        buffer = file.readAndFlip(dataOffset + Integer.BYTES, length);
+        buffer = databaseFile.readAndFlip(dataOffset + Integer.BYTES, length);
         var data = buffer.array();
         return DataRecord.from(data);
     }
 
     public void updateHeader(long newOffset) throws IOException {
         header = header.updateOffset(newOffset);
-        file.write(header.toByteBuffer(), 0);
+        databaseFile.write(header.toByteBuffer(), 0);
     }
 
     public void deleteFile() throws IOException {
-        file.tryDeleteFile();
+        databaseFile.tryDeleteFile();
     }
 
     public void truncate() throws IOException {
-        file.truncate();
+        databaseFile.truncate();
         header = FileHeader.defaultValue();
-        file.write(header.toByteBuffer(), 0);
+        databaseFile.write(header.toByteBuffer(), 0);
     }
 
     public Path getPath() {
-        return file.getPath();
+        return databaseFile.getPath();
     }
 
     private void write(DataRecord record, long dataOffset) throws IOException {
-        file.write(record.toByteBuffer(), dataOffset);
+        databaseFile.write(record.toByteBuffer(), dataOffset);
     }
 
     public void closeFileChannels() {
-        file.closeChannels();
+        databaseFile.closeChannels();
     }
 
     public long getFileSize() {
-        return file.getFileSize();
+        return databaseFile.getFileSize();
     }
 }

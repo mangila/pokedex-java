@@ -16,7 +16,7 @@ When you run the wrapper script (`mvnw` or `mvnw.cmd`), it will download the cor
 ## Files
 
 - `maven-wrapper.properties`: Specifies the Maven version to use
-- `maven-wrapper.jar`: The wrapper JAR file (will be downloaded automatically on first run)
+- `maven-wrapper.jar`: The wrapper JAR databaseFile (will be downloaded automatically on first run)
 - `MavenWrapperDownloader.java`: A Java class used as a fallback to download the wrapper JAR
 - `mvnw`: Shell script for Unix-like systems
 - `mvnw.cmd`: Batch script for Windows

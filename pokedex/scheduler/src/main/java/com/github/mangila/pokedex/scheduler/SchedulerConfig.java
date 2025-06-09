@@ -2,9 +2,7 @@ package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.scheduler.task.Task;
 
-import java.util.List;
+import java.util.HashMap;
 
-public record SchedulerConfig(
-        List<Task> tasks
-) {
+public record SchedulerConfig(HashMap<String, Task> tasks) {
 }

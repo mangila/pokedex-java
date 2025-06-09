@@ -23,7 +23,7 @@ public record CompactThread(DatabaseName databaseName,
      * Executes the compaction process for a database.
      * This involves consolidating the data and index files to reduce file size
      * and eliminate unnecessary entries, ensuring optimal performance.
-     *
+     * <p>
      * The method works by:
      * - Acquiring necessary permits to synchronize write and read operations.
      * - Creating temporary data and index files for the compaction.
@@ -33,7 +33,7 @@ public record CompactThread(DatabaseName databaseName,
      * - Replacing the old data and index files with the newly compacted versions atomically.
      * - Handling any `IOException` that may occur during file operations.
      * - Releasing the acquired permits after the process is completed.
-     *
+     * <p>
      * This method ensures data consistency and integrity even when the application
      * is actively reading and writing to the database by using synchronization mechanisms.
      */
@@ -42,8 +42,10 @@ public record CompactThread(DatabaseName databaseName,
         log.info("Compacting database {}", databaseName);
         compactWritePermit.acquireUninterruptibly();
         try {
-            var indexTmp = new File(new FileName("index.tmp.yakvs"));
-            var dataTmp = new File(new FileName("data.tmp.yakvs"));
+            var indexTmp = new DatabaseFile(new FileName("index.tmp.yakvs"));
+            indexTmp.tryDeleteFile();
+            var dataTmp = new DatabaseFile(new FileName("data.tmp.yakvs"));
+            dataTmp.tryDeleteFile();
             var indexFileHandlerTmp = new IndexFileHandler(indexTmp);
             var dataFileHandlerTmp = new DataFileHandler(dataTmp);
             indexFileHandlerTmp.init();
@@ -58,14 +60,14 @@ public record CompactThread(DatabaseName databaseName,
                 indexFileHandlerTmp.updateHeader(indexOffsetBoundary.endOffset());
                 indexFileHandlerTmp.putIndex(key, dataOffsetBoundary.startOffset());
             }
-            log.info("Compact database {}. Old size: {} bytes, new size: {} bytes",
+            log.info("Compact database {}. Old size: {} bytes, New size: {} bytes",
                     databaseName,
                     dataFileHandler.getFileSize(),
                     dataFileHandlerTmp.getFileSize());
             compactReadPermit.acquireUninterruptibly(readThreadConfig.nThreads());
-            indexFileHandler.setDataOffsets(indexFileHandlerTmp.getDataOffsets());
             indexFileHandlerTmp.closeFileChannels();
             indexFileHandler.closeFileChannels();
+            indexFileHandler.setDataOffsets(indexFileHandlerTmp.getDataOffsets());
             Files.move(
                     indexFileHandlerTmp.getPath(),
                     indexFileHandler.getPath(),

@@ -47,7 +47,7 @@ public class IndexFileHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IndexFileHandler.class);
 
-    private final File file;
+    private final DatabaseFile databaseFile;
     private Map<String, Long> dataOffsets;
     private FileHeader header;
 
@@ -55,13 +55,13 @@ public class IndexFileHandler {
         var fileName = databaseName.value()
                 .concat(".index")
                 .concat(".yakvs");
-        this.file = new File(new FileName(fileName));
+        this.databaseFile = new DatabaseFile(new FileName(fileName));
         this.dataOffsets = new ConcurrentHashMap<>();
         this.header = FileHeader.defaultValue();
     }
 
-    public IndexFileHandler(File file) {
-        this.file = file;
+    public IndexFileHandler(DatabaseFile databaseFile) {
+        this.databaseFile = databaseFile;
         this.dataOffsets = new ConcurrentHashMap<>();
         this.header = FileHeader.defaultValue();
     }
@@ -74,11 +74,11 @@ public class IndexFileHandler {
      */
     public void init() throws IOException {
         ByteBuffer buffer;
-        file.tryCreateFileIfNotExists();
-        if (file.isEmpty()) {
-            file.write(header.toByteBuffer(), 0);
+        databaseFile.tryCreateFileIfNotExists();
+        if (databaseFile.isEmpty()) {
+            databaseFile.write(header.toByteBuffer(), 0);
         } else {
-            buffer = file.readAndFlip(0, FileHeader.HEADER_SIZE);
+            buffer = databaseFile.readAndFlip(0, FileHeader.HEADER_SIZE);
             this.header = FileHeader.from(buffer);
             this.dataOffsets.putAll(loadIndexes());
             log.debug("Loaded {} index entries", dataOffsets.size());
@@ -88,14 +88,14 @@ public class IndexFileHandler {
     public OffsetBoundary write(IndexEntry entry) throws IOException {
         var offset = header.offset();
         int size = entry.getSize();
-        file.write(entry.toByteBuffer(), offset);
+        databaseFile.write(entry.toByteBuffer(), offset);
         long newOffset = offset + size;
         return OffsetBoundary.from(offset, newOffset);
     }
 
     public void updateHeader(long newOffset) throws IOException {
         header = header.updateOffset(newOffset);
-        file.write(header.toByteBuffer(), 0);
+        databaseFile.write(header.toByteBuffer(), 0);
     }
 
     public boolean hasIndex(String key) {
@@ -111,8 +111,8 @@ public class IndexFileHandler {
     }
 
     private Map<String, Long> loadIndexes() throws IOException {
-        long size = file.getFileSize() - FileHeader.HEADER_SIZE;
-        var buffer = file.readFileRegion(
+        long size = databaseFile.getFileSize() - FileHeader.HEADER_SIZE;
+        var buffer = databaseFile.readFileRegion(
                 FileHeader.HEADER_SIZE,
                 size);
         int recordCount = header.recordCount();
@@ -129,13 +129,15 @@ public class IndexFileHandler {
     }
 
     public void deleteFile() throws IOException {
-        file.tryDeleteFile();
+        databaseFile.tryDeleteFile();
+        header = FileHeader.defaultValue();
+        dataOffsets.clear();
     }
 
     public void truncate() throws IOException {
-        file.truncate();
+        databaseFile.truncate();
         header = FileHeader.defaultValue();
-        file.write(header.toByteBuffer(), 0);
+        databaseFile.write(header.toByteBuffer(), 0);
         dataOffsets.clear();
     }
 
@@ -152,10 +154,10 @@ public class IndexFileHandler {
     }
 
     public Path getPath() {
-        return file.getPath();
+        return databaseFile.getPath();
     }
 
     public void closeFileChannels() {
-        file.closeChannels();
+        databaseFile.closeChannels();
     }
 }

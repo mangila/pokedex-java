@@ -112,11 +112,11 @@ class PokemonDatabaseTest {
         assertThat(firstCompact.getLevel())
                 .isEqualTo(Level.INFO);
         assertThat(firstCompact.getFormattedMessage())
-                .contains("Old size: 175 bytes, new size: 94 bytes");
+                .contains("Old size: 175 bytes, New size: 94 bytes");
         assertThat(secondCompact.getLevel())
                 .isEqualTo(Level.INFO);
         assertThat(secondCompact.getFormattedMessage())
-                .contains("Old size: 94 bytes, new size: 94 bytes");
+                .contains("Old size: 94 bytes, New size: 94 bytes");
     }
 
 }

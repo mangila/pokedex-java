@@ -62,10 +62,10 @@ Overengineering at its finest
 - Key Value Database (Yet Another Key Value Store)
     - Persist to disk
     - Lock Free read and writes
-    - .yakvs file format
+    - .yakvs databaseFile format
         - Binary format
-        - Index file
-        - Data file
+        - Index databaseFile
+        - Data databaseFile
 
 ## Engineering Principles (WIP)
 

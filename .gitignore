@@ -1,10 +1,10 @@
 *.yakvs
 __pycache__
 .idea
-# Compiled class file
+# Compiled class databaseFile
 *.class
 
-# Log file
+# Log databaseFile
 *.log
 
 # BlueJ files

@@ -16,8 +16,7 @@ import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.mangila.pokedex.scheduler.SchedulerApplication.*;
@@ -84,13 +83,18 @@ public class Bootstrap {
         var pokeApiClient = PokeApiClient.getInstance();
         var queueService = QueueService.getInstance();
         var pokemonDatabase = PokemonDatabase.getInstance();
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(new InsertCriesTask(pokeApiClient, queueService));
-        tasks.add(new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase));
-        tasks.add(new InsertSpritesTask(pokeApiClient, queueService));
-        tasks.add(new QueuePokemonsTask(pokeApiClient, queueService, 1025));
-        tasks.add(new ShutdownTask(queueService));
-        Scheduler.configure(new SchedulerConfig(tasks));
+        var map = new HashMap<String, Task>();
+        var insertCriesTask = new InsertCriesTask(pokeApiClient, queueService);
+        map.put(insertCriesTask.name(), insertCriesTask);
+        var insertPokemonTask = new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase);
+        map.put(insertPokemonTask.name(), insertPokemonTask);
+        var insertSpritesTask = new InsertSpritesTask(pokeApiClient, queueService);
+        map.put(insertSpritesTask.name(), insertSpritesTask);
+        var queuePokemonsTask = new QueuePokemonsTask(pokeApiClient, queueService, 5);
+        map.put(queuePokemonsTask.name(), queuePokemonsTask);
+        var shutdownTask = new ShutdownTask(queueService);
+        map.put(shutdownTask.name(), shutdownTask);
+        Scheduler.configure(new SchedulerConfig(map));
         Scheduler.getInstance().init();
     }
 }

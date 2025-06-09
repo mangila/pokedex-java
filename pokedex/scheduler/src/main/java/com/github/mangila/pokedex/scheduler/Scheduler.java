@@ -1,11 +1,10 @@
 package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.scheduler.task.Task;
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class Scheduler {
@@ -14,7 +13,7 @@ public class Scheduler {
 
     private static SchedulerConfig config;
 
-    private final List<Task> tasks;
+    private final Map<String, Task> tasks;
 
     private Scheduler(SchedulerConfig config) {
         this.tasks = config.tasks();
@@ -39,33 +38,26 @@ public class Scheduler {
     }
 
     public void init() {
-        tasks.forEach(this::scheduleTask);
+        tasks.forEach((key, task) -> {
+            log.info("Schedule task {}", key);
+            task.schedule();
+        });
     }
 
-    /**
-     * Trigger Thread with a Worker pool
-     */
-    private void scheduleTask(Task task) {
-        log.info("Scheduling {}", task.getTaskName());
-        var taskConfig = task.getTaskConfig();
-        var triggerConfig = taskConfig.triggerConfig();
-        var workerConfig = taskConfig.workerConfig();
-        var workerPool = VirtualThreadConfig.newFixedThreadPool(workerConfig.poolSize());
-        switch (triggerConfig.taskType()) {
-            case ONE_OFF -> triggerConfig.executor()
-                    .schedule(() -> workerPool.submit(task),
-                            triggerConfig.initialDelay(),
-                            triggerConfig.timeUnit());
-            case FIXED_RATE -> triggerConfig.executor()
-                    .scheduleAtFixedRate(() -> workerPool.submit(task),
-                            triggerConfig.initialDelay(),
-                            triggerConfig.delay(),
-                            triggerConfig.timeUnit());
-            case FIXED_DELAY -> triggerConfig.executor()
-                    .scheduleWithFixedDelay(() -> workerPool.submit(task),
-                            triggerConfig.initialDelay(),
-                            triggerConfig.delay(),
-                            triggerConfig.timeUnit());
+    public void shutdownAllTasks() {
+        tasks.forEach((key, task) -> {
+            log.info("Shutting down task {}", key);
+            shutdownTask(task);
+        });
+    }
+
+    private void shutdownTask(Task task) {
+        var name = task.name();
+        var isShutdown = task.shutdown();
+        if (isShutdown) {
+            log.info("Task {} shutdown successfully", name);
+        } else {
+            log.warn("Task {} failed to shutdown", name);
         }
     }
 }

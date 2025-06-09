@@ -15,9 +15,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class File {
+public class DatabaseFile {
 
-    private static final Logger log = LoggerFactory.getLogger(File.class);
+    private static final Logger log = LoggerFactory.getLogger(DatabaseFile.class);
 
     public static final Set<StandardOpenOption> WRITE_OPTIONS = EnumSet.of(
             StandardOpenOption.READ,
@@ -31,7 +31,7 @@ public class File {
     private FileChannel writeChannel;
     private FileChannel readChannel;
 
-    public File(FileName fileName) {
+    public DatabaseFile(FileName fileName) {
         this.path = Paths.get(fileName.value());
     }
 
@@ -56,12 +56,7 @@ public class File {
 
     public void tryDeleteFile() throws IOException {
         log.info("Trying to delete file {}", path.getFileName());
-        if (writeChannel != null) {
-            writeChannel.close();
-        }
-        if (readChannel != null) {
-            readChannel.close();
-        }
+        closeChannels();
         Files.deleteIfExists(path);
     }
 
