@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 
 public class FileHandler {
@@ -19,6 +20,7 @@ public class FileHandler {
     private final Semaphore compactReadPermit;
     private final DatabaseConfig.CompactThreadConfig compactThreadConfig;
     private final CompactThread compactThread;
+    private final ScheduledExecutorService healthProbeExecutor;
 
     public FileHandler(DatabaseConfig config) {
         var databaseName = config.databaseName();
@@ -28,6 +30,7 @@ public class FileHandler {
         this.compactWritePermit = new Semaphore(1, Boolean.TRUE);
         this.compactReadPermit = new Semaphore(readThreadConfig.nThreads(), Boolean.TRUE);
         this.compactThreadConfig = config.compactThreadConfig();
+        this.healthProbeExecutor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
         this.compactThread = new CompactThread(
                 databaseName,
                 indexFileHandler,
@@ -80,11 +83,12 @@ public class FileHandler {
     public void init() throws IOException {
         indexFileHandler.init();
         dataFileHandler.init();
-        VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(compactThread,
-                        compactThreadConfig.initialDelay(),
-                        compactThreadConfig.delay(),
-                        compactThreadConfig.timeUnit());
+        healthProbeExecutor.scheduleWithFixedDelay(
+                compactThread,
+                compactThreadConfig.initialDelay(),
+                compactThreadConfig.delay(),
+                compactThreadConfig.timeUnit()
+        );
     }
 
     public void deleteFiles() throws IOException {
