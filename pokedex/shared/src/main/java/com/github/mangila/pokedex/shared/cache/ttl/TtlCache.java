@@ -1,9 +1,12 @@
 package com.github.mangila.pokedex.shared.cache.ttl;
 
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,17 +15,24 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TtlCache<K, V> {
 
     private static final Logger log = LoggerFactory.getLogger(TtlCache.class);
-
     private final Map<K, TtlEntry> cache = new ConcurrentHashMap<>();
     private final TtlCacheConfig config;
-    private final EvictionThread<K> evictionThread;
-    private final ScheduledExecutorService executor;
+    private final ScheduledExecutorService evictionThread;
 
     public TtlCache(TtlCacheConfig config) {
         this.config = config;
-        this.evictionThread = new EvictionThread<>(cache, config.ttl());
-        this.executor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(evictionThread,
+        this.evictionThread = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        evictionThread.scheduleWithFixedDelay(() -> {
+                    log.debug("Running eviction thread");
+                    cache.entrySet()
+                            .removeIf(entry -> {
+                                boolean isExpired = TtlCacheUtils.isExpired(entry.getValue(), config.ttl());
+                                if (isExpired) {
+                                    log.debug("Evicting entry: {}", entry.getKey());
+                                }
+                                return isExpired;
+                            });
+                },
                 config.evictionConfig().initialDelay(),
                 config.evictionConfig().delay(),
                 config.evictionConfig().timeUnit());
@@ -33,7 +43,7 @@ public class TtlCache<K, V> {
     }
 
     @SuppressWarnings("unchecked")
-    public V get(K key) {
+    public @Nullable V get(K key) {
         var entry = cache.get(key);
         if (entry == null) {
             log.debug("Cache miss for key {}", key);
@@ -52,10 +62,13 @@ public class TtlCache<K, V> {
     }
 
     public boolean isEvictionThreadShutdown() {
-        return executor.isShutdown();
+        return evictionThread.isShutdown();
     }
 
     public void shutdownEvictionThread() {
-        executor.shutdown();
+        VirtualThreadUtils.terminateExecutorGracefully(
+                evictionThread,
+                Duration.ofSeconds(10)
+        );
     }
 }

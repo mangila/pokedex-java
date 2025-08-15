@@ -7,12 +7,9 @@ import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
-public class JsonStreamReader implements AutoCloseable {
-
-    private final BufferedReader stream;
-
-    public JsonStreamReader(byte[] data) {
-        this.stream = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data), Charset.defaultCharset()));
+public record JsonStreamReader(BufferedReader stream) implements AutoCloseable {
+    public JsonStreamReader(byte[] stream) {
+        this(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(stream), Charset.defaultCharset())));
     }
 
     public int read() throws IOException {

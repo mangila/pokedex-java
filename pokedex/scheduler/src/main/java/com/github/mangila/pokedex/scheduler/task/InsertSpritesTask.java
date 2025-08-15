@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
+import com.github.mangila.pokedex.api.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public record InsertSpritesTask(
         QueueService queueService
 ) implements Task {
 
-    private static final Logger log = LoggerFactory.getLogger(InsertSpritesTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpritesTask.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadConfig.newSingleThreadScheduledExecutor();
     private static final ExecutorService WORKER_POOL = VirtualThreadConfig.newFixedThreadPool(10);
 
@@ -36,7 +36,7 @@ public record InsertSpritesTask(
 
     @Override
     public boolean shutdown() {
-        log.info("Shutting down {}", name());
+        LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
         return VirtualThreadUtils.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
                 VirtualThreadUtils.terminateExecutorGracefully(WORKER_POOL, duration);
@@ -45,9 +45,9 @@ public record InsertSpritesTask(
     @Override
     public void run() {
         try {
-            log.debug("Fetching sprites");
+            LOGGER.debug("Fetching sprites");
         } catch (Exception e) {
-            log.error("Error fetching sprites", e);
+            LOGGER.error("Error fetching sprites", e);
         }
     }
 }

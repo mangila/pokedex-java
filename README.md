@@ -1,17 +1,6 @@
 # pokedex-java
 
-Experimental Low-level project with plain Java.
-
-This is the first project created in the Pokédex series;
-
-Overengineering at its finest
-
-# Requirements
-
-- Multi-module (if possible) project with chosen Language
-- Daemon Service
-- Web Service
-- Common/Shared module
+Pokedex built in Java
 
 ## Development Environment
 
@@ -53,19 +42,22 @@ Overengineering at its finest
 
 - Http Client
     - HTTP/1.1
-    - Connection Pooling
+    - Connection Pool
     - SSL/TLS
 - Json Parser
 - Time To Live(TTL) Cache
 - Last Recently Used(LRU) Cache
 - Scheduler
+- HTTP Server
+    - Serve JSON
 - Key Value Database (Yet Another Key Value Store)
     - Persist to disk
     - Lock Free read and writes
-    - .yakvs databaseFile format
+    - Append only to file
+    - ".yakvs" file format
         - Binary format
-        - Index databaseFile
-        - Data databaseFile
+        - Index file
+        - Data file
 
 ## Engineering Principles (WIP)
 

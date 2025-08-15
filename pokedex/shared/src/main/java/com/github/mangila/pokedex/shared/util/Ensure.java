@@ -1,0 +1,100 @@
+package com.github.mangila.pokedex.shared.util;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+public final class Ensure {
+
+    private Ensure() {
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static void notNull(Object object) {
+        if (object == null) {
+            throw new IllegalStateException("Object cannot be null");
+        }
+    }
+
+    public static void notNull(Object object, Class<?> clazz) {
+        if (object == null) {
+            throw new IllegalArgumentException(clazz.getName() + " cannot be null");
+        }
+    }
+
+    public static void notNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void notEquals(int first, int second, Supplier<RuntimeException> ex) {
+        if (first == second) {
+            throw ex.get();
+        }
+    }
+
+    public static void equals(byte[] a, byte[] a2) {
+        boolean equals = Arrays.equals(a, a2);
+        if (!equals) {
+            throw new IllegalStateException("Arrays are not equal");
+        }
+    }
+
+    public static void notNull(Object object, Supplier<RuntimeException> ex) {
+        if (object == null) {
+            throw ex.get();
+        }
+    }
+
+    public static void notEmpty(Object[] array, Class<?> clazz) {
+        notNull(array, clazz);
+        if (array.length == 0) {
+            throw new IllegalStateException("%s cannot be empty".formatted(clazz.getSimpleName()));
+        }
+    }
+
+
+    public static void min(int min, int target) {
+        if (target < min) {
+            throw new IllegalStateException("Target must be greater than or equal to %d but was %d"
+                    .formatted(min, target)
+            );
+        }
+    }
+
+    public static void min(long min, long target) {
+        if (target < min) {
+            throw new IllegalStateException("Target must be greater than or equal to %d but was %d"
+                    .formatted(min, target)
+            );
+        }
+    }
+
+    public static void max(int max, int target) {
+        if (target > max) {
+            throw new IllegalStateException("Target must be less than or equal to %d but was %d"
+                    .formatted(max, target)
+            );
+        }
+    }
+
+    public static void equals(Object object, Object another) {
+        if (!Objects.equals(object, another)) {
+            throw new IllegalStateException("Objects are not equal: %s != %s".formatted(object, another));
+        }
+    }
+
+    public static void notBlank(String value, Class<?> clazz) {
+        notNull(value, clazz);
+        if (value.isBlank()) {
+            throw new IllegalStateException("%s cannot be blank".formatted(clazz.getSimpleName()));
+        }
+    }
+}

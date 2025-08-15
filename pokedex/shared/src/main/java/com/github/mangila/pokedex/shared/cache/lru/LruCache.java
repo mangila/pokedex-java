@@ -1,11 +1,15 @@
 package com.github.mangila.pokedex.shared.cache.lru;
 
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LruCache<K, V> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LruCache.class);
     private final Map<K, CacheEntry> cache = new ConcurrentHashMap<>();
     private final int capacity;
     private final CacheEntry head;
@@ -52,13 +56,15 @@ public class LruCache<K, V> {
         lastRecentlyUsed(entry);
     }
 
-    public Optional<V> get(K key) {
+    public @Nullable V get(K key) {
         var entry = cache.get(key);
         if (entry == null) {
-            return Optional.empty();
+            LOGGER.debug("Cache miss for key {}", key);
+            return null;
         }
         lastRecentlyUsed(entry);
-        return Optional.ofNullable(entry.value);
+        LOGGER.debug("Cache hit for key {}", key);
+        return entry.value;
     }
 
     public void truncate() {

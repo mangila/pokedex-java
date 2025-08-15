@@ -1,100 +1,81 @@
 package com.github.mangila.pokedex.scheduler;
 
+import com.github.mangila.pokedex.api.client.PokeApiClient;
+import com.github.mangila.pokedex.api.db.PokemonDatabase;
+import com.github.mangila.pokedex.database.DatabaseConfig;
+import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.scheduler.task.*;
-import com.github.mangila.pokedex.shared.PokemonDatabase;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
-import com.github.mangila.pokedex.shared.database.DatabaseConfig;
-import com.github.mangila.pokedex.shared.database.DatabaseName;
-import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
-import com.github.mangila.pokedex.shared.https.client.PokeApiClientConfig;
-import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClient;
-import com.github.mangila.pokedex.shared.https.client.PokeApiMediaClientConfig;
+import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
+import com.github.mangila.pokedex.shared.https.client.json.JsonResponse;
 import com.github.mangila.pokedex.shared.json.JsonParser;
-import com.github.mangila.pokedex.shared.json.JsonParserConfig;
-import com.github.mangila.pokedex.shared.model.primitives.PokeApiHost;
 import com.github.mangila.pokedex.shared.queue.QueueService;
-import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
+import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
+import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPoolConfig;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.mangila.pokedex.scheduler.SchedulerApplication.*;
 
 public class Bootstrap {
 
-    public void initQueues() {
-        var queueService = QueueService.getInstance();
+    public QueueService initQueueService() {
+        QueueService queueService = new QueueService();
         queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
         queueService.createNewQueue(POKEMON_SPECIES_URL_DL_QUEUE);
         queueService.createNewQueue(POKEMON_SPRITES_QUEUE);
         queueService.createNewQueue(POKEMON_CRIES_QUEUE);
+        return queueService;
     }
 
-    public void configureJsonParser() {
-        JsonParser.configure(new JsonParserConfig(64));
+    public JsonParser initJsonParser() {
+        return JsonParser.DEFAULT;
     }
 
-    public void configurePokeApiClient() {
-        var pokeApiHost = PokeApiHost.fromDefault();
-        var connectionPoolConfig = new TlsConnectionPoolConfig(
-                pokeApiHost.host(),
-                pokeApiHost.port(),
-                5,
-                new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
+    public TlsConnectionPool initTlsConnectionPool() {
+        return new TlsConnectionPool(new TlsConnectionPoolConfig(POKEAPI_HOST, POKEAPI_PORT, 5));
+    }
+
+    public TtlCache<String, JsonResponse> initTtlCache() {
+        return new TtlCache<>(TtlCacheConfig.defaultConfig());
+    }
+
+    public JsonClient initJsonClient() {
+        return new JsonClient("pokeapi.co",
+                initJsonParser(),
+                initTlsConnectionPool(),
+                initTtlCache());
+    }
+
+    public PokeApiClient initPokeApiClient() {
+        return new PokeApiClient(initJsonClient());
+    }
+
+    public PokemonDatabase initPokemonDatabase() {
+        return PokemonDatabase.init(
+                new DatabaseConfig(
+                        new DatabaseName("pokedex"),
+                        new LruCacheConfig(50),
+                        new DatabaseConfig.CompactThreadConfig(10, 10, TimeUnit.MINUTES),
+                        new DatabaseConfig.ReaderThreadConfig(3, 100),
+                        new DatabaseConfig.WriteThreadConfig(100)
+                )
         );
-        var config = new PokeApiClientConfig(
-                pokeApiHost,
-                connectionPoolConfig,
-                TtlCacheConfig.fromDefaultConfig()
-        );
-        PokeApiClient.configure(config);
     }
 
-    public void configurePokeApiMediaClient() {
-        var pokeApiHost = PokeApiHost.fromDefault();
-        var connectionPoolConfig = new TlsConnectionPoolConfig(
-                pokeApiHost.host(),
-                pokeApiHost.port(),
-                5,
-                new TlsConnectionPoolConfig.HealthCheckConfig(10, 10, TimeUnit.SECONDS)
+    public List<Task> configureScheduler() {
+        PokeApiClient pokeApiClient = initPokeApiClient();
+        QueueService queueService = initQueueService();
+        PokemonDatabase pokemonDatabase = initPokemonDatabase();
+        return List.of(
+                new QueuePokemonsTask(pokeApiClient, queueService, 1000),
+                new InsertCriesTask(pokeApiClient, queueService),
+                new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase),
+                new InsertSpritesTask(pokeApiClient, queueService),
+                new ShutdownTask(queueService)
         );
-        var config = new PokeApiMediaClientConfig(
-                pokeApiHost,
-                connectionPoolConfig,
-                TtlCacheConfig.fromDefaultConfig()
-        );
-        PokeApiMediaClient.configure(config);
-    }
-
-    public void configurePokemonDatabase() {
-        PokemonDatabase.configure(new DatabaseConfig(
-                new DatabaseName("pokedex"),
-                new LruCacheConfig(10),
-                new DatabaseConfig.CompactThreadConfig(10, 5, TimeUnit.SECONDS),
-                new DatabaseConfig.ReaderThreadConfig(3, 50),
-                new DatabaseConfig.WriteThreadConfig(10)));
-        PokemonDatabase.getInstance()
-                .get()
-                .init();
-    }
-
-    public void configureScheduler() {
-        var pokeApiClient = PokeApiClient.getInstance();
-        var queueService = QueueService.getInstance();
-        var pokemonDatabase = PokemonDatabase.getInstance();
-        var map = new HashMap<String, Task>();
-        var insertCriesTask = new InsertCriesTask(pokeApiClient, queueService);
-        map.put(insertCriesTask.name(), insertCriesTask);
-        var insertPokemonTask = new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase);
-        map.put(insertPokemonTask.name(), insertPokemonTask);
-        var insertSpritesTask = new InsertSpritesTask(pokeApiClient, queueService);
-        map.put(insertSpritesTask.name(), insertSpritesTask);
-        var queuePokemonsTask = new QueuePokemonsTask(pokeApiClient, queueService, 5);
-        map.put(queuePokemonsTask.name(), queuePokemonsTask);
-        var shutdownTask = new ShutdownTask(queueService);
-        map.put(shutdownTask.name(), shutdownTask);
-        Scheduler.configure(new SchedulerConfig(map));
-        Scheduler.getInstance().init();
     }
 }

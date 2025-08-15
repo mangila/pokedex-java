@@ -14,38 +14,26 @@ public class TlsConnection {
     private static final Logger log = LoggerFactory.getLogger(TlsConnection.class);
     private final String host;
     private final int port;
+    private final SSLSocket socket;
 
-    private SSLSocket socket;
-
-    private TlsConnection(String host, int port) {
+    private TlsConnection(String host,
+                          int port,
+                          SSLSocket socket) {
         this.host = host;
         this.port = port;
-        this.socket = TlsClientSocketFactory.create();
+        this.socket = socket;
     }
 
     public static TlsConnection create(String host, int port) {
-        return new TlsConnection(host, port);
+        SSLSocket socket = TlsClientSocketFactory.create();
+        return new TlsConnection(host, port, socket);
     }
 
     public boolean isConnected() {
         return socket.isConnected() &&
-                !socket.isClosed() &&
-                !socket.isInputShutdown() &&
-                !socket.isOutputShutdown();
-    }
-
-    public void reconnect() {
-        log.debug("Reconnecting to {}:{}", host, port);
-        this.socket = TlsClientSocketFactory.create();
-        connect();
-    }
-
-    public TlsConnection reconnectIfUnHealthy() {
-        if (!isConnected()) {
-            reconnect();
-            return this;
-        }
-        return this;
+               !socket.isClosed() &&
+               !socket.isInputShutdown() &&
+               !socket.isOutputShutdown();
     }
 
     public void connect() {
@@ -73,5 +61,17 @@ public class TlsConnection {
 
     public OutputStream getOutputStream() throws IOException {
         return socket.getOutputStream();
+    }
+
+    public SSLSocket getSocket() {
+        return socket;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

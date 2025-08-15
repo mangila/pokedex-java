@@ -1,14 +1,16 @@
 package com.github.mangila.pokedex.shared.tls.pool;
 
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.tls.TlsConnection;
-import com.github.mangila.pokedex.shared.tls.config.TlsConnectionPoolConfig;
+import com.github.mangila.pokedex.shared.tls.TlsConnectionHandler;
+import com.github.mangila.pokedex.shared.util.Ensure;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.time.Duration;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 /**
  * <summary>
@@ -21,81 +23,71 @@ public class TlsConnectionPool {
 
     private final TlsConnectionPoolConfig config;
     private final int maxConnections;
-    private final ConcurrentLinkedQueue<TlsConnection> queue;
-    private final Semaphore bound;
-    private final HealthProbe healthProbe;
-    private final AtomicBoolean initialized;
+    private final ArrayBlockingQueue<TlsConnectionHandler> queue;
+
+    private final AtomicInteger availableConnections;
+    private volatile boolean initialized;
 
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.config = config;
         this.maxConnections = config.maxConnections();
-        this.queue = new ConcurrentLinkedQueue<>();
-        this.bound = new Semaphore(maxConnections, Boolean.TRUE);
-        this.healthProbe = new HealthProbe(this.queue);
-        this.initialized = new AtomicBoolean(Boolean.FALSE);
+        this.availableConnections = new AtomicInteger(0);
+        this.queue = new ArrayBlockingQueue<>(maxConnections, false);
+        this.initialized = false;
     }
 
     public void init() {
-        initialized.set(Boolean.TRUE);
-        for (int i = 0; i < maxConnections; i++) {
-            log.debug("Creating new connection - {} of {}", i + 1, maxConnections);
-            var connection = createNewConnection();
-            connection.connect();
-            queue.offer(connection);
-        }
-        VirtualThreadConfig.newSingleThreadScheduledExecutor()
-                .scheduleAtFixedRate(healthProbe,
-                        config.healthCheckConfig().initialDelay(),
-                        config.healthCheckConfig().delay(),
-                        config.healthCheckConfig().timeUnit());
+        this.initialized = true;
+        IntStream.range(1, maxConnections + 1)
+                .peek(value -> log.debug("Creating new connection - {} of {}", value, maxConnections))
+                .forEach(unused -> offerNewConnection());
     }
 
-    /**
-     * <summary>
-     * Offer connection and release a permit if not exceed maxConnections
-     * safety for semaphore permits missmatch
-     * </summary>
-     */
-    public void offer(TlsConnection connection) {
+    public void offer(TlsConnectionHandler tlsConnectionHandler) {
         ensureConnectionPoolIsInitialized();
-        queue.offer(connection);
-        if (bound.availablePermits() < maxConnections) {
-            bound.release();
+        if (!queue.offer(tlsConnectionHandler)) {
+            log.warn("Queue is full, dropping tlsConnectionHandler");
+            tlsConnectionHandler.disconnect();
+        } else {
+            log.debug("Connection offered to queue");
+            tlsConnectionHandler.reconnectIfUnHealthy();
+            availableConnections.incrementAndGet();
         }
     }
 
-    /**
-     * <summary>
-     * Acquire permit and poll queue. If null returns we have a Semaphore permit missmatch
-     * </summary>
-     */
-    public TlsConnection borrow() {
+    public @Nullable TlsConnectionHandler borrow(Duration timeout) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        bound.acquireUninterruptibly();
-        var connection = queue.poll();
-        if (connection == null) {
-            throw new IllegalStateException("Connection pool is empty");
+        TlsConnectionHandler tlsConnectionHandler = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        if (tlsConnectionHandler == null) {
+            log.debug("Timeout waiting for tlsConnectionHandler");
+            return null;
         }
-        return connection.reconnectIfUnHealthy();
+        availableConnections.decrementAndGet();
+        return tlsConnectionHandler.reconnectIfUnHealthy();
     }
 
-    public int availablePermits() {
-        return bound.availablePermits();
+    public void offerNewConnection() {
+        ensureConnectionPoolIsInitialized();
+        TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
+        offer(handler);
     }
 
-    /**
-     * Factory method
-     */
-    public TlsConnection createNewConnection() {
-        return TlsConnection.create(config.host(), config.port());
+    public boolean isInitialized() {
+        return initialized;
     }
 
-    /**
-     * Ensure pattern / Fail fast
-     */
+    public int availableConnections() {
+        return availableConnections.get();
+    }
+
+    public void close() {
+        initialized = false;
+        queue.forEach(TlsConnectionHandler::disconnect);
+        queue.clear();
+        availableConnections.set(0);
+    }
+
     private void ensureConnectionPoolIsInitialized() {
-        if (!initialized.get()) {
-            throw new IllegalStateException("Connection pool is not initialized");
-        }
+        Ensure.isTrue(isInitialized(), "Connection pool is not initialized");
     }
 }

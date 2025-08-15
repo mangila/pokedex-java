@@ -2,13 +2,7 @@ package com.github.mangila.pokedex.shared.json;
 
 import java.util.Queue;
 
-public class JsonTokenQueue {
-
-    private final Queue<JsonToken> queue;
-
-    public JsonTokenQueue(Queue<JsonToken> queue) {
-        this.queue = queue;
-    }
+public record JsonTokenQueue(Queue<JsonToken> queue) {
 
     public void add(JsonToken token) {
         queue.add(token);

@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
+import com.github.mangila.pokedex.api.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.https.client.PokeApiClient;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
 import org.slf4j.Logger;

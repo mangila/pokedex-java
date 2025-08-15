@@ -12,6 +12,8 @@
         <module>scheduler</module>
         <module>shared</module>
         <module>web</module>
+        <module>api</module>
+        <module>database</module>
     </modules>
 
     <properties>
@@ -27,10 +29,26 @@
                 <artifactId>shared</artifactId>
                 <version>3.0.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.mangila.pokedex</groupId>
+                <artifactId>api</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.mangila.pokedex</groupId>
+                <artifactId>database</artifactId>
+                <version>3.0.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.jspecify/jspecify -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
