@@ -39,7 +39,7 @@ public class PokeApiClient {
     }
 
     public CompletableFuture<PokemonsResponse> fetchAllPokemons(int limit) {
-        PokeApiUri uri = PokeApiUri.fromString("https://pokeapi.co/api/v2/pokemon?limit=" + limit);
+        PokeApiUri uri = PokeApiUri.fromString("https://pokeapi.co/api/v2/pokemon-species?limit=" + limit);
         return jsonClient.fetchAsync(uri.toGetRequest())
                 .thenApply(JsonClientUtil.ensureSuccess())
                 .thenApply(JsonResponse::body)

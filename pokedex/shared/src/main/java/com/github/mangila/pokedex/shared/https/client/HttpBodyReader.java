@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 public class HttpBodyReader {
@@ -20,17 +19,29 @@ public class HttpBodyReader {
     public Body read(ResponseHeaders responseHeaders, TlsConnectionHandler tlsConnectionHandler) throws IOException {
         InputStream inputStream = tlsConnectionHandler.getConnection().getInputStream();
         if (responseHeaders.isChunked()) {
-            LOGGER.debug("Chunked encoding detected");
+            LOGGER.debug("Chunked Transfer Encoding detected");
             if (responseHeaders.isGzip()) {
                 LOGGER.debug("Chunked GZIP encoding detected");
                 return GzipBodyReader.readChunked(inputStream);
             }
+            return BodyReader.readChunked(inputStream);
         }
         if (responseHeaders.isGzip()) {
             LOGGER.debug("GZIP encoding detected");
             return GzipBodyReader.read(inputStream, responseHeaders.getContentLength());
         }
-        throw new IllegalStateException("Unsupported HTTP body response");
+        return BodyReader.read(inputStream, responseHeaders.getContentLength());
+    }
+
+    private static class BodyReader {
+        private static Body read(InputStream inputStream, int contentLength) throws IOException {
+            return Body.from(inputStream.readNBytes(contentLength));
+        }
+
+        public static Body readChunked(InputStream inputStream) throws IOException {
+            byte[] allChunks = readAllChunks(inputStream);
+            return Body.from(allChunks);
+        }
     }
 
     private static class GzipBodyReader {
@@ -47,33 +58,32 @@ public class HttpBodyReader {
                     .readAllBytes();
             return Body.from(decompressed);
         }
-
-        private static byte[] readAllChunks(InputStream inputStream) throws IOException {
-            ByteArrayOutputStream chunkLineBuffer = BufferUtils.newByteArrayOutputStream();
-            ByteArrayOutputStream chunkBuffer = BufferUtils.newByteArrayOutputStream(1024);
-            int previous = -1;
-            while (true) {
-                int current = inputStream.read();
-                if (current == HttpsUtils.END_OF_STREAM) {
-                    break;
-                }
-                chunkLineBuffer.write(current);
-                if (HttpsUtils.isCrLf(previous, current)) {
-                    var chunkLine = chunkLineBuffer.toString(StandardCharsets.US_ASCII).trim();
-                    if (chunkLine.equals("0")) {
-                        inputStream.skipNBytes(inputStream.available());
-                        break;
-                    } else if (HttpsUtils.HEX_DECIMAL.matcher(chunkLine).matches()) {
-                        int chunkSize = Integer.parseInt(chunkLine, 16);
-                        chunkBuffer.write(inputStream.readNBytes(chunkSize));
-                    }
-                    chunkLineBuffer.reset();
-                }
-                previous = current;
-            }
-
-            return chunkBuffer.toByteArray();
-        }
     }
 
+    private static byte[] readAllChunks(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream chunkLineBuffer = BufferUtils.newByteArrayOutputStream();
+        ByteArrayOutputStream chunkBuffer = BufferUtils.newByteArrayOutputStream(1024);
+        int previous = -1;
+        while (true) {
+            int current = inputStream.read();
+            if (current == HttpsUtils.END_OF_STREAM) {
+                break;
+            }
+            chunkLineBuffer.write(current);
+            if (HttpsUtils.isCrLf(previous, current)) {
+                String chunkLine = chunkLineBuffer.toString().trim();
+                if (chunkLine.equals("0")) {
+                    inputStream.skipNBytes(inputStream.available());
+                    break;
+                } else if (HttpsUtils.HEX_DECIMAL.matcher(chunkLine).matches()) {
+                    int chunkSize = Integer.parseInt(chunkLine, 16);
+                    chunkBuffer.write(inputStream.readNBytes(chunkSize));
+                }
+                chunkLineBuffer.reset();
+            }
+            previous = current;
+        }
+
+        return chunkBuffer.toByteArray();
+    }
 }

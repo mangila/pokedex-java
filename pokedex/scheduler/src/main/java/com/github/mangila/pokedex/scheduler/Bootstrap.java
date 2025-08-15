@@ -66,12 +66,12 @@ public class Bootstrap {
         );
     }
 
-    public List<Task> configureScheduler() {
+    public List<Task> initTasks() {
         PokeApiClient pokeApiClient = initPokeApiClient();
         QueueService queueService = initQueueService();
         PokemonDatabase pokemonDatabase = initPokemonDatabase();
         return List.of(
-                new QueuePokemonsTask(pokeApiClient, queueService, 1000),
+                new QueuePokemonsTask(pokeApiClient, queueService, 1),
                 new InsertCriesTask(pokeApiClient, queueService),
                 new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase),
                 new InsertSpritesTask(pokeApiClient, queueService),

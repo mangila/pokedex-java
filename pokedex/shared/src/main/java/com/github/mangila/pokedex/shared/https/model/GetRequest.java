@@ -20,9 +20,6 @@ public record GetRequest(
         return """
                 %s
                 Host: %s
-                Connection: keep-alive
-                Accept: application/json
-                Accept-Encoding: gzip
                 %s
                 
                 """.formatted(toRequestLine(), host, toRawHeaders());

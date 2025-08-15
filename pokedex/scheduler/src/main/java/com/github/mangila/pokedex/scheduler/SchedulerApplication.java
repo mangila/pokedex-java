@@ -15,7 +15,7 @@ public class SchedulerApplication {
 
     public static void main(String[] args) {
         Bootstrap bootstrap = new Bootstrap();
-        Scheduler scheduler = new Scheduler(new SchedulerConfig(bootstrap.configureScheduler()));
+        Scheduler scheduler = new Scheduler(new SchedulerConfig(bootstrap.initTasks()));
         scheduler.init();
         IS_RUNNING.set(Boolean.TRUE);
         while (IS_RUNNING.get()) {
