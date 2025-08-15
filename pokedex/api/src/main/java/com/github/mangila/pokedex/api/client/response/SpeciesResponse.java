@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.shared.json.model.JsonTree;
 
 import java.util.List;
 
+// FIXME - mapping stuffs
 public record SpeciesResponse(int id,
                               String name,
                               String description,
