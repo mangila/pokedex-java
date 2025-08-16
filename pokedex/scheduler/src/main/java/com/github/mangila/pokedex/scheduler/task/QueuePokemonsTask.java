@@ -26,11 +26,13 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
 
     @Override
     public void schedule() {
+        LOGGER.info("Scheduling {}", name());
         EXECUTOR.submit(this);
     }
 
     @Override
     public boolean shutdown() {
+        LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
         return VirtualThreadFactory.terminateExecutorGracefully(EXECUTOR, duration);
     }

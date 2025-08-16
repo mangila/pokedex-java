@@ -33,12 +33,6 @@ public class Reader {
         }
     }
 
-    /**
-     * <summary>
-     * Fan-Out - Fan-In <br>
-     * Transfer to ReaderThread and return result
-     * </summary>
-     */
     public CompletableFuture<byte[]> get(String key) {
         try {
             readPermits.acquire();

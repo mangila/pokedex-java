@@ -40,10 +40,10 @@ public class Bootstrap {
         );
     }
 
-    public PokemonDatabase initPokemonDatabase() {
+    public PokemonDatabase initPokemonDatabase(DatabaseName databaseName) {
         return PokemonDatabase.init(
                 new DatabaseConfig(
-                        new DatabaseName("pokedex"),
+                        databaseName,
                         new LruCacheConfig(50),
                         new DatabaseConfig.CompactThreadConfig(10, 10, TimeUnit.MINUTES),
                         new DatabaseConfig.ReaderThreadConfig(3, 100),

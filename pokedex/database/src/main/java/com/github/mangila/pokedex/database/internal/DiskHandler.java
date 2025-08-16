@@ -39,16 +39,26 @@ public class DiskHandler {
     }
 
     public void deleteFiles() throws IOException {
-        reader.shutdown();
-        writer.shutdown();
         fileHandler.deleteFiles();
+        shutdownIO();
     }
 
     public void truncateFiles() throws IOException {
         fileHandler.truncateFiles();
+        shutdownIO();
     }
 
     public boolean isEmpty() {
         return fileHandler.isEmpty();
+    }
+
+    public void shutdown() {
+        shutdownIO();
+    }
+
+    private void shutdownIO() {
+        reader.shutdown();
+        writer.shutdown();
+        fileHandler.shutdownIO();
     }
 }

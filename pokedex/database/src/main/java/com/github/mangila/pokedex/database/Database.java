@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 public class Database<V extends DatabaseObject<V>> {
 
-    private static final Logger log = LoggerFactory.getLogger(Database.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
 
     private final LruCache<String, V> cache;
     private final DiskHandler disk;
@@ -28,13 +28,19 @@ public class Database<V extends DatabaseObject<V>> {
     }
 
     public void init() {
-        log.info("Initializing database");
+        LOGGER.info("Initializing database");
         try {
             disk.init();
         } catch (IOException e) {
-            log.error("ERR", e);
+            LOGGER.error("ERR", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void close() {
+        LOGGER.info("Shutting down database");
+        cache.truncate();
+        disk.shutdown();
     }
 
     public CompletableFuture<Boolean> putAsync(String key, V value) {
@@ -44,19 +50,19 @@ public class Database<V extends DatabaseObject<V>> {
             var bytes = value.serialize();
             return disk.put(key, bytes)
                     .exceptionally(throwable -> {
-                        log.error("ERR", throwable);
+                        LOGGER.error("ERR", throwable);
                         return Boolean.FALSE;
                     })
                     .whenComplete((ok, throwable) -> {
                         if (throwable != null) {
-                            log.error("ERR", throwable);
+                            LOGGER.error("ERR", throwable);
                         }
                         if (Boolean.TRUE.equals(ok)) {
                             cache.put(key, value);
                         }
                     });
         } catch (IOException e) {
-            log.error("ERR", e);
+            LOGGER.error("ERR", e);
             throw new RuntimeException(e);
         }
     }
@@ -70,7 +76,7 @@ public class Database<V extends DatabaseObject<V>> {
         }
         return disk.get(key)
                 .exceptionally(throwable -> {
-                    log.error("ERR", throwable);
+                    LOGGER.error("ERR", throwable);
                     return ArrayUtils.EMPTY_BYTE_ARRAY;
                 })
                 .thenApply(bytes -> {
@@ -81,7 +87,7 @@ public class Database<V extends DatabaseObject<V>> {
                         return Optional.ofNullable(instanceCreator.get()
                                 .deserialize(bytes));
                     } catch (IOException e) {
-                        log.error("ERR", e);
+                        LOGGER.error("ERR", e);
                         return Optional.empty();
                     }
                 });
@@ -93,20 +99,22 @@ public class Database<V extends DatabaseObject<V>> {
 
     public void truncateDatabase() {
         try {
+            LOGGER.info("Truncating database");
             cache.truncate();
             disk.truncateFiles();
         } catch (IOException e) {
-            log.error("ERR", e);
+            LOGGER.error("ERR", e);
             throw new RuntimeException(e);
         }
     }
 
     public void deleteDatabase() {
         try {
+            LOGGER.info("Deleting database");
             cache.truncate();
             disk.deleteFiles();
         } catch (IOException e) {
-            log.error("ERR", e);
+            LOGGER.error("ERR", e);
             throw new RuntimeException(e);
         }
     }

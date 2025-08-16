@@ -22,7 +22,8 @@ public record ShutdownTask(QueueService queueService) implements Task {
 
     @Override
     public void schedule() {
-        SCHEDULED_EXECUTOR.scheduleWithFixedDelay(this, 1, 5, TimeUnit.MINUTES);
+        LOGGER.info("Scheduling {}", name());
+        SCHEDULED_EXECUTOR.scheduleWithFixedDelay(this, 1, 1, TimeUnit.MINUTES);
     }
 
     @Override

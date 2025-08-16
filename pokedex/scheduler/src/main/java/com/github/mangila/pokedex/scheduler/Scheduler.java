@@ -17,24 +17,21 @@ public class Scheduler {
 
     public void init() {
         LOGGER.info("Initializing scheduler");
-        tasks.stream()
-                .peek(task -> LOGGER.info("schedule task {}", task.name()))
-                .forEach(Task::schedule);
+        tasks.forEach(Task::schedule);
     }
 
     public void shutdownAllTasks() {
-        tasks.stream()
-                .peek(task -> LOGGER.info("shutdown task {}", task.name()))
-                .forEach(this::shutdownTask);
+        LOGGER.info("Shutting down scheduler");
+        tasks.forEach(this::shutdownTask);
     }
 
     private void shutdownTask(Task task) {
         String name = task.name();
         boolean isShutdown = task.shutdown();
         if (isShutdown) {
-            LOGGER.info("Task {} shutdown successfully", name);
+            LOGGER.info("{} shutdown successfully", name);
         } else {
-            LOGGER.warn("Task {} failed to shutdown", name);
+            LOGGER.warn("{} failed to shutdown", name);
         }
     }
 }

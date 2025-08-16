@@ -36,6 +36,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
     @Override
     public void schedule() {
+        LOGGER.info("Scheduling {}", name());
         SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> WORKER_POOL.submit(this),
                 100,
                 100,
@@ -44,6 +45,8 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
 
     @Override
     public boolean shutdown() {
+        LOGGER.info("Shutting down {}", name());
+     //   database.instance().close();
         var duration = Duration.ofSeconds(30);
         return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
                VirtualThreadFactory.terminateExecutorGracefully(WORKER_POOL, duration);
@@ -68,8 +71,8 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .toList();
             CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
                     .join();
-            boolean ok = database.get().
-                    putAsync("hej", new Pokemon(1, "bulba"))
+            boolean ok = database.instance()
+                    .putAsync("hej", new Pokemon(1, "bulba"))
                     .join();
             if (ok) {
                 LOGGER.info("Inserted pokemon");

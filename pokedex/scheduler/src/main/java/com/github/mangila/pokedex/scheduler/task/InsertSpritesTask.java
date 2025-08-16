@@ -27,6 +27,7 @@ public record InsertSpritesTask(
 
     @Override
     public void schedule() {
+        LOGGER.info("Scheduling {}", name());
         SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> WORKER_POOL.submit(this),
                 100,
                 100,

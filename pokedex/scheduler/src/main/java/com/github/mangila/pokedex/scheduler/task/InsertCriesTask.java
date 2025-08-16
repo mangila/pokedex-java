@@ -16,7 +16,7 @@ public record InsertCriesTask(
         QueueService queueService
 ) implements Task {
 
-    private static final Logger log = LoggerFactory.getLogger(InsertCriesTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertCriesTask.class);
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadFactory.newSingleThreadScheduledExecutor();
     private static final ExecutorService WORKER_POOL = VirtualThreadFactory.newFixedThreadPool(10);
 
@@ -27,6 +27,7 @@ public record InsertCriesTask(
 
     @Override
     public void schedule() {
+        LOGGER.info("Scheduling {}", name());
         SCHEDULED_EXECUTOR.scheduleWithFixedDelay(() -> WORKER_POOL.submit(this),
                 100,
                 100,
@@ -35,7 +36,7 @@ public record InsertCriesTask(
 
     @Override
     public boolean shutdown() {
-        log.info("Shutting down {}", name());
+        LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
         return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
                VirtualThreadFactory.terminateExecutorGracefully(WORKER_POOL, duration);
@@ -44,9 +45,9 @@ public record InsertCriesTask(
     @Override
     public void run() {
         try {
-            log.debug("Fetching cries");
+            LOGGER.debug("Fetching cries");
         } catch (Exception e) {
-            log.error("Error fetching cries", e);
+            LOGGER.error("Error fetching cries", e);
         }
     }
 }

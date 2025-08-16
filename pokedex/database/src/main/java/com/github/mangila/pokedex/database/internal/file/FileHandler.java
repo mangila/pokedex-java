@@ -1,12 +1,13 @@
 package com.github.mangila.pokedex.database.internal.file;
 
-import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 
@@ -20,7 +21,7 @@ public class FileHandler {
     private final Semaphore compactReadPermit;
     private final DatabaseConfig.CompactThreadConfig compactThreadConfig;
     private final CompactThread compactThread;
-    private final ScheduledExecutorService healthProbeExecutor;
+    private final ScheduledExecutorService compactThreadExecutor;
 
     public FileHandler(DatabaseConfig config) {
         var databaseName = config.databaseName();
@@ -30,7 +31,7 @@ public class FileHandler {
         this.compactWritePermit = new Semaphore(1, Boolean.TRUE);
         this.compactReadPermit = new Semaphore(readThreadConfig.nThreads(), Boolean.TRUE);
         this.compactThreadConfig = config.compactThreadConfig();
-        this.healthProbeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+        this.compactThreadExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.compactThread = new CompactThread(
                 databaseName,
                 indexFileHandler,
@@ -83,7 +84,7 @@ public class FileHandler {
     public void init() throws IOException {
         indexFileHandler.init();
         dataFileHandler.init();
-        healthProbeExecutor.scheduleWithFixedDelay(
+        compactThreadExecutor.scheduleWithFixedDelay(
                 compactThread,
                 compactThreadConfig.initialDelay(),
                 compactThreadConfig.delay(),
@@ -103,5 +104,11 @@ public class FileHandler {
 
     public boolean isEmpty() {
         return indexFileHandler.isEmpty();
+    }
+
+    public void shutdownIO() {
+        VirtualThreadFactory.terminateExecutorGracefully(compactThreadExecutor, Duration.ofSeconds(30));
+        indexFileHandler.closeFileChannels();
+        dataFileHandler.closeFileChannels();
     }
 }
