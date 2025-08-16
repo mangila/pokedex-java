@@ -1,7 +1,10 @@
-package com.github.mangila.pokedex.scheduler;
+package com.github.mangila.pokedex.app;
 
 import com.github.mangila.pokedex.api.client.PokeApiClient;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
+import com.github.mangila.pokedex.scheduler.Bootstrap;
+import com.github.mangila.pokedex.scheduler.Scheduler;
+import com.github.mangila.pokedex.scheduler.SchedulerConfig;
 import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
@@ -10,13 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Main class for the scheduler application. Mostly for testing purposes.
- * See app module for the actual application.
- */
-public class SchedulerApplication {
+public class Application {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
     public static final String POKEAPI_HOST = "pokeapi.co";
     public static final int POKEAPI_PORT = 443;
     public static final int POKEMON_LIMIT = 10;
