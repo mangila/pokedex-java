@@ -17,10 +17,6 @@ public record PokeApiUri(URI uri) {
         return new PokeApiUri(URI.create(uri));
     }
 
-    public String getPath() {
-        return uri.getPath();
-    }
-
     public GetRequest toGetRequest() {
         String query = uri.getQuery();
         String path = uri.getPath();
@@ -28,10 +24,6 @@ public record PokeApiUri(URI uri) {
             path = path + "?" + query;
         }
         return GetRequest.from(path);
-    }
-
-    public String getHost() {
-        return uri.getHost();
     }
 
     private static void ensureHost(String host) {

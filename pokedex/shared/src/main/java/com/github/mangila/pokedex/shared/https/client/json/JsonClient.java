@@ -31,15 +31,12 @@ public class JsonClient {
     private final HttpBodyReader httpBodyReader;
     private final JsonParser jsonParser;
 
-    public JsonClient(String host,
-                      JsonParser jsonParser,
-                      TlsConnectionPool pool,
-                      TtlCache<String, JsonResponse> responseTtlCache) {
-        this.host = host;
-        this.jsonParser = jsonParser;
-        this.pool = pool;
+    public JsonClient(JsonClientConfig config) {
+        this.host = config.host();
+        this.jsonParser = config.jsonParser();
+        this.pool = new TlsConnectionPool(config.poolConfig());
         pool.init();
-        this.responseTtlCache = responseTtlCache;
+        this.responseTtlCache = new TtlCache<>(config.ttlCacheConfig());
         this.statusReader = new HttpStatusReader();
         this.headerReader = new HttpHeaderReader();
         this.httpBodyReader = new HttpBodyReader();
@@ -56,7 +53,10 @@ public class JsonClient {
             if (responseTtlCache.hasKey(path)) {
                 return responseTtlCache.get(path);
             }
-            TlsConnectionHandler tlsConnectionHandler = pool.borrow(Duration.ofSeconds(30));
+            TlsConnectionHandler tlsConnectionHandler = pool.borrowWithRetry(Duration.ofSeconds(30), 3);
+            if (tlsConnectionHandler == null) {
+                throw new IllegalStateException("No connection available");
+            }
             String rawHttpRequest = request.toRawHttp(host);
             LOGGER.debug("{}", rawHttpRequest);
             tlsConnectionHandler.writeAndFlush(rawHttpRequest.getBytes());
@@ -65,7 +65,6 @@ public class JsonClient {
             if (!responseHeaders.isJson()) {
                 throw new IllegalStateException("Response is not JSON");
             }
-            LOGGER.debug("Response is JSON");
             Body body = httpBodyReader.read(responseHeaders, tlsConnectionHandler);
             JsonResponse response = JsonResponse.from(status, responseHeaders, body, jsonParser);
             pool.offer(tlsConnectionHandler);

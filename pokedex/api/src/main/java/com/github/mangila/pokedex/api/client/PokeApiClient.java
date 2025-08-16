@@ -13,8 +13,8 @@ import java.util.concurrent.CompletableFuture;
 public class PokeApiClient {
     private final JsonClient jsonClient;
 
-    public PokeApiClient(JsonClient jsonClient) {
-        this.jsonClient = jsonClient;
+    public PokeApiClient(PokeApiClientConfig config) {
+        this.jsonClient = new JsonClient(config.jsonClientConfig());
     }
 
     public CompletableFuture<SpeciesResponse> fetchPokemonSpecies(PokeApiUri uri) {

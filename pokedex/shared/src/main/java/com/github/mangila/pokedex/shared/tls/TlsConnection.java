@@ -29,7 +29,7 @@ public class TlsConnection {
         return new TlsConnection(host, port, socket);
     }
 
-    public boolean isConnected() {
+    public boolean connected() {
         return socket.isConnected() &&
                !socket.isClosed() &&
                !socket.isInputShutdown() &&

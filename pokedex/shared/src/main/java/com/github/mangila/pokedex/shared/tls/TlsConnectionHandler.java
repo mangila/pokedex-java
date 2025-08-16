@@ -15,7 +15,7 @@ public class TlsConnectionHandler {
     }
 
     public TlsConnectionHandler reconnectIfUnHealthy() {
-        if (!connection.isConnected()) {
+        if (!connected()) {
             reconnect();
             return this;
         }
@@ -40,5 +40,9 @@ public class TlsConnectionHandler {
 
     public TlsConnection getConnection() {
         return connection;
+    }
+
+    public boolean connected() {
+        return connection.connected();
     }
 }

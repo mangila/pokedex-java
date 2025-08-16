@@ -1,18 +1,16 @@
 package com.github.mangila.pokedex.scheduler;
 
 import com.github.mangila.pokedex.api.client.PokeApiClient;
+import com.github.mangila.pokedex.api.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
-import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
-import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
-import com.github.mangila.pokedex.shared.https.client.json.JsonResponse;
+import com.github.mangila.pokedex.shared.https.client.json.JsonClientConfig;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.queue.QueueService;
-import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
 import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPoolConfig;
 
 import java.util.List;
@@ -31,27 +29,17 @@ public class Bootstrap {
         return queueService;
     }
 
-    public JsonParser initJsonParser() {
-        return JsonParser.DEFAULT;
-    }
-
-    public TlsConnectionPool initTlsConnectionPool() {
-        return new TlsConnectionPool(new TlsConnectionPoolConfig(POKEAPI_HOST, POKEAPI_PORT, 5));
-    }
-
-    public TtlCache<String, JsonResponse> initTtlCache() {
-        return new TtlCache<>(TtlCacheConfig.defaultConfig());
-    }
-
-    public JsonClient initJsonClient() {
-        return new JsonClient("pokeapi.co",
-                initJsonParser(),
-                initTlsConnectionPool(),
-                initTtlCache());
-    }
-
     public PokeApiClient initPokeApiClient() {
-        return new PokeApiClient(initJsonClient());
+        return new PokeApiClient(
+                new PokeApiClientConfig(
+                        new JsonClientConfig(
+                                POKEAPI_HOST,
+                                JsonParser.DEFAULT,
+                                new TlsConnectionPoolConfig(POKEAPI_HOST, POKEAPI_PORT, 5),
+                                TtlCacheConfig.defaultConfig()
+                        )
+                )
+        );
     }
 
     public PokemonDatabase initPokemonDatabase() {

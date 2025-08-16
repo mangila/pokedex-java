@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -19,12 +20,11 @@ import java.util.stream.IntStream;
  */
 public class TlsConnectionPool {
 
-    private static final Logger log = LoggerFactory.getLogger(TlsConnectionPool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsConnectionPool.class);
 
     private final TlsConnectionPoolConfig config;
     private final int maxConnections;
-    private final ArrayBlockingQueue<TlsConnectionHandler> queue;
-
+    private final BlockingQueue<TlsConnectionHandler> queue;
     private final AtomicInteger availableConnections;
     private volatile boolean initialized;
 
@@ -32,38 +32,44 @@ public class TlsConnectionPool {
         this.config = config;
         this.maxConnections = config.maxConnections();
         this.availableConnections = new AtomicInteger(0);
-        this.queue = new ArrayBlockingQueue<>(maxConnections, false);
+        this.queue = new ArrayBlockingQueue<>(maxConnections, true);
         this.initialized = false;
     }
 
     public void init() {
         this.initialized = true;
         IntStream.range(1, maxConnections + 1)
-                .peek(value -> log.debug("Creating new connection - {} of {}", value, maxConnections))
+                .peek(value -> LOGGER.debug("Creating new connection - {} of {}", value, maxConnections))
                 .forEach(unused -> offerNewConnection());
     }
 
     public void offer(TlsConnectionHandler tlsConnectionHandler) {
         ensureConnectionPoolIsInitialized();
         if (!queue.offer(tlsConnectionHandler)) {
-            log.warn("Queue is full, dropping tlsConnectionHandler");
-            tlsConnectionHandler.disconnect();
+            LOGGER.warn("Queue is full, dropping tlsConnectionHandler");
+            if (tlsConnectionHandler.connected()) {
+                tlsConnectionHandler.disconnect();
+            }
         } else {
-            log.debug("Connection offered to queue");
+            LOGGER.debug("Connection offered to queue");
             tlsConnectionHandler.reconnectIfUnHealthy();
             availableConnections.incrementAndGet();
         }
     }
 
-    public @Nullable TlsConnectionHandler borrow(Duration timeout) throws InterruptedException {
+    public @Nullable TlsConnectionHandler borrow(Duration timeout) {
+        return poll(timeout);
+    }
+
+    public @Nullable TlsConnectionHandler borrowWithRetry(Duration timeout, int attempts) throws InterruptedException {
         ensureConnectionPoolIsInitialized();
-        TlsConnectionHandler tlsConnectionHandler = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        if (tlsConnectionHandler == null) {
-            log.debug("Timeout waiting for tlsConnectionHandler");
-            return null;
-        }
-        availableConnections.decrementAndGet();
-        return tlsConnectionHandler.reconnectIfUnHealthy();
+        TlsConnectionHandler tlsConnectionHandler;
+        int retries = attempts;
+        do {
+            tlsConnectionHandler = poll(timeout);
+            retries--;
+        } while (retries > 0 && tlsConnectionHandler == null);
+        return tlsConnectionHandler;
     }
 
     public void offerNewConnection() {
@@ -85,6 +91,23 @@ public class TlsConnectionPool {
         queue.forEach(TlsConnectionHandler::disconnect);
         queue.clear();
         availableConnections.set(0);
+    }
+
+    private @Nullable TlsConnectionHandler poll(Duration timeout) {
+        ensureConnectionPoolIsInitialized();
+        try {
+            TlsConnectionHandler tlsConnectionHandler = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
+            if (tlsConnectionHandler == null) {
+                LOGGER.debug("No connection available after timeout - {}", timeout);
+                return null;
+            }
+            availableConnections.decrementAndGet();
+            return tlsConnectionHandler.reconnectIfUnHealthy();
+        } catch (InterruptedException e) {
+            LOGGER.error("ERR", e);
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
     }
 
     private void ensureConnectionPoolIsInitialized() {
