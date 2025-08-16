@@ -70,11 +70,12 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .toList();
             CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
                     .join();
+            var p = new Pokemon(speciesResponse.id().intValue(), speciesResponse.name());
             boolean ok = database.db()
-                    .putAsync("hej", new Pokemon(1, "bulba"))
+                    .putAsync(p.name(), p)
                     .join();
             if (ok) {
-                LOGGER.info("Inserted pokemon");
+                LOGGER.info("Inserted pokemon: {}", p.name());
             } else {
                 throw new IllegalStateException("Db fail");
             }

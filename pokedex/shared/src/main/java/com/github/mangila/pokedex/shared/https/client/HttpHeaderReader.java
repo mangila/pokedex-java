@@ -35,6 +35,7 @@ public class HttpHeaderReader {
             if (HttpsUtils.isCrLf(previous, current)) {
                 String rawHeader = lineBuffer.toString(Charset.defaultCharset()).trim();
                 if (rawHeader.isBlank()) {
+                    LOGGER.debug("End of Headers");
                     break;
                 }
                 String[] parts = rawHeader.split(": ", 2);

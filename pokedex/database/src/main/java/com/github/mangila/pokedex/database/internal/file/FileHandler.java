@@ -106,6 +106,10 @@ public class FileHandler {
         return indexFileHandler.isEmpty();
     }
 
+    public int size() {
+        return indexFileHandler.size();
+    }
+
     public void shutdownIO() {
         VirtualThreadFactory.terminateExecutorGracefully(compactThreadExecutor, Duration.ofSeconds(30));
         indexFileHandler.closeFileChannels();

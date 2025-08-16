@@ -52,6 +52,10 @@ public class DiskHandler {
         return fileHandler.isEmpty();
     }
 
+    public int size() {
+        return fileHandler.size();
+    }
+
     public void shutdown() {
         shutdownIO();
     }

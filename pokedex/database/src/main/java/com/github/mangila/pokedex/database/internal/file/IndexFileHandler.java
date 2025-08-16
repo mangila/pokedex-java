@@ -145,6 +145,10 @@ public class IndexFileHandler {
         return dataOffsets.isEmpty();
     }
 
+    public int size() {
+        return dataOffsets.size();
+    }
+
     public Map<String, Long> getDataOffsets() {
         return dataOffsets;
     }

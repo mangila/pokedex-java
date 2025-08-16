@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.api.model;
 
 
-import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.database.DatabaseObject;
 
 import java.io.*;

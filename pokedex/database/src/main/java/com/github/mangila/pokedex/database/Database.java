@@ -97,6 +97,14 @@ public class Database<V extends DatabaseObject<V>> {
         return cache.isEmpty() && disk.isEmpty();
     }
 
+    public void clearCache() {
+        cache.truncate();
+    }
+
+    public int size() {
+        return disk.size();
+    }
+
     public void truncateDatabase() {
         try {
             LOGGER.info("Truncating database");

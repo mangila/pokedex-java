@@ -4,6 +4,8 @@ import com.github.mangila.pokedex.api.client.PokeApiClient;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.queue.QueueService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,9 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SchedulerApplication {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerApplication.class);
     public static final String POKEAPI_HOST = "pokeapi.co";
     public static final int POKEAPI_PORT = 443;
-    public static final int POKEMON_LIMIT = 1;
+    public static final int POKEMON_LIMIT = 10;
     public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
     public static final String POKEMON_SPECIES_URL_DL_QUEUE = "pokemon-species-url-dl-queue";
     public static final String POKEMON_SPRITES_QUEUE = "pokemon-sprites-queue";
@@ -41,6 +44,7 @@ public class SchedulerApplication {
         while (IS_RUNNING.get()) {
 
         }
+        LOGGER.info("Db size = {}", pokemonDatabase.db().size());
         scheduler.shutdownAllTasks();
         if (DELETE_DATABASE) {
             pokemonDatabase.db().deleteDatabase();
