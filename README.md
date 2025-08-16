@@ -8,7 +8,7 @@
 
 Low-level Java implementation that consumes data from PokeApi and serves it over HTTP.
 
-For more information, please see /docs
+For more information, please see /docs (wip)
 
 ## Project Goal
 
@@ -34,6 +34,7 @@ For more information, please see /docs
 - Scheduler
 - HTTP Server
     - Serve RESTful JSON
+    - Serve media files
     - HTTP/1.1
 - Key Value Database (Yet Another Key Value Store)
     - Persist to disk
