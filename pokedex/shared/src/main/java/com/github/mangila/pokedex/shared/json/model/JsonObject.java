@@ -15,27 +15,27 @@ public class JsonObject {
 
     public String getString(String key) {
         return tree.get(key)
-                .getString();
+                .unwrapString();
     }
 
     public JsonObject getObject(String key) {
         return tree.get(key)
-                .getObject();
+                .unwrapObject();
     }
 
     public JsonArray getArray(String key) {
         return tree.get(key)
-                .getArray();
+                .unwrapArray();
     }
 
     public Number getNumber(String key) {
         return tree.get(key)
-                .getNumber();
+                .unwrapNumber();
     }
 
     public Boolean getBoolean(String key) {
         return tree.get(key)
-                .getBoolean();
+                .unwrapBoolean();
     }
 
     public boolean isNull(String key) {
@@ -43,7 +43,7 @@ public class JsonObject {
                 .isNull();
     }
 
-    public JsonValue get(String key) {
+    public JsonValue getValue(String key) {
         return tree.get(key);
     }
 }

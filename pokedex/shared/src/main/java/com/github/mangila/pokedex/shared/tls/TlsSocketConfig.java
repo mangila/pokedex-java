@@ -1,4 +1,6 @@
-package com.github.mangila.pokedex.shared.tls.config;
+package com.github.mangila.pokedex.shared.tls;
+
+import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.time.Duration;
 
@@ -14,28 +16,22 @@ public record TlsSocketConfig(
 
     public record BufferSize(int send, int receive) {
         public BufferSize {
-            if (send < 0) {
-                throw new IllegalArgumentException("send must be greater than or equal to 0");
-            }
-            if (receive < 0) {
-                throw new IllegalArgumentException("receive must be greater than or equal to 0");
-            }
+            Ensure.min(1, send);
+            Ensure.min(1, receive);
         }
     }
 
     public record SoTimeout(Duration duration) {
         public SoTimeout {
             if (duration.isNegative()) {
-                throw new IllegalArgumentException("duration must be greater than or equal to 0");
+                throw new IllegalArgumentException("duration must not be negative");
             }
         }
     }
 
     public record SoLinger(boolean active, int seconds) {
         public SoLinger {
-            if (seconds < 0) {
-                throw new IllegalArgumentException("seconds must be greater than or equal to 0");
-            }
+            Ensure.min(1, seconds);
         }
     }
 

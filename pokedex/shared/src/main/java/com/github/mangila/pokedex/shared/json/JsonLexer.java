@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.CharBuffer;
 import java.util.HexFormat;
 import java.util.Map;
 
@@ -112,7 +113,7 @@ public class JsonLexer {
                 if (isValidEscape(escapeChar)) {
                     continue;
                 } else if (escapeChar == 'u') {
-                    var hex = reader.read(4);
+                    CharBuffer hex = reader.read(4);
                     line.append(HexFormat.fromHexDigits(hex));
                     continue;
                 } else {
@@ -127,13 +128,13 @@ public class JsonLexer {
 
     private boolean isValidEscape(char escapeChar) {
         return escapeChar == '"' ||
-                escapeChar == '\\' ||
-                escapeChar == '/' ||
-                escapeChar == 'b' ||
-                escapeChar == 'f' ||
-                escapeChar == 'n' ||
-                escapeChar == 'r' ||
-                escapeChar == 't';
+               escapeChar == '\\' ||
+               escapeChar == '/' ||
+               escapeChar == 'b' ||
+               escapeChar == 'f' ||
+               escapeChar == 'n' ||
+               escapeChar == 'r' ||
+               escapeChar == 't';
     }
 
     /**

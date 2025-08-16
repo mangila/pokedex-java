@@ -1,9 +1,8 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.PokeApiClient;
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.queue.QueueService;
-import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +17,8 @@ public record InsertSpritesTask(
 ) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpritesTask.class);
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadConfig.newSingleThreadScheduledExecutor();
-    private static final ExecutorService WORKER_POOL = VirtualThreadConfig.newFixedThreadPool(10);
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+    private static final ExecutorService WORKER_POOL = VirtualThreadFactory.newFixedThreadPool(10);
 
     @Override
     public String name() {
@@ -38,8 +37,8 @@ public record InsertSpritesTask(
     public boolean shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadUtils.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
-                VirtualThreadUtils.terminateExecutorGracefully(WORKER_POOL, duration);
+        return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
+               VirtualThreadFactory.terminateExecutorGracefully(WORKER_POOL, duration);
     }
 
     @Override

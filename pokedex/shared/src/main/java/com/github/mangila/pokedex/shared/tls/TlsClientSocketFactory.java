@@ -1,7 +1,5 @@
 package com.github.mangila.pokedex.shared.tls;
 
-import com.github.mangila.pokedex.shared.tls.config.TlsConfig;
-import com.github.mangila.pokedex.shared.tls.config.TlsSocketConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -22,11 +22,6 @@ public record QueueEntry(Object data,
         return failCounter.get() == maxRetries;
     }
 
-    /**
-     * <summary>
-     * Convenient method cast data as the specified type
-     * </summary>
-     */
     public <T> T getDataAs(Class<T> clazz) {
         return clazz.cast(data);
     }

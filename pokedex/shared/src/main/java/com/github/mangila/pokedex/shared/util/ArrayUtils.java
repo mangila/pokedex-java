@@ -8,7 +8,11 @@ public final class ArrayUtils {
         throw new IllegalStateException("Utility class");
     }
 
+    public static boolean isEmpty(byte[] a) {
+        return a.length == 0;
+    }
+
     public static boolean isEmptyOrNull(byte[] a) {
-        return a == null || a.length == 0;
+        return a == null || isEmpty(a);
     }
 }

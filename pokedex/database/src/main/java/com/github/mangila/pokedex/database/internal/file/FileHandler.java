@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.database.internal.file;
 
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class FileHandler {
         this.compactWritePermit = new Semaphore(1, Boolean.TRUE);
         this.compactReadPermit = new Semaphore(readThreadConfig.nThreads(), Boolean.TRUE);
         this.compactThreadConfig = config.compactThreadConfig();
-        this.healthProbeExecutor = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        this.healthProbeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.compactThread = new CompactThread(
                 databaseName,
                 indexFileHandler,

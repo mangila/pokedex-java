@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.cache.ttl;
 
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class TtlCache<K, V> {
 
     public TtlCache(TtlCacheConfig config) {
         this.config = config;
-        this.evictionThread = VirtualThreadConfig.newSingleThreadScheduledExecutor();
+        this.evictionThread = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         evictionThread.scheduleWithFixedDelay(() -> {
                     log.debug("Running eviction thread");
                     cache.entrySet()
@@ -66,7 +65,7 @@ public class TtlCache<K, V> {
     }
 
     public void shutdownEvictionThread() {
-        VirtualThreadUtils.terminateExecutorGracefully(
+        VirtualThreadFactory.terminateExecutorGracefully(
                 evictionThread,
                 Duration.ofSeconds(10)
         );

@@ -13,7 +13,7 @@ public record PokeApiUri(URI uri) {
         ensurePath(uri.getPath());
     }
 
-    public static PokeApiUri fromString(String uri) {
+    public static PokeApiUri from(String uri) {
         return new PokeApiUri(URI.create(uri));
     }
 

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.tls.config;
+package com.github.mangila.pokedex.shared.tls;
 
 import java.util.Objects;
 

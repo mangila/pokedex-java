@@ -13,11 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-/**
- * <summary>
- * Bounded Connection Pool using Semaphore
- * </summary>
- */
 public class TlsConnectionPool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsConnectionPool.class);
@@ -61,7 +56,7 @@ public class TlsConnectionPool {
         return poll(timeout);
     }
 
-    public @Nullable TlsConnectionHandler borrowWithRetry(Duration timeout, int attempts) throws InterruptedException {
+    public @Nullable TlsConnectionHandler borrowWithRetry(Duration timeout, int attempts) {
         ensureConnectionPoolIsInitialized();
         TlsConnectionHandler tlsConnectionHandler;
         int retries = attempts;

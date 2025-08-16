@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.shared.https.client.json;
 
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
 import com.github.mangila.pokedex.shared.https.client.HttpBodyReader;
 import com.github.mangila.pokedex.shared.https.client.HttpHeaderReader;
 import com.github.mangila.pokedex.shared.https.client.HttpStatusReader;
@@ -13,6 +12,7 @@ import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionHandler;
 import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
 import com.github.mangila.pokedex.shared.util.Ensure;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,8 @@ public class JsonClient {
         this.httpBodyReader = new HttpBodyReader();
     }
 
-    public CompletableFuture<JsonResponse> fetchAsync(GetRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadConfig.newSingleThreadExecutor());
+    public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
+        return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadFactory.newSingleThreadExecutor());
     }
 
     public @Nullable JsonResponse fetch(GetRequest request) {

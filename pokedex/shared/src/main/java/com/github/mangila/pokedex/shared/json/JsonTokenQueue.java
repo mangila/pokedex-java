@@ -1,8 +1,11 @@
 package com.github.mangila.pokedex.shared.json;
 
+import java.util.ArrayDeque;
 import java.util.Queue;
 
 public record JsonTokenQueue(Queue<JsonToken> queue) {
+
+    public static final JsonTokenQueue EMPTY = new JsonTokenQueue(new ArrayDeque<>(0));
 
     public void add(JsonToken token) {
         queue.add(token);

@@ -2,8 +2,7 @@ package com.github.mangila.pokedex.database.internal.read;
 
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.database.internal.file.FileHandler;
-import com.github.mangila.pokedex.shared.config.VirtualThreadConfig;
-import com.github.mangila.pokedex.shared.util.VirtualThreadUtils;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Reader {
 
-    private static final Logger log = LoggerFactory.getLogger(Reader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Reader.class);
 
     private final AtomicBoolean shutdown;
     private final Semaphore readPermits;
@@ -30,7 +29,7 @@ public class Reader {
         this.readerThread = new ReaderThread(handler, readTransfers, readPermits, shutdown);
         this.executors = new ArrayList<>(readerThreadConfig.nThreads());
         for (int i = 0; i < readerThreadConfig.nThreads(); i++) {
-            this.executors.add(VirtualThreadConfig.newSingleThreadScheduledExecutor());
+            this.executors.add(VirtualThreadFactory.newSingleThreadScheduledExecutor());
         }
     }
 
@@ -54,7 +53,7 @@ public class Reader {
 
     public void init() {
         for (var executor : executors) {
-            log.info("Starting Reader thread -- {}", executor.toString());
+            LOGGER.info("Starting Reader thread -- {}", executor.toString());
             executor.scheduleAtFixedRate(readerThread, 1, 1, TimeUnit.SECONDS);
         }
     }
@@ -62,8 +61,8 @@ public class Reader {
     public void shutdown() {
         shutdown.set(true);
         for (var executor : executors) {
-            log.info("Shutting down Reader thread -- {}", executor.toString());
-            VirtualThreadUtils.terminateExecutorGracefully(executor, Duration.ofMinutes(1));
+            LOGGER.info("Shutting down Reader thread -- {}", executor.toString());
+            VirtualThreadFactory.terminateExecutorGracefully(executor, Duration.ofMinutes(1));
         }
     }
 }

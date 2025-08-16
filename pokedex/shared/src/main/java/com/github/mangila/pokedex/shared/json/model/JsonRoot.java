@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.shared.json.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JsonTree {
+public class JsonRoot {
 
     private final Map<String, JsonValue> tree = new HashMap<>();
 
@@ -24,15 +24,15 @@ public class JsonTree {
     }
 
     public String getString(String key) {
-        return tree.get(key).getString();
+        return tree.get(key).unwrapString();
     }
 
     public Number getNumber(String key) {
-        return tree.get(key).getNumber();
+        return tree.get(key).unwrapNumber();
     }
 
     public Boolean getBoolean(String key) {
-        return tree.get(key).getBoolean();
+        return tree.get(key).unwrapBoolean();
     }
 
     public boolean isNull(String key) {

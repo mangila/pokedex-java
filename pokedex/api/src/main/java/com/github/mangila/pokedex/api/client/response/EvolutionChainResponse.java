@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.api.client.response;
 
 import com.github.mangila.pokedex.shared.json.model.JsonArray;
 import com.github.mangila.pokedex.shared.json.model.JsonObject;
-import com.github.mangila.pokedex.shared.json.model.JsonTree;
+import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,9 +15,9 @@ public record EvolutionChainResponse(List<Evolution> evolutions) {
     public record Evolution(int order, String name) {
     }
 
-    public static EvolutionChainResponse from(JsonTree jsonTree) {
+    public static EvolutionChainResponse from(JsonRoot jsonRoot) {
         List<Evolution> evolutions = new ArrayList<>();
-        JsonObject firstChain = jsonTree.getObject("chain");
+        JsonObject firstChain = jsonRoot.getObject("chain");
         if (firstChain.getArray("evolves_to").isEmpty()) {
             return EMPTY;
         }
@@ -33,12 +33,12 @@ public record EvolutionChainResponse(List<Evolution> evolutions) {
             }
             String nChainName = nChain.values()
                     .getFirst()
-                    .getObject()
+                    .unwrapObject()
                     .getObject("species")
                     .getString("name");
             evolutions.add(new Evolution(order, nChainName));
             nChain = nChain.values().getFirst()
-                    .getObject()
+                    .unwrapObject()
                     .getArray("evolves_to");
             order = order + 1;
         }

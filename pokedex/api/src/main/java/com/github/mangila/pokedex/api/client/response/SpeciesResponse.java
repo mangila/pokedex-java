@@ -1,12 +1,15 @@
 package com.github.mangila.pokedex.api.client.response;
 
 import com.github.mangila.pokedex.api.client.PokeApiUri;
-import com.github.mangila.pokedex.shared.json.model.JsonTree;
+import com.github.mangila.pokedex.shared.json.model.JsonArray;
+import com.github.mangila.pokedex.shared.json.model.JsonObject;
+import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 
+import java.math.BigInteger;
 import java.util.List;
 
 // FIXME - mapping stuffs
-public record SpeciesResponse(int id,
+public record SpeciesResponse(BigInteger id,
                               String name,
                               String description,
                               String genus,
@@ -14,47 +17,79 @@ public record SpeciesResponse(int id,
                               PokeApiUri evolutionChainUrl,
                               Pedigree pedigree,
                               List<PokeApiUri> varietiesUrls) {
-    public static SpeciesResponse from(JsonTree jsonTree) {
-        int id = jsonTree.getValue("id").getNumber().intValue();
-        String name = jsonTree.getValue("name").getString();
-        String description = jsonTree.getValue("flavour_text_entries")
-                .getArray()
-                .values()
-                .stream()
-                .filter(entry -> entry.getObject().getString("language").equals("en"))
-                .findFirst()
-                .orElseThrow()
-                .getObject()
-                .getString("flavor_text");
-        String genus = jsonTree.getValue("genera")
-                .getArray()
-                .values()
-                .stream()
-                .filter(entry -> entry.getObject().getString("language").equals("en"))
-                .findFirst()
-                .orElseThrow()
-                .getObject()
-                .getString("genus");
-        String color = jsonTree.getObject("color")
-                .getString("name");
-        PokeApiUri evolutionChain = PokeApiUri.fromString(jsonTree.getObject("evolution_chain")
-                .getString("url"));
-        Pedigree pedigree = new Pedigree(
-                jsonTree.getBoolean("is_baby"),
-                jsonTree.getBoolean("is_legendary"),
-                jsonTree.getBoolean("is_mythical")
-        );
-        List<PokeApiUri> varietiesUrls = jsonTree.getValue("varieties")
-                .getArray()
-                .values()
-                .stream()
-                .map(variety -> PokeApiUri.fromString(variety.getObject()
-                        .getObject("pokemon")
-                        .getString("url")))
-                .toList();
-        return new SpeciesResponse(id, name, description, genus, color, evolutionChain, pedigree, varietiesUrls);
+    public static SpeciesResponse from(JsonRoot jsonRoot) {
+        return new SpeciesResponseMapper()
+                .map(jsonRoot);
     }
 
     public record Pedigree(boolean baby, boolean legendary, boolean mythical) {
+    }
+
+    private static final class SpeciesResponseMapper implements JsonMapper<SpeciesResponse> {
+        @Override
+        public SpeciesResponse map(JsonRoot jsonRoot) {
+            BigInteger id = getId(jsonRoot);
+            String name = getName(jsonRoot);
+            String description = getDescription(jsonRoot.getValue("flavor_text_entries").unwrapArray());
+            String genus = getGenus(jsonRoot.getValue("genera").unwrapArray());
+            String color = getColor(jsonRoot.getObject("color"));
+            PokeApiUri evolutionChainUrl = getEvolutionChainUrl(jsonRoot.getObject("evolution_chain"));
+            Pedigree pedigree = getPedigree(jsonRoot);
+            List<PokeApiUri> varietiesUrls = getVarietiesUrls(jsonRoot.getValue("varieties").unwrapArray());
+            return new SpeciesResponse(id, name, description, genus, color, evolutionChainUrl, pedigree, varietiesUrls);
+        }
+
+        private static BigInteger getId(JsonRoot jsonRoot) {
+            return (BigInteger) jsonRoot.getNumber("id");
+        }
+
+        private static String getName(JsonRoot jsonRoot) {
+            return jsonRoot.getString("name");
+        }
+
+        private static String getDescription(JsonArray flavor_text_entries) {
+            return flavor_text_entries.values()
+                    .stream()
+                    .filter(jsonValue -> jsonValue.unwrapObject().getObject("language").getString("name").equals("en"))
+                    .findFirst()
+                    .orElseThrow()
+                    .unwrapObject()
+                    .getString("flavor_text");
+        }
+
+        private static String getGenus(JsonArray genera) {
+            return genera.values()
+                    .stream()
+                    .filter(entry -> entry.unwrapObject().getObject("language").getString("name").equals("en"))
+                    .findFirst()
+                    .orElseThrow()
+                    .unwrapObject()
+                    .getString("genus");
+        }
+
+        private static String getColor(JsonObject color) {
+            return color.getString("name");
+        }
+
+        private static PokeApiUri getEvolutionChainUrl(JsonObject evolution_chain) {
+            String url = evolution_chain.getString("url");
+            return PokeApiUri.from(url);
+        }
+
+        private static Pedigree getPedigree(JsonRoot jsonRoot) {
+            boolean baby = jsonRoot.getBoolean("is_baby");
+            boolean legendary = jsonRoot.getBoolean("is_legendary");
+            boolean mythical = jsonRoot.getBoolean("is_mythical");
+            return new Pedigree(baby, legendary, mythical);
+        }
+
+        private static List<PokeApiUri> getVarietiesUrls(JsonArray varieties) {
+            return varieties.values()
+                    .stream()
+                    .map(variety -> PokeApiUri.from(variety.unwrapObject()
+                            .getObject("pokemon")
+                            .getString("url")))
+                    .toList();
+        }
     }
 }

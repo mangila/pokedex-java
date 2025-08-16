@@ -1,27 +1,27 @@
 package com.github.mangila.pokedex.shared.json.model;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
+/**
+ * Wrapper class for any JSON values.
+ */
 public record JsonValue(Object value) {
 
-    public String getString() {
+    public String unwrapString() {
         return (String) value;
     }
 
-    public JsonObject getObject() {
+    public JsonObject unwrapObject() {
         return (JsonObject) value;
     }
 
-    public JsonArray getArray() {
+    public JsonArray unwrapArray() {
         return (JsonArray) value;
     }
 
-    public Number getNumber() {
+    public Number unwrapNumber() {
         return (Number) value;
     }
 
-    public Boolean getBoolean() {
+    public Boolean unwrapBoolean() {
         return (Boolean) value;
     }
 

@@ -8,12 +8,14 @@ import com.github.mangila.pokedex.shared.util.HttpsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 public class HttpBodyReader {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpBodyReader.class);
 
     public Body read(ResponseHeaders responseHeaders, TlsConnectionHandler tlsConnectionHandler) throws IOException {
@@ -26,41 +28,62 @@ public class HttpBodyReader {
             }
             return BodyReader.readChunked(inputStream);
         }
+        int contentLength = responseHeaders.getContentLength();
         if (responseHeaders.isGzip()) {
             LOGGER.debug("GZIP encoding detected");
-            return GzipBodyReader.read(inputStream, responseHeaders.getContentLength());
+            return GzipBodyReader.read(inputStream, contentLength);
         }
-        return BodyReader.read(inputStream, responseHeaders.getContentLength());
+        return BodyReader.read(inputStream, contentLength);
     }
 
     private static class BodyReader {
         private static Body read(InputStream inputStream, int contentLength) throws IOException {
-            return Body.from(inputStream.readNBytes(contentLength));
+            Content content = readContentLength(inputStream, contentLength);
+            return Body.from(content.value);
         }
 
         public static Body readChunked(InputStream inputStream) throws IOException {
-            byte[] allChunks = readAllChunks(inputStream);
-            return Body.from(allChunks);
+            Content content = readAllChunks(inputStream);
+            return Body.from(content.value);
         }
     }
 
     private static class GzipBodyReader {
         private static Body read(InputStream inputStream, int contentLength) throws IOException {
-            byte[] len = inputStream.readNBytes(contentLength);
-            byte[] decompressed = new GZIPInputStream(BufferUtils.newByteArrayInputStream(len))
-                    .readAllBytes();
-            return Body.from(decompressed);
+            Content compressedContent = readContentLength(inputStream, contentLength);
+            Decompressed decompressed = decompress(compressedContent);
+            return Body.from(decompressed.value);
         }
 
         private static Body readChunked(InputStream inputStream) throws IOException {
-            byte[] allChunks = readAllChunks(inputStream);
-            byte[] decompressed = new GZIPInputStream(BufferUtils.newByteArrayInputStream(allChunks))
-                    .readAllBytes();
-            return Body.from(decompressed);
+            Content compressedContent = readAllChunks(inputStream);
+            Decompressed decompressed = decompress(compressedContent);
+            return Body.from(decompressed.value);
+        }
+
+        private static Decompressed decompress(Content compressedContent) throws IOException {
+            byte[] content = compressedContent.value;
+            LOGGER.debug("Compressed {} bytes", content.length);
+            ByteArrayInputStream inputStream = BufferUtils.newByteArrayInputStream(content);
+            byte[] decompressed = new GZIPInputStream(inputStream).readAllBytes();
+            LOGGER.debug("Decompressed {} bytes", decompressed.length);
+            return new Decompressed(decompressed);
+        }
+
+        private record Decompressed(byte[] value) {
         }
     }
 
-    private static byte[] readAllChunks(InputStream inputStream) throws IOException {
+    private record Content(byte[] value) {
+    }
+
+    private static Content readContentLength(InputStream inputStream, int contentLength) throws IOException {
+        LOGGER.debug("Content-Length: {}", contentLength);
+        byte[] readNBytes = inputStream.readNBytes(contentLength);
+        return new Content(readNBytes);
+    }
+
+    private static Content readAllChunks(InputStream inputStream) throws IOException {
         ByteArrayOutputStream chunkLineBuffer = BufferUtils.newByteArrayOutputStream();
         ByteArrayOutputStream chunkBuffer = BufferUtils.newByteArrayOutputStream(1024);
         int previous = -1;
@@ -73,9 +96,11 @@ public class HttpBodyReader {
             if (HttpsUtils.isCrLf(previous, current)) {
                 String chunkLine = chunkLineBuffer.toString().trim();
                 if (chunkLine.equals("0")) {
+                    LOGGER.debug("End of Chunks");
                     inputStream.skipNBytes(inputStream.available());
                     break;
                 } else if (HttpsUtils.HEX_DECIMAL.matcher(chunkLine).matches()) {
+                    LOGGER.debug("Chunk size: {}", chunkLine);
                     int chunkSize = Integer.parseInt(chunkLine, 16);
                     chunkBuffer.write(inputStream.readNBytes(chunkSize));
                 }
@@ -84,6 +109,6 @@ public class HttpBodyReader {
             previous = current;
         }
 
-        return chunkBuffer.toByteArray();
+        return new Content(chunkBuffer.toByteArray());
     }
 }

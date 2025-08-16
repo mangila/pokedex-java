@@ -13,27 +13,27 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class QueueService {
 
-    private static final Logger log = LoggerFactory.getLogger(QueueService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueueService.class);
 
     private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
 
     public QueueService() {
-        log.info("Initializing QueueService");
+        LOGGER.info("Initializing QueueService");
         this.queues = new ConcurrentHashMap<>();
     }
 
     public void createNewQueue(String queueName) {
-        log.info("Create new queue '{}'", queueName);
+        LOGGER.info("Create new queue '{}'", queueName);
         queues.put(queueName, new ConcurrentLinkedQueue<>());
     }
 
     public boolean add(String queueName, QueueEntry entry) {
-        log.debug("Add QueueEntry to {} - {}", queueName, entry);
+        LOGGER.debug("Add QueueEntry to {} - {}", queueName, entry);
         return queues.get(queueName).add(entry);
     }
 
     public @Nullable QueueEntry poll(String queueName) {
-        log.debug("Poll QueueEntry from {}", queueName);
+        LOGGER.debug("Poll QueueEntry from {}", queueName);
         var queue = queues.get(queueName);
         if (queue == null) {
             throw new QueueNotFoundException(queueName);

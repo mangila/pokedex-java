@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.shared.json;
 
 import com.github.mangila.pokedex.shared.json.model.JsonArray;
 import com.github.mangila.pokedex.shared.json.model.JsonObject;
-import com.github.mangila.pokedex.shared.json.model.JsonTree;
+import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;
@@ -16,10 +16,6 @@ import static com.github.mangila.pokedex.shared.json.InvalidJsonException.PARSE_
 import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACE;
 import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 
-/**
- * DFS (Depth-First) traversal of the JSON tree
- * O(2n) = O(n) since it has to tokenize and then traverse the whole tree
- */
 public class JsonParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonParser.class);
@@ -30,21 +26,21 @@ public class JsonParser {
         this.maxDepth = config.maxDepth();
     }
 
-    public JsonTree parseTree(byte[] data) {
+    public JsonRoot parseTree(byte[] data) {
         var tokens = JsonTokenizer.tokenizeFrom(data);
         return parseTree(tokens);
     }
 
-    public JsonTree parseTree(String data) {
+    public JsonRoot parseTree(String data) {
         var tokens = JsonTokenizer.tokenizeFrom(data);
         return parseTree(tokens);
     }
 
-    private JsonTree parseTree(JsonTokenQueue queue) {
+    private JsonRoot parseTree(JsonTokenQueue queue) {
         if (queue.isEmpty()) {
             throw new InvalidJsonException(EMPTY_DATA_ERROR_MESSAGE);
         }
-        JsonTree tree = new JsonTree();
+        JsonRoot tree = new JsonRoot();
         queue.expect(JsonType.LEFT_BRACE);
         if (queue.peek().type() == RIGHT_BRACE) {
             queue.poll();
@@ -130,7 +126,6 @@ public class JsonParser {
             }
             return new BigInteger(number);
         } catch (NumberFormatException e) {
-            LOGGER.error("ERR - number format exception - {}", number, e);
             throw new InvalidJsonException(
                     "Number format exception - %s".formatted(number)
             );

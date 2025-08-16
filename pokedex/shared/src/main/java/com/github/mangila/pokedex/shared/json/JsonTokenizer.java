@@ -1,11 +1,12 @@
 package com.github.mangila.pokedex.shared.json;
 
+import com.github.mangila.pokedex.shared.util.ArrayUtils;
+import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
-import java.util.Objects;
 
 public class JsonTokenizer {
 
@@ -27,10 +28,13 @@ public class JsonTokenizer {
      * Create Queue with 1024 as the startOffset size - for some extra performance.
      */
     private static JsonTokenQueue tokenize(byte[] data) {
-        Objects.requireNonNull(data, "json data must not be null");
-        var lexer = new JsonLexer(data);
-        var queue = new JsonTokenQueue(new ArrayDeque<>(1024));
-        try (var reader = lexer.getReader()) {
+        Ensure.notNull(data, "json data must not be null");
+        if (ArrayUtils.isEmpty(data)) {
+            return JsonTokenQueue.EMPTY;
+        }
+        JsonLexer lexer = new JsonLexer(data);
+        JsonTokenQueue queue = new JsonTokenQueue(new ArrayDeque<>(1024));
+        try (JsonStreamReader reader = lexer.getReader()) {
             int current;
             while ((current = reader.read()) != -1) {
                 if (Character.isWhitespace(current)) {
