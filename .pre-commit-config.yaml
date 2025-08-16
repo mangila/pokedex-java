@@ -1,0 +1,21 @@
+fail_fast: false
+repos:
+  - repo: local
+    hooks:
+      - id: terraform-validate
+        name: Terraform validate
+        entry: terraform validate ./infrastructure
+        language: system
+        files: ^infrastructure
+        exclude: \.(ya?ml|md)$
+        require_serial: true
+        pass_filenames: false
+
+      - id: pokedex-parent-build
+        name: Pokedex Parent Build
+        entry: cmd.exe /c mvnw.cmd
+        args: [ "-f", "pokedex/pom.xml", "-am", "clean", "install" ]
+        language: system
+        exclude: \.(ya?ml|md)$
+        require_serial: true
+        pass_filenames: false
