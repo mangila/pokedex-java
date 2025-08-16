@@ -46,9 +46,9 @@ public class TlsConnectionPool {
                 tlsConnectionHandler.disconnect();
             }
         } else {
-            LOGGER.debug("Connection offered to queue");
             tlsConnectionHandler.reconnectIfUnHealthy();
             availableConnections.incrementAndGet();
+            LOGGER.debug("Connection brought back to the pool - availableConnections = {}", availableConnections.get());
         }
     }
 
@@ -97,6 +97,7 @@ public class TlsConnectionPool {
                 return null;
             }
             availableConnections.decrementAndGet();
+            LOGGER.debug("Connection borrowed from the pool - availableConnections = {}", availableConnections.get());
             return tlsConnectionHandler.reconnectIfUnHealthy();
         } catch (InterruptedException e) {
             LOGGER.error("ERR", e);

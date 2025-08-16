@@ -17,7 +17,7 @@ public record CompactThread(DatabaseName databaseName,
                             DatabaseConfig.ReaderThreadConfig readThreadConfig,
                             Semaphore compactReadPermit) implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(CompactThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompactThread.class);
 
     /**
      * Executes the compaction process for a database.
@@ -39,7 +39,7 @@ public record CompactThread(DatabaseName databaseName,
      */
     @Override
     public void run() {
-        log.info("Compacting database {}", databaseName);
+        LOGGER.info("Compacting database {}", databaseName);
         compactWritePermit.acquireUninterruptibly();
         try {
             var indexTmp = new DatabaseFile(new FileName("index.tmp.yakvs"));
@@ -60,7 +60,7 @@ public record CompactThread(DatabaseName databaseName,
                 indexFileHandlerTmp.updateHeader(indexOffsetBoundary.endOffset());
                 indexFileHandlerTmp.putIndex(key, dataOffsetBoundary.startOffset());
             }
-            log.info("Compact database {}. Old size: {} bytes, New size: {} bytes",
+            LOGGER.info("Compact database {}. Old size: {} bytes, New size: {} bytes",
                     databaseName,
                     dataFileHandler.getFileSize(),
                     dataFileHandlerTmp.getFileSize());
@@ -80,7 +80,7 @@ public record CompactThread(DatabaseName databaseName,
                     StandardCopyOption.ATOMIC_MOVE
             );
         } catch (IOException e) {
-            log.error("ERR", e);
+            LOGGER.error("ERR", e);
         }
         compactReadPermit.release(readThreadConfig.nThreads());
         compactWritePermit.release();
