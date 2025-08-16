@@ -8,7 +8,6 @@ import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import java.math.BigInteger;
 import java.util.List;
 
-// FIXME - mapping stuffs
 public record SpeciesResponse(BigInteger id,
                               String name,
                               String description,
