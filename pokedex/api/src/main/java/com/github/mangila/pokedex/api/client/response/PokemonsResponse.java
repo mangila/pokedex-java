@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.api.client.response;
 
 import com.github.mangila.pokedex.api.client.PokeApiUri;
+import com.github.mangila.pokedex.shared.json.model.JsonArray;
 import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
 
@@ -14,14 +15,12 @@ public record PokemonsResponse(List<PokeApiUri> uris) {
     private static class PokemonsResponseMapper implements JsonMapper<PokemonsResponse> {
         @Override
         public PokemonsResponse map(JsonRoot jsonRoot) {
-            List<PokeApiUri> uris = getResultsArray(jsonRoot);
+            List<PokeApiUri> uris = getUris(jsonRoot.getArray("results"));
             return new PokemonsResponse(uris);
         }
 
-        public List<PokeApiUri> getResultsArray(JsonRoot jsonRoot) {
-            return jsonRoot.getValue("results")
-                    .unwrapArray()
-                    .values()
+        public List<PokeApiUri> getUris(JsonArray results) {
+            return results.values()
                     .stream()
                     .map(JsonValue::unwrapObject)
                     .map(jsonObject -> jsonObject.getString("url"))

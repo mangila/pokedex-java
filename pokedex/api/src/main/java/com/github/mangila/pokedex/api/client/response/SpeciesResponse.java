@@ -30,12 +30,12 @@ public record SpeciesResponse(BigInteger id,
         public SpeciesResponse map(JsonRoot jsonRoot) {
             BigInteger id = getId(jsonRoot);
             String name = getName(jsonRoot);
-            String description = getDescription(jsonRoot.getValue("flavor_text_entries").unwrapArray());
-            String genus = getGenus(jsonRoot.getValue("genera").unwrapArray());
+            String description = getDescription(jsonRoot.getArray("flavor_text_entries"));
+            String genus = getGenus(jsonRoot.getArray("genera"));
             String color = getColor(jsonRoot.getObject("color"));
             PokeApiUri evolutionChainUrl = getEvolutionChainUrl(jsonRoot.getObject("evolution_chain"));
             Pedigree pedigree = getPedigree(jsonRoot);
-            List<PokeApiUri> varietiesUrls = getVarietiesUrls(jsonRoot.getValue("varieties").unwrapArray());
+            List<PokeApiUri> varietiesUrls = getVarietiesUrls(jsonRoot.getArray("varieties"));
             return new SpeciesResponse(id, name, description, genus, color, evolutionChainUrl, pedigree, varietiesUrls);
         }
 
