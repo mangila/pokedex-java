@@ -66,8 +66,8 @@ public class JsonClient {
                 throw new IllegalStateException("Response is not JSON");
             }
             Body body = httpBodyReader.read(responseHeaders, tlsConnectionHandler);
-            JsonResponse response = JsonResponse.from(status, responseHeaders, body, jsonParser);
             pool.offer(tlsConnectionHandler);
+            JsonResponse response = JsonResponse.from(status, responseHeaders, body, jsonParser);
             if (response.isSuccess()) {
                 responseTtlCache.put(path, response);
             }
