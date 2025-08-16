@@ -5,20 +5,14 @@ import com.github.mangila.pokedex.shared.json.model.JsonObject;
 import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.util.Ensure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static com.github.mangila.pokedex.shared.json.InvalidJsonException.EMPTY_DATA_ERROR_MESSAGE;
-import static com.github.mangila.pokedex.shared.json.InvalidJsonException.PARSE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACE;
 import static com.github.mangila.pokedex.shared.json.JsonType.RIGHT_BRACKET;
 
 public class JsonParser {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonParser.class);
     public static final JsonParser DEFAULT = new JsonParser(JsonParserConfig.DEFAULT);
     private final int maxDepth;
 
@@ -38,10 +32,11 @@ public class JsonParser {
 
     private JsonRoot parseTree(JsonTokenQueue queue) {
         if (queue.isEmpty()) {
-            throw new InvalidJsonException(EMPTY_DATA_ERROR_MESSAGE);
+            throw new InvalidJsonException("Can not parse empty data");
         }
         JsonRoot tree = new JsonRoot();
         queue.expect(JsonType.LEFT_BRACE);
+        // Return Empty JSON Root Object
         if (queue.peek().type() == RIGHT_BRACE) {
             queue.poll();
             return tree;
@@ -68,13 +63,14 @@ public class JsonParser {
             case NUMBER -> new JsonValue(parseNumber(queue));
             case LEFT_BRACE -> new JsonValue(parseObject(queue, depth + 1));
             case LEFT_BRACKET -> new JsonValue(parseArray(queue, depth + 1));
-            default -> throw new InvalidJsonException(PARSE_ERROR_MESSAGE);
+            default -> throw new InvalidJsonException("Token type not supported: %s".formatted(token.type()));
         };
     }
 
     private JsonArray parseArray(JsonTokenQueue queue, int depth) {
         queue.expect(JsonType.LEFT_BRACKET);
         JsonArray jsonArray = new JsonArray();
+        // Return Empty JSON Array
         if (queue.peek().type() == RIGHT_BRACKET) {
             queue.poll();
             return jsonArray;
@@ -93,6 +89,7 @@ public class JsonParser {
 
     private JsonObject parseObject(JsonTokenQueue queue, int depth) {
         queue.expect(JsonType.LEFT_BRACE);
+        // Return Empty JSON Object
         if (queue.peek().type() == RIGHT_BRACE) {
             queue.poll();
             return JsonObject.EMPTY;

@@ -1,20 +1,13 @@
 package com.github.mangila.pokedex.shared.json;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.HexFormat;
 import java.util.Map;
 
-import static com.github.mangila.pokedex.shared.json.InvalidJsonException.TOKENIZE_ERROR_MESSAGE;
 import static com.github.mangila.pokedex.shared.json.JsonType.*;
 
 public class JsonLexer {
-
-    private static final Logger log = LoggerFactory.getLogger(JsonLexer.class);
-
     private static final Map<JsonType, JsonToken> TOKEN_MAP = Map.of(
             LEFT_BRACE, new JsonToken(LEFT_BRACE, '{'),
             RIGHT_BRACE, new JsonToken(RIGHT_BRACE, '}'),
@@ -84,10 +77,7 @@ public class JsonLexer {
             case '9' -> TOKEN_MAP_NUMBER.get("nine");
             case 'E' -> TOKEN_MAP_NUMBER_SPECIAL.get("programmer-e");
             case 'e' -> TOKEN_MAP_NUMBER_SPECIAL.get("math-e");
-            default -> {
-                log.error("ERR - unexpected character {}", (char) current);
-                throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
-            }
+            default -> throw new InvalidJsonException("Not a valid JSON character: %c".formatted(current));
         };
     }
 
@@ -100,8 +90,7 @@ public class JsonLexer {
         while (true) {
             int current = reader.read();
             if (current == -1) {
-                log.error("ERR - endOffset of stream unexpectedly");
-                throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+                throw new InvalidJsonException("Unexpected end of data while lexing string");
             }
             if (current == '"') {
                 break;
@@ -117,7 +106,7 @@ public class JsonLexer {
                     line.append(HexFormat.fromHexDigits(hex));
                     continue;
                 } else {
-                    throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+                    throw new InvalidJsonException("Not valid escape sequence: %s".formatted(line.toString()));
                 }
             }
 
@@ -146,7 +135,7 @@ public class JsonLexer {
         if (read.equals("alse")) {
             return TOKEN_MAP.get(FALSE);
         }
-        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+        throw new InvalidJsonException("Not valid parsing of boolean value false");
     }
 
     /**
@@ -161,6 +150,6 @@ public class JsonLexer {
         } else if (read.equals("ull")) {
             return TOKEN_MAP.get(NULL);
         }
-        throw new InvalidJsonException(TOKENIZE_ERROR_MESSAGE);
+        throw new InvalidJsonException("Not valid parsing of boolean value true or null");
     }
 }

@@ -2,16 +2,11 @@ package com.github.mangila.pokedex.shared.json;
 
 import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import com.github.mangila.pokedex.shared.util.Ensure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 
 public class JsonTokenizer {
-
-    private static final Logger log = LoggerFactory.getLogger(JsonTokenizer.class);
-
     public static JsonTokenQueue tokenizeFrom(byte[] data) {
         return tokenize(data);
     }
@@ -44,8 +39,7 @@ public class JsonTokenizer {
                 queue.add(token);
             }
         } catch (Exception e) {
-            log.error("ERR", e);
-            throw new InvalidJsonException(InvalidJsonException.TOKENIZE_ERROR_MESSAGE);
+            throw new InvalidJsonException(e.getMessage(), e);
         }
 
         return queue;

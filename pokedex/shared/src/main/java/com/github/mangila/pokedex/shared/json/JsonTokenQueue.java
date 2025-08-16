@@ -26,7 +26,7 @@ public record JsonTokenQueue(Queue<JsonToken> queue) {
     public JsonToken expect(JsonType type) {
         var token = poll();
         if (token == null || token.type() != type) {
-            throw new InvalidJsonException(InvalidJsonException.PARSE_ERROR_MESSAGE);
+            throw new InvalidJsonException("Expected type %s not found".formatted(type));
         }
         return token;
     }
