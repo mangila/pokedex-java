@@ -1,12 +1,8 @@
 # pokedex-java
 
-Pokedex built in Java
+Low-level Java implementation that consumes data from PokeApi and serves it over HTTP.
 
-## Development Environment
-
-- Java 21+
-- Python3 installed on the system (for pre-commit hooks)
-- cwebp installed on the system (when converting images to webp)
+For more information, please see /docs
 
 ## Project Goal
 
@@ -14,29 +10,11 @@ Pokedex built in Java
 - Build software components from scratch
 - For the sake of fun and love for programming, technologies and Pokémon
 
-## Project Structure (WIP)
+## Development Environment
 
-- Service Layer
-- Maven multi module project
-    - scheduler - Daemon Service
-    - web - Web Service
-    - shared — Common classes
-- Java 21
-- Terraform (AWS provider)
-- Maven Wrapper (for consistent builds)
-
-## System Architecture (WIP)
-
-- Domain Primitives with Service Layer
-- Event Driven
-
-## Paradigms (WIP)
-
-- Functional
-- Imperative
-- Object Oriented
-- Declarative
-- Concurrent
+- Java 21+
+- Python3 installed on the system (for pre-commit hooks)
+- `cwebp` installed on the system (when converting images to webp)
 
 ## Software Components (WIP)
 
@@ -49,7 +27,8 @@ Pokedex built in Java
 - Last Recently Used(LRU) Cache
 - Scheduler
 - HTTP Server
-    - Serve JSON
+    - Serve RESTful JSON
+    - HTTP/1.1
 - Key Value Database (Yet Another Key Value Store)
     - Persist to disk
     - Lock Free read and writes
@@ -58,39 +37,3 @@ Pokedex built in Java
         - Binary format
         - Index file
         - Data file
-
-## Engineering Principles (WIP)
-
-- EAFP — Easier to Ask Forgiveness than Permission
-- LBYL - Look Before You Leap
-- Defensive Programming
-    - Ensure pattern / Fail fast
-    - Try pattern / Fail safe
-
-## Datastructures (WIP)
-
-- Queue
-    - Bounded Queue
-    - Linked Queue
-- Linked List
-- Array List
-- Hash Table
-
-## Algorithms techniques (WIP)
-
-- Two pointers
-
-## Design Patterns (WIP)
-
-#### Gang of Four
-
-- Singleton
-    - Bill Pugh with Configure method
-    - Bill Pugh with Configure and Reset method
-- Factory Method
-
-#### Concurrency
-
-- Fan Out and Fan In
-- Dedicated Reader/Write Thread
-- Trigger Thread with a Worker pool
