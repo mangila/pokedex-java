@@ -5,7 +5,6 @@ import com.github.mangila.pokedex.api.client.PokeApiClientConfig;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.database.DatabaseName;
-import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClientConfig;
@@ -13,7 +12,6 @@ import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPoolConfig;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.mangila.pokedex.scheduler.SchedulerApplication.*;
@@ -51,19 +49,6 @@ public class Bootstrap {
                         new DatabaseConfig.ReaderThreadConfig(3, 100),
                         new DatabaseConfig.WriteThreadConfig(100)
                 )
-        );
-    }
-
-    public List<Task> initTasks() {
-        PokeApiClient pokeApiClient = initPokeApiClient();
-        QueueService queueService = initQueueService();
-        PokemonDatabase pokemonDatabase = initPokemonDatabase();
-        return List.of(
-                new QueuePokemonsTask(pokeApiClient, queueService, 1),
-                new InsertCriesTask(pokeApiClient, queueService),
-                new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase),
-                new InsertSpritesTask(pokeApiClient, queueService),
-                new ShutdownTask(queueService)
         );
     }
 }

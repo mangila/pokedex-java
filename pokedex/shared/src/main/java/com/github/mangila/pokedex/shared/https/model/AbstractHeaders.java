@@ -1,5 +1,8 @@
 package com.github.mangila.pokedex.shared.https.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +10,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract sealed class AbstractHeaders permits RequestHeaders, ResponseHeaders {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHeaders.class);
     private final Map<String, String> rawHeaders = new HashMap<>();
     private final List<Header> headers = new ArrayList<>();
 
     public void putRaw(String name, String value) {
+        LOGGER.debug("Header: {} - {}", name, value);
         rawHeaders.put(name, value);
         headers.add(new Header(name, value));
     }

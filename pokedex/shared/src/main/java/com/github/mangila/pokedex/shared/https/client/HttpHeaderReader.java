@@ -34,7 +34,6 @@ public class HttpHeaderReader {
             lineBuffer.write(current);
             if (HttpsUtils.isCrLf(previous, current)) {
                 String rawHeader = lineBuffer.toString(Charset.defaultCharset()).trim();
-                LOGGER.debug("Header: {}", rawHeader);
                 if (rawHeader.isBlank()) {
                     break;
                 }
