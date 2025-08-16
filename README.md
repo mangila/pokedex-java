@@ -21,6 +21,7 @@ For more information, please see /docs (wip)
 - Java 21+
 - Python3 installed on the system (for pre-commit hooks)
 - `cwebp` installed on the system (when converting images to webp)
+- `terraform` installed on the system (for infrastructure as code)
 
 ## Software Components (WIP)
 
