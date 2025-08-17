@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class IndexFileHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(IndexFileHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IndexFileHandler.class);
 
     private final DatabaseFile databaseFile;
     private Map<String, Long> dataOffsets;
@@ -73,20 +73,19 @@ public class IndexFileHandler {
      * @throws IOException if there is an issue, creating the file, reading from it, or writing to it.
      */
     public void init() throws IOException {
-        ByteBuffer buffer;
         databaseFile.tryCreateFileIfNotExists();
         if (databaseFile.isEmpty()) {
             databaseFile.write(header.toByteBuffer(), 0);
         } else {
-            buffer = databaseFile.readAndFlip(0, FileHeader.HEADER_SIZE);
+            ByteBuffer buffer = databaseFile.readAndFlip(0, FileHeader.HEADER_SIZE);
             this.header = FileHeader.from(buffer);
             this.dataOffsets.putAll(loadIndexes());
-            log.debug("Loaded {} index entries", dataOffsets.size());
+            LOGGER.debug("Loaded {} index entries", dataOffsets.size());
         }
     }
 
     public OffsetBoundary write(IndexEntry entry) throws IOException {
-        var offset = header.offset();
+        long offset = header.offset();
         int size = entry.getSize();
         databaseFile.write(entry.toByteBuffer(), offset);
         long newOffset = offset + size;

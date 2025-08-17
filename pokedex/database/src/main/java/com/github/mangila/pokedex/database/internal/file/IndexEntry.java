@@ -14,16 +14,16 @@ public record IndexEntry(int keyLength, byte[] key, long dataOffset) {
         return Integer.BYTES + key.length + Long.BYTES;
     }
 
-    public void fillAndFlip(ByteBuffer buffer) {
+    public ByteBuffer toByteBuffer() {
+        ByteBuffer buffer = BufferUtils.newByteBuffer(getSize());
+        fillAndFlip(buffer);
+        return buffer;
+    }
+
+    private void fillAndFlip(ByteBuffer buffer) {
         buffer.putInt(keyLength);
         buffer.put(key);
         buffer.putLong(dataOffset);
         buffer.flip();
-    }
-
-    public ByteBuffer toByteBuffer() {
-        var buffer = BufferUtils.newByteBuffer(getSize());
-        fillAndFlip(buffer);
-        return buffer;
     }
 }

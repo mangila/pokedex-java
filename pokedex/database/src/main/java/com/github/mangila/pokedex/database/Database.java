@@ -12,16 +12,15 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public class Database<V extends DatabaseObject<V>> {
+public class Database<T extends DatabaseObject<T>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
-
-    private final LruCache<String, V> cache;
+    private final LruCache<String, T> cache;
     private final DiskHandler disk;
-    private final Supplier<V> instanceCreator;
+    private final Supplier<T> instanceCreator;
 
     public Database(DatabaseConfig config,
-                    Supplier<V> instanceCreator) {
+                    Supplier<T> instanceCreator) {
         this.cache = new LruCache<>(config.lruCacheConfig());
         this.disk = new DiskHandler(config);
         this.instanceCreator = instanceCreator;
@@ -43,11 +42,11 @@ public class Database<V extends DatabaseObject<V>> {
         disk.shutdown();
     }
 
-    public CompletableFuture<Boolean> putAsync(String key, V value) {
+    public CompletableFuture<Boolean> putAsync(String key, T value) {
         Objects.requireNonNull(key, "key must not be null");
         Objects.requireNonNull(value, "value must not be null");
         try {
-            var bytes = value.serialize();
+            byte[] bytes = value.serialize();
             return disk.put(key, bytes)
                     .exceptionally(throwable -> {
                         LOGGER.error("ERR", throwable);
@@ -67,7 +66,7 @@ public class Database<V extends DatabaseObject<V>> {
         }
     }
 
-    public CompletableFuture<Optional<V>> getAsync(String key) {
+    public CompletableFuture<Optional<T>> getAsync(String key) {
         Objects.requireNonNull(key, "key must not be null");
         if (cache.hasKey(key)) {
             return CompletableFuture.completedFuture(

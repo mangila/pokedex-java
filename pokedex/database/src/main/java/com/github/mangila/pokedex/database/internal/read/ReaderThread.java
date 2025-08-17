@@ -9,11 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * <summary>
- * Dedicated Reader Thread
- * </summary>
- */
 public record ReaderThread(FileHandler handler,
                            TransferQueue<ReadTransfer> readTransfers,
                            Semaphore readPermits,

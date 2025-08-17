@@ -40,12 +40,10 @@ public class DiskHandler {
 
     public void deleteFiles() throws IOException {
         fileHandler.deleteFiles();
-        shutdownIO();
     }
 
     public void truncateFiles() throws IOException {
         fileHandler.truncateFiles();
-        shutdownIO();
     }
 
     public boolean isEmpty() {
@@ -57,10 +55,6 @@ public class DiskHandler {
     }
 
     public void shutdown() {
-        shutdownIO();
-    }
-
-    private void shutdownIO() {
         reader.shutdown();
         writer.shutdown();
         fileHandler.shutdownIO();

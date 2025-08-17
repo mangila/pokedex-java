@@ -14,15 +14,15 @@ public record DataRecord(int dataLength, byte[] data) {
         return Integer.BYTES + data.length + Long.BYTES;
     }
 
-    public void fillAndFlip(ByteBuffer buffer) {
+    public ByteBuffer toByteBuffer() {
+        ByteBuffer buffer = BufferUtils.newByteBuffer(getSize());
+        fillAndFlip(buffer);
+        return buffer;
+    }
+
+    private void fillAndFlip(ByteBuffer buffer) {
         buffer.putInt(dataLength);
         buffer.put(data);
         buffer.flip();
-    }
-
-    public ByteBuffer toByteBuffer() {
-        var buffer = BufferUtils.newByteBuffer(getSize());
-        fillAndFlip(buffer);
-        return buffer;
     }
 }

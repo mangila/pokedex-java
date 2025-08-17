@@ -40,6 +40,12 @@ public final class Ensure {
         }
     }
 
+    public static void notEquals(int first, int second, String message) {
+        if (first != second) {
+            throw new IllegalStateException(message);
+        }
+    }
+
     public static void equals(byte[] a, byte[] a2) {
         boolean equals = Arrays.equals(a, a2);
         if (!equals) {
