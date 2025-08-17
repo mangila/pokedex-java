@@ -51,26 +51,23 @@ public class HttpBodyReader {
     private static class GzipBodyReader {
         private static Body read(InputStream inputStream, int contentLength) throws IOException {
             Content compressedContent = readContentLength(inputStream, contentLength);
-            ContentDecompressed contentDecompressed = decompress(compressedContent);
+            Content contentDecompressed = decompress(compressedContent);
             return Body.from(contentDecompressed.value);
         }
 
         private static Body readChunked(InputStream inputStream) throws IOException {
             Content compressedContent = readAllChunks(inputStream);
-            ContentDecompressed contentDecompressed = decompress(compressedContent);
+            Content contentDecompressed = decompress(compressedContent);
             return Body.from(contentDecompressed.value);
         }
 
-        private static ContentDecompressed decompress(Content compressedContent) throws IOException {
+        private static Content decompress(Content compressedContent) throws IOException {
             byte[] content = compressedContent.value;
             LOGGER.debug("Compressed {} bytes", content.length);
             ByteArrayInputStream inputStream = BufferUtils.newByteArrayInputStream(content);
             byte[] decompressed = new GZIPInputStream(inputStream).readAllBytes();
             LOGGER.debug("Decompressed {} bytes", decompressed.length);
-            return new ContentDecompressed(decompressed);
-        }
-
-        private record ContentDecompressed(byte[] value) {
+            return new Content(decompressed);
         }
     }
 

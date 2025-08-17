@@ -15,7 +15,7 @@ public final class BufferUtils {
     }
 
     public static ByteArrayOutputStream newByteArrayOutputStream(int size) {
-        return new ByteArrayOutputStream(1024);
+        return new ByteArrayOutputStream(size);
     }
 
     public static ByteArrayInputStream newByteArrayInputStream(byte[] bytes) {

@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.api.model;
 
 
 import com.github.mangila.pokedex.database.DatabaseObject;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.io.*;
 
@@ -11,7 +12,7 @@ public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
 
     @Override
     public byte[] serialize() throws IOException {
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream buffer = BufferUtils.newByteArrayOutputStream();
              DataOutputStream out = new DataOutputStream(buffer)) {
             out.writeInt(id);
             out.writeUTF(name);
@@ -21,7 +22,7 @@ public record Pokemon(int id, String name) implements DatabaseObject<Pokemon> {
 
     @Override
     public Pokemon deserialize(byte[] data) throws IOException {
-        try (ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+        try (ByteArrayInputStream buffer = BufferUtils.newByteArrayInputStream(data);
              DataInputStream in = new DataInputStream(buffer)) {
             int id = in.readInt();
             String name = in.readUTF();

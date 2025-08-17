@@ -6,7 +6,7 @@
 
 # pokedex-java
 
-Low-level Java implementation that consumes data from PokeApi and serves it over HTTP.
+Low-level Java implementation that consumes data from [https://pokeapi.co/](https://pokeapi.co/), saves it to disk and serves it via HTTP.
 
 For more information, please see /docs (wip)
 
@@ -53,3 +53,5 @@ This project is for educational purposes. Feel free to fork and extend it.
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
+
+This project is independent work and has no affiliation with [https://pokeapi.co/]([https://pokeapi.co/]) or The Pokémon Company.
