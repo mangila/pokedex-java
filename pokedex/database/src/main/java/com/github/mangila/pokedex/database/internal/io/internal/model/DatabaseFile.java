@@ -1,6 +1,10 @@
-package com.github.mangila.pokedex.database.internal.io;
+package com.github.mangila.pokedex.database.internal.io.internal.model;
 
+import com.github.mangila.pokedex.database.internal.io.model.DatabaseFileName;
+
+import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -27,6 +31,18 @@ public class DatabaseFile {
 
     public FileChannel getReadChannel() {
         return readChannel;
+    }
+
+    public boolean exists() {
+        return Files.exists(path);
+    }
+
+    public long size() throws IOException {
+        return Files.size(path);
+    }
+
+    public boolean isEmpty() throws IOException {
+        return exists() && size() == 0;
     }
 
     public void setReadChannel(FileChannel readChannel) {

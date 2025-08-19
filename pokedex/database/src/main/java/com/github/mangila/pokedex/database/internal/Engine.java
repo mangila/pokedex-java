@@ -1,0 +1,51 @@
+package com.github.mangila.pokedex.database.internal;
+
+import com.github.mangila.pokedex.database.DatabaseConfig;
+import com.github.mangila.pokedex.database.internal.io.DatabaseIo;
+import com.github.mangila.pokedex.database.internal.io.model.Key;
+import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
+import com.github.mangila.pokedex.database.internal.io.model.Value;
+import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
+import com.github.mangila.pokedex.shared.cache.lru.LruCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+
+public class Engine {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
+    private final DatabaseCache cache;
+    private final DatabaseIo io;
+
+    public Engine(DatabaseConfig config) {
+        this.cache = new DatabaseCache(new LruCache<>(config.lruCacheConfig()));
+        this.io = new DatabaseIo(config.databaseName(), config.nReadThreads());
+    }
+
+    public CompletableFuture<Value> getAsync(Key key) {
+        Value value = cache.get(key);
+        if (value != null) {
+            return CompletableFuture.completedFuture(value);
+        }
+        return io.readAsync(new ReadOperation(key, new CompletableFuture<>()))
+                .whenComplete((v, t) -> {
+                    if (t != null) {
+                        LOGGER.error("ERR", t);
+                    }
+                });
+    }
+
+    public CompletableFuture<Boolean> putAsync(Key key, Value value) {
+        return io.writeAsync(new WriteOperation(key, value, new CompletableFuture<>()))
+                .whenComplete((result, t) -> {
+                    if (t != null) {
+                        LOGGER.error("ERR", t);
+                    } else if (result.equals(false)) {
+                        LOGGER.warn("Failed to write to database");
+                    } else {
+                        cache.put(key, value);
+                    }
+                });
+    }
+}

@@ -97,10 +97,10 @@ public final class Ensure {
         }
     }
 
-    public static void notBlank(String value, Class<?> clazz) {
-        notNull(value, clazz);
+    public static void notBlank(String value, String message) {
+        notNull(value, message);
         if (value.isBlank()) {
-            throw new IllegalStateException("%s cannot be blank".formatted(clazz.getSimpleName()));
+            throw new IllegalStateException(message);
         }
     }
 }
