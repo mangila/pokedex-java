@@ -1,13 +1,13 @@
-package com.github.mangila.pokedex.database.internal.io;
+package com.github.mangila.pokedex.database.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
-import com.github.mangila.pokedex.database.internal.io.internal.DataFileHandler;
-import com.github.mangila.pokedex.database.internal.io.internal.IndexFileHandler;
+import com.github.mangila.pokedex.database.internal.io.data.DataFileHandler;
+import com.github.mangila.pokedex.database.internal.io.index.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
 import com.github.mangila.pokedex.database.internal.io.internal.WriterThread;
-import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
-import com.github.mangila.pokedex.database.internal.io.model.Value;
-import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
+import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
+import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
+import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
@@ -20,12 +20,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseIo {
-
     private final IndexFileHandler indexFileHandler;
     private final DataFileHandler dataFileHandler;
     private final ScheduledExecutorService writeExecutor;
     private final ScheduledExecutorService readExecutor;
-
     private final String readQueueName;
     private final String writeQueueName;
     private final ReaderThread readerThread;
@@ -50,7 +48,7 @@ public class DatabaseIo {
         indexFileHandler.init();
         dataFileHandler.init();
         writeExecutor.scheduleWithFixedDelay(writerThread, 0, 100, TimeUnit.MILLISECONDS);
-        readExecutor.scheduleWithFixedDelay(readerThread, 0, 100, TimeUnit.MILLISECONDS);
+        readExecutor.scheduleAtFixedRate(readerThread, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
@@ -63,9 +61,9 @@ public class DatabaseIo {
         indexFileHandler.truncate();
     }
 
-    public void deleteFiles() throws IOException {
-        dataFileHandler.deleteFile();
-        indexFileHandler.deleteFile();
+    public void delete() throws IOException {
+        dataFileHandler.delete();
+        indexFileHandler.delete();
     }
 
     public CompletableFuture<Value> readAsync(ReadOperation readOperation) {

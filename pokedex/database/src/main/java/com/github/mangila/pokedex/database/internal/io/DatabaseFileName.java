@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.database.internal.io.model;
+package com.github.mangila.pokedex.database.internal.io;
 
 import com.github.mangila.pokedex.shared.util.Ensure;
 

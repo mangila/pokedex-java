@@ -1,12 +1,11 @@
-package com.github.mangila.pokedex.database.internal.io.internal;
+package com.github.mangila.pokedex.database.internal.io.internal.model;
 
-import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
 import com.github.mangila.pokedex.shared.util.BufferUtils;
 import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.nio.ByteBuffer;
 
-import static com.github.mangila.pokedex.database.internal.io.internal.DatabaseFileHeader.MagicNumber.MAGIC_NUMBER_SIZE;
+import static com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFileHeader.MagicNumber.MAGIC_NUMBER_SIZE;
 
 /**
  * File Header Section:

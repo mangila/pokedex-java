@@ -1,8 +1,10 @@
 package com.github.mangila.pokedex.database.internal.io.internal;
 
+import com.github.mangila.pokedex.database.internal.io.data.DataFileHandler;
+import com.github.mangila.pokedex.database.internal.io.index.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
-import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
-import com.github.mangila.pokedex.database.internal.io.model.Value;
+import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
+import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 

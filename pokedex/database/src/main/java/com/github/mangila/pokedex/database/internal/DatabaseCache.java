@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database.internal;
 
-import com.github.mangila.pokedex.database.internal.io.model.Key;
-import com.github.mangila.pokedex.database.internal.io.model.Value;
+import com.github.mangila.pokedex.database.internal.model.Key;
+import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import org.jspecify.annotations.Nullable;
 

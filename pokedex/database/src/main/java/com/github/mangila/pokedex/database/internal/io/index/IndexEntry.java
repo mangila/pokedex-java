@@ -1,6 +1,7 @@
-package com.github.mangila.pokedex.database.internal.io.internal.model;
+package com.github.mangila.pokedex.database.internal.io.index;
 
-import com.github.mangila.pokedex.database.internal.io.model.Key;
+import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
+import com.github.mangila.pokedex.database.internal.model.Key;
 import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.nio.ByteBuffer;

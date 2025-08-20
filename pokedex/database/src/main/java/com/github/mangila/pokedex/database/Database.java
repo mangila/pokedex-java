@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.internal.Engine;
-import com.github.mangila.pokedex.database.internal.io.model.Key;
-import com.github.mangila.pokedex.database.internal.io.model.Value;
+import com.github.mangila.pokedex.database.internal.model.Key;
+import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class Database<T extends DatabaseObject<T>> {
         try {
             LOGGER.info("Truncating database");
             engine.truncateCache();
-            engine.truncateFiles();
+            engine.truncate();
         } catch (IOException e) {
             LOGGER.error("ERR", e);
             throw new RuntimeException(e);
@@ -53,7 +53,7 @@ public class Database<T extends DatabaseObject<T>> {
         try {
             LOGGER.info("Deleting database");
             engine.truncateCache();
-            engine.deleteFiles();
+            engine.delete();
         } catch (IOException e) {
             LOGGER.error("ERR", e);
             throw new RuntimeException(e);

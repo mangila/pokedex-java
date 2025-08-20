@@ -1,4 +1,6 @@
-package com.github.mangila.pokedex.database.internal.io.internal.model;
+package com.github.mangila.pokedex.database.internal.io.data;
+
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.nio.ByteBuffer;
 
@@ -9,7 +11,7 @@ public record DataEntry(byte[] data) {
     }
 
     public ByteBuffer toByteBuffer(boolean flip) {
-        var buffer = ByteBuffer.allocate(getSize());
+        ByteBuffer buffer = BufferUtils.newByteBuffer(getSize());
         buffer.putInt(data.length);
         buffer.put(data);
         if (flip) {

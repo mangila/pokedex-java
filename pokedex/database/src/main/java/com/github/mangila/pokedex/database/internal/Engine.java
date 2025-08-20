@@ -1,11 +1,10 @@
 package com.github.mangila.pokedex.database.internal;
 
 import com.github.mangila.pokedex.database.DatabaseConfig;
-import com.github.mangila.pokedex.database.internal.io.DatabaseIo;
-import com.github.mangila.pokedex.database.internal.io.model.Key;
-import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
-import com.github.mangila.pokedex.database.internal.io.model.Value;
-import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
+import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
+import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
+import com.github.mangila.pokedex.database.internal.model.Key;
+import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -37,12 +36,12 @@ public class Engine {
         cache.truncate();
     }
 
-    public void truncateFiles() throws IOException {
+    public void truncate() throws IOException {
         io.truncate();
     }
 
-    public void deleteFiles() throws IOException {
-        io.deleteFiles();
+    public void delete() throws IOException {
+        io.delete();
     }
 
     public CompletableFuture<@Nullable Value> getAsync(Key key) {
@@ -59,7 +58,7 @@ public class Engine {
     }
 
     public CompletableFuture<Boolean> putAsync(Key key, Value value) {
-        return io.writeAsync(new WriteOperation(key, value, new CompletableFuture<>()))
+        return io.writeAsync(new WriteOperation(key, value, WriteOperation.Operation.WRITE, new CompletableFuture<>()))
                 .whenComplete((result, t) -> {
                     if (t != null) {
                         LOGGER.error("ERR", t);
