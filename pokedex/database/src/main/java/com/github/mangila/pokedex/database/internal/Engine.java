@@ -44,6 +44,8 @@ public class Engine {
                         LOGGER.error("ERR", t);
                     } else if (result.equals(false)) {
                         LOGGER.warn("Failed to truncate database");
+                    } else {
+                        LOGGER.info("Database truncated successfully");
                     }
                 });
     }
@@ -56,6 +58,8 @@ public class Engine {
                         LOGGER.error("ERR", t);
                     } else if (result.equals(false)) {
                         LOGGER.warn("Failed to delete database");
+                    } else {
+                        LOGGER.info("Database deleted successfully");
                     }
                 });
     }
@@ -69,6 +73,8 @@ public class Engine {
                 .whenComplete((v, t) -> {
                     if (t != null) {
                         LOGGER.error("ERR", t);
+                    } else if (v == null) {
+                        LOGGER.warn("Failed to read from database");
                     }
                 });
     }
