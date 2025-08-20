@@ -5,12 +5,14 @@ import com.github.mangila.pokedex.database.internal.io.internal.DataFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
 import com.github.mangila.pokedex.database.internal.io.internal.WriterThread;
-import com.github.mangila.pokedex.database.internal.io.internal.util.DiskOperationQueue;
 import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
 import com.github.mangila.pokedex.database.internal.io.model.Value;
 import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,33 +25,52 @@ public class DatabaseIo {
     private final DataFileHandler dataFileHandler;
     private final ScheduledExecutorService writeExecutor;
     private final ScheduledExecutorService readExecutor;
-    private final DiskOperationQueue<ReadOperation> readOperationQueue;
-    private final DiskOperationQueue<WriteOperation> writeOperationQueue;
+
+    private final String readQueueName;
+    private final String writeQueueName;
     private final ReaderThread readerThread;
     private final WriterThread writerThread;
-
     private final AtomicInteger writeCounter = new AtomicInteger(0);
 
-    public DatabaseIo(DatabaseName databaseName, int nReadThreads) {
+    public DatabaseIo(DatabaseName databaseName) {
         this.indexFileHandler = new IndexFileHandler(databaseName);
         this.dataFileHandler = new DataFileHandler(databaseName);
         this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.readExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        this.writeOperationQueue = new DiskOperationQueue<>();
-        this.readOperationQueue = new DiskOperationQueue<>();
-        this.writerThread = new WriterThread(writeOperationQueue, indexFileHandler, dataFileHandler);
-        this.readerThread = new ReaderThread(readOperationQueue, indexFileHandler, dataFileHandler);
+        this.readQueueName = databaseName.value().concat("-read");
+        this.writeQueueName = databaseName.value().concat("-write");
+        QueueService queueService = QueueService.getInstance();
+        queueService.createNewQueue(readQueueName);
+        queueService.createNewQueue(writeQueueName);
+        this.writerThread = new WriterThread(writeQueueName, indexFileHandler, dataFileHandler);
+        this.readerThread = new ReaderThread(readQueueName, indexFileHandler, dataFileHandler);
     }
 
-    public void init() throws Exception {
+    public void init() throws IOException {
         indexFileHandler.init();
         dataFileHandler.init();
-        writeExecutor.scheduleWithFixedDelay(writerThread, 0, 0, TimeUnit.SECONDS);
-        readExecutor.scheduleWithFixedDelay(readerThread, 0, 0, TimeUnit.SECONDS);
+        writeExecutor.scheduleWithFixedDelay(writerThread, 0, 100, TimeUnit.MILLISECONDS);
+        readExecutor.scheduleWithFixedDelay(readerThread, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    public void shutdown() {
+        VirtualThreadFactory.terminateExecutorGracefully(writeExecutor, Duration.ofSeconds(30));
+        VirtualThreadFactory.terminateExecutorGracefully(readExecutor, Duration.ofSeconds(30));
+    }
+
+    public void truncate() throws IOException {
+        dataFileHandler.truncate();
+        indexFileHandler.truncate();
+    }
+
+    public void deleteFiles() throws IOException {
+        dataFileHandler.deleteFile();
+        indexFileHandler.deleteFile();
     }
 
     public CompletableFuture<Value> readAsync(ReadOperation readOperation) {
-        readOperationQueue.add(readOperation);
+        QueueService.getInstance()
+                .add(readQueueName, new QueueEntry(readOperation));
         return readOperation.result();
     }
 
@@ -58,12 +79,12 @@ public class DatabaseIo {
             // TODO: run compaction
             writeCounter.set(0);
         }
-        writeOperationQueue.add(writeOperation);
+        QueueService.getInstance()
+                .add(writeQueueName, new QueueEntry(writeOperation));
         return writeOperation.result();
     }
 
-    public void shutdown() {
-        VirtualThreadFactory.terminateExecutorGracefully(writeExecutor, Duration.ofSeconds(30));
-        VirtualThreadFactory.terminateExecutorGracefully(readExecutor, Duration.ofSeconds(30));
+    public int size() {
+        return indexFileHandler.size();
     }
 }

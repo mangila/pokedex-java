@@ -1,21 +1,27 @@
 package com.github.mangila.pokedex.database.internal.io.internal;
 
-import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
-import com.github.mangila.pokedex.database.internal.io.internal.util.DiskOperationQueue;
+import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
 import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueService;
 
 public record WriterThread(
-        DiskOperationQueue<WriteOperation> writeOperationQueue,
+        String writeQueueName,
         IndexFileHandler indexFileHandler,
         DataFileHandler dataFileHandler) implements Runnable {
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            WriteOperation operation = writeOperationQueue.poll();
-            Offset offset = dataFileHandler.write(operation.key(), operation.value());
-            indexFileHandler.put(operation.key(), offset);
-            operation.result().complete(true);
+        QueueEntry queueEntry = QueueService.getInstance().poll(writeQueueName);
+        if (queueEntry != null) {
+            WriteOperation operation = queueEntry.unwrapAs(WriteOperation.class);
+            try {
+                OffsetBoundary boundary = dataFileHandler.append(operation.value());
+                indexFileHandler.append(operation.key(), boundary.start());
+                operation.result().complete(true);
+            } catch (Exception e) {
+                operation.result().completeExceptionally(e);
+            }
         }
     }
 }

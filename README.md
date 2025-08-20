@@ -6,7 +6,8 @@
 
 # pokedex-java
 
-Low-level Java implementation that consumes data from [https://pokeapi.co/](https://pokeapi.co/), saves it to disk and serves it via HTTP.
+Low-level Java implementation that consumes data from [https://pokeapi.co/](https://pokeapi.co/), saves it to disk and
+serves it via HTTP.
 
 For more information, please see /docs (wip)
 
@@ -39,9 +40,8 @@ For more information, please see /docs (wip)
     - HTTP/1.1
 - Key Value Database (Yet Another Key Value Store)
     - Persist to disk
-    - Lock Free read and writes
-    - Append only to file
-    - ".yakvs" file format
+    - Append only file
+    - `.yakvs` file format
         - Binary format
         - Index file
         - Data file
@@ -54,4 +54,5 @@ This project is for educational purposes. Feel free to fork and extend it.
 
 This project is open-source and available under the [MIT License](LICENSE).
 
-This project is independent work and has no affiliation with [https://pokeapi.co/]([https://pokeapi.co/]) or The Pokémon Company.
+This project is independent work and has no affiliation with [https://pokeapi.co/]([https://pokeapi.co/]) or The Pokémon
+Company.

@@ -7,4 +7,9 @@ public record Key(String value) {
         Ensure.notNull(value, "key value must not be null");
         Ensure.notBlank(value, "key value must not be blank");
     }
+
+    public int length() {
+        return value.length();
+    }
+
 }

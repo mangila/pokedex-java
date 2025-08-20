@@ -10,8 +10,7 @@ import java.nio.file.Paths;
 
 public class DatabaseFile {
     private final Path path;
-    private FileChannel writeChannel;
-    private FileChannel readChannel;
+    private FileChannel channel;
 
     public DatabaseFile(DatabaseFileName fileName) {
         this.path = Paths.get(fileName.value());
@@ -21,16 +20,12 @@ public class DatabaseFile {
         return path;
     }
 
-    public FileChannel getWriteChannel() {
-        return writeChannel;
+    public FileChannel getChannel() {
+        return channel;
     }
 
-    public void setWriteChannel(FileChannel writeChannel) {
-        this.writeChannel = writeChannel;
-    }
-
-    public FileChannel getReadChannel() {
-        return readChannel;
+    public void setChannel(FileChannel channel) {
+        this.channel = channel;
     }
 
     public boolean exists() {
@@ -45,19 +40,7 @@ public class DatabaseFile {
         return exists() && size() == 0;
     }
 
-    public void setReadChannel(FileChannel readChannel) {
-        this.readChannel = readChannel;
-    }
-
-    public boolean isReadable() {
-        return isOpen(readChannel);
-    }
-
-    public boolean isWritable() {
-        return isOpen(writeChannel);
-    }
-
-    private boolean isOpen(FileChannel channel) {
+    public boolean isOpen() {
         return channel != null && channel.isOpen();
     }
 }

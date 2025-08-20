@@ -22,7 +22,7 @@ public record QueueEntry(Object data,
         return failCounter.get() == maxRetries;
     }
 
-    public <T> T getDataAs(Class<T> clazz) {
+    public <T> T unwrapAs(Class<T> clazz) {
         return clazz.cast(data);
     }
 

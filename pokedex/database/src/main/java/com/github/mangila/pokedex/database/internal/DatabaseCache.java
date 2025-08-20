@@ -14,4 +14,8 @@ public record DatabaseCache(LruCache<Key, Value> cache) {
     public void put(Key key, Value value) {
         cache.put(key, value);
     }
+
+    public void truncate() {
+        cache.truncate();
+    }
 }

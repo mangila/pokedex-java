@@ -10,15 +10,14 @@ import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPoolConfig;
 
 import static com.github.mangila.pokedex.scheduler.SchedulerApplication.*;
 
-public class Bootstrap {
+public class SchedulerBootstrap {
 
-    public QueueService initQueueService() {
-        QueueService queueService = new QueueService();
+    public void configureQueues() {
+        QueueService queueService = QueueService.getInstance();
         queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
         queueService.createNewQueue(POKEMON_SPECIES_URL_DL_QUEUE);
         queueService.createNewQueue(POKEMON_SPRITES_QUEUE);
         queueService.createNewQueue(POKEMON_CRIES_QUEUE);
-        return queueService;
     }
 
     public PokeApiClient initPokeApiClient() {

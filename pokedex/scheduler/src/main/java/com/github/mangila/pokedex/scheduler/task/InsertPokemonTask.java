@@ -59,7 +59,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             return;
         }
         try {
-            PokeApiUri uri = queueEntry.getDataAs(PokeApiUri.class);
+            PokeApiUri uri = queueEntry.unwrapAs(PokeApiUri.class);
             SpeciesResponse speciesResponse = pokeApiClient.fetchPokemonSpecies(uri)
                     .join();
             EvolutionChainResponse evolutionChainResponse = pokeApiClient.fetchEvolutionChain(speciesResponse.evolutionChainUrl())

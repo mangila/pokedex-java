@@ -2,16 +2,16 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 
 
 import com.github.mangila.pokedex.database.DatabaseName;
-import com.github.mangila.pokedex.database.internal.file.FileHeader;
-import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
-import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
+import com.github.mangila.pokedex.database.internal.io.internal.model.*;
+import com.github.mangila.pokedex.database.internal.io.internal.util.FileChannelUtil;
 import com.github.mangila.pokedex.database.internal.io.model.DatabaseFileName;
 import com.github.mangila.pokedex.database.internal.io.model.Key;
+import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +53,7 @@ public class IndexFileHandler {
 
     public IndexFileHandler(DatabaseName databaseName) {
         DatabaseFileName databaseFileName = new DatabaseFileName(databaseName.value()
-                .concat(".data")
+                .concat(".index")
                 .concat(".yakvs"));
         DatabaseFile databaseFile = new DatabaseFile(databaseFileName);
         this.databaseFileHandler = new DatabaseFileHandler(databaseFile);
@@ -64,40 +64,69 @@ public class IndexFileHandler {
         databaseFileHandler.init();
         if (databaseFileHandler.databaseFile().isEmpty()) {
             LOGGER.info("Creating new index file");
-            DatabaseFileHeader emptyHeader = DatabaseFileHeader.EMPTY;
-            databaseFileHandler.write(emptyHeader);
+            FileChannelUtil.writeHeader(
+                    databaseFileHandler.channel(),
+                    DatabaseFileHeader.EMPTY
+            );
         } else {
             LOGGER.info("Loading existing index file");
-            DatabaseFileHeader header = databaseFileHandler.readHeader();
+            DatabaseFileHeader header = FileChannelUtil.readHeader(databaseFileHandler.channel());
             keys.putAll(loadKeys(header));
         }
     }
 
-    private Map<Key, Offset> loadKeys(DatabaseFileHeader header) throws IOException {
-        long position = FileHeader.HEADER_SIZE;
-        int recordCount = header.recordCount().value();
-        Map<Key, Offset> indexes = new HashMap<>();
-        for (int i = 0; i < recordCount; i++) {
-            ByteBuffer keyLengthBuffer = databaseFileHandler.read(ByteBuffer.allocate(Integer.BYTES), position, true);
-            int keyLength = keyLengthBuffer.getInt();
-            byte[] keyBytes = new byte[keyLength];
-            ByteBuffer keyBuffer = databaseFileHandler.read(ByteBuffer.allocate(keyLength), position + Integer.BYTES, true);
-            keyBuffer.get(keyBytes);
-            Key key = new Key(new String(keyBytes));
-            ByteBuffer dataOffsetBuffer = databaseFileHandler.read(ByteBuffer.allocate(Long.BYTES), position + Integer.BYTES + keyLength, true);
-            Offset offset = new Offset(dataOffsetBuffer.getLong());
-            LOGGER.debug("Loaded index entry for key {} and offset {}", key, offset);
-            position += Integer.BYTES + keyLength + Long.BYTES;
-            indexes.put(key, offset);
-        }
-        return indexes;
+    public void truncate() throws IOException {
+        databaseFileHandler.truncate();
+        keys.clear();
+    }
+
+    public void deleteFile() throws IOException {
+        databaseFileHandler.deleteFile();
+        keys.clear();
+    }
+
+    public int size() {
+        return keys.size();
     }
 
     public Offset get(Key key) {
         return keys.get(key);
     }
 
-    public void put(Key key, Offset offset) {
-        keys.put(key, offset);
+    public void append(Key key, Offset offset) throws IOException {
+        IndexEntry indexEntry = new IndexEntry(key, offset);
+        Entry entry = new Entry(indexEntry.toByteBuffer(true));
+        OffsetBoundary boundary = FileChannelUtil.append(entry, databaseFileHandler.channel());
+        keys.put(key, boundary.start());
+    }
+
+    private Map<Key, Offset> loadKeys(DatabaseFileHeader header) throws IOException {
+        long position = DatabaseFileHeader.HEADER_SIZE.value();
+        int recordCount = header.recordCount().value();
+        Map<Key, Offset> indexes = new HashMap<>();
+        FileChannel channel = databaseFileHandler.channel();
+        for (int i = 0; i < recordCount; i++) {
+            Entry keyLengthBuffer = FileChannelUtil.read(
+                    BufferUtils.newByteBuffer(Integer.BYTES),
+                    position,
+                    true,
+                    channel);
+            int keyLength = keyLengthBuffer.getInt();
+            Entry keyBuffer = FileChannelUtil.read(
+                    BufferUtils.newByteBuffer(keyLength),
+                    position + Integer.BYTES,
+                    true,
+                    channel);
+            Key key = new Key(new String(keyBuffer.getArray()));
+            Entry dataOffsetBuffer = FileChannelUtil.read(
+                    BufferUtils.newByteBuffer(Long.BYTES),
+                    position + Integer.BYTES + keyLength,
+                    true,
+                    channel);
+            Offset offset = new Offset(dataOffsetBuffer.getLong());
+            position += Integer.BYTES + keyLength + Long.BYTES;
+            indexes.put(key, offset);
+        }
+        return indexes;
     }
 }

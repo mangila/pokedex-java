@@ -22,7 +22,7 @@ public record DatabaseFileName(String value) {
 
     public DatabaseFileName {
         Ensure.notNull(value, "database name must not be null");
-        Ensure.notBlank(value, DatabaseFileName.class);
+        Ensure.notBlank(value, "database name must not be blank");
         if (!value.endsWith(YAKVS_SUFFIX)) {
             throw new IllegalArgumentException("database value must have suffix: %s".formatted(YAKVS_SUFFIX));
         }

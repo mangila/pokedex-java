@@ -7,9 +7,11 @@ import com.github.mangila.pokedex.database.internal.io.model.ReadOperation;
 import com.github.mangila.pokedex.database.internal.io.model.Value;
 import com.github.mangila.pokedex.database.internal.io.model.WriteOperation;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class Engine {
@@ -20,10 +22,30 @@ public class Engine {
 
     public Engine(DatabaseConfig config) {
         this.cache = new DatabaseCache(new LruCache<>(config.lruCacheConfig()));
-        this.io = new DatabaseIo(config.databaseName(), config.nReadThreads());
+        this.io = new DatabaseIo(config.databaseName());
     }
 
-    public CompletableFuture<Value> getAsync(Key key) {
+    public void init() throws IOException {
+        io.init();
+    }
+
+    public void shutdown() {
+        io.shutdown();
+    }
+
+    public void truncateCache() {
+        cache.truncate();
+    }
+
+    public void truncateFiles() throws IOException {
+        io.truncate();
+    }
+
+    public void deleteFiles() throws IOException {
+        io.deleteFiles();
+    }
+
+    public CompletableFuture<@Nullable Value> getAsync(Key key) {
         Value value = cache.get(key);
         if (value != null) {
             return CompletableFuture.completedFuture(value);
@@ -47,5 +69,9 @@ public class Engine {
                         cache.put(key, value);
                     }
                 });
+    }
+
+    public int size() {
+        return io.size();
     }
 }

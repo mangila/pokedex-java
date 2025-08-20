@@ -85,16 +85,6 @@ public record DatabaseFileHeader(
             HEADER_SIZE
     );
 
-    /**
-     * Constructs a new instance of {@code DatabaseFileHeader} by deserializing the provided {@code ByteBuffer}.
-     * The method reads the buffer sequentially to extract the magic number, version, record count, and offset.
-     *
-     * @param buffer the {@code ByteBuffer} containing the serialized representation of the {@code DatabaseFileHeader}.
-     *               The buffer's position should be set to the start of the header data.
-     * @return a {@code DatabaseFileHeader} instance constructed from the data read from the buffer.
-     * @throws IllegalStateException    if the magic number in the buffer does not match the expected magic number.
-     * @throws BufferUnderflowException if there is insufficient data in the buffer to read the expected fields.
-     */
     public static DatabaseFileHeader from(ByteBuffer buffer) {
         byte[] magicNumber = new byte[MAGIC_NUMBER_SIZE];
         buffer.get(magicNumber);
@@ -110,16 +100,15 @@ public record DatabaseFileHeader(
         );
     }
 
-    /**
-     * Converts the current {@code DatabaseFileHeader} instance into a {@link ByteBuffer}.
-     * The buffer includes the magic number, version, record count, and offset fields.
-     * Optionally, the buffer can be flipped before being returned.
-     *
-     * @param flip if {@code true}, the buffer is flipped to prepare it for reading;
-     *             if {@code false}, the buffer remains in its current state.
-     * @return a {@link ByteBuffer} containing the serialized representation of the
-     * {@code DatabaseFileHeader}.
-     */
+    public static DatabaseFileHeader from(DatabaseFileHeader oldHeader, Offset newOffset) {
+        return new DatabaseFileHeader(
+                oldHeader.magicNumber(),
+                oldHeader.version(),
+                DatabaseFileHeader.RecordCount.increment(oldHeader.recordCount()),
+                newOffset
+        );
+    }
+
     public ByteBuffer toByteBuffer(boolean flip) {
         ByteBuffer buffer = BufferUtils.newByteBuffer((int) HEADER_SIZE.value());
         buffer.put(magicNumber.value);
