@@ -8,18 +8,22 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Holds queues in a ConcurrentHashMap
- */
 public class QueueService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueService.class);
-
     private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
 
-    public QueueService() {
+    private QueueService() {
         LOGGER.info("Initializing QueueService");
         this.queues = new ConcurrentHashMap<>();
+    }
+
+    private static final class Holder {
+        private static final QueueService INSTANCE = new QueueService();
+    }
+
+    public static QueueService getInstance() {
+        return Holder.INSTANCE;
     }
 
     public void createNewQueue(String queueName) {

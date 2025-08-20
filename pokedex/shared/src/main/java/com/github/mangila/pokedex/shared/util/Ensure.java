@@ -40,6 +40,12 @@ public final class Ensure {
         }
     }
 
+    public static void notEquals(int first, int second, String message) {
+        if (first != second) {
+            throw new IllegalStateException(message);
+        }
+    }
+
     public static void equals(byte[] a, byte[] a2) {
         boolean equals = Arrays.equals(a, a2);
         if (!equals) {
@@ -91,10 +97,10 @@ public final class Ensure {
         }
     }
 
-    public static void notBlank(String value, Class<?> clazz) {
-        notNull(value, clazz);
+    public static void notBlank(String value, String message) {
+        notNull(value, message);
         if (value.isBlank()) {
-            throw new IllegalStateException("%s cannot be blank".formatted(clazz.getSimpleName()));
+            throw new IllegalStateException(message);
         }
     }
 }

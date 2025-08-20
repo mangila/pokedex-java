@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import com.github.mangila.pokedex.scheduler.SchedulerApplication;
+import com.github.mangila.pokedex.scheduler.Scheduler;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
@@ -36,8 +36,8 @@ public record ShutdownTask(QueueService queueService) implements Task {
     @Override
     public void run() {
         if (queueService.allQueuesEmpty()) {
-            LOGGER.info("All queues empty, shutting down");
-            SchedulerApplication.IS_RUNNING.set(Boolean.FALSE);
+            LOGGER.info("All queues empty, shutting down Scheduler");
+            Scheduler.IS_RUNNING.set(Boolean.FALSE);
         }
     }
 }

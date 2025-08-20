@@ -29,8 +29,10 @@ public class HttpStatusReader {
                 throw new IOException("Stream ended unexpectedly");
             }
             lineBuffer.write(current);
-            // Break if the status line is complete via CR+LF
-            // also check if the line-buffer has some content
+            /*
+             * Break if the status line is complete via CR+LF
+             * also check if the line-buffer has some content
+             */
             if (HttpsUtils.isCrLf(previous, current) && lineBuffer.size() > 8) {
                 break;
             }

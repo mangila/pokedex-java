@@ -97,8 +97,8 @@ public class HttpBodyReader {
                     inputStream.skipNBytes(inputStream.available());
                     break;
                 } else if (HttpsUtils.HEX_DECIMAL.matcher(chunkLine).matches()) {
-                    LOGGER.debug("Chunk size: {}", chunkLine);
                     int chunkSize = Integer.parseInt(chunkLine, 16);
+                    LOGGER.debug("Chunk size: {} - Hex: {}", chunkSize, chunkLine);
                     chunkBuffer.write(inputStream.readNBytes(chunkSize));
                 }
                 chunkLineBuffer.reset();

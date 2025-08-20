@@ -9,18 +9,13 @@ import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
-
 public class PokemonDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PokemonDatabase.class);
 
     private static final DatabaseConfig DEFAULT_CONFIG = new DatabaseConfig(
             new DatabaseName("pokedex"),
-            new LruCacheConfig(50),
-            new DatabaseConfig.CompactThreadConfig(10, 10, TimeUnit.MINUTES),
-            new DatabaseConfig.ReaderThreadConfig(3, 100),
-            new DatabaseConfig.WriteThreadConfig(100)
+            new LruCacheConfig(50)
     );
     private static DatabaseConfig config;
 

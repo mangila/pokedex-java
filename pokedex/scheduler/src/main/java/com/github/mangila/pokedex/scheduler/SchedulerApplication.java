@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main class for the scheduler application. Mostly for testing purposes.
@@ -26,14 +25,28 @@ public class SchedulerApplication {
     public static final String POKEMON_CRIES_QUEUE = "pokemon-cries-queue";
     public static final boolean DELETE_DATABASE = Boolean.TRUE;
     public static final boolean TRUNCATE_DATABASE = Boolean.FALSE;
-    public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
 
     public static void main(String[] args) {
-        Bootstrap bootstrap = new Bootstrap();
+        SchedulerBootstrap schedulerBootstrap = new SchedulerBootstrap();
         PokemonDatabase.defaultConfig();
         PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
-        PokeApiClient pokeApiClient = bootstrap.initPokeApiClient();
-        QueueService queueService = bootstrap.initQueueService();
+        PokeApiClient pokeApiClient = schedulerBootstrap.initPokeApiClient();
+        schedulerBootstrap.configureQueues();
+        Scheduler scheduler = getScheduler(pokeApiClient, pokemonDatabase);
+        while (Scheduler.IS_RUNNING.get()) {
+
+        }
+        LOGGER.info("Db size = {}", pokemonDatabase.db().size());
+        scheduler.shutdownAllTasks();
+        if (DELETE_DATABASE) {
+            pokemonDatabase.db().delete();
+        } else if (TRUNCATE_DATABASE) {
+            pokemonDatabase.db().truncate();
+        }
+    }
+
+    private static Scheduler getScheduler(PokeApiClient pokeApiClient, PokemonDatabase pokemonDatabase) {
+        QueueService queueService = QueueService.getInstance();
         List<Task> tasks = List.of(
                 new QueuePokemonsTask(pokeApiClient, queueService, POKEMON_LIMIT),
                 new InsertCriesTask(pokeApiClient, queueService),
@@ -43,16 +56,6 @@ public class SchedulerApplication {
         );
         Scheduler scheduler = new Scheduler(new SchedulerConfig(tasks));
         scheduler.init();
-        IS_RUNNING.set(Boolean.TRUE);
-        while (IS_RUNNING.get()) {
-
-        }
-        LOGGER.info("Db size = {}", pokemonDatabase.db().size());
-        scheduler.shutdownAllTasks();
-        if (DELETE_DATABASE) {
-            pokemonDatabase.db().deleteDatabase();
-        } else if (TRUNCATE_DATABASE) {
-            pokemonDatabase.db().truncateDatabase();
-        }
+        return scheduler;
     }
 }
