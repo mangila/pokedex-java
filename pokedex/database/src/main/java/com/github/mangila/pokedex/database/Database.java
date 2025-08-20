@@ -33,7 +33,7 @@ public class Database<T extends DatabaseObject<T>> {
         }
     }
 
-    public void close() {
+    public void shutdown() {
         LOGGER.info("Shutting down database");
         engine.shutdown();
     }

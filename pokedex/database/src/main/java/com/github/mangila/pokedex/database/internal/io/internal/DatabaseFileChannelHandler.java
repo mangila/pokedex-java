@@ -73,4 +73,8 @@ public class DatabaseFileChannelHandler {
     public boolean isOpen() {
         return channel != null && channel.isOpen();
     }
+
+    public String fileName() {
+        return databaseFile.path().getFileName().toString();
+    }
 }

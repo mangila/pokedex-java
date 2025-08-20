@@ -48,12 +48,20 @@ public class DatabaseIo {
     public void init() throws IOException {
         indexFileHandler.init();
         dataFileHandler.init();
-        writeExecutor.scheduleWithFixedDelay(writerThread, 0, 100, TimeUnit.MILLISECONDS);
+        writeExecutor.scheduleWithFixedDelay(writerThread, 0, 300, TimeUnit.MILLISECONDS);
         readExecutor.scheduleAtFixedRate(readerThread, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
+        shutdownReaderThread();
+        shutdownWriterThread();
+    }
+
+    public void shutdownWriterThread() {
         VirtualThreadFactory.terminateExecutorGracefully(writeExecutor, Duration.ofSeconds(30));
+    }
+
+    public void shutdownReaderThread() {
         VirtualThreadFactory.terminateExecutorGracefully(readExecutor, Duration.ofSeconds(30));
     }
 

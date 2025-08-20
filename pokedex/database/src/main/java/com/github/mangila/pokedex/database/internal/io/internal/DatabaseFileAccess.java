@@ -49,13 +49,13 @@ public record DatabaseFileAccess(DatabaseFileChannelHandler channelHandler) {
         ByteBuffer buffer = BufferUtils.newByteBuffer((int) DatabaseFileHeader.HEADER_SIZE.value());
         channelHandler.read(buffer, 0);
         buffer.flip();
-        var header = DatabaseFileHeader.from(buffer);
-        LOGGER.debug("Read header {}", header);
+        DatabaseFileHeader header = DatabaseFileHeader.from(buffer);
+        LOGGER.debug("Read header {} - {}", header, channelHandler.fileName());
         return header;
     }
 
     public void writeHeader(DatabaseFileHeader header) throws IOException {
-        LOGGER.debug("Writing header {}", header);
+        LOGGER.debug("Writing header {} - {}", header, channelHandler.fileName());
         channelHandler.write(header.toByteBuffer(Boolean.TRUE), 0);
     }
 
