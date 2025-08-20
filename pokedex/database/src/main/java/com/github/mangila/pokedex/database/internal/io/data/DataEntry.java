@@ -4,6 +4,16 @@ import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Data Records Section:
+ * <pre>
+ * +-----------------+----------------------+
+ * | Record Length   | 4 bytes             |
+ * | Data            | Variable length     |
+ * +-----------------+----------------------+
+ * </pre>
+ *
+ */
 public record DataEntry(byte[] data) {
 
     public int getSize() {
