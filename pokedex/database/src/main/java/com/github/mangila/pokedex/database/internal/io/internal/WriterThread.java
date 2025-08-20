@@ -18,15 +18,15 @@ public record WriterThread(
     public void run() {
         QueueEntry queueEntry = QueueService.getInstance().poll(writeQueueName);
         if (queueEntry != null) {
-            WriteOperation operation = queueEntry.unwrapAs(WriteOperation.class);
+            WriteOperation writeOperation = queueEntry.unwrapAs(WriteOperation.class);
             try {
-                switch (operation.operation()) {
-                    case WRITE -> write(operation);
-                    case TRUNCATE -> truncate(operation);
-                    case DELETE -> delete(operation);
+                switch (writeOperation.operation()) {
+                    case WRITE -> write(writeOperation);
+                    case TRUNCATE -> truncate(writeOperation);
+                    case DELETE -> delete(writeOperation);
                 }
             } catch (Exception e) {
-                operation.result().completeExceptionally(e);
+                writeOperation.result().completeExceptionally(e);
             }
         }
     }

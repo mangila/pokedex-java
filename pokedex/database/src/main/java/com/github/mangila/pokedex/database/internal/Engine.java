@@ -36,12 +36,28 @@ public class Engine {
         cache.truncate();
     }
 
-    public void truncate() throws IOException {
-        io.truncate();
+    public CompletableFuture<Boolean> truncateAsync() {
+        truncateCache();
+        return io.truncateAsync()
+                .whenComplete((result, t) -> {
+                    if (t != null) {
+                        LOGGER.error("ERR", t);
+                    } else if (result.equals(false)) {
+                        LOGGER.warn("Failed to truncate database");
+                    }
+                });
     }
 
-    public void delete() throws IOException {
-        io.delete();
+    public CompletableFuture<Boolean> deleteAsync() {
+        truncateCache();
+        return io.deleteAsync()
+                .whenComplete((result, t) -> {
+                    if (t != null) {
+                        LOGGER.error("ERR", t);
+                    } else if (result.equals(false)) {
+                        LOGGER.warn("Failed to delete database");
+                    }
+                });
     }
 
     public CompletableFuture<@Nullable Value> getAsync(Key key) {

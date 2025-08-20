@@ -47,9 +47,9 @@ public class Application {
         LOGGER.info("Db size = {}", pokemonDatabase.db().size());
         scheduler.shutdownAllTasks();
         if (DELETE_DATABASE) {
-            pokemonDatabase.db().delete();
+            pokemonDatabase.db().deleteAsync().join();
         } else if (TRUNCATE_DATABASE) {
-            pokemonDatabase.db().truncate();
+            pokemonDatabase.db().truncateAsync().join();
         }
     }
 }

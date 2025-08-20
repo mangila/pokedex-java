@@ -7,6 +7,7 @@ import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
 import com.github.mangila.pokedex.database.internal.io.internal.WriterThread;
 import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
+import com.github.mangila.pokedex.database.internal.model.Key;
 import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -56,14 +57,28 @@ public class DatabaseIo {
         VirtualThreadFactory.terminateExecutorGracefully(readExecutor, Duration.ofSeconds(30));
     }
 
-    public void truncate() throws IOException {
-        dataFileHandler.truncate();
-        indexFileHandler.truncate();
+    public CompletableFuture<Boolean> truncateAsync() {
+        WriteOperation writeOperation = new WriteOperation(
+                Key.EMPTY,
+                Value.EMPTY,
+                WriteOperation.Operation.TRUNCATE,
+                new CompletableFuture<>()
+        );
+        QueueService.getInstance()
+                .add(writeQueueName, new QueueEntry(writeOperation));
+        return writeOperation.result();
     }
 
-    public void delete() throws IOException {
-        dataFileHandler.delete();
-        indexFileHandler.delete();
+    public CompletableFuture<Boolean> deleteAsync() {
+        WriteOperation writeOperation = new WriteOperation(
+                Key.EMPTY,
+                Value.EMPTY,
+                WriteOperation.Operation.DELETE,
+                new CompletableFuture<>()
+        );
+        QueueService.getInstance()
+                .add(writeQueueName, new QueueEntry(writeOperation));
+        return writeOperation.result();
     }
 
     public CompletableFuture<Value> readAsync(ReadOperation readOperation) {

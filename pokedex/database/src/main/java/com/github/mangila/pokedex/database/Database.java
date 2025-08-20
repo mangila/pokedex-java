@@ -38,26 +38,12 @@ public class Database<T extends DatabaseObject<T>> {
         engine.shutdown();
     }
 
-    public void truncate() {
-        try {
-            LOGGER.info("Truncating database");
-            engine.truncateCache();
-            engine.truncate();
-        } catch (IOException e) {
-            LOGGER.error("ERR", e);
-            throw new RuntimeException(e);
-        }
+    public CompletableFuture<Boolean> truncateAsync() {
+        return engine.truncateAsync();
     }
 
-    public void delete() {
-        try {
-            LOGGER.info("Deleting database");
-            engine.truncateCache();
-            engine.delete();
-        } catch (IOException e) {
-            LOGGER.error("ERR", e);
-            throw new RuntimeException(e);
-        }
+    public CompletableFuture<Boolean> deleteAsync() {
+        return engine.deleteAsync();
     }
 
     public int size() {
