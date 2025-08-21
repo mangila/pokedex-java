@@ -27,7 +27,7 @@ public class VirtualThreadFactory {
         return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }
 
-    public static boolean terminateExecutorGracefully(ExecutorService executorService, Duration awaitTermination) {
+    public static boolean terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
         try {
             executorService.shutdown();
             while (!executorService.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {

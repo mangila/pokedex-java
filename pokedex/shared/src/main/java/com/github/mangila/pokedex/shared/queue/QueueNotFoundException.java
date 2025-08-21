@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.shared.queue;
 
 public class QueueNotFoundException extends RuntimeException {
-    public QueueNotFoundException(String message) {
-        super(message);
+    public QueueNotFoundException(QueueName queueName) {
+        super(queueName.value());
     }
 }

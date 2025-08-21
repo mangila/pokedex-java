@@ -7,9 +7,8 @@ import com.github.mangila.pokedex.api.client.response.SpeciesResponse;
 import com.github.mangila.pokedex.api.client.response.VarietyResponse;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.api.model.Pokemon;
-import com.github.mangila.pokedex.scheduler.SchedulerApplication;
+import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
-import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public record InsertPokemonTask(PokeApiClient pokeApiClient,
-                                QueueService queueService,
+                                Queue queue,
                                 PokemonDatabase database) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertPokemonTask.class);
@@ -47,13 +46,13 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
     public boolean shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
-               VirtualThreadFactory.terminateExecutorGracefully(WORKER_POOL, duration);
+        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration) &&
+               VirtualThreadFactory.terminateGracefully(WORKER_POOL, duration);
     }
 
     @Override
     public void run() {
-        QueueEntry queueEntry = queueService.poll(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE);
+        QueueEntry queueEntry = queue.poll();
         if (queueEntry == null) {
             LOGGER.debug("Queue is empty");
             return;
@@ -71,7 +70,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
                     .join();
             var p = new Pokemon(speciesResponse.id().intValue(), speciesResponse.name());
-            boolean ok = database.db()
+            boolean ok = database.instance()
                     .putAsync(p.name(), p)
                     .join();
             if (ok) {
@@ -81,11 +80,11 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             }
         } catch (Exception e) {
             if (queueEntry.equalsMaxRetries(3)) {
-                queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_DL_QUEUE, queueEntry);
+                queue.addDlq(queueEntry);
                 return;
             }
             queueEntry.incrementFailCounter();
-            queueService.add(SchedulerApplication.POKEMON_SPECIES_URL_QUEUE, queueEntry);
+            queue.add(queueEntry);
         }
     }
 }

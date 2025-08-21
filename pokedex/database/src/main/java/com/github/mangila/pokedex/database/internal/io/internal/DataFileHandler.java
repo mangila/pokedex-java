@@ -1,11 +1,13 @@
-package com.github.mangila.pokedex.database.internal.io.data;
+package com.github.mangila.pokedex.database.internal.io.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
-import com.github.mangila.pokedex.database.internal.io.internal.DatabaseFileHandler;
-import com.github.mangila.pokedex.database.internal.io.internal.model.*;
+import com.github.mangila.pokedex.database.internal.io.internal.model.DataEntry;
+import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
+import com.github.mangila.pokedex.database.internal.io.internal.model.Buffer;
+import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
+import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
 import com.github.mangila.pokedex.database.internal.model.Value;
-import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,22 +64,23 @@ public class DataFileHandler {
     }
 
     public Value read(Offset offset) throws IOException {
-        Entry entry = databaseFileHandler.fileAccess().read(
-                BufferUtils.newByteBuffer(Integer.BYTES),
-                offset.value(),
+        Buffer buffer = databaseFileHandler.fileAccess().read(
+                Buffer.from(Integer.BYTES),
+                offset,
                 true);
-        int recordLength = entry.getInt();
-        entry = databaseFileHandler.fileAccess().read(
-                BufferUtils.newByteBuffer(recordLength),
-                offset.value() + Integer.BYTES,
+        buffer = databaseFileHandler.fileAccess().read(
+                Buffer.from(buffer.getInt()),
+                new Offset(Integer.BYTES + offset.value()),
                 true);
-        return new Value(entry.getArray());
+        return new Value(buffer.getArray());
     }
 
     public OffsetBoundary append(Value value) throws IOException {
-        DataEntry dataEntry = new DataEntry(value.value());
-        Entry entry = new Entry(dataEntry.toByteBuffer(true));
-        return databaseFileHandler.fileAccess()
-                .append(entry);
+        DataEntry dataEntry = DataEntry.from(value);
+        Buffer buffer = dataEntry.toBuffer(true);
+        OffsetBoundary boundary = databaseFileHandler.fileAccess()
+                .append(buffer);
+        LOGGER.debug("Appended data entry {} - {}", dataEntry, boundary);
+        return boundary;
     }
 }

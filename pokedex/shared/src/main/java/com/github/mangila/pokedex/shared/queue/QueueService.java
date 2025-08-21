@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class QueueService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueService.class);
-    private final Map<String, ConcurrentLinkedQueue<QueueEntry>> queues;
+
+    private final Map<QueueName, Queue> queues;
 
     private QueueService() {
         LOGGER.info("Initializing QueueService");
@@ -26,32 +26,36 @@ public class QueueService {
         return Holder.INSTANCE;
     }
 
-    public void createNewQueue(String queueName) {
+    public void createNewQueue(QueueName queueName) {
         LOGGER.info("Create new queue '{}'", queueName);
-        queues.put(queueName, new ConcurrentLinkedQueue<>());
+        queues.put(queueName, new Queue(queueName));
     }
 
-    public boolean add(String queueName, QueueEntry entry) {
+    public Queue getQueue(QueueName queueName) {
+        return queues.get(queueName);
+    }
+
+    public boolean add(QueueName queueName, QueueEntry entry) {
         LOGGER.debug("Add QueueEntry to {} - {}", queueName, entry);
         return queues.get(queueName).add(entry);
     }
 
-    public @Nullable QueueEntry poll(String queueName) {
+    public @Nullable QueueEntry poll(QueueName queueName) {
         LOGGER.debug("Poll QueueEntry from {}", queueName);
-        var queue = queues.get(queueName);
+        Queue queue = queues.get(queueName);
         if (queue == null) {
             throw new QueueNotFoundException(queueName);
         }
         return queue.poll();
     }
 
-    public boolean isEmpty(String name) {
-        return queues.get(name).isEmpty();
+    public boolean isEmpty(QueueName queueName) {
+        return queues.get(queueName).isEmpty();
     }
 
     public boolean allQueuesEmpty() {
         return queues.values()
                 .stream()
-                .allMatch(ConcurrentLinkedQueue::isEmpty);
+                .allMatch(Queue::isEmpty);
     }
 }

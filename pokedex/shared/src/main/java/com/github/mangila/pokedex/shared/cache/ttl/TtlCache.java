@@ -65,7 +65,7 @@ public class TtlCache<K, V> {
     }
 
     public void shutdownEvictionThread() {
-        VirtualThreadFactory.terminateExecutorGracefully(
+        VirtualThreadFactory.terminateGracefully(
                 evictionThread,
                 Duration.ofSeconds(10)
         );

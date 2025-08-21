@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.database.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
-import com.github.mangila.pokedex.database.internal.io.data.DataFileHandler;
-import com.github.mangila.pokedex.database.internal.io.index.IndexFileHandler;
+import com.github.mangila.pokedex.database.internal.io.internal.DataFileHandler;
+import com.github.mangila.pokedex.database.internal.io.internal.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
 import com.github.mangila.pokedex.database.internal.io.internal.WriterThread;
 import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
@@ -10,8 +10,11 @@ import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOpera
 import com.github.mangila.pokedex.database.internal.model.Key;
 import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueName;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -21,12 +24,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseIo {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseIo.class);
     private final IndexFileHandler indexFileHandler;
     private final DataFileHandler dataFileHandler;
     private final ScheduledExecutorService writeExecutor;
     private final ScheduledExecutorService readExecutor;
-    private final String readQueueName;
-    private final String writeQueueName;
+    private final QueueName readQueueName;
+    private final QueueName writeQueueName;
     private final ReaderThread readerThread;
     private final WriterThread writerThread;
     private final AtomicInteger writeCounter = new AtomicInteger(0);
@@ -36,8 +41,8 @@ public class DatabaseIo {
         this.dataFileHandler = new DataFileHandler(databaseName);
         this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.readExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        this.readQueueName = databaseName.value().concat("-read");
-        this.writeQueueName = databaseName.value().concat("-write");
+        this.readQueueName = new QueueName(databaseName.value().concat("-read"));
+        this.writeQueueName = new QueueName(databaseName.value().concat("-write"));
         QueueService queueService = QueueService.getInstance();
         queueService.createNewQueue(readQueueName);
         queueService.createNewQueue(writeQueueName);
@@ -48,7 +53,21 @@ public class DatabaseIo {
     public void init() throws IOException {
         indexFileHandler.init();
         dataFileHandler.init();
+        startThreads();
+    }
+
+    public void startThreads() {
+        startReaderThread();
+        startWriterThread();
+    }
+
+    public void startWriterThread() {
+        LOGGER.info("Starting writer thread");
         writeExecutor.scheduleWithFixedDelay(writerThread, 0, 300, TimeUnit.MILLISECONDS);
+    }
+
+    public void startReaderThread() {
+        LOGGER.info("Starting reader thread");
         readExecutor.scheduleAtFixedRate(readerThread, 0, 100, TimeUnit.MILLISECONDS);
     }
 
@@ -58,11 +77,13 @@ public class DatabaseIo {
     }
 
     public void shutdownWriterThread() {
-        VirtualThreadFactory.terminateExecutorGracefully(writeExecutor, Duration.ofSeconds(30));
+        LOGGER.info("Shutting down writer thread");
+        VirtualThreadFactory.terminateGracefully(writeExecutor, Duration.ofSeconds(30));
     }
 
     public void shutdownReaderThread() {
-        VirtualThreadFactory.terminateExecutorGracefully(readExecutor, Duration.ofSeconds(30));
+        LOGGER.info("Shutting down reader thread");
+        VirtualThreadFactory.terminateGracefully(readExecutor, Duration.ofSeconds(30));
     }
 
     public CompletableFuture<Boolean> truncateAsync() {

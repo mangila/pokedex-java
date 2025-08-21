@@ -10,7 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    public static final AtomicBoolean IS_RUNNING = new AtomicBoolean(Boolean.FALSE);
+
+    public static final AtomicBoolean RUNNING = new AtomicBoolean(Boolean.FALSE);
+    public static final AtomicBoolean SHUTDOWN = new AtomicBoolean(Boolean.FALSE);
     private final List<Task> tasks;
 
     public Scheduler(SchedulerConfig config) {
@@ -20,16 +22,24 @@ public class Scheduler {
     public void init() {
         LOGGER.info("Initializing scheduler");
         tasks.forEach(Task::schedule);
-        IS_RUNNING.set(Boolean.TRUE);
+        RUNNING.set(Boolean.TRUE);
     }
 
     public void shutdownAllTasks() {
-        LOGGER.info("Shutting down scheduler");
-        tasks.forEach(this::shutdownTask);
-        IS_RUNNING.set(Boolean.FALSE);
+        if (!RUNNING.get()) {
+            LOGGER.debug("Scheduler is not running");
+            return;
+        }
+        if (SHUTDOWN.get()) {
+            LOGGER.info("Shutting down scheduler");
+            tasks.forEach(this::shutdown);
+            RUNNING.set(Boolean.FALSE);
+        } else {
+            LOGGER.warn("Scheduler is still running, skipping shutdown");
+        }
     }
 
-    private void shutdownTask(Task task) {
+    private void shutdown(Task task) {
         String name = task.name();
         boolean isShutdown = task.shutdown();
         if (isShutdown) {

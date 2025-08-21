@@ -5,7 +5,7 @@ import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.nio.ByteBuffer;
 
-import static com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFileHeader.MagicNumber.MAGIC_NUMBER_SIZE;
+import static com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFileHeader.MagicNumber.SIZE;
 
 /**
  * File Header Section:
@@ -22,46 +22,46 @@ public record DatabaseFileHeader(
         MagicNumber magicNumber,
         Version version,
         RecordCount recordCount,
-        Offset offset
+        Offset nextOffset
 ) {
     public DatabaseFileHeader {
         Ensure.notNull(magicNumber, MagicNumber.class);
         Ensure.notNull(version, Version.class);
         Ensure.notNull(recordCount, RecordCount.class);
-        Ensure.notNull(offset, Offset.class);
+        Ensure.notNull(nextOffset, Offset.class);
     }
 
     public record MagicNumber(byte[] value) {
-        public static final String MAGIC_NUMBER = "yakvs";
-        public static final byte[] MAGIC_NUMBER_BYTES = MAGIC_NUMBER.getBytes();
-        public static final int MAGIC_NUMBER_SIZE = MAGIC_NUMBER_BYTES.length;
-        public static final MagicNumber CURRENT_MAGIC_NUMBER = new MagicNumber(MAGIC_NUMBER_BYTES);
+        public static final String VALUE = "yakvs";
+        public static final byte[] VALUE_BYTES = VALUE.getBytes();
+        public static final int SIZE = VALUE_BYTES.length;
+        public static final MagicNumber CURRENT = new MagicNumber(VALUE_BYTES);
 
         public MagicNumber {
-            Ensure.equals(value, MAGIC_NUMBER_BYTES);
-            Ensure.equals(MAGIC_NUMBER_SIZE, MAGIC_NUMBER_BYTES.length);
+            Ensure.equals(value, VALUE_BYTES);
+            Ensure.equals(SIZE, VALUE_BYTES.length);
         }
     }
 
     public record Version(int value) {
-        public static final int VERSION = 1;
-        public static final int VERSION_SIZE = Integer.BYTES;
-        public static final Version CURRENT_VERSION = new Version(VERSION);
+
+        public static final int VALUE = 1;
+        public static final int SIZE = Integer.BYTES;
+        public static final Version CURRENT = new Version(VALUE);
 
         public Version {
-            Ensure.equals(value, VERSION);
-            Ensure.equals(Integer.BYTES, VERSION_SIZE);
+            Ensure.equals(value, VALUE);
+            Ensure.equals(Integer.BYTES, SIZE);
         }
     }
 
     public record RecordCount(int value) {
-        public static final int RECORD_COUNT_SIZE = Integer.BYTES;
-
+        public static final int SIZE = Integer.BYTES;
         public static final RecordCount ZERO = new RecordCount(0);
 
         public RecordCount {
             Ensure.min(0, value);
-            Ensure.equals(RECORD_COUNT_SIZE, Integer.BYTES);
+            Ensure.equals(SIZE, Integer.BYTES);
         }
 
         public static RecordCount increment(RecordCount recordCount) {
@@ -70,24 +70,21 @@ public record DatabaseFileHeader(
         }
     }
 
-    public static final Offset HEADER_SIZE = new Offset(
-            MagicNumber.MAGIC_NUMBER_SIZE +
-            Version.VERSION_SIZE +
-            RecordCount.RECORD_COUNT_SIZE +
-            Offset.OFFSET_SIZE
+    public static final OffsetBoundary HEADER_OFFSET_BOUNDARY = new OffsetBoundary(
+            Offset.ZERO,
+            new Offset(SIZE + Version.SIZE + RecordCount.SIZE + Offset.SIZE)
     );
 
     public static DatabaseFileHeader EMPTY = new DatabaseFileHeader(
-            MagicNumber.CURRENT_MAGIC_NUMBER,
-            Version.CURRENT_VERSION,
+            MagicNumber.CURRENT,
+            Version.CURRENT,
             RecordCount.ZERO,
-            HEADER_SIZE
+            HEADER_OFFSET_BOUNDARY.end()
     );
 
-    public static DatabaseFileHeader from(ByteBuffer buffer) {
-        byte[] magicNumber = new byte[MAGIC_NUMBER_SIZE];
-        buffer.get(magicNumber);
-        Ensure.equals(magicNumber, MagicNumber.MAGIC_NUMBER_BYTES);
+    public static DatabaseFileHeader from(Buffer buffer) {
+        byte[] magicNumber = buffer.getArray(MagicNumber.SIZE);
+        Ensure.equals(magicNumber, MagicNumber.VALUE_BYTES);
         int version = buffer.getInt();
         int recordCount = buffer.getInt();
         long offset = buffer.getLong();
@@ -99,25 +96,15 @@ public record DatabaseFileHeader(
         );
     }
 
-    public static DatabaseFileHeader from(DatabaseFileHeader oldHeader, Offset newOffset) {
-        return new DatabaseFileHeader(
-                oldHeader.magicNumber(),
-                oldHeader.version(),
-                DatabaseFileHeader.RecordCount.increment(oldHeader.recordCount()),
-                newOffset
-        );
-    }
-
-    public ByteBuffer toByteBuffer(boolean flip) {
-        ByteBuffer buffer = BufferUtils.newByteBuffer((int) HEADER_SIZE.value());
+    public Buffer toBuffer(boolean flip) {
+        ByteBuffer buffer = BufferUtils.newByteBuffer((int) HEADER_OFFSET_BOUNDARY.end().value());
         buffer.put(magicNumber.value);
         buffer.putInt(version.value);
         buffer.putInt(recordCount.value);
-        buffer.putLong(offset.value());
+        buffer.putLong(nextOffset.value());
         if (flip) {
-            // Flip the buffer, set the position to zero
             buffer.flip();
         }
-        return buffer;
+        return new Buffer(buffer);
     }
 }

@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.json;
 
-import com.github.mangila.pokedex.shared.util.ArrayUtils;
 import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.nio.charset.Charset;
@@ -17,14 +16,11 @@ public class JsonTokenizer {
 
     /**
      * Tokenizes a JSON string into a queue of tokens.
-     * Try-with-resources is used to close the reader automatically
-     * might be completely unnecessary, since we read an in-memory byte array
-     * a good practice anyway.
-     * Create Queue with 1024 as the startOffset size - for some extra performance.
+     * Create Queue with 1024 as the start capacity, for some extra performance.
      */
     private static JsonTokenQueue tokenize(byte[] data) {
         Ensure.notNull(data, "json data must not be null");
-        if (ArrayUtils.isEmpty(data)) {
+        if (data.length == 0) {
             return JsonTokenQueue.EMPTY;
         }
         JsonLexer lexer = new JsonLexer(data);

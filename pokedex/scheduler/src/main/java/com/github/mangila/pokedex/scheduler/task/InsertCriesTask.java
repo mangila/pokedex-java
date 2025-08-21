@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.PokeApiClient;
-import com.github.mangila.pokedex.shared.queue.QueueService;
+import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public record InsertCriesTask(
         PokeApiClient pokeApiClient,
-        QueueService queueService
+        Queue queue
 ) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertCriesTask.class);
@@ -38,8 +38,8 @@ public record InsertCriesTask(
     public boolean shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration) &&
-               VirtualThreadFactory.terminateExecutorGracefully(WORKER_POOL, duration);
+        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration) &&
+               VirtualThreadFactory.terminateGracefully(WORKER_POOL, duration);
     }
 
     @Override

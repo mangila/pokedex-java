@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public class Database<T extends DatabaseObject<T>> {
+public class Database<T extends DatabaseObject<T>> implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
     private final Engine engine;
     private final Supplier<T> instanceCreator;
@@ -33,8 +33,9 @@ public class Database<T extends DatabaseObject<T>> {
         }
     }
 
-    public void shutdown() {
-        LOGGER.info("Shutting down database");
+    @Override
+    public void close() {
+        LOGGER.info("Closing database");
         engine.shutdown();
     }
 

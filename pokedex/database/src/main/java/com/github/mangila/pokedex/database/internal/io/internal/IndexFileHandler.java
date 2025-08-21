@@ -1,12 +1,11 @@
-package com.github.mangila.pokedex.database.internal.io.index;
+package com.github.mangila.pokedex.database.internal.io.internal;
 
 
 import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
-import com.github.mangila.pokedex.database.internal.io.internal.DatabaseFileHandler;
+import com.github.mangila.pokedex.database.internal.io.internal.model.IndexEntry;
 import com.github.mangila.pokedex.database.internal.io.internal.model.*;
 import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.shared.util.BufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public class IndexFileHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexFileHandler.class);
     private final DatabaseFileHandler databaseFileHandler;
-    private final Map<Key, Offset> keys;
+    private final Map<Key, Offset> keyToOffset;
 
     public IndexFileHandler(DatabaseName databaseName) {
         DatabaseFileName databaseFileName = new DatabaseFileName(databaseName.value()
@@ -56,68 +55,70 @@ public class IndexFileHandler {
                 .concat(".yakvs"));
         DatabaseFile databaseFile = new DatabaseFile(databaseFileName);
         this.databaseFileHandler = new DatabaseFileHandler(databaseFile);
-        this.keys = new ConcurrentHashMap<>();
+        this.keyToOffset = new ConcurrentHashMap<>();
     }
 
     public void init() throws IOException {
         databaseFileHandler.init();
         DatabaseFileHeader header = databaseFileHandler.fileAccess()
                 .readHeader();
-        keys.putAll(loadKeys(header));
+        keyToOffset.putAll(loadKeys(header));
     }
 
     public void truncate() throws IOException {
         LOGGER.info("Truncating index file");
-        keys.clear();
+        keyToOffset.clear();
         databaseFileHandler.fileModification().truncate();
     }
 
     public void delete() throws IOException {
         LOGGER.info("Deleting index file");
-        keys.clear();
+        keyToOffset.clear();
         databaseFileHandler.fileAccess().channelHandler().close();
         databaseFileHandler.fileModification().delete();
     }
 
     public int size() {
-        return keys.size();
+        return keyToOffset.size();
     }
 
     public Offset get(Key key) {
-        return keys.get(key);
+        return keyToOffset.get(key);
     }
 
     public void append(Key key, Offset offset) throws IOException {
         IndexEntry indexEntry = new IndexEntry(key, offset);
-        Entry entry = new Entry(indexEntry.toByteBuffer(true));
+        Buffer buffer = indexEntry.toBuffer(true);
         OffsetBoundary boundary = databaseFileHandler.fileAccess()
-                .append(entry);
-        keys.put(key, boundary.start());
+                .append(buffer);
+        keyToOffset.put(key, boundary.start());
+        LOGGER.debug("Appended index entry {} - {}", key, boundary);
     }
 
     private Map<Key, Offset> loadKeys(DatabaseFileHeader header) throws IOException {
-        long position = DatabaseFileHeader.HEADER_SIZE.value();
-        int recordCount = header.recordCount().value();
+        Offset offset = DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end();
+        DatabaseFileHeader.RecordCount recordCount = header.recordCount();
         Map<Key, Offset> indexes = new HashMap<>();
-        for (int i = 0; i < recordCount; i++) {
-            Entry keyLengthBuffer = databaseFileHandler.fileAccess().read(
-                    BufferUtils.newByteBuffer(Integer.BYTES),
-                    position,
+        for (int i = 0; i < recordCount.value(); i++) {
+            Buffer keyLength = databaseFileHandler.fileAccess().read(
+                    Buffer.from(Integer.BYTES),
+                    offset,
                     true);
-            int keyLength = keyLengthBuffer.getInt();
-            Entry keyBuffer = databaseFileHandler.fileAccess().read(
-                    BufferUtils.newByteBuffer(keyLength),
-                    position + Integer.BYTES,
+            Buffer keyBuffer = databaseFileHandler.fileAccess().read(
+                    Buffer.from(keyLength.getInt()),
+                    new Offset(offset.value() + Integer.BYTES),
                     true);
+            Buffer dataOffsetBuffer = databaseFileHandler.fileAccess().read(
+                    Buffer.from(Long.BYTES),
+                    new Offset(offset.value() + Integer.BYTES + keyBuffer.length()),
+                    true);
+            Offset dataOffset = new Offset(dataOffsetBuffer.getLong());
             Key key = new Key(new String(keyBuffer.getArray()));
-            Entry dataOffsetBuffer = databaseFileHandler.fileAccess().read(
-                    BufferUtils.newByteBuffer(Long.BYTES),
-                    position + Integer.BYTES + keyLength,
-                    true);
-            Offset offset = new Offset(dataOffsetBuffer.getLong());
-            position += Integer.BYTES + keyLength + Long.BYTES;
-            indexes.put(key, offset);
+            LOGGER.debug("Loaded index entry {} - {}", key, dataOffset);
+            indexes.put(key, dataOffset);
+            offset = new Offset(offset.value() + Integer.BYTES + keyBuffer.length() + Long.BYTES);
         }
+        LOGGER.debug("Loaded {} index entries", indexes.size());
         return indexes;
     }
 }

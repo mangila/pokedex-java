@@ -1,56 +1,51 @@
 package com.github.mangila.pokedex.app;
 
-import com.github.mangila.pokedex.api.client.PokeApiClient;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.scheduler.Scheduler;
-import com.github.mangila.pokedex.scheduler.SchedulerBootstrap;
-import com.github.mangila.pokedex.scheduler.SchedulerConfig;
-import com.github.mangila.pokedex.scheduler.task.*;
-import com.github.mangila.pokedex.shared.queue.QueueService;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.github.mangila.pokedex.shared.Config.DELETE_DATABASE;
+import static com.github.mangila.pokedex.shared.Config.TRUNCATE_DATABASE;
 
 public class Application {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
-    public static final String POKEAPI_HOST = "pokeapi.co";
-    public static final int POKEAPI_PORT = 443;
-    public static final int POKEMON_LIMIT = 10;
-    public static final String POKEMON_SPECIES_URL_QUEUE = "pokemon-species-url-queue";
-    public static final String POKEMON_SPECIES_URL_DL_QUEUE = "pokemon-species-url-dl-queue";
-    public static final String POKEMON_SPRITES_QUEUE = "pokemon-sprites-queue";
-    public static final String POKEMON_CRIES_QUEUE = "pokemon-cries-queue";
-    public static final boolean DELETE_DATABASE = Boolean.TRUE;
-    public static final boolean TRUNCATE_DATABASE = Boolean.FALSE;
+    private static final AtomicBoolean APPLICATION_RUNNING = new AtomicBoolean(Boolean.FALSE);
+    private static final ExecutorService SCHEDULER_RUNNER = VirtualThreadFactory.newSingleThreadExecutor();
 
     public static void main(String[] args) {
-        SchedulerBootstrap schedulerBootstrap = new SchedulerBootstrap();
-        PokemonDatabase.defaultConfig();
-        PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
-        PokeApiClient pokeApiClient = schedulerBootstrap.initPokeApiClient();
-        schedulerBootstrap.configureQueues();
-        QueueService queueService = QueueService.getInstance();
-        List<Task> tasks = List.of(
-                new QueuePokemonsTask(pokeApiClient, queueService, POKEMON_LIMIT),
-                new InsertCriesTask(pokeApiClient, queueService),
-                new InsertPokemonTask(pokeApiClient, queueService, pokemonDatabase),
-                new InsertSpritesTask(pokeApiClient, queueService),
-                new ShutdownTask(queueService)
-        );
-        Scheduler scheduler = new Scheduler(new SchedulerConfig(tasks));
-        scheduler.init();
-        while (Scheduler.IS_RUNNING.get()) {
-
+        APPLICATION_RUNNING.set(Boolean.TRUE);
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.configurePokemonDatabase();
+        bootstrap.configurePokeApiClient();
+        bootstrap.initQueues();
+        Scheduler scheduler = bootstrap.initScheduler();
+        SCHEDULER_RUNNER.submit(() -> {
+            while (Scheduler.RUNNING.get()) {
+                if (Scheduler.SHUTDOWN.get()) {
+                    scheduler.shutdownAllTasks();
+                    break;
+                }
+            }
+        });
+        while (APPLICATION_RUNNING.get()) {
+            if (!Scheduler.RUNNING.get() && !SCHEDULER_RUNNER.isTerminated()) {
+                LOGGER.info("Shutting down SCHEDULER_RUNNER");
+                VirtualThreadFactory.terminateGracefully(SCHEDULER_RUNNER, Duration.ofSeconds(30));
+                APPLICATION_RUNNING.set(Boolean.FALSE);
+            }
         }
-        LOGGER.info("Db size = {}", pokemonDatabase.db().size());
-        scheduler.shutdownAllTasks();
-        //pokemonDatabase.db().shutdown();
+        PokemonDatabase db = PokemonDatabase.getInstance();
         if (DELETE_DATABASE) {
-            pokemonDatabase.db().deleteAsync().join();
+            db.instance().deleteAsync().join();
         } else if (TRUNCATE_DATABASE) {
-            pokemonDatabase.db().truncateAsync().join();
+            db.instance().truncateAsync().join();
         }
+        db.instance().close();
     }
 }

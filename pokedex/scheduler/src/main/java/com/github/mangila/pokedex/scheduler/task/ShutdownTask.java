@@ -30,14 +30,14 @@ public record ShutdownTask(QueueService queueService) implements Task {
     public boolean shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateExecutorGracefully(SCHEDULED_EXECUTOR, duration);
+        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration);
     }
 
     @Override
     public void run() {
         if (queueService.allQueuesEmpty()) {
             LOGGER.info("All queues empty, shutting down Scheduler");
-            Scheduler.IS_RUNNING.set(Boolean.FALSE);
+            Scheduler.SHUTDOWN.set(Boolean.TRUE);
         }
     }
 }

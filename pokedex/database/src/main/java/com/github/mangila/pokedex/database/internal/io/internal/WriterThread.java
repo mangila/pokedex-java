@@ -1,16 +1,15 @@
 package com.github.mangila.pokedex.database.internal.io.internal;
 
-import com.github.mangila.pokedex.database.internal.io.data.DataFileHandler;
-import com.github.mangila.pokedex.database.internal.io.index.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueName;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 
 import java.io.IOException;
 
 public record WriterThread(
-        String writeQueueName,
+        QueueName writeQueueName,
         IndexFileHandler indexFileHandler,
         DataFileHandler dataFileHandler) implements Runnable {
 
@@ -22,30 +21,28 @@ public record WriterThread(
             try {
                 switch (writeOperation.operation()) {
                     case WRITE -> write(writeOperation);
-                    case TRUNCATE -> truncate(writeOperation);
-                    case DELETE -> delete(writeOperation);
+                    case TRUNCATE -> truncate();
+                    case DELETE -> delete();
                 }
+                writeOperation.result().complete(true);
             } catch (Exception e) {
                 writeOperation.result().completeExceptionally(e);
             }
         }
     }
 
-    private void write(WriteOperation operation) throws IOException {
-        OffsetBoundary boundary = dataFileHandler.append(operation.value());
-        indexFileHandler.append(operation.key(), boundary.start());
-        operation.result().complete(true);
+    private void write(WriteOperation writeOperation) throws IOException {
+        OffsetBoundary boundary = dataFileHandler.append(writeOperation.value());
+        indexFileHandler.append(writeOperation.key(), boundary.start());
     }
 
-    private void truncate(WriteOperation operation) throws IOException {
+    private void truncate() throws IOException {
         dataFileHandler.truncate();
         indexFileHandler.truncate();
-        operation.result().complete(true);
     }
 
-    private void delete(WriteOperation operation) throws IOException {
+    private void delete() throws IOException {
         dataFileHandler.delete();
         indexFileHandler.delete();
-        operation.result().complete(true);
     }
 }

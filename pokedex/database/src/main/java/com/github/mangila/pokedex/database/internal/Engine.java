@@ -6,11 +6,11 @@ import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOpera
 import com.github.mangila.pokedex.database.internal.model.Key;
 import com.github.mangila.pokedex.database.internal.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class Engine {
@@ -64,7 +64,7 @@ public class Engine {
                 });
     }
 
-    public CompletableFuture<@Nullable Value> getAsync(Key key) {
+    public CompletableFuture<Value> getAsync(Key key) {
         Value value = cache.get(key);
         if (value != null) {
             return CompletableFuture.completedFuture(value);
@@ -73,7 +73,7 @@ public class Engine {
                 .whenComplete((v, t) -> {
                     if (t != null) {
                         LOGGER.error("ERR", t);
-                    } else if (v == null) {
+                    } else if (Arrays.equals(v.value(), Value.EMPTY.value())) {
                         LOGGER.warn("Failed to read from database");
                     }
                 });

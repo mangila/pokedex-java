@@ -10,23 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PokemonDatabase {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(PokemonDatabase.class);
 
     private static final DatabaseConfig DEFAULT_CONFIG = new DatabaseConfig(
             new DatabaseName("pokedex"),
-            new LruCacheConfig(50)
+            new LruCacheConfig(100)
     );
     private static DatabaseConfig config;
 
-    private final Database<Pokemon> instance;
-
-    private PokemonDatabase(DatabaseConfig config) {
-        this.instance = new Database<>(config, () -> Pokemon.DEFAULT_INSTANCE);
-        instance.init();
+    private static final class Holder {
+        private static final PokemonDatabase INSTANCE = new PokemonDatabase(config);
     }
 
-    public static void defaultConfig() {
+    public static PokemonDatabase getInstance() {
+        Ensure.notNull(config, "PokemonDatabase must be configured");
+        return Holder.INSTANCE;
+    }
+
+    public static void configureDefaultSettings() {
         LOGGER.info("Configuring PokemonDatabase with default config");
         configure(DEFAULT_CONFIG);
     }
@@ -40,16 +41,14 @@ public class PokemonDatabase {
         PokemonDatabase.config = config;
     }
 
-    private static final class Holder {
-        private static final PokemonDatabase INSTANCE = new PokemonDatabase(config);
+    private final Database<Pokemon> instance;
+
+    private PokemonDatabase(DatabaseConfig config) {
+        this.instance = new Database<>(config, () -> Pokemon.DEFAULT_INSTANCE);
+        instance.init();
     }
 
-    public static PokemonDatabase getInstance() {
-        Ensure.notNull(config, "PokemonDatabase must be configured");
-        return Holder.INSTANCE;
-    }
-
-    public Database<Pokemon> db() {
+    public Database<Pokemon> instance() {
         return instance;
     }
 }
