@@ -35,7 +35,7 @@ public record WriterThread(
     }
 
     private void write(WriteOperation writeOperation) throws IOException {
-        LOGGER.debug("Writing key {} with value length {}", writeOperation.key(), writeOperation.value().value().length);
+        LOGGER.debug("Writing key {} with value length {}", writeOperation.key(), writeOperation.value().length());
         OffsetBoundary boundary = dataFileHandler.append(writeOperation.value());
         indexFileHandler.append(writeOperation.key(), boundary.start());
     }

@@ -9,4 +9,8 @@ public record Value(byte[] value) {
     public Value {
         Ensure.notNull(value, "value must not be null");
     }
+
+    public int length() {
+        return value.length;
+    }
 }
