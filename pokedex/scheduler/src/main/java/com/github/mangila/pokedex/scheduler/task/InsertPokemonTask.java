@@ -72,7 +72,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .putAsync(p.name(), p)
                     .join();
             if (ok) {
-                LOGGER.info("Inserted pokemon: {}", p.name());
+                LOGGER.info("pokemon: {}", p.name());
             } else {
                 throw new IllegalStateException("Db fail");
             }

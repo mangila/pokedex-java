@@ -6,15 +6,15 @@
     </appender>
 
     <logger name="com.github.mangila.pokedex.scheduler" level="INFO"/>
-    <logger name="com.github.mangila.pokedex.database" level="DEBUG"/>
-    <logger name="com.github.mangila.pokedex.api" level="DEBUG"/>
+    <logger name="com.github.mangila.pokedex.database" level="INFO"/>
+    <logger name="com.github.mangila.pokedex.api" level="INFO"/>
     <!--                    SHARED MODULE                            -->
     <logger name="com.github.mangila.pokedex.shared.cache" level="INFO"/>
-    <logger name="com.github.mangila.pokedex.shared.https" level="DEBUG"/>
-    <logger name="com.github.mangila.pokedex.shared.json" level="DEBUG"/>
+    <logger name="com.github.mangila.pokedex.shared.https" level="INFO"/>
+    <logger name="com.github.mangila.pokedex.shared.json" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.queue" level="INFO"/>
-    <logger name="com.github.mangila.pokedex.shared.tls" level="DEBUG"/>
-    <logger name="com.github.mangila.pokedex.shared.util" level="DEBUG"/>
+    <logger name="com.github.mangila.pokedex.shared.tls.pool" level="DEBUG"/>
+    <logger name="com.github.mangila.pokedex.shared.util" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

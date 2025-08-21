@@ -9,6 +9,10 @@ The pokedex database is a key-value store. (yet another one)
 The engine uses an LRU cache and persists the data to disk—All operations are asynchronous.
 A ScheduledExecutor creating Virtual Threads is polling from an internal queue for read or write operations.
 
+The file is append-only and the header is locked during write operations. After (n) writes, a compact operation is triggered.
+To slim down the file size, the compact operation will remove the old keys and values from the file.
+That means when a key is updated, it will append a new record to the file. So the oldest record will be removed.
+
 ### Reader Thread
 
 Pooled ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for read operations.
@@ -44,6 +48,8 @@ The specs for the header are in order:
     * Record count is the number of records in the file.
 * Next offset—eight bytes
     * The next offset is the offset to be used when writing the next record.
+
+After a write operation, the next offset is updated and the record count is incremented.
 
 ### .yakvs index-format
 
