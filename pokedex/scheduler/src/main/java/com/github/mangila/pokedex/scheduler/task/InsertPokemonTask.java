@@ -1,10 +1,10 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import com.github.mangila.pokedex.api.client.PokeApiClient;
-import com.github.mangila.pokedex.api.client.PokeApiUri;
-import com.github.mangila.pokedex.api.client.response.EvolutionChainResponse;
-import com.github.mangila.pokedex.api.client.response.SpeciesResponse;
-import com.github.mangila.pokedex.api.client.response.VarietyResponse;
+import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
+import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
+import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResponse;
+import com.github.mangila.pokedex.api.client.pokeapi.response.SpeciesResponse;
+import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.api.model.Pokemon;
 import com.github.mangila.pokedex.shared.queue.Queue;

@@ -1,6 +1,6 @@
-package com.github.mangila.pokedex.api.client;
+package com.github.mangila.pokedex.api.client.pokeapi;
 
-import com.github.mangila.pokedex.api.client.response.*;
+import com.github.mangila.pokedex.api.client.pokeapi.response.*;
 import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClient;

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.api.client;
+package com.github.mangila.pokedex.api.client.pokeapi;
 
 import com.github.mangila.pokedex.shared.https.model.GetRequest;
 

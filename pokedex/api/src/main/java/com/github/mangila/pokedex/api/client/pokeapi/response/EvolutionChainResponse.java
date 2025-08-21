@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.api.client.response;
+package com.github.mangila.pokedex.api.client.pokeapi.response;
 
 import com.github.mangila.pokedex.shared.json.model.JsonArray;
 import com.github.mangila.pokedex.shared.json.model.JsonObject;

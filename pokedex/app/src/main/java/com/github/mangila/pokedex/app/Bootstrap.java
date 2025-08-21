@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.app;
 
-import com.github.mangila.pokedex.api.client.PokeApiClient;
+import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.scheduler.Scheduler;
 import com.github.mangila.pokedex.scheduler.SchedulerConfig;
