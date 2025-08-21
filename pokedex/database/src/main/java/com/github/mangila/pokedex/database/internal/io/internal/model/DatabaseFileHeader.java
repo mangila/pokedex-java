@@ -5,8 +5,6 @@ import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.nio.ByteBuffer;
 
-import static com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFileHeader.MagicNumber.SIZE;
-
 /**
  * File Header Section:
  * <pre>
@@ -72,7 +70,7 @@ public record DatabaseFileHeader(
 
     public static final OffsetBoundary HEADER_OFFSET_BOUNDARY = new OffsetBoundary(
             Offset.ZERO,
-            new Offset(SIZE + Version.SIZE + RecordCount.SIZE + Offset.SIZE)
+            new Offset(MagicNumber.SIZE + Version.SIZE + RecordCount.SIZE + Offset.SIZE)
     );
 
     public static DatabaseFileHeader EMPTY = new DatabaseFileHeader(
@@ -97,7 +95,8 @@ public record DatabaseFileHeader(
     }
 
     public Buffer toBuffer(boolean flip) {
-        ByteBuffer buffer = BufferUtils.newByteBuffer((int) HEADER_OFFSET_BOUNDARY.end().value());
+        Offset headerEndOffset = HEADER_OFFSET_BOUNDARY.end();
+        ByteBuffer buffer = BufferUtils.newByteBuffer((int) headerEndOffset.value());
         buffer.put(magicNumber.value);
         buffer.putInt(version.value);
         buffer.putInt(recordCount.value);
