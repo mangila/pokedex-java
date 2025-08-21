@@ -26,9 +26,10 @@ public class QueueService {
         return Holder.INSTANCE;
     }
 
-    public void createNewQueue(QueueName queueName) {
+    public Queue createNewQueue(QueueName queueName) {
         LOGGER.info("Create new queue '{}'", queueName);
         queues.put(queueName, new Queue(queueName));
+        return queues.get(queueName);
     }
 
     public Queue getQueue(QueueName queueName) {

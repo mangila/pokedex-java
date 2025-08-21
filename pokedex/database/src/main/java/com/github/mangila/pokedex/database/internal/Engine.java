@@ -69,7 +69,8 @@ public class Engine {
         if (value != null) {
             return CompletableFuture.completedFuture(value);
         }
-        return io.readAsync(new ReadOperation(key, new CompletableFuture<>()))
+        ReadOperation readOperation = new ReadOperation(key, new CompletableFuture<>());
+        return io.readAsync(readOperation)
                 .whenComplete((v, t) -> {
                     if (t != null) {
                         LOGGER.error("ERR", t);
@@ -80,7 +81,13 @@ public class Engine {
     }
 
     public CompletableFuture<Boolean> putAsync(Key key, Value value) {
-        return io.writeAsync(new WriteOperation(key, value, WriteOperation.Operation.WRITE, new CompletableFuture<>()))
+        WriteOperation writeOperation = new WriteOperation(
+                key,
+                value,
+                WriteOperation.Operation.WRITE,
+                new CompletableFuture<>()
+        );
+        return io.writeAsync(writeOperation)
                 .whenComplete((result, t) -> {
                     if (t != null) {
                         LOGGER.error("ERR", t);

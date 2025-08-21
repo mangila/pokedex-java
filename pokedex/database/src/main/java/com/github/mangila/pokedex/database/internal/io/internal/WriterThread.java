@@ -2,20 +2,19 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 
 import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
+import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
-import com.github.mangila.pokedex.shared.queue.QueueName;
-import com.github.mangila.pokedex.shared.queue.QueueService;
 
 import java.io.IOException;
 
 public record WriterThread(
-        QueueName writeQueueName,
+        Queue queue,
         IndexFileHandler indexFileHandler,
         DataFileHandler dataFileHandler) implements Runnable {
 
     @Override
     public void run() {
-        QueueEntry queueEntry = QueueService.getInstance().poll(writeQueueName);
+        QueueEntry queueEntry = queue.poll();
         if (queueEntry != null) {
             WriteOperation writeOperation = queueEntry.unwrapAs(WriteOperation.class);
             try {

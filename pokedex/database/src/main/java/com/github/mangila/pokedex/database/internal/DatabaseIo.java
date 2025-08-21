@@ -9,6 +9,7 @@ import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperat
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
 import com.github.mangila.pokedex.database.internal.model.Key;
 import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueName;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -30,8 +31,8 @@ public class DatabaseIo {
     private final DataFileHandler dataFileHandler;
     private final ScheduledExecutorService writeExecutor;
     private final ScheduledExecutorService readExecutor;
-    private final QueueName readQueueName;
-    private final QueueName writeQueueName;
+    private final Queue readQueue;
+    private final Queue writeQueue;
     private final ReaderThread readerThread;
     private final WriterThread writerThread;
     private final AtomicInteger writeCounter = new AtomicInteger(0);
@@ -41,13 +42,11 @@ public class DatabaseIo {
         this.dataFileHandler = new DataFileHandler(databaseName);
         this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.readExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        this.readQueueName = new QueueName(databaseName.value().concat("-read"));
-        this.writeQueueName = new QueueName(databaseName.value().concat("-write"));
         QueueService queueService = QueueService.getInstance();
-        queueService.createNewQueue(readQueueName);
-        queueService.createNewQueue(writeQueueName);
-        this.writerThread = new WriterThread(writeQueueName, indexFileHandler, dataFileHandler);
-        this.readerThread = new ReaderThread(readQueueName, indexFileHandler, dataFileHandler);
+        this.readQueue = queueService.createNewQueue(new QueueName(databaseName.value().concat("-read")));
+        this.writeQueue = queueService.createNewQueue(new QueueName(databaseName.value().concat("-write")));
+        this.writerThread = new WriterThread(writeQueue, indexFileHandler, dataFileHandler);
+        this.readerThread = new ReaderThread(readQueue, indexFileHandler, dataFileHandler);
     }
 
     public void init() throws IOException {
@@ -93,8 +92,7 @@ public class DatabaseIo {
                 WriteOperation.Operation.TRUNCATE,
                 new CompletableFuture<>()
         );
-        QueueService.getInstance()
-                .add(writeQueueName, new QueueEntry(writeOperation));
+        writeQueue.add(new QueueEntry(writeOperation));
         return writeOperation.result();
     }
 
@@ -105,14 +103,12 @@ public class DatabaseIo {
                 WriteOperation.Operation.DELETE,
                 new CompletableFuture<>()
         );
-        QueueService.getInstance()
-                .add(writeQueueName, new QueueEntry(writeOperation));
+        writeQueue.add(new QueueEntry(writeOperation));
         return writeOperation.result();
     }
 
     public CompletableFuture<Value> readAsync(ReadOperation readOperation) {
-        QueueService.getInstance()
-                .add(readQueueName, new QueueEntry(readOperation));
+        readQueue.add(new QueueEntry(readOperation));
         return readOperation.result();
     }
 
@@ -121,8 +117,7 @@ public class DatabaseIo {
             // TODO: run compaction
             writeCounter.set(0);
         }
-        QueueService.getInstance()
-                .add(writeQueueName, new QueueEntry(writeOperation));
+        writeQueue.add(new QueueEntry(writeOperation));
         return writeOperation.result();
     }
 
