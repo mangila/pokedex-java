@@ -1,11 +1,10 @@
 package com.github.mangila.pokedex.database.internal.io.internal;
 
-import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
-import com.github.mangila.pokedex.database.internal.io.internal.model.*;
-import com.github.mangila.pokedex.database.internal.model.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.mangila.pokedex.database.internal.io.internal.model.Buffer;
+import com.github.mangila.pokedex.database.internal.io.internal.model.DataEntry;
+import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
+import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
 
 import java.io.IOException;
 
@@ -32,50 +31,20 @@ import java.io.IOException;
  * <p>
  * Records are stored sequentially
  */
-public class DataFileHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataFileHandler.class);
-    private final DatabaseFileHandler databaseFileHandler;
+public final class DataFileHandler extends AbstractFileHandler {
 
-    public DataFileHandler(DatabaseName databaseName) {
-        DatabaseFileName databaseFileName = new DatabaseFileName(databaseName.value()
-                .concat(".data")
-                .concat(".yakvs"));
-        DatabaseFile databaseFile = new DatabaseFile(databaseFileName);
-        this.databaseFileHandler = new DatabaseFileHandler(databaseFile);
+    public DataFileHandler(DatabaseFileName databaseFileName) {
+        super(new DatabaseFile(databaseFileName));
     }
-
-    public void init() throws IOException {
-        databaseFileHandler.init();
-    }
-
-    public void truncate() throws IOException {
-        LOGGER.info("Truncating data file");
-        databaseFileHandler.fileModification().truncate();
-    }
-
-    public void delete() throws IOException {
-        LOGGER.info("Deleting data file");
-        databaseFileHandler.fileAccess().channelHandler().close();
-        databaseFileHandler.fileModification().delete();
-    }
-
-    public Value read(Offset offset) throws IOException {
-        Buffer buffer = databaseFileHandler.fileAccess().read(
+    public DataEntry read(Offset offset) throws IOException {
+        Buffer buffer = fileAccess().read(
                 Buffer.from(Integer.BYTES),
                 offset,
                 true);
-        buffer = databaseFileHandler.fileAccess().read(
+        buffer = fileAccess().read(
                 Buffer.from(buffer.getInt()),
                 new Offset(Integer.BYTES + offset.value()),
                 true);
-        return new Value(buffer.getArray());
-    }
-
-    public OffsetBoundary append(Value value) throws IOException {
-        DataEntry dataEntry = DataEntry.from(value);
-        Buffer buffer = dataEntry.toBuffer(true);
-        OffsetBoundary boundary = databaseFileHandler.fileAccess().append(buffer);
-        LOGGER.debug("Appended DataEntry {} - {}", dataEntry, boundary);
-        return boundary;
+        return new DataEntry(buffer.getArray());
     }
 }

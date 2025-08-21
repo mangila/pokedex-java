@@ -25,6 +25,10 @@ public record DataEntry(byte[] data) {
         return Integer.BYTES + data.length;
     }
 
+    public Value toValue() {
+        return new Value(data);
+    }
+
     public Buffer toBuffer(boolean flip) {
         ByteBuffer buffer = BufferUtils.newByteBuffer(getSize());
         buffer.putInt(data.length);

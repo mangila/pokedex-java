@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.database.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
+import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
 import com.github.mangila.pokedex.database.internal.io.internal.DataFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.IndexFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
@@ -38,8 +39,16 @@ public class DatabaseIo {
     private final AtomicInteger writeCounter = new AtomicInteger(0);
 
     public DatabaseIo(DatabaseName databaseName) {
-        this.indexFileHandler = new IndexFileHandler(databaseName);
-        this.dataFileHandler = new DataFileHandler(databaseName);
+        this.indexFileHandler = new IndexFileHandler(
+                new DatabaseFileName(databaseName.value()
+                        .concat("-index")
+                        .concat(".yakvs"))
+        );
+        this.dataFileHandler = new DataFileHandler(
+                new DatabaseFileName(databaseName.value()
+                        .concat("-data")
+                        .concat(".yakvs"))
+        );
         this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.readExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         QueueService queueService = QueueService.getInstance();
@@ -51,6 +60,7 @@ public class DatabaseIo {
 
     public void init() throws IOException {
         indexFileHandler.init();
+        indexFileHandler.loadIndexes();
         dataFileHandler.init();
         startThreads();
     }
@@ -122,6 +132,6 @@ public class DatabaseIo {
     }
 
     public int size() {
-        return indexFileHandler.size();
+        return indexFileHandler.indexMap().size();
     }
 }

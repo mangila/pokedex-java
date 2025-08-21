@@ -45,18 +45,18 @@ public record DatabaseFileAccess(DatabaseFileChannelHandler channelHandler) {
     }
 
     public DatabaseFileHeader readHeader() throws IOException {
-        Buffer buffer = read(Buffer.from((int) DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end().value()),
-                DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.start(),
+        Offset headerEndOffset = DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end();
+        Buffer buffer = read(
+                Buffer.from((int) headerEndOffset.value()),
+                Offset.ZERO,
                 true);
-        DatabaseFileHeader header = DatabaseFileHeader.from(buffer);
-        LOGGER.debug("Read header {} - {}", header, channelHandler.fileName());
-        return header;
+        return DatabaseFileHeader.from(buffer);
     }
 
     public void writeHeader(DatabaseFileHeader header) throws IOException {
-        LOGGER.debug("Writing header {} - {}", header, channelHandler.fileName());
         Buffer buffer = header.toBuffer(true);
         channelHandler.write(buffer, Offset.ZERO);
+        LOGGER.debug("Write: {} - {}", header, channelHandler.fileName());
     }
 
     public boolean isEmpty() throws IOException {

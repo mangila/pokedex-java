@@ -7,12 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class DatabaseFileHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseFileHandler.class);
+public sealed class AbstractFileHandler permits DataFileHandler, IndexFileHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileHandler.class);
+    private final String fileName;
     private final DatabaseFileAccess fileAccess;
     private final DatabaseFileModification fileModification;
 
-    public DatabaseFileHandler(DatabaseFile databaseFile) {
+    public AbstractFileHandler(DatabaseFile databaseFile) {
+        this.fileName = databaseFile.path().getFileName().toString();
         this.fileAccess = new DatabaseFileAccess(new DatabaseFileChannelHandler(databaseFile));
         this.fileModification = new DatabaseFileModification(databaseFile);
     }
@@ -25,11 +27,26 @@ public class DatabaseFileHandler {
         }
     }
 
+    public void truncate() throws IOException {
+        LOGGER.info("Truncating database file {}", fileName());
+        fileModification().truncate();
+    }
+
+    public void delete() throws IOException {
+        LOGGER.info("Deleting database file {}", fileName());
+        fileAccess().channelHandler().close();
+        fileModification().delete();
+    }
+
     public DatabaseFileAccess fileAccess() {
         return fileAccess;
     }
 
     public DatabaseFileModification fileModification() {
         return fileModification;
+    }
+
+    public String fileName() {
+        return fileName;
     }
 }
