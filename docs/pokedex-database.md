@@ -19,7 +19,7 @@ Pooled ScheduledExecutor with a Virtual Thread factory is polling from an intern
 
 The executor is scheduled on a fixed rate and creates a new thread for each operation from its pool.
 
-## Writer Thread
+### Writer Thread
 
 Pooled ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for write operations.
 
