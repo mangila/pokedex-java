@@ -49,7 +49,7 @@ public class DatabaseIo {
                         .concat("-data")
                         .concat(".yakvs"))
         );
-        this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+        this.writeExecutor = VirtualThreadFactory.newScheduledThreadPool(10);
         this.readExecutor = VirtualThreadFactory.newScheduledThreadPool(10);
         QueueService queueService = QueueService.getInstance();
         this.readQueue = queueService.createNewQueue(new QueueName(databaseName.value().concat("-read")));
@@ -72,7 +72,7 @@ public class DatabaseIo {
 
     public void startWriterThread() {
         LOGGER.info("Starting writer thread");
-        writeExecutor.scheduleWithFixedDelay(writerThread, 0, 300, TimeUnit.MILLISECONDS);
+        writeExecutor.scheduleAtFixedRate(writerThread, 0, 300, TimeUnit.MILLISECONDS);
     }
 
     public void startReaderThread() {

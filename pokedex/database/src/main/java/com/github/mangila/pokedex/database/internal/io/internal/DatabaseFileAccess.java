@@ -27,7 +27,7 @@ public record DatabaseFileAccess(DatabaseFileChannelHandler channelHandler) {
             DatabaseFileHeader currentHeader = readHeader();
             Offset nextOffset = currentHeader.nextOffset();
             channelHandler.write(buffer, nextOffset);
-            Offset newOffset = new Offset(currentHeader.nextOffset().value() + buffer.value().capacity());
+            Offset newOffset = new Offset(currentHeader.nextOffset().value() + buffer.length());
             DatabaseFileHeader newHeader = new DatabaseFileHeader(
                     currentHeader.magicNumber(),
                     currentHeader.version(),
