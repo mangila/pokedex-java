@@ -65,7 +65,7 @@ After a write operation, the next offset is updated and the record count is incr
 The index file stores the key and offset/position of the data records.
 
 For more efficient access, an index map(ConcurrentHashMap) is loaded into memory during startup,
-it overwrites the duplicates and makes sure the newest key is loaded
+it overwrites the duplicates and makes sure the newest key is loaded, during write operations the index, and its internal map is updated.
 
 The specs for the index are in order:
 
