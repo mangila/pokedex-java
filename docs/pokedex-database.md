@@ -9,19 +9,17 @@ The pokedex database is a key-value store. (yet another one)
 The engine uses an LRU cache and persists the data to disk—All operations are asynchronous.
 A ScheduledExecutor creating Virtual Threads is polling from an internal queue for read or write operations.
 
-One thread is responsible for reading and one thread is responsible for writing.
-
 ### Reader Thread
 
 ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for read operations.
 
-The executor is scheduled on a fixed rate.
+The executor is scheduled on a fixed rate and creates a new thread for each operation.
 
 ## Writer Thread
 
 ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for write operations.
 
-The executor is scheduled on a fixed delay.
+The executor is scheduled on a fixed delay and creates a new thread for each operation.
 
 When Write operations are performed, it will try to acquire a file lock on the header region of the file.
 
