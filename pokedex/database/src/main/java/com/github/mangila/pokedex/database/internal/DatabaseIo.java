@@ -50,7 +50,7 @@ public class DatabaseIo {
                         .concat(".yakvs"))
         );
         this.writeExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        this.readExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+        this.readExecutor = VirtualThreadFactory.newScheduledThreadPool(10);
         QueueService queueService = QueueService.getInstance();
         this.readQueue = queueService.createNewQueue(new QueueName(databaseName.value().concat("-read")));
         this.writeQueue = queueService.createNewQueue(new QueueName(databaseName.value().concat("-write")));

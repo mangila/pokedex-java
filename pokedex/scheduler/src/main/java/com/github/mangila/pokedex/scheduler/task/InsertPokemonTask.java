@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -25,8 +24,8 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                                 PokemonDatabase database) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertPokemonTask.class);
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-    private static final ExecutorService WORKER_POOL = VirtualThreadFactory.newFixedThreadPool(10);
+
+    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_POOL = VirtualThreadFactory.newScheduledThreadPool(10);
 
     @Override
     public String name() {
@@ -36,7 +35,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
     @Override
     public void schedule() {
         LOGGER.info("Scheduling {}", name());
-        SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> WORKER_POOL.submit(this),
+        SCHEDULED_EXECUTOR_POOL.scheduleAtFixedRate(this,
                 100,
                 100,
                 TimeUnit.MILLISECONDS);
@@ -46,8 +45,7 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
     public boolean shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration) &&
-               VirtualThreadFactory.terminateGracefully(WORKER_POOL, duration);
+        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR_POOL, duration);
     }
 
     @Override

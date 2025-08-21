@@ -19,6 +19,10 @@ public class VirtualThreadFactory {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
 
+    public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+        return Executors.newScheduledThreadPool(corePoolSize, THREAD_FACTORY);
+    }
+
     public static ExecutorService newFixedThreadPool(int nThreads) {
         return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
     }

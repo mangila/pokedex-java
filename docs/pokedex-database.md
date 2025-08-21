@@ -11,15 +11,15 @@ A ScheduledExecutor creating Virtual Threads is polling from an internal queue f
 
 ### Reader Thread
 
-ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for read operations.
+Pooled ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for read operations.
 
-The executor is scheduled on a fixed rate and creates a new thread for each operation.
+The executor is scheduled on a fixed rate and creates a new thread for each operation from its pool.
 
 ## Writer Thread
 
-ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for write operations.
+Single ScheduledExecutor with a Virtual Thread factory is polling from an internal queue for write operations.
 
-The executor is scheduled on a fixed delay and creates a new thread for each operation.
+The executor is scheduled on a fixed delay and runs the operation on the same thread.
 
 When Write operations are performed, it will try to acquire a file lock on the header region of the file.
 
