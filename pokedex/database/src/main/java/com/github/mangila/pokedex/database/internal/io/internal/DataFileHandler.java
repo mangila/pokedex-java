@@ -2,11 +2,7 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
-import com.github.mangila.pokedex.database.internal.io.internal.model.DataEntry;
-import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
-import com.github.mangila.pokedex.database.internal.io.internal.model.Buffer;
-import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
-import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
+import com.github.mangila.pokedex.database.internal.io.internal.model.*;
 import com.github.mangila.pokedex.database.internal.model.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +74,8 @@ public class DataFileHandler {
     public OffsetBoundary append(Value value) throws IOException {
         DataEntry dataEntry = DataEntry.from(value);
         Buffer buffer = dataEntry.toBuffer(true);
-        OffsetBoundary boundary = databaseFileHandler.fileAccess()
-                .append(buffer);
-        LOGGER.debug("Appended data entry {} - {}", dataEntry, boundary);
+        OffsetBoundary boundary = databaseFileHandler.fileAccess().append(buffer);
+        LOGGER.debug("Appended DataEntry {} - {}", dataEntry, boundary);
         return boundary;
     }
 }

@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database.internal.io.internal;
 
-import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Buffer;
+import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
 import com.github.mangila.pokedex.database.internal.io.internal.model.OffsetBoundary;
 import org.slf4j.Logger;
@@ -22,24 +22,18 @@ public class DatabaseFileChannelHandler {
         this.databaseFile = databaseFile;
     }
 
-    public long read(Buffer buffer, Offset offset) throws IOException {
-        long bytesRead = channel.read(buffer.value(), offset.value());
-        LOGGER.debug("Read {} bytes from offset {}", bytesRead, offset);
-        return bytesRead;
+    public void read(Buffer buffer, Offset offset) throws IOException {
+        channel.read(buffer.value(), offset.value());
     }
 
     public void write(Buffer buffer, Offset offset) throws IOException {
-        long writtenBytes = channel.write(buffer.value(), offset.value());
-        LOGGER.debug("Wrote {} bytes to offset {}", writtenBytes, offset);
+        channel.write(buffer.value(), offset.value());
     }
 
     public FileLock acquireLock(OffsetBoundary boundary, boolean shared) throws IOException {
         Offset start = boundary.start();
         Offset end = boundary.end();
-        LOGGER.debug("Acquiring {} lock for position {} and size {}", shared ? "shared" : "exclusive", start, end);
-        FileLock lock = channel.lock(boundary.start().value(), boundary.end().value(), shared);
-        LOGGER.debug("Acquired {} lock for position {} and size {}", shared ? "shared" : "exclusive", start, end);
-        return lock;
+        return channel.lock(start.value(), end.value(), shared);
     }
 
     public void open() throws IOException {
@@ -66,9 +60,7 @@ public class DatabaseFileChannelHandler {
     }
 
     public long size() throws IOException {
-        long size = channel.size();
-        LOGGER.debug("FileChannel {} size is {}", databaseFile.path(), size);
-        return size;
+        return channel.size();
     }
 
     public boolean isOpen() {

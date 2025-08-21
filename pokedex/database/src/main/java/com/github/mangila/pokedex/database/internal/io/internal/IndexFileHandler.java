@@ -3,7 +3,6 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 
 import com.github.mangila.pokedex.database.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
-import com.github.mangila.pokedex.database.internal.io.internal.model.IndexEntry;
 import com.github.mangila.pokedex.database.internal.io.internal.model.*;
 import com.github.mangila.pokedex.database.internal.model.Key;
 import org.slf4j.Logger;
@@ -92,7 +91,7 @@ public class IndexFileHandler {
         OffsetBoundary boundary = databaseFileHandler.fileAccess()
                 .append(buffer);
         keyToOffset.put(key, boundary.start());
-        LOGGER.debug("Appended index entry {} - {}", key, boundary);
+        LOGGER.debug("Appended Index Entry {} - {}", indexEntry, boundary);
     }
 
     private Map<Key, Offset> loadKeys(DatabaseFileHeader header) throws IOException {
