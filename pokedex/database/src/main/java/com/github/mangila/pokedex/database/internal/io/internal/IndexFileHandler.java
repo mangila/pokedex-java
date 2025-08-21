@@ -61,31 +61,36 @@ public final class IndexFileHandler extends AbstractFileHandler {
     public void loadIndexes() throws IOException {
         DatabaseFileHeader header = fileAccess().readHeader();
         var loadedIndexes = loadIndexes(header);
-        LOGGER.debug("Loaded {} index entries from {}", loadedIndexes.size(), fileName());
+        LOGGER.info("Loaded {} index entries from {}", loadedIndexes.size(), fileName());
         indexMap.putAll(loadedIndexes);
     }
 
     private Map<Key, Offset> loadIndexes(DatabaseFileHeader header) throws IOException {
         Offset offset = DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end();
         DatabaseFileHeader.RecordCount recordCount = header.recordCount();
-        Map<Key, Offset> indexes = new HashMap<>();
+        Map<Key, Offset> indexes = new HashMap<>(recordCount.value());
+        Buffer keyLengthBuffer = Buffer.from(Integer.BYTES);
+        Buffer dataOffsetBuffer = Buffer.from(Long.BYTES);
         for (int i = 0; i < recordCount.value(); i++) {
-            Buffer keyLength = fileAccess().read(
-                    Buffer.from(Integer.BYTES),
+            fileAccess().read(
+                    keyLengthBuffer,
                     offset,
                     true);
-            Buffer keyBuffer = fileAccess().read(
-                    Buffer.from(keyLength.getInt()),
+            Buffer keyDataBuffer = Buffer.from(keyLengthBuffer.getInt());
+            fileAccess().read(
+                    keyDataBuffer,
                     new Offset(offset.value() + Integer.BYTES),
                     true);
-            Buffer dataOffsetBuffer = fileAccess().read(
-                    Buffer.from(Long.BYTES),
-                    new Offset(offset.value() + Integer.BYTES + keyBuffer.length()),
+            Key key = new Key(new String(keyDataBuffer.getArray()));
+            fileAccess().read(
+                    dataOffsetBuffer,
+                    new Offset(offset.value() + Integer.BYTES + key.length()),
                     true);
             Offset dataOffset = new Offset(dataOffsetBuffer.getLong());
-            Key key = new Key(new String(keyBuffer.getArray()));
             indexes.put(key, dataOffset);
-            offset = new Offset(offset.value() + Integer.BYTES + keyBuffer.length() + Long.BYTES);
+            offset = new Offset(offset.value() + Integer.BYTES + key.length() + Long.BYTES);
+            keyLengthBuffer.clear();
+            dataOffsetBuffer.clear();
         }
         return indexes;
     }

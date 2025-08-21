@@ -6,7 +6,7 @@
     </appender>
 
     <logger name="com.github.mangila.pokedex.scheduler" level="INFO"/>
-    <logger name="com.github.mangila.pokedex.database" level="INFO"/>
+    <logger name="com.github.mangila.pokedex.database" level="DEBUG"/>
     <logger name="com.github.mangila.pokedex.api" level="INFO"/>
     <!--                    SHARED MODULE                            -->
     <logger name="com.github.mangila.pokedex.shared.cache" level="INFO"/>

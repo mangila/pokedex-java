@@ -40,4 +40,8 @@ public record Buffer(ByteBuffer value) {
     public void flip() {
         value.flip();
     }
+
+    public void clear() {
+        value.clear();
+    }
 }

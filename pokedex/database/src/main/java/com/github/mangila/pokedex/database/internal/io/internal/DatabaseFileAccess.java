@@ -11,15 +11,21 @@ import java.io.IOException;
 import java.nio.channels.FileLock;
 
 public record DatabaseFileAccess(DatabaseFileChannelHandler channelHandler) {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseFileAccess.class);
 
-    public Buffer read(Buffer buffer, Offset offset, boolean flip) throws IOException {
+    private static final ThreadLocal<Buffer> THREAD_LOCAL_HEADER_BUFFER =
+            ThreadLocal.withInitial(() -> {
+                Offset headerEndOffset = DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end();
+                return Buffer.from((int) headerEndOffset.value());
+            });
+
+    public void read(Buffer buffer, Offset offset, boolean flip) throws IOException {
         channelHandler.read(buffer, offset);
         if (flip) {
             // Flip the readBuffer, set the position to zero
             buffer.flip();
         }
-        return buffer;
     }
 
     public OffsetBoundary append(Buffer buffer) throws IOException {
@@ -45,12 +51,10 @@ public record DatabaseFileAccess(DatabaseFileChannelHandler channelHandler) {
     }
 
     public DatabaseFileHeader readHeader() throws IOException {
-        Offset headerEndOffset = DatabaseFileHeader.HEADER_OFFSET_BOUNDARY.end();
-        Buffer buffer = read(
-                Buffer.from((int) headerEndOffset.value()),
-                Offset.ZERO,
-                true);
-        return DatabaseFileHeader.from(buffer);
+        Buffer headerBuffer = THREAD_LOCAL_HEADER_BUFFER.get();
+        headerBuffer.clear();
+        read(headerBuffer, Offset.ZERO, true);
+        return DatabaseFileHeader.from(headerBuffer);
     }
 
     public void writeHeader(DatabaseFileHeader header) throws IOException {

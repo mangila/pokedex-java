@@ -72,7 +72,7 @@ public class DatabaseIo {
 
     public void startWriterThread() {
         LOGGER.info("Starting writer thread");
-        writeExecutor.scheduleAtFixedRate(writerThread, 0, 300, TimeUnit.MILLISECONDS);
+        writeExecutor.scheduleAtFixedRate(writerThread, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     public void startReaderThread() {

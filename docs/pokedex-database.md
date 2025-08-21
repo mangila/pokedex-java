@@ -8,14 +8,14 @@ The Pokédex database is an embedded key-value store. (yet another one)
 
 The engine uses an LRU cache as a "second-level cache" and persists data to disk.
 
-All its operations are asynchronous using CompletetableFutures.
+All its operations are asynchronous using—CompletableFutures.
 
 The file is append-only and the header is locked during write operations. After (n) writes, a compact operation is
 triggered.
 
 The compact operation will remove the old keys and values from the file.
 That means when a key is updated, it will append a new record to the file.
-So when the compact operation is running, the oldest record will be removed.
+So when the compact operation is running, the oldest record will be removed. (TODO: implement, tombstone?)
 
 ### Reader Thread
 

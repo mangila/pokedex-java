@@ -32,19 +32,21 @@ import java.io.IOException;
  * Records are stored sequentially
  */
 public final class DataFileHandler extends AbstractFileHandler {
+    private static final ThreadLocal<Buffer> THREAD_LOCAL_LENGTH_BUFFER =
+            ThreadLocal.withInitial(() -> Buffer.from(Integer.BYTES));
 
     public DataFileHandler(DatabaseFileName databaseFileName) {
         super(new DatabaseFile(databaseFileName));
     }
+
     public DataEntry read(Offset offset) throws IOException {
-        Buffer buffer = fileAccess().read(
-                Buffer.from(Integer.BYTES),
-                offset,
-                true);
-        buffer = fileAccess().read(
-                Buffer.from(buffer.getInt()),
+        Buffer lengthBuffer = THREAD_LOCAL_LENGTH_BUFFER.get();
+        lengthBuffer.clear();
+        fileAccess().read(lengthBuffer, offset, true);
+        Buffer dataBuffer = Buffer.from(lengthBuffer.getInt());
+        fileAccess().read(dataBuffer,
                 new Offset(Integer.BYTES + offset.value()),
                 true);
-        return new DataEntry(buffer.getArray());
+        return new DataEntry(dataBuffer.getArray());
     }
 }
