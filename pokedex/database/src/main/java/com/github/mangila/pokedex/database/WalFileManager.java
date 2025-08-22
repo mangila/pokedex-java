@@ -72,6 +72,7 @@ public class WalFileManager {
             int bytesToWrite = writeBuffer.value().remaining();
             long position = writePosition.getAndAdd(bytesToWrite);
             walFileChannel.write(writeBuffer, position, writeFuture);
+            writeFuture.complete(true);
         } catch (Exception e) {
             writeFuture.completeExceptionally(e);
         } finally {
