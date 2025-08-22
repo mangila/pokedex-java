@@ -23,7 +23,7 @@ class EngineTest {
                 new Cache(new LruCache<>(new LruCacheConfig(100)))
         );
         e.init();
-        for (int i = 0; i < 250; i++) {
+        for (int i = 0; i < 1000000; i++) {
             e.putAsync(new Key("hejsan" + i), new Value(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
         }
         Thread.sleep(100);

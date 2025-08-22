@@ -22,10 +22,13 @@ public record Value(byte[] value) {
         return Integer.BYTES + length();
     }
 
-    public Buffer toBuffer() {
+    public Buffer toBuffer(boolean flip) {
         Buffer buffer = Buffer.from(bufferSize());
         buffer.putInt(length());
         buffer.put(value);
+        if (flip) {
+            buffer.flip();
+        }
         return buffer;
     }
 }

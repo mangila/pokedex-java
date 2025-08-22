@@ -54,7 +54,6 @@ public record Buffer(ByteBuffer value) {
     }
 
     public void put(Buffer buffer) {
-        buffer.flip();
         value.put(buffer.value());
     }
 }

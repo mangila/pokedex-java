@@ -14,7 +14,7 @@ public record Key(String value) {
     }
 
     public int length() {
-        return value.length();
+        return getBytes().length;
     }
 
     public byte[] getBytes() {
@@ -25,10 +25,13 @@ public record Key(String value) {
         return Integer.BYTES + length();
     }
 
-    public Buffer toBuffer() {
+    public Buffer toBuffer(boolean flip) {
         Buffer buffer = Buffer.from(bufferSize());
         buffer.putInt(length());
         buffer.put(getBytes());
+        if (flip) {
+            buffer.flip();
+        }
         return buffer;
     }
 }
