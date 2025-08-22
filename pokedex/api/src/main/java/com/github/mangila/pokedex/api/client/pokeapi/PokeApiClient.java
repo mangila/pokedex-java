@@ -7,7 +7,7 @@ import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClientConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonResponse;
 import com.github.mangila.pokedex.shared.json.JsonParser;
-import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPoolConfig;
+import com.github.mangila.pokedex.shared.tls.TlsConnectionPoolConfig;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

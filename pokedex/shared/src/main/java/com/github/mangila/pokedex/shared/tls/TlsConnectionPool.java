@@ -1,7 +1,5 @@
-package com.github.mangila.pokedex.shared.tls.pool;
+package com.github.mangila.pokedex.shared.tls;
 
-import com.github.mangila.pokedex.shared.tls.TlsConnectionHandler;
-import com.github.mangila.pokedex.shared.util.Ensure;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +29,7 @@ public class TlsConnectionPool {
         this.initialized = false;
     }
 
-    public void init() {
-        this.initialized = true;
-        IntStream.range(1, maxConnections + 1)
-                .peek(value -> LOGGER.debug("Creating new connection - {} of {}", value, maxConnections))
-                .forEach(unused -> offerNewConnection());
-    }
-
     public void offer(TlsConnectionHandler tlsConnectionHandler) {
-        ensureConnectionPoolIsInitialized();
         if (!queue.offer(tlsConnectionHandler)) {
             LOGGER.warn("Queue is full, dropping tlsConnectionHandler");
             if (tlsConnectionHandler.connected()) {
@@ -52,23 +42,24 @@ public class TlsConnectionPool {
         }
     }
 
-    public @Nullable TlsConnectionHandler borrow(Duration timeout) {
-        return poll(timeout);
-    }
-
     public @Nullable TlsConnectionHandler borrowWithRetry(Duration timeout, int attempts) {
-        ensureConnectionPoolIsInitialized();
         TlsConnectionHandler tlsConnectionHandler;
         int retries = attempts;
         do {
-            tlsConnectionHandler = poll(timeout);
+            tlsConnectionHandler = borrow(timeout);
             retries--;
         } while (retries > 0 && tlsConnectionHandler == null);
         return tlsConnectionHandler;
     }
 
+    public @Nullable TlsConnectionHandler borrow(Duration timeout) {
+        if (!initialized) {
+            init();
+        }
+        return poll(timeout);
+    }
+
     public void offerNewConnection() {
-        ensureConnectionPoolIsInitialized();
         TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
         offer(handler);
     }
@@ -88,8 +79,14 @@ public class TlsConnectionPool {
         availableConnections.set(0);
     }
 
+    private void init() {
+        this.initialized = true;
+        IntStream.range(1, maxConnections + 1)
+                .peek(value -> LOGGER.debug("Creating new connection - {} of {}", value, maxConnections))
+                .forEach(unused -> offerNewConnection());
+    }
+
     private @Nullable TlsConnectionHandler poll(Duration timeout) {
-        ensureConnectionPoolIsInitialized();
         try {
             TlsConnectionHandler tlsConnectionHandler = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
             if (tlsConnectionHandler == null) {
@@ -104,9 +101,5 @@ public class TlsConnectionPool {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
-    }
-
-    private void ensureConnectionPoolIsInitialized() {
-        Ensure.isTrue(isInitialized(), "Connection pool is not initialized");
     }
 }

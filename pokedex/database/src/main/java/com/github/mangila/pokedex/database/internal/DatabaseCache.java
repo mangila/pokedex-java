@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database.internal;
 
-import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import org.jspecify.annotations.Nullable;
 
@@ -15,7 +15,7 @@ public record DatabaseCache(LruCache<Key, Value> cache) {
         cache.put(key, value);
     }
 
-    public void truncate() {
-        cache.truncate();
+    public void clear() {
+        cache.clear();
     }
 }

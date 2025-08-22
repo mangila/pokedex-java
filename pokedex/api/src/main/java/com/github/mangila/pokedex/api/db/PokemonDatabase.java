@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.api.db;
 import com.github.mangila.pokedex.api.model.Pokemon;
 import com.github.mangila.pokedex.database.Database;
 import com.github.mangila.pokedex.database.DatabaseConfig;
-import com.github.mangila.pokedex.database.DatabaseName;
+import com.github.mangila.pokedex.database.model.DatabaseName;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;

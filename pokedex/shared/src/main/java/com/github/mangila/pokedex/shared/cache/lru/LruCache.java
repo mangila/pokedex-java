@@ -67,7 +67,7 @@ public class LruCache<K, V> {
         return entry.value;
     }
 
-    public void truncate() {
+    public void clear() {
         cache.clear();
         head.next = tail;
         tail.previous = head;

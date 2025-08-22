@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database.internal.io.internal.model;
 
-import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.concurrent.CompletableFuture;
 

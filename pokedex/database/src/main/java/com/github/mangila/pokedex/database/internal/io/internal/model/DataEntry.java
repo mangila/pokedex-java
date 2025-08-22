@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.database.internal.io.internal.model;
 
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.util.BufferUtils;
 
 import java.nio.ByteBuffer;

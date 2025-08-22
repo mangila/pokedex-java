@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 import com.github.mangila.pokedex.database.internal.io.internal.model.DataEntry;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
 import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 

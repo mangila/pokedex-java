@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.shared.json;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -11,11 +13,11 @@ public record JsonTokenQueue(Queue<JsonToken> queue) {
         queue.add(token);
     }
 
-    public JsonToken poll() {
+    public @Nullable JsonToken poll() {
         return queue.poll();
     }
 
-    public JsonToken peek() {
+    public @Nullable JsonToken peek() {
         return queue.peek();
     }
 
@@ -24,9 +26,9 @@ public record JsonTokenQueue(Queue<JsonToken> queue) {
     }
 
     public JsonToken expect(JsonType type) {
-        var token = poll();
+        JsonToken token = poll();
         if (token == null || token.type() != type) {
-            throw new InvalidJsonException("Expected type %s not found".formatted(type));
+            throw new NotValidJsonException("Expected type %s not found".formatted(type));
         }
         return token;
     }

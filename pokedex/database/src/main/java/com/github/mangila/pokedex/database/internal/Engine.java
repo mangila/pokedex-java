@@ -3,8 +3,8 @@ package com.github.mangila.pokedex.database.internal;
 import com.github.mangila.pokedex.database.DatabaseConfig;
 import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
-import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +32,12 @@ public class Engine {
         io.shutdown();
     }
 
-    public void truncateCache() {
-        cache.truncate();
+    public void clearCache() {
+        cache.clear();
     }
 
     public CompletableFuture<Boolean> truncateAsync() {
-        truncateCache();
+        clearCache();
         return io.truncateAsync()
                 .whenComplete((result, t) -> {
                     if (t != null) {
@@ -51,7 +51,7 @@ public class Engine {
     }
 
     public CompletableFuture<Boolean> deleteAsync() {
-        truncateCache();
+        clearCache();
         return io.deleteAsync()
                 .whenComplete((result, t) -> {
                     if (t != null) {

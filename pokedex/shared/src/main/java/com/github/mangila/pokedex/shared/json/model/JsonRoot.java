@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class JsonRoot {
 
+    public static final JsonRoot EMPTY = new JsonRoot();
     private final Map<String, JsonValue> tree = new HashMap<>();
 
     public void add(String key, JsonValue value) {
@@ -41,5 +42,9 @@ public class JsonRoot {
 
     public int size() {
         return tree.size();
+    }
+
+    public boolean isEmpty() {
+        return tree.isEmpty();
     }
 }

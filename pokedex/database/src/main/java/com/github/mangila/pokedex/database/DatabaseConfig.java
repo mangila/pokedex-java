@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.database;
 
+import com.github.mangila.pokedex.database.model.DatabaseName;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.util.Ensure;
 

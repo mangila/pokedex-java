@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.internal.Engine;
-import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public class Database<T extends DatabaseObject<T>> implements AutoCloseable {
+public class Database<T extends DatabaseObject<T>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
     private final Engine engine;
     private final Supplier<T> instanceCreator;
@@ -33,7 +33,6 @@ public class Database<T extends DatabaseObject<T>> implements AutoCloseable {
         }
     }
 
-    @Override
     public void close() {
         LOGGER.info("Closing database");
         engine.shutdown();

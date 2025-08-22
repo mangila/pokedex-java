@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.database.internal.model;
+package com.github.mangila.pokedex.database.model;
 
 import com.github.mangila.pokedex.shared.util.Ensure;
 
@@ -13,5 +13,4 @@ public record Key(String value) {
     public int length() {
         return value.length();
     }
-
 }

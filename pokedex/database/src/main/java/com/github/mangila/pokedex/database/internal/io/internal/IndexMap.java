@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.database.internal.io.internal;
 
 import com.github.mangila.pokedex.database.internal.io.internal.model.IndexEntry;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
-import com.github.mangila.pokedex.database.internal.model.Key;
+import com.github.mangila.pokedex.database.model.Key;
 
 import java.util.Map;
 

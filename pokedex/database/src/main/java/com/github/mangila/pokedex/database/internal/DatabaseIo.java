@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.database.internal;
 
-import com.github.mangila.pokedex.database.DatabaseName;
+import com.github.mangila.pokedex.database.model.DatabaseName;
 import com.github.mangila.pokedex.database.internal.io.DatabaseFileName;
 import com.github.mangila.pokedex.database.internal.io.internal.DataFileHandler;
 import com.github.mangila.pokedex.database.internal.io.internal.IndexFileHandler;
@@ -8,8 +8,8 @@ import com.github.mangila.pokedex.database.internal.io.internal.ReaderThread;
 import com.github.mangila.pokedex.database.internal.io.internal.WriterThread;
 import com.github.mangila.pokedex.database.internal.io.internal.model.ReadOperation;
 import com.github.mangila.pokedex.database.internal.io.internal.model.WriteOperation;
-import com.github.mangila.pokedex.database.internal.model.Key;
-import com.github.mangila.pokedex.database.internal.model.Value;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.queue.QueueName;
@@ -72,12 +72,12 @@ public class DatabaseIo {
 
     public void startWriterThread() {
         LOGGER.info("Starting writer thread");
-        writeExecutor.scheduleAtFixedRate(writerThread, 0, 100, TimeUnit.MILLISECONDS);
+        writeExecutor.scheduleAtFixedRate(writerThread, 0, 300, TimeUnit.MILLISECONDS);
     }
 
     public void startReaderThread() {
         LOGGER.info("Starting reader thread");
-        readExecutor.scheduleAtFixedRate(readerThread, 0, 100, TimeUnit.MILLISECONDS);
+        readExecutor.scheduleAtFixedRate(readerThread, 0, 300, TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {

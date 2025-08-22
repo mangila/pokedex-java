@@ -6,11 +6,12 @@ import com.github.mangila.pokedex.database.internal.io.internal.model.Buffer;
 import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFile;
 import com.github.mangila.pokedex.database.internal.io.internal.model.DatabaseFileHeader;
 import com.github.mangila.pokedex.database.internal.io.internal.model.Offset;
-import com.github.mangila.pokedex.database.internal.model.Key;
+import com.github.mangila.pokedex.database.model.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
