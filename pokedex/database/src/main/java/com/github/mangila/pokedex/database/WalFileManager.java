@@ -52,7 +52,7 @@ public class WalFileManager {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {
-                        rwLock.readLock().unlock();
+                        rwLock.writeLock().unlock();
                     }
                 }
             }
@@ -63,16 +63,14 @@ public class WalFileManager {
         CompletableFuture<Boolean> writeFuture = new CompletableFuture<>();
         try {
             rwLock.readLock().lock();
-            Buffer keyBuffer = key.toBuffer(true);
-            Buffer valueBuffer = value.toBuffer(true);
-            Buffer writeBuffer = Buffer.from(keyBuffer.capacity() + valueBuffer.capacity());
-            writeBuffer.put(keyBuffer);
-            writeBuffer.put(valueBuffer);
+            Buffer writeBuffer = Buffer.from(1024 * 1024);
+            writeBuffer.clear();
+            writeBuffer.put(key);
+            writeBuffer.put(value);
             writeBuffer.flip();
             int bytesToWrite = writeBuffer.value().remaining();
             long position = writePosition.getAndAdd(bytesToWrite);
             walFileChannel.write(writeBuffer, position, writeFuture);
-            writeFuture.complete(true);
         } catch (Exception e) {
             writeFuture.completeExceptionally(e);
         } finally {
@@ -87,6 +85,7 @@ public class WalFileManager {
     }
 
     private void flush() {
+        System.out.println("Flushing");
         MemTable memTableSnapshot = new MemTable(memTable.map());
         QueueService.getInstance().add(
                 new QueueName("hej"),

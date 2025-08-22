@@ -17,18 +17,4 @@ public record Value(byte[] value) {
     public boolean isEmpty() {
         return this.equals(EMPTY);
     }
-
-    private int bufferSize() {
-        return Integer.BYTES + length();
-    }
-
-    public Buffer toBuffer(boolean flip) {
-        Buffer buffer = Buffer.from(bufferSize());
-        buffer.putInt(length());
-        buffer.put(value);
-        if (flip) {
-            buffer.flip();
-        }
-        return buffer;
-    }
 }

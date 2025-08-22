@@ -20,18 +20,4 @@ public record Key(String value) {
     public byte[] getBytes() {
         return value.getBytes();
     }
-
-    private int bufferSize() {
-        return Integer.BYTES + length();
-    }
-
-    public Buffer toBuffer(boolean flip) {
-        Buffer buffer = Buffer.from(bufferSize());
-        buffer.putInt(length());
-        buffer.put(getBytes());
-        if (flip) {
-            buffer.flip();
-        }
-        return buffer;
-    }
 }

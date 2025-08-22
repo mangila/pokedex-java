@@ -53,7 +53,13 @@ public record Buffer(ByteBuffer value) {
         value.put(bytes);
     }
 
-    public void put(Buffer buffer) {
-        value.put(buffer.value());
+    public void put(Value value) {
+        putInt(value.length());
+        put(value.value());
+    }
+
+    public void put(Key key) {
+        putInt(key.length());
+        put(key.getBytes());
     }
 }
