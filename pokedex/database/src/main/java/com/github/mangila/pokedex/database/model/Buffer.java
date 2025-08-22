@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.database.internal.io.internal.model;
+package com.github.mangila.pokedex.database.model;
 
 import com.github.mangila.pokedex.shared.util.BufferUtils;
 import com.github.mangila.pokedex.shared.util.Ensure;
@@ -15,7 +15,7 @@ public record Buffer(ByteBuffer value) {
         return new Buffer(BufferUtils.newByteBuffer(capacity));
     }
 
-    public int length() {
+    public int capacity() {
         return value.capacity();
     }
 
@@ -34,7 +34,7 @@ public record Buffer(ByteBuffer value) {
     }
 
     public byte[] getArray() {
-        return getArray(length());
+        return getArray(capacity());
     }
 
     public void flip() {
@@ -43,5 +43,18 @@ public record Buffer(ByteBuffer value) {
 
     public void clear() {
         value.clear();
+    }
+
+    public void putInt(int i) {
+        value.putInt(i);
+    }
+
+    public void put(byte[] bytes) {
+        value.put(bytes);
+    }
+
+    public void put(Buffer buffer) {
+        buffer.flip();
+        value.put(buffer.value());
     }
 }

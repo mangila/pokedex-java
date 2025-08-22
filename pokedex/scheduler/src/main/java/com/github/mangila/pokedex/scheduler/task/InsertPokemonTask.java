@@ -68,14 +68,6 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
                     .join();
             var p = new Pokemon(speciesResponse.id().intValue(), speciesResponse.name());
-            boolean ok = database.instance()
-                    .putAsync(p.name(), p)
-                    .join();
-            if (ok) {
-                LOGGER.info("pokemon: {} - {}", p.id(), p.name());
-            } else {
-                throw new IllegalStateException("Db fail");
-            }
         } catch (Exception e) {
             if (queueEntry.equalsMaxRetries(3)) {
                 queue.addDlq(queueEntry);

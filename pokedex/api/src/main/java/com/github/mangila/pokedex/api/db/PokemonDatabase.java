@@ -45,7 +45,6 @@ public class PokemonDatabase {
 
     private PokemonDatabase(DatabaseConfig config) {
         this.instance = new Database<>(config, () -> Pokemon.DEFAULT_INSTANCE);
-        instance.init();
     }
 
     public Database<Pokemon> instance() {

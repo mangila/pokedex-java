@@ -13,4 +13,19 @@ public record Value(byte[] value) {
     public int length() {
         return value.length;
     }
+
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
+    }
+
+    private int bufferSize() {
+        return Integer.BYTES + length();
+    }
+
+    public Buffer toBuffer() {
+        Buffer buffer = Buffer.from(bufferSize());
+        buffer.putInt(length());
+        buffer.put(value);
+        return buffer;
+    }
 }

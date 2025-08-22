@@ -23,6 +23,10 @@ public class VirtualThreadFactory {
         return Executors.newScheduledThreadPool(corePoolSize, THREAD_FACTORY);
     }
 
+    public static ExecutorService newFixedThreadPool(int nThreads) {
+        return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
+    }
+
     public static ExecutorService newSingleThreadExecutor() {
         return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }

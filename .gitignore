@@ -1,4 +1,4 @@
-*.yakvs
+*.wal
 __pycache__
 .idea
 # Compiled class databaseFile
