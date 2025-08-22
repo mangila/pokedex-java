@@ -21,11 +21,11 @@ public class Engine {
 
     public CompletableFuture<Boolean> putAsync(Key key, Value value) {
         return fileManager.wal().append(key, value)
-                .thenCompose(result -> {
-                    if (result.equals(true)) {
+                .thenApply(ok -> {
+                    if (Boolean.TRUE.equals(ok)) {
                         cache.put(key, value);
                     }
-                    return CompletableFuture.completedFuture(result);
+                    return ok;
                 });
     }
 

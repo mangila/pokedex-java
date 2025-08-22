@@ -78,8 +78,8 @@ public class WalFileManager {
         } finally {
             rwLock.readLock().unlock();
         }
-        writeFuture.thenAccept(success -> {
-            if (Boolean.TRUE.equals(success)) {
+        writeFuture.thenAccept(ok -> {
+            if (Boolean.TRUE.equals(ok)) {
                 memTable.put(key, value);
             }
         });
