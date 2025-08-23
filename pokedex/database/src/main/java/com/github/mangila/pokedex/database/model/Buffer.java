@@ -19,6 +19,10 @@ public record Buffer(ByteBuffer value) {
         return value.capacity();
     }
 
+    public int remaining() {
+        return value.remaining();
+    }
+
     public int getInt() {
         return value.getInt();
     }
@@ -49,17 +53,29 @@ public record Buffer(ByteBuffer value) {
         value.putInt(i);
     }
 
+    public void putShort(short s) {
+        value.putShort(s);
+    }
+
     public void put(byte[] bytes) {
         value.put(bytes);
     }
 
-    public void put(Value value) {
-        putInt(value.length());
-        put(value.value());
+    public void put(HashKey hashKey) {
+        putShort(HashKey.MAGIC_NUMBER);
+        putInt(hashKey.length());
+        put(hashKey.getBytes());
     }
 
-    public void put(Key key) {
-        putInt(key.length());
-        put(key.getBytes());
+    public void put(Field field) {
+        putShort(Field.MAGIC_NUMBER);
+        putInt(field.length());
+        put(field.getBytes());
+    }
+
+    public void put(Value value) {
+        putShort(Value.MAGIC_NUMBER);
+        putInt(value.length());
+        put(value.value());
     }
 }

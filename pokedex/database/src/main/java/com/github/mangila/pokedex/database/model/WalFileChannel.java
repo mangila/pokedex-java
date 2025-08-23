@@ -7,27 +7,38 @@ import java.util.concurrent.CompletableFuture;
 
 public record WalFileChannel(AsynchronousFileChannel channel) {
 
-    public static final CompletionHandler<Integer, CompletableFuture<Boolean>> COMPLETION_HANDLER = new CompletionHandler<>() {
+    private static final CompletionHandler<Integer, Attachment> COMPLETION_HANDLER = new CompletionHandler<>() {
         @Override
-        public void completed(Integer result, CompletableFuture<Boolean> attachment) {
-            attachment.complete(true);
+        public void completed(Integer result, Attachment attachment) {
+            if (result != attachment.bytesToWrite) {
+                attachment.future.complete(WalAppendStatus.FAILED);
+                return;
+            }
+            attachment.future.complete(WalAppendStatus.SUCCESS);
         }
 
         @Override
-        public void failed(Throwable exc, CompletableFuture<Boolean> attachment) {
-            attachment.completeExceptionally(exc);
+        public void failed(Throwable exc, Attachment attachment) {
+            attachment.future.completeExceptionally(exc);
         }
     };
 
-    public void write(Buffer writeBuffer, long position, CompletableFuture<Boolean> attachment) {
-        channel.write(writeBuffer.value(), position, attachment, COMPLETION_HANDLER);
+    public record Attachment(CompletableFuture<WalAppendStatus> future,
+                             long position,
+                             int bytesToWrite,
+                             Buffer buffer) {
     }
 
-    public void truncate(long size) {
-        try {
-            channel.truncate(size);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+    public void write(Attachment attachment) {
+        channel.write(attachment.buffer.value(), attachment.position, attachment, COMPLETION_HANDLER);
+    }
+
+    public void read(Attachment attachment) {
+        channel.read(attachment.buffer.value(), attachment.position, attachment, COMPLETION_HANDLER);
+    }
+
+    public void close() throws IOException {
+        channel.close();
     }
 }
