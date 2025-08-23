@@ -29,7 +29,7 @@ public class WalFile {
             StandardOpenOption.WRITE,
             StandardOpenOption.READ,
             StandardOpenOption.SYNC);
-    private static final String MAGIC_NUMBER = "WAL";
+    private static final byte[] MAGIC_NUMBER = "WAL".getBytes(Charset.defaultCharset());
     private final Path path;
     private final ExecutorService walChannelExecutor;
     private final WalTable walTable;
@@ -49,7 +49,7 @@ public class WalFile {
         LOGGER.info("Opening WAL file {}", path);
         if (!Files.exists(path)) {
             Files.createFile(path);
-            Files.writeString(path, MAGIC_NUMBER, Charset.defaultCharset());
+            Files.write(path, MAGIC_NUMBER);
             LOGGER.info("Created new WAL file {}", path);
         }
         channel = new WalFileChannel(
@@ -67,7 +67,7 @@ public class WalFile {
         if (size == 0) {
             throw new IllegalStateException("WAL file is empty");
         }
-        if (size == MAGIC_NUMBER.length()) {
+        if (size == MAGIC_NUMBER.length) {
             return;
         }
         Buffer readBuffer = Buffer.from((int) getSize());
@@ -75,8 +75,8 @@ public class WalFile {
         channel.read(new WalFileChannel.Attachment(readFuture, 0, readBuffer.remaining(), readBuffer));
         readFuture.join();
         readBuffer.flip();
-        byte[] magicNumber = readBuffer.getArray(MAGIC_NUMBER.length());
-        Ensure.equals(magicNumber, MAGIC_NUMBER.getBytes(Charset.defaultCharset()));
+        byte[] magicNumber = readBuffer.getArray(MAGIC_NUMBER.length);
+        Ensure.equals(magicNumber, MAGIC_NUMBER);
         var bytes = readBuffer.getArray();
         System.out.println(readBuffer);
     }
