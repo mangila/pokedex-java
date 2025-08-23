@@ -11,6 +11,7 @@ public record WalFileChannel(AsynchronousFileChannel channel) {
         @Override
         public void completed(Integer result, Attachment attachment) {
             if (result != attachment.bytesToWrite) {
+                // TODO retry read or write or throw exception for partial writes and discard write
                 attachment.future.complete(WalAppendStatus.FAILED);
                 return;
             }
