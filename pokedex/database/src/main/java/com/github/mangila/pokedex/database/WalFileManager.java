@@ -1,8 +1,6 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.model.*;
-import com.github.mangila.pokedex.shared.queue.QueueName;
-import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,6 @@ public class WalFileManager {
 
     public WalFileManager(DatabaseName databaseName) {
         this.databaseName = databaseName;
-        QueueService.getInstance().createNewQueue(new QueueName("hej"));
         try {
             replay();
         } catch (IOException e) {

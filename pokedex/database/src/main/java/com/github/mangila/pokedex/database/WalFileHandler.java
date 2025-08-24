@@ -76,10 +76,7 @@ public class WalFileHandler {
     public void flush() throws InterruptedException {
         if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
             LOGGER.info("Flushing WAL file {}", walFile.getPath());
-            QueueService.getInstance().add(
-                    new QueueName("hej"),
-                    new QueueEntry(walTable)
-            );
+            // TODO: send to disk via future or smt
             walTable.clear();
             try {
                 walFile.delete();
