@@ -1,9 +1,6 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.model.*;
-import com.github.mangila.pokedex.shared.queue.QueueEntry;
-import com.github.mangila.pokedex.shared.queue.QueueName;
-import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,17 +48,16 @@ public class WalFileHandler {
         writeBuffer.flip();
         walFile.channel().write(writeBuffer, walAppendFuture);
         return walAppendFuture
-                .whenComplete((status, error) -> {
-                    if (error == null && status == WalAppendStatus.SUCCESS) {
+                .thenApply(status -> {
+                    if (status == WalAppendStatus.SUCCESS) {
                         walTable.put(hashKey, field, value);
-                        if (walTable.fieldSize() >= 1000 && shouldFlush()) {
-                            flushLatch.countDown();
-                        }
-                    } else if (error == null && status == WalAppendStatus.FAILED) {
+                    } else if (status == WalAppendStatus.FAILED) {
                         LOGGER.warn("Failed to write to WAL file");
-                    } else {
-                        LOGGER.error("ERR", error);
                     }
+                    if (walTable.fieldSize() >= 1000 && shouldFlush()) {
+                        flushLatch.countDown();
+                    }
+                    return status;
                 });
     }
 
