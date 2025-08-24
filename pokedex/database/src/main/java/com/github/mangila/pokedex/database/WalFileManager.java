@@ -39,6 +39,7 @@ public class WalFileManager {
                 rotate();
                 rotate.set(false);
             } catch (IOException e) {
+                // TODO: recover or just panic
                 LOGGER.error("Failed to rotate WAL file", e);
                 return CompletableFuture.failedFuture(e);
             }
