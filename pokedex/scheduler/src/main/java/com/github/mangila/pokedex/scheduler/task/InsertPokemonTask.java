@@ -6,13 +6,16 @@ import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResp
 import com.github.mangila.pokedex.api.client.pokeapi.response.SpeciesResponse;
 import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
-import com.github.mangila.pokedex.api.model.Pokemon;
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.HashKey;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -67,8 +70,14 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .toList();
             CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
                     .join();
-            var p = new Pokemon(speciesResponse.id().intValue(), speciesResponse.name());
+            LOGGER.info("#{} {}", speciesResponse.id(), speciesResponse.name());
+            database.instance().engine()
+                    .appendAsync(
+                            new HashKey("pokemon::" + speciesResponse.id()),
+                            new Field("name"),
+                            new Value(speciesResponse.name().getBytes(Charset.defaultCharset())));
         } catch (Exception e) {
+            LOGGER.error("ERR", e);
             if (queueEntry.equalsMaxRetries(3)) {
                 queue.addDlq(queueEntry);
                 return;

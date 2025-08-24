@@ -63,10 +63,10 @@ public class WalFile {
         Ensure.equals(magicNumber, MAGIC_NUMBER, "WAL file magic number not equals");
         if (!readBuffer.isEmpty()) {
             // TODO: load WalTable
-            walTable.put(new HashKey("ASDF"),new Field("ASDF"),new Value(new byte[]{1,2,3,4,5,6,7,8,9,0}));
-            LOGGER.info("Loaded {} entries to WalTable", 1);
+            walTable.put(new HashKey("ASDF"), new Field("ASDF"), new Value(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
+            LOGGER.debug("Loaded {} entries to {}", 1, path);
         } else {
-            LOGGER.info("File {} is empty", path);
+            LOGGER.debug("File {} is empty", path);
         }
         LOGGER.info("Loaded WAL file {}", path);
     }
@@ -80,7 +80,6 @@ public class WalFile {
 
     public void delete() throws IOException {
         LOGGER.info("Deleting WAL file {}", path);
-        close();
         Files.deleteIfExists(path);
     }
 

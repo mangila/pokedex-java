@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -47,7 +48,7 @@ public class WalFileManager {
     }
 
     private boolean shouldRotate() {
-        return handlerRef.get().isFlushing() && rotate.compareAndSet(false, true);
+        return handlerRef.get().hasFlushed() && rotate.compareAndSet(false, true);
     }
 
     void replay() throws IOException {
@@ -58,13 +59,14 @@ public class WalFileManager {
                 })) {
             for (Path path : walFiles) {
                 LOGGER.info("Replaying WAL file {}", path);
-                WalFile walFile = new WalFile(path);
-                walRotations.set(walFile.getRotation() + 1);
-                WalFileHandler handler = new WalFileHandler(walFile);
-                walFile.open(handler.walTable());
                 try {
+                    WalFile walFile = new WalFile(path);
+                    walRotations.set(walFile.getRotation() + 1);
+                    WalFileHandler handler = new WalFileHandler(walFile);
+                    walFile.open(handler.walTable());
                     handler.flush();
-                } catch (InterruptedException e) {
+                    handler.closeAndDelete(Duration.ofMillis(1));
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -73,6 +75,10 @@ public class WalFileManager {
     }
 
     void rotate() throws IOException {
+        WalFileHandler current = handlerRef.get();
+        if (current != null) {
+            current.closeAndDelete(Duration.ofSeconds(30));
+        }
         String name = databaseName.value()
                 .concat("-" + walRotations.get())
                 .concat(".wal");

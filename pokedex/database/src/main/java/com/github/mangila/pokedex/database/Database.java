@@ -1,24 +1,18 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.util.function.Supplier;
-
-public class Database<T extends DatabaseObject<T>> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Database.class);
+public class Database {
     private final Engine engine;
-    private final Supplier<T> instanceCreator;
 
-    public Database(DatabaseConfig config,
-                    Supplier<T> instanceCreator) {
-        var p = Path.of("hej.wal");
+    public Database(DatabaseConfig config) {
         this.engine = new Engine(
                 new FileManager(new WalFileManager(config.databaseName())),
                 new Cache(new LruCache<>(config.lruCacheConfig()))
         );
-        this.instanceCreator = instanceCreator;
+    }
+
+    public Engine engine() {
+        return engine;
     }
 }
