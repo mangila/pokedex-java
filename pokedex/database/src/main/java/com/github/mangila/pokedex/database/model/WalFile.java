@@ -63,7 +63,7 @@ public class WalFile {
         Ensure.equals(magicNumber, MAGIC_NUMBER, "WAL file magic number not equals");
         if (!readBuffer.isEmpty()) {
             // TODO: load WalTable
-            walTable.put(new HashKey("ASDF"), new Field("ASDF"), new Value(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
+            walTable.put(new Key("ASDF"), new Field("ASDF"), new Value(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
             LOGGER.debug("Loaded {} entries to {}", 1, path);
         } else {
             LOGGER.debug("File {} is empty", path);

@@ -19,30 +19,32 @@ public class WalFileHandler {
     private final WalFile walFile;
     private final WalTable walTable;
     private final ExecutorService flushExecutor;
+    private final CompletableFuture<Void> flushCompletion = new CompletableFuture<>();
     private final CountDownLatch flushLatch;
 
     public WalFileHandler(WalFile walFile) {
         this.walFile = walFile;
-        this.walTable = new WalTable(new ConcurrentSkipListMap<>(Comparator.comparing(HashKey::value)));
+        this.walTable = new WalTable(new ConcurrentSkipListMap<>(Comparator.comparing(Key::value)));
         this.flushExecutor = VirtualThreadFactory.newSingleThreadExecutor();
         this.flushLatch = new CountDownLatch(1);
         flushExecutor.submit(() -> {
             try {
                 flushLatch.await();
                 flush();
-                walFile.status().set(WalFileStatus.FLUSHED);
+                flushCompletion.complete(null);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                flushCompletion.completeExceptionally(e);
                 LOGGER.error("Interrupted while waiting for flush", e);
             }
         });
     }
 
-    public CompletableFuture<WalAppendStatus> appendAsync(HashKey hashKey, Field field, Value value) {
+    public CompletableFuture<WalAppendStatus> appendAsync(Key key, Field field, Value value) {
         var walAppendFuture = new CompletableFuture<WalAppendStatus>();
-        int bufferSize = hashKey.getBufferSize() + field.getBufferSize() + value.getBufferSize();
+        int bufferSize = key.getBufferSize() + field.getBufferSize() + value.getBufferSize();
         Buffer writeBuffer = Buffer.from(bufferSize);
-        writeBuffer.put(hashKey);
+        writeBuffer.put(key);
         writeBuffer.put(field);
         writeBuffer.put(value);
         writeBuffer.flip();
@@ -50,7 +52,7 @@ public class WalFileHandler {
         return walAppendFuture
                 .thenApply(status -> {
                     if (status == WalAppendStatus.SUCCESS) {
-                        walTable.put(hashKey, field, value);
+                        walTable.put(key, field, value);
                     } else if (status == WalAppendStatus.FAILED) {
                         LOGGER.warn("Failed to write to WAL file");
                     }
@@ -61,8 +63,12 @@ public class WalFileHandler {
                 });
     }
 
-    public boolean hasFlushed() {
-        return walFile.status().get() == WalFileStatus.FLUSHED;
+    public boolean isFlushing() {
+        return walFile.status().get() == WalFileStatus.FLUSHING;
+    }
+
+    public CompletableFuture<Void> flushCompletion() {
+        return flushCompletion;
     }
 
     public WalTable walTable() {
@@ -82,7 +88,7 @@ public class WalFileHandler {
     public void flush() throws InterruptedException {
         if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
             LOGGER.info("Flushing WAL file {}", walFile.getPath());
-            // TODO: send to disk via future or smt
+            // TODO: snapshot waltable and send to disk via future or smt
             walTable.clear();
         }
         // TODO: recover or just panic

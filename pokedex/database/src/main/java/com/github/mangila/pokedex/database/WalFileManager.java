@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.model.*;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,6 +20,7 @@ public class WalFileManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFileManager.class);
     private final DatabaseName databaseName;
+    private final ExecutorService shutdownHandlerExecutor = VirtualThreadFactory.newSingleThreadExecutor();
     private final AtomicReference<WalFileHandler> handlerRef = new AtomicReference<>();
     private final AtomicBoolean rotate = new AtomicBoolean(false);
     private final AtomicLong walRotations = new AtomicLong(1);
@@ -31,9 +34,10 @@ public class WalFileManager {
         }
     }
 
-    CompletableFuture<Boolean> appendAsync(HashKey hashKey, Field field, Value value) {
+    CompletableFuture<Boolean> putAsync(Key key, Field field, Value value) {
         if (shouldRotate()) {
             try {
+                closeCurrentHandlerAsync();
                 rotate();
                 rotate.set(false);
             } catch (IOException e) {
@@ -43,15 +47,11 @@ public class WalFileManager {
             }
         }
         return handlerRef.get()
-                .appendAsync(hashKey, field, value)
+                .appendAsync(key, field, value)
                 .thenApply(walAppendStatus -> walAppendStatus == WalAppendStatus.SUCCESS);
     }
 
-    private boolean shouldRotate() {
-        return handlerRef.get().hasFlushed() && rotate.compareAndSet(false, true);
-    }
-
-    void replay() throws IOException {
+    private void replay() throws IOException {
         try (DirectoryStream<Path> walFiles = Files.newDirectoryStream(Path.of("."),
                 entry -> {
                     String name = entry.getFileName().toString();
@@ -74,11 +74,7 @@ public class WalFileManager {
         rotate();
     }
 
-    void rotate() throws IOException {
-        WalFileHandler current = handlerRef.get();
-        if (current != null) {
-            current.closeAndDelete(Duration.ofSeconds(30));
-        }
+    private void rotate() throws IOException {
         String name = databaseName.value()
                 .concat("-" + walRotations.get())
                 .concat(".wal");
@@ -88,5 +84,22 @@ public class WalFileManager {
         walFile.open(handler.walTable());
         handlerRef.set(handler);
         walRotations.incrementAndGet();
+    }
+
+    private boolean shouldRotate() {
+        return handlerRef.get().isFlushing() && rotate.compareAndSet(false, true);
+    }
+
+    private void closeCurrentHandlerAsync() {
+        WalFileHandler current = handlerRef.get();
+        if (current != null) {
+            current.flushCompletion().whenCompleteAsync((v, t) -> {
+                try {
+                    current.closeAndDelete(Duration.ofSeconds(30));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, shutdownHandlerExecutor);
+        }
     }
 }

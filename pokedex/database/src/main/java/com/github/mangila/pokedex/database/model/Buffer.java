@@ -65,10 +65,10 @@ public record Buffer(ByteBuffer value) {
         value.put(bytes);
     }
 
-    public void put(HashKey hashKey) {
-        putShort(HashKey.MAGIC_NUMBER);
-        putInt(hashKey.length());
-        put(hashKey.getBytes());
+    public void put(Key key) {
+        putShort(Key.MAGIC_NUMBER);
+        putInt(key.length());
+        put(key.getBytes());
     }
 
     public void put(Field field) {

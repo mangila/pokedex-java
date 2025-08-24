@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.database;
+package com.github.mangila.pokedex.database.config;
 
 import com.github.mangila.pokedex.database.model.DatabaseName;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;

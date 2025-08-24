@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.model.Field;
-import com.github.mangila.pokedex.database.model.HashKey;
+import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.concurrent.CompletableFuture;
@@ -15,9 +15,9 @@ public class Engine {
         this.cache = cache;
     }
 
-    public CompletableFuture<Boolean> appendAsync(HashKey hashKey, Field field, Value value) {
+    public CompletableFuture<Boolean> putAsync(Key key, Field field, Value value) {
         return fileManager.wal()
-                .appendAsync(hashKey, field, value)
+                .putAsync(key, field, value)
                 .copy();
     }
 

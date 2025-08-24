@@ -9,18 +9,18 @@ Documentation about the /pokedex/database module
                         Client / App
                              │
                              ▼
-                Append hashKey/value to WAL (disk)
+                Append key/value to WAL (disk)
                              │                                   
                              ▼                                        
-            Insert hashKey/value into MemTable (in-memory)
+            Insert key/value into WalTable (in-memory)
                              │
                              ▼
-                        Is MemTable full?
+                        Is WalTable full?
                              ├─ No → Done
-                             └─ Yes → Flush MemTable to disk:
-                             ├─ Create hash buckets (hash(hashKey) % N)
+                             └─ Yes → Flush WalTable to disk:
+                             ├─ Create hash buckets (hash(key) % N)
                              └─ Update Bloom filter for new keys
                              │
                              ▼
-                Discard WAL entries for flushed MemTable
+                Discard WAL entries for flushed WalTable
 

@@ -4,12 +4,12 @@ import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.nio.charset.Charset;
 
-public record HashKey(String value) {
+public record Key(String value) {
 
-    public static final HashKey EMPTY = new HashKey("EMPTY");
+    public static final Key EMPTY = new Key("EMPTY");
     public static final short MAGIC_NUMBER = 1;
 
-    public HashKey {
+    public Key {
         Ensure.notNull(value, "hashkey value must not be null");
         Ensure.notBlank(value, "hashkey value must not be blank");
         Ensure.min(2, value.length());
