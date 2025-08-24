@@ -20,7 +20,7 @@ public class WalFileManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFileManager.class);
     private final DatabaseName databaseName;
     private final AtomicReference<WalFileHandler> handlerRef = new AtomicReference<>();
-    private final AtomicBoolean rotationStarted = new AtomicBoolean(false);
+    private final AtomicBoolean rotate = new AtomicBoolean(false);
     private final AtomicLong walRotations = new AtomicLong(1);
 
     public WalFileManager(DatabaseName databaseName) {
@@ -34,10 +34,10 @@ public class WalFileManager {
     }
 
     CompletableFuture<Boolean> appendAsync(HashKey hashKey, Field field, Value value) {
-        if (handlerRef.get().isFlushing() && rotationStarted.compareAndSet(false, true)) {
+        if (shouldRotate()) {
             try {
                 rotate();
-                rotationStarted.set(false);
+                rotate.set(false);
             } catch (IOException e) {
                 LOGGER.error("Failed to rotate WAL file", e);
                 return CompletableFuture.failedFuture(e);
@@ -47,6 +47,10 @@ public class WalFileManager {
                 .appendAsync(hashKey, field, value)
                 .thenApply(walAppendStatus -> walAppendStatus == WalAppendStatus.SUCCESS)
                 .copy();
+    }
+
+    private boolean shouldRotate() {
+        return handlerRef.get().isFlushing() && rotate.compareAndSet(false, true);
     }
 
     void replay() throws IOException {
@@ -61,7 +65,7 @@ public class WalFileManager {
                 walRotations.set(walFile.getRotation());
                 walFile.open();
                 WalFileHandler handler = new WalFileHandler(walFile);
-                walFile.status().set(WalFileStatus.FLUSHING);
+                walFile.status().set(WalFileStatus.SHOULD_FLUSH);
                 handler.flush();
             }
         }

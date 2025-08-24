@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public record WalTable(ConcurrentSkipListMap<HashKey, ConcurrentSkipListMap<Field, Value>> map) {
     public void put(HashKey hashKey, Field field, Value value) {
-        var created = new ConcurrentSkipListMap<Field, Value>(Comparator.comparing(Field::value));;
+        var created = new ConcurrentSkipListMap<Field, Value>(Comparator.comparing(Field::value));
         var existing = map.putIfAbsent(hashKey, created);
         var table = (existing != null) ? existing : created;
         table.put(field, value);
@@ -13,5 +13,9 @@ public record WalTable(ConcurrentSkipListMap<HashKey, ConcurrentSkipListMap<Fiel
 
     public void clear() {
         map.clear();
+    }
+
+    public int size() {
+        return map.size();
     }
 }

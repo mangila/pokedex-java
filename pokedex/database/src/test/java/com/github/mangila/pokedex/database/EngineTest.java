@@ -14,19 +14,20 @@ import java.nio.file.Paths;
 class EngineTest {
 
     @Test
-    void abc() throws IOException {
+    void abc() throws IOException, InterruptedException {
         var p = Paths.get("hej.wal");
         var e = new Engine(
                 new FileManager(new WalFileManager(new DatabaseName("hej"))),
                 new Cache(new LruCache<>(new LruCacheConfig(100)))
         );
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 150; i++) {
             e.appendAsync(
                     new HashKey("hash"),
                     new Field("hejsan" + i),
                     new Value(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0})
             );
         }
+        Thread.sleep(20_000);
     }
 
 }
