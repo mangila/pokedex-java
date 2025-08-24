@@ -61,7 +61,7 @@ public class WalFile {
         readBuffer.flip();
         byte[] magicNumber = readBuffer.getArray(MAGIC_NUMBER.length);
         Ensure.equals(magicNumber, MAGIC_NUMBER, "WAL file magic number not equals");
-        if (readBuffer.remaining() > 0) {
+        if (!readBuffer.isEmpty()) {
             // TODO: load WalTable
             walTable.put(new HashKey("ASDF"),new Field("ASDF"),new Value(new byte[]{1,2,3,4,5,6,7,8,9,0}));
             LOGGER.info("Loaded {} entries to WalTable", 1);

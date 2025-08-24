@@ -23,6 +23,10 @@ public record Buffer(ByteBuffer value) {
         return value.remaining();
     }
 
+    public boolean isEmpty() {
+        return remaining() == 0;
+    }
+
     public int getInt() {
         return value.getInt();
     }
