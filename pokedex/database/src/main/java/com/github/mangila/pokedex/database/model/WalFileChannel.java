@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
+import java.nio.channels.NonReadableChannelException;
 import java.nio.channels.NonWritableChannelException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -66,8 +67,14 @@ public class WalFileChannel {
 
         @Override
         public void failed(Throwable exc, Attachment attachment) {
-
-            attachment.future.completeExceptionally(exc);
+            switch (exc) {
+                case IllegalArgumentException iae -> attachment.future.completeExceptionally(iae);
+                case NonReadableChannelException nre -> attachment.future.completeExceptionally(nre);
+                default -> {
+                    // TODO: panic
+                    attachment.future.completeExceptionally(exc);
+                }
+            }
         }
     };
 
