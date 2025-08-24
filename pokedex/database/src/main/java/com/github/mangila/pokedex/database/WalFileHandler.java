@@ -33,13 +33,9 @@ public class WalFileHandler {
             try {
                 flushLatch.await();
                 flush();
-                walFile.delete();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOGGER.error("Interrupted while waiting for flush", e);
-            } catch (IOException e) {
-                LOGGER.error("Failed to delete WAL file", e);
-                // TODO: recover or just panic
             }
             VirtualThreadFactory.terminateGracefully(flushExecutor, Duration.ofSeconds(30));
         });
@@ -85,6 +81,11 @@ public class WalFileHandler {
                     new QueueEntry(walTable)
             );
             walTable.clear();
+            try {
+                walFile.delete();
+            } catch (IOException e) {
+                // TODO: recover or just panic
+            }
         }
         // TODO: recover or just panic
     }
