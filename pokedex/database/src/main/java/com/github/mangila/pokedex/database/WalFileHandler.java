@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 public class WalFileHandler {
@@ -21,24 +22,23 @@ public class WalFileHandler {
     private final WalFile walFile;
     private final WalTable walTable;
     private final ExecutorService flushExecutor;
+    private final CountDownLatch flushLatch;
 
     public WalFileHandler(WalFile walFile) {
         this.walFile = walFile;
         this.walTable = new WalTable(new ConcurrentSkipListMap<>(Comparator.comparing(HashKey::value)));
         this.flushExecutor = VirtualThreadFactory.newSingleThreadExecutor();
+        this.flushLatch = new CountDownLatch(1);
         flushExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    if (shouldFlush()) {
-                        flush();
-                    } else {
-                        Thread.sleep(50);
-                    }
-                } catch (IOException e) {
-                    LOGGER.error("Failed to flush WAL file", e);
-                } catch (InterruptedException ie) {
+                    flushLatch.await();
+                    flush();
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
+                } catch (IOException e) {
+                    LOGGER.error("Failed to flush WAL file", e);
                 }
             }
         });
@@ -57,8 +57,8 @@ public class WalFileHandler {
                 .whenComplete((status, error) -> {
                     if (error == null && status == WalAppendStatus.SUCCESS) {
                         walTable.put(hashKey, field, value);
-                        if (walTable.fieldSize() >= 10) {
-                            walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.SHOULD_FLUSH);
+                        if (walTable.fieldSize() >= 10 && shouldFlush()) {
+                            flushLatch.countDown();
                         }
                     } else if (error == null && status == WalAppendStatus.FAILED) {
                         LOGGER.warn("Failed to write to WAL file");
@@ -86,7 +86,7 @@ public class WalFileHandler {
     }
 
     public boolean shouldFlush() {
-        return walFile.status().get() == WalFileStatus.SHOULD_FLUSH;
+        return walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.SHOULD_FLUSH);
     }
 
     public boolean isFlushing() {
