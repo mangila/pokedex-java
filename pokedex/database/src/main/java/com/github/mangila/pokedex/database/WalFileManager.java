@@ -45,8 +45,7 @@ public class WalFileManager {
         }
         return handlerRef.get()
                 .appendAsync(hashKey, field, value)
-                .thenApply(walAppendStatus -> walAppendStatus == WalAppendStatus.SUCCESS)
-                .copy();
+                .thenApply(walAppendStatus -> walAppendStatus == WalAppendStatus.SUCCESS);
     }
 
     private boolean shouldRotate() {
@@ -65,7 +64,6 @@ public class WalFileManager {
                 walRotations.set(walFile.getRotation());
                 walFile.open();
                 WalFileHandler handler = new WalFileHandler(walFile);
-                walFile.status().set(WalFileStatus.SHOULD_FLUSH);
                 try {
                     handler.flush();
                 } catch (InterruptedException e) {

@@ -76,7 +76,7 @@ public class WalFile {
     public void delete() throws IOException {
         LOGGER.info("Deleting WAL file {}", path);
         close();
-        Files.delete(path);
+        Files.deleteIfExists(path);
     }
 
     public WalFileChannel channel() {

@@ -16,12 +16,9 @@ public class Engine {
     }
 
     public CompletableFuture<Boolean> appendAsync(HashKey hashKey, Field field, Value value) {
-        return fileManager.wal().appendAsync(hashKey, field, value)
-                .whenComplete((ok, error) -> {
-                    if (error == null && Boolean.TRUE.equals(ok)) {
-                        cache.put(hashKey, value);
-                    }
-                });
+        return fileManager.wal()
+                .appendAsync(hashKey, field, value)
+                .copy();
     }
 
 }

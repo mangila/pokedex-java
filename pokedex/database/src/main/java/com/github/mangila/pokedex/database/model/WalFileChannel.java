@@ -108,12 +108,13 @@ public class WalFileChannel {
                 break;
             } catch (TimeoutException e) {
                 attempts--;
+                TimeUnit.SECONDS.sleep(1);
             }
         } while (attempts >= 0);
         return success;
     }
 
-    public void awaitInFlightWrites(Duration timeout) throws InterruptedException, TimeoutException {
+    private void awaitInFlightWrites(Duration timeout) throws InterruptedException, TimeoutException {
         int phase = phaser.getPhase();
         if (phaser.getRegisteredParties() == 0 || phaser.getUnarrivedParties() == 0) {
             return;

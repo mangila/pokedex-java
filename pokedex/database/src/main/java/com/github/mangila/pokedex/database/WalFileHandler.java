@@ -36,8 +36,10 @@ public class WalFileHandler {
                 walFile.delete();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                LOGGER.error("Interrupted while waiting for flush", e);
             } catch (IOException e) {
                 LOGGER.error("Failed to delete WAL file", e);
+                // TODO: recover delete file
             }
             VirtualThreadFactory.terminateGracefully(flushExecutor, Duration.ofSeconds(30));
         });
@@ -56,7 +58,7 @@ public class WalFileHandler {
                 .whenComplete((status, error) -> {
                     if (error == null && status == WalAppendStatus.SUCCESS) {
                         walTable.put(hashKey, field, value);
-                        if (walTable.fieldSize() >= 10 && shouldFlush()) {
+                        if (walTable.fieldSize() >= 1000 && shouldFlush()) {
                             flushLatch.countDown();
                         }
                     } else if (error == null && status == WalAppendStatus.FAILED) {
@@ -67,24 +69,23 @@ public class WalFileHandler {
                 });
     }
 
-    public boolean shouldFlush() {
-        return walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.SHOULD_FLUSH);
-    }
-
     public boolean isFlushing() {
         return walFile.status().get() == WalFileStatus.FLUSHING;
     }
 
+    private boolean shouldFlush() {
+        return walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.FLUSHING);
+    }
+
     public void flush() throws InterruptedException {
-        if (walFile.status().compareAndSet(WalFileStatus.SHOULD_FLUSH, WalFileStatus.FLUSHING)) {
+        if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
             LOGGER.info("Flushing WAL file {}", walFile.getPath());
-            if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
-                QueueService.getInstance().add(
-                        new QueueName("hej"),
-                        new QueueEntry(walTable)
-                );
-                walTable.clear();
-            }
+            QueueService.getInstance().add(
+                    new QueueName("hej"),
+                    new QueueEntry(walTable)
+            );
+            walTable.clear();
         }
+        // TODO: recovery or just wait longer
     }
 }
