@@ -37,11 +37,10 @@ public class VirtualThreadFactory {
             while (!executorService.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
                 executorService.shutdownNow();
             }
+            return executorService.isTerminated();
         } catch (InterruptedException e) {
-            executorService.shutdownNow();
             Thread.currentThread().interrupt();
-            LOGGER.error("Worker executor shutdown interrupted", e);
+            return false;
         }
-        return executorService.isTerminated();
     }
 }

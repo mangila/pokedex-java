@@ -30,15 +30,16 @@ public class WalFileHandler {
         this.flushExecutor = VirtualThreadFactory.newSingleThreadExecutor();
         this.flushLatch = new CountDownLatch(1);
         flushExecutor.submit(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    flushLatch.await();
-                    flush();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            try {
+                flushLatch.await();
+                flush();
+                walFile.delete();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                LOGGER.error("Failed to delete WAL file", e);
             }
+            VirtualThreadFactory.terminateGracefully(flushExecutor, Duration.ofSeconds(30));
         });
     }
 
@@ -66,32 +67,24 @@ public class WalFileHandler {
                 });
     }
 
-    public void flush() {
-        if (walFile.status().compareAndSet(WalFileStatus.SHOULD_FLUSH, WalFileStatus.FLUSHING)) {
-            LOGGER.info("Flushing WAL file {}", walFile.getPath());
-            try {
-                walFile.channel().awaitInFlightWrites(Duration.ofMinutes(1));
-            } catch (Exception e) {
-                LOGGER.error("Failed to flush WAL file", e);
-            }
-            QueueService.getInstance().add(
-                    new QueueName("hej"),
-                    new QueueEntry(walTable)
-            );
-            walTable.clear();
-            try {
-                walFile.delete();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     public boolean shouldFlush() {
         return walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.SHOULD_FLUSH);
     }
 
     public boolean isFlushing() {
         return walFile.status().get() == WalFileStatus.FLUSHING;
+    }
+
+    public void flush() throws InterruptedException {
+        if (walFile.status().compareAndSet(WalFileStatus.SHOULD_FLUSH, WalFileStatus.FLUSHING)) {
+            LOGGER.info("Flushing WAL file {}", walFile.getPath());
+            if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
+                QueueService.getInstance().add(
+                        new QueueName("hej"),
+                        new QueueEntry(walTable)
+                );
+                walTable.clear();
+            }
+        }
     }
 }

@@ -66,7 +66,11 @@ public class WalFileManager {
                 walFile.open();
                 WalFileHandler handler = new WalFileHandler(walFile);
                 walFile.status().set(WalFileStatus.SHOULD_FLUSH);
-                handler.flush();
+                try {
+                    handler.flush();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         rotate();

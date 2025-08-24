@@ -11,7 +11,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class WalFileChannel {
@@ -98,6 +97,20 @@ public class WalFileChannel {
     public void close() throws IOException {
         position.set(0);
         channel.close();
+    }
+
+    public boolean awaitInFlightWritesWithRetry(Duration timeout, int attempts) throws InterruptedException {
+        boolean success = false;
+        do {
+            try {
+                awaitInFlightWrites(timeout);
+                success = true;
+                break;
+            } catch (TimeoutException e) {
+                attempts--;
+            }
+        } while (attempts >= 0);
+        return success;
     }
 
     public void awaitInFlightWrites(Duration timeout) throws InterruptedException, TimeoutException {
