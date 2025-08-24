@@ -19,13 +19,11 @@ public class WalFileChannel {
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFileChannel.class);
     private final AsynchronousFileChannel channel;
     private final AtomicLong position;
-    private final AtomicInteger writeCount;
     private final Phaser phaser;
 
     public WalFileChannel(AsynchronousFileChannel channel) throws IOException {
         this.channel = channel;
         this.position = new AtomicLong(size());
-        this.writeCount = new AtomicInteger(0);
         this.phaser = new Phaser();
     }
 
@@ -38,7 +36,6 @@ public class WalFileChannel {
                 return;
             }
             phaser.arriveAndDeregister();
-            writeCount.incrementAndGet();
             attachment.future.complete(WalAppendStatus.SUCCESS);
         }
 
@@ -100,7 +97,6 @@ public class WalFileChannel {
 
     public void close() throws IOException {
         position.set(0);
-        writeCount.set(0);
         channel.close();
     }
 
@@ -116,7 +112,4 @@ public class WalFileChannel {
         );
     }
 
-    public int writeCount() {
-        return writeCount.get();
-    }
 }

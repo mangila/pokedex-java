@@ -15,7 +15,14 @@ public record WalTable(ConcurrentSkipListMap<HashKey, ConcurrentSkipListMap<Fiel
         map.clear();
     }
 
-    public int size() {
+    public int hashKeySize() {
         return map.size();
+    }
+
+    public int fieldSize() {
+        return map.values()
+                .stream()
+                .mapToInt(ConcurrentSkipListMap::size)
+                .sum();
     }
 }

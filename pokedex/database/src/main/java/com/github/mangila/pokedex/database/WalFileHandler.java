@@ -57,7 +57,7 @@ public class WalFileHandler {
                 .whenComplete((status, error) -> {
                     if (error == null && status == WalAppendStatus.SUCCESS) {
                         walTable.put(hashKey, field, value);
-                        if (walFile.channel().writeCount() > 10) {
+                        if (walTable.fieldSize() >= 10) {
                             walFile.status().compareAndSet(WalFileStatus.OPEN, WalFileStatus.SHOULD_FLUSH);
                         }
                     } else if (error == null && status == WalAppendStatus.FAILED) {
