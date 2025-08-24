@@ -38,7 +38,7 @@ public class WalFile {
         this.walChannelExecutor = VirtualThreadFactory.newFixedThreadPool(10);
     }
 
-    public void open() throws IOException {
+    public void open(WalTable walTable) throws IOException {
         LOGGER.info("Opening WAL file {}", path);
         if (!Files.exists(path)) {
             Files.createFile(path);
@@ -50,20 +50,25 @@ public class WalFile {
                 walChannelExecutor)
         );
         status.set(WalFileStatus.OPEN);
-        load();
+        load(walTable);
     }
 
-    private void load() throws IOException {
-        if (channel.size() == MAGIC_NUMBER.length) {
-            return;
-        }
+    private void load(WalTable walTable) throws IOException {
         Buffer readBuffer = Buffer.from((int) channel.size());
         CompletableFuture<WalAppendStatus> readFuture = new CompletableFuture<>();
         channel.read(new WalFileChannel.Attachment(readFuture, 0, readBuffer.remaining(), readBuffer));
         readFuture.join();
         readBuffer.flip();
         byte[] magicNumber = readBuffer.getArray(MAGIC_NUMBER.length);
-        Ensure.equals(magicNumber, MAGIC_NUMBER);
+        Ensure.equals(magicNumber, MAGIC_NUMBER, "WAL file magic number not equals");
+        if (readBuffer.remaining() > 0) {
+            // TODO: load WalTable
+            walTable.put(new HashKey("ASDF"),new Field("ASDF"),new Value(new byte[]{1,2,3,4,5,6,7,8,9,0}));
+            LOGGER.info("Loaded {} entries to WalTable", 1);
+        } else {
+            LOGGER.info("File {} is empty", path);
+        }
+        LOGGER.info("Loaded WAL file {}", path);
     }
 
     public void close() throws IOException {

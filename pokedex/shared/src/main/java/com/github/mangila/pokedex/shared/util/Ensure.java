@@ -53,6 +53,13 @@ public final class Ensure {
         }
     }
 
+    public static void equals(byte[] a, byte[] a2, String message) {
+        boolean equals = Arrays.equals(a, a2);
+        if (!equals) {
+            throw new IllegalStateException(message);
+        }
+    }
+
     public static void notNull(Object object, Supplier<RuntimeException> ex) {
         if (object == null) {
             throw ex.get();

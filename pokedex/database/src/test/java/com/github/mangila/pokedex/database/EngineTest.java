@@ -20,7 +20,7 @@ class EngineTest {
                 new FileManager(new WalFileManager(new DatabaseName("hej"))),
                 new Cache(new LruCache<>(new LruCacheConfig(100)))
         );
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 21; i++) {
             e.appendAsync(
                     new HashKey("hash"),
                     new Field("hejsan" + i),

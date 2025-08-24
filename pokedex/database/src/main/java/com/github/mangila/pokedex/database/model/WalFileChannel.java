@@ -78,7 +78,6 @@ public class WalFileChannel {
         }
     };
 
-
     public void write(Buffer writeBuffer, CompletableFuture<WalAppendStatus> future) {
         int bytesToWrite = writeBuffer.remaining();
         var attachment = new WalFileChannel.Attachment(

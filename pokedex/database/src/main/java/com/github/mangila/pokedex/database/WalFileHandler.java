@@ -54,7 +54,7 @@ public class WalFileHandler {
                     } else if (status == WalAppendStatus.FAILED) {
                         LOGGER.warn("Failed to write to WAL file");
                     }
-                    if (walTable.fieldSize() >= 1000 && shouldFlush()) {
+                    if (walTable.fieldSize() >= 10 && shouldFlush()) {
                         flushLatch.countDown();
                     }
                     return status;
@@ -63,6 +63,10 @@ public class WalFileHandler {
 
     public boolean isFlushing() {
         return walFile.status().get() == WalFileStatus.FLUSHING;
+    }
+
+    public WalTable walTable() {
+        return walTable;
     }
 
     private boolean shouldFlush() {

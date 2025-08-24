@@ -59,9 +59,9 @@ public class WalFileManager {
             for (Path path : walFiles) {
                 LOGGER.info("Replaying WAL file {}", path);
                 WalFile walFile = new WalFile(path);
-                walRotations.set(walFile.getRotation());
-                walFile.open();
+                walRotations.set(walFile.getRotation() + 1);
                 WalFileHandler handler = new WalFileHandler(walFile);
+                walFile.open(handler.walTable());
                 try {
                     handler.flush();
                 } catch (InterruptedException e) {
@@ -78,8 +78,8 @@ public class WalFileManager {
                 .concat(".wal");
         Path path = Path.of(name);
         WalFile walFile = new WalFile(path);
-        walFile.open();
         WalFileHandler handler = new WalFileHandler(walFile);
+        walFile.open(handler.walTable());
         handlerRef.set(handler);
         walRotations.incrementAndGet();
     }
