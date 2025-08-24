@@ -1,43 +1,48 @@
 package com.github.mangila.pokedex.shared.json;
 
-import com.github.mangila.pokedex.shared.util.Ensure;
-
-import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 
 public class JsonTokenizer {
     public static JsonTokenQueue tokenizeFrom(byte[] data) {
+        if (data == null || data.length == 0) {
+            return JsonTokenQueue.EMPTY;
+        }
         return tokenize(data);
     }
 
-    public static JsonTokenQueue tokenizeFrom(String data) {
-        return tokenize(data.getBytes(Charset.defaultCharset()));
-    }
-
-    /**
-     * Tokenizes a JSON string into a queue of tokens.
-     * Create Queue with 1024 as the start capacity, for some extra performance.
-     */
     private static JsonTokenQueue tokenize(byte[] data) {
-        Ensure.notNull(data, "json data must not be null");
-        if (data.length == 0) {
-            return JsonTokenQueue.EMPTY;
-        }
         JsonLexer lexer = new JsonLexer(data);
-        JsonTokenQueue queue = new JsonTokenQueue(new ArrayDeque<>(1024));
+        JsonTokenQueue queue = new JsonTokenQueue(new ArrayDeque<>(estimateCapacity(data.length)));
         try (JsonStreamReader reader = lexer.getReader()) {
             int current;
             while ((current = reader.read()) != -1) {
                 if (Character.isWhitespace(current)) {
                     continue;
                 }
-                var token = lexer.lexChar(current);
+                JsonToken token = lexer.lexChar(current);
                 queue.add(token);
             }
+        } catch (NotValidJsonException e) {
+            throw e;
         } catch (Exception e) {
-            throw new InvalidJsonException(e.getMessage(), e);
+            throw new NotValidJsonException(e.getMessage(), e);
         }
-
         return queue;
+    }
+
+
+    /**
+     * Estimates the initial capacity for a data structure based on the size of the provided byte array.
+     *
+     * @param dataLength the byte array whose length is used to estimate the capacity
+     * @return the estimated capacity, which is generally one-fourth of the byte array size,
+     * or a minimum value of 16 if the calculated capacity does not exceed 32
+     */
+    private static int estimateCapacity(int dataLength) {
+        int capacity = dataLength / 4;
+        if (capacity > 32) {
+            return capacity;
+        }
+        return 16;
     }
 }

@@ -1,10 +1,8 @@
 package com.github.mangila.pokedex.api.db;
 
-import com.github.mangila.pokedex.api.model.Pokemon;
 import com.github.mangila.pokedex.database.Database;
 import com.github.mangila.pokedex.database.DatabaseConfig;
-import com.github.mangila.pokedex.database.DatabaseName;
-import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
+import com.github.mangila.pokedex.database.model.DatabaseName;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +10,9 @@ import org.slf4j.LoggerFactory;
 public class PokemonDatabase {
     private static final Logger LOGGER = LoggerFactory.getLogger(PokemonDatabase.class);
 
-    private static final DatabaseConfig DEFAULT_CONFIG = new DatabaseConfig(
-            new DatabaseName("pokedex"),
-            new LruCacheConfig(100)
-    );
+    private static final DatabaseConfig DEFAULT_CONFIG = DatabaseConfig.builder()
+            .databaseName(new DatabaseName("pokedex"))
+            .build();
     private static DatabaseConfig config;
 
     private static final class Holder {
@@ -41,14 +38,13 @@ public class PokemonDatabase {
         PokemonDatabase.config = config;
     }
 
-    private final Database<Pokemon> instance;
+    private final Database instance;
 
     private PokemonDatabase(DatabaseConfig config) {
-        this.instance = new Database<>(config, () -> Pokemon.DEFAULT_INSTANCE);
-        instance.init();
+        this.instance = new Database(config);
     }
 
-    public Database<Pokemon> instance() {
+    public Database instance() {
         return instance;
     }
 }

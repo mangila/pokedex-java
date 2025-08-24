@@ -23,21 +23,27 @@ public class VirtualThreadFactory {
         return Executors.newScheduledThreadPool(corePoolSize, THREAD_FACTORY);
     }
 
+    public static ExecutorService newFixedThreadPool(int nThreads) {
+        return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
+    }
+
     public static ExecutorService newSingleThreadExecutor() {
         return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }
 
     public static boolean terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
         try {
+            LOGGER.debug("Shutting down executor service {}", executorService);
             executorService.shutdown();
             while (!executorService.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
                 executorService.shutdownNow();
             }
+            LOGGER.debug("Executor service {} terminated", executorService);
+            return executorService.isTerminated();
         } catch (InterruptedException e) {
-            executorService.shutdownNow();
+            LOGGER.error("Interrupted while waiting for termination", e);
             Thread.currentThread().interrupt();
-            LOGGER.error("Worker executor shutdown interrupted", e);
+            return false;
         }
-        return executorService.isTerminated();
     }
 }

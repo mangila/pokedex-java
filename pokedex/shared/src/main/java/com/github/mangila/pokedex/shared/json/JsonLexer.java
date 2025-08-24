@@ -9,15 +9,15 @@ import static com.github.mangila.pokedex.shared.json.JsonType.*;
 
 public class JsonLexer {
     private static final Map<JsonType, JsonToken> TOKEN_MAP = Map.of(
-            LEFT_BRACE, new JsonToken(LEFT_BRACE, '{'),
-            RIGHT_BRACE, new JsonToken(RIGHT_BRACE, '}'),
-            LEFT_BRACKET, new JsonToken(LEFT_BRACKET, '['),
-            RIGHT_BRACKET, new JsonToken(RIGHT_BRACKET, ']'),
+            OPEN_BRACE, new JsonToken(OPEN_BRACE, '{'),
+            CLOSE_BRACE, new JsonToken(CLOSE_BRACE, '}'),
+            OPEN_BRACKET, new JsonToken(OPEN_BRACKET, '['),
+            CLOSE_BRACKET, new JsonToken(CLOSE_BRACKET, ']'),
             COMMA, new JsonToken(COMMA, ','),
             COLON, new JsonToken(COLON, ':'),
             TRUE, new JsonToken(TRUE, true),
             FALSE, new JsonToken(FALSE, false),
-            NULL, new JsonToken(NULL, null)
+            NULL, new JsonToken(NULL, "null")
     );
 
     private static final Map<String, JsonToken> TOKEN_MAP_NUMBER = Map.of(
@@ -53,10 +53,10 @@ public class JsonLexer {
 
     public JsonToken lexChar(int current) throws IOException {
         return switch (current) {
-            case '{' -> TOKEN_MAP.get(LEFT_BRACE);
-            case '}' -> TOKEN_MAP.get(RIGHT_BRACE);
-            case '[' -> TOKEN_MAP.get(LEFT_BRACKET);
-            case ']' -> TOKEN_MAP.get(RIGHT_BRACKET);
+            case '{' -> TOKEN_MAP.get(OPEN_BRACE);
+            case '}' -> TOKEN_MAP.get(CLOSE_BRACE);
+            case '[' -> TOKEN_MAP.get(OPEN_BRACKET);
+            case ']' -> TOKEN_MAP.get(CLOSE_BRACKET);
             case ',' -> TOKEN_MAP.get(COMMA);
             case ':' -> TOKEN_MAP.get(COLON);
             case '"' -> lexString();
@@ -77,7 +77,7 @@ public class JsonLexer {
             case '9' -> TOKEN_MAP_NUMBER.get("nine");
             case 'E' -> TOKEN_MAP_NUMBER_SPECIAL.get("programmer-e");
             case 'e' -> TOKEN_MAP_NUMBER_SPECIAL.get("math-e");
-            default -> throw new InvalidJsonException("Not a valid JSON character: %c".formatted(current));
+            default -> throw new NotValidJsonException("Not a valid JSON character: %c".formatted(current));
         };
     }
 
@@ -90,7 +90,7 @@ public class JsonLexer {
         while (true) {
             int current = reader.read();
             if (current == -1) {
-                throw new InvalidJsonException("Unexpected end of data while lexing string");
+                throw new NotValidJsonException("Unexpected end of data while lexing string");
             }
             if (current == '"') {
                 break;
@@ -106,7 +106,7 @@ public class JsonLexer {
                     line.append(HexFormat.fromHexDigits(hex));
                     continue;
                 } else {
-                    throw new InvalidJsonException("Not valid escape sequence: %s".formatted(line.toString()));
+                    throw new NotValidJsonException("Not valid escape sequence: %s".formatted(line.toString()));
                 }
             }
 
@@ -135,7 +135,7 @@ public class JsonLexer {
         if (read.equals("alse")) {
             return TOKEN_MAP.get(FALSE);
         }
-        throw new InvalidJsonException("Not valid parsing of boolean value false");
+        throw new NotValidJsonException("Not valid parsing of boolean value false");
     }
 
     /**
@@ -150,6 +150,6 @@ public class JsonLexer {
         } else if (read.equals("ull")) {
             return TOKEN_MAP.get(NULL);
         }
-        throw new InvalidJsonException("Not valid parsing of boolean value true or null");
+        throw new NotValidJsonException("Not valid parsing of boolean value true or null");
     }
 }

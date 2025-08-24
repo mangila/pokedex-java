@@ -10,7 +10,7 @@ import com.github.mangila.pokedex.shared.https.model.ResponseHeaders;
 import com.github.mangila.pokedex.shared.https.model.Status;
 import com.github.mangila.pokedex.shared.json.JsonParser;
 import com.github.mangila.pokedex.shared.tls.TlsConnectionHandler;
-import com.github.mangila.pokedex.shared.tls.pool.TlsConnectionPool;
+import com.github.mangila.pokedex.shared.tls.TlsConnectionPool;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.jspecify.annotations.Nullable;
@@ -35,7 +35,6 @@ public class JsonClient {
         this.host = config.host();
         this.jsonParser = config.jsonParser();
         this.pool = new TlsConnectionPool(config.poolConfig());
-        pool.init();
         this.responseTtlCache = new TtlCache<>(config.ttlCacheConfig());
         this.statusReader = new HttpStatusReader();
         this.headerReader = new HttpHeaderReader();

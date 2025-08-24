@@ -17,7 +17,7 @@ public record JsonStreamReader(BufferedReader stream) implements AutoCloseable {
     }
 
     public CharBuffer read(int length) throws IOException {
-        var buffer = CharBuffer.allocate(length);
+        CharBuffer buffer = CharBuffer.allocate(length);
         //noinspection ResultOfMethodCallIgnored
         stream.read(buffer.array(), 0, length);
         return buffer;

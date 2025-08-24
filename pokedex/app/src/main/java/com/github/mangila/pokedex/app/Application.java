@@ -41,11 +41,5 @@ public class Application {
             }
         }
         PokemonDatabase db = PokemonDatabase.getInstance();
-        if (DELETE_DATABASE) {
-            db.instance().deleteAsync().join();
-        } else if (TRUNCATE_DATABASE) {
-            db.instance().truncateAsync().join();
-        }
-        db.instance().close();
     }
 }

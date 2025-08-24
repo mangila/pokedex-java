@@ -5,6 +5,7 @@ import java.util.List;
 
 public class JsonArray {
 
+    public static final JsonArray EMPTY = new JsonArray();
     private final List<JsonValue> list = new ArrayList<>();
 
     public void add(JsonValue value) {

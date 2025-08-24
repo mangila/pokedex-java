@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.tls.pool;
+package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.util.Ensure;
 
