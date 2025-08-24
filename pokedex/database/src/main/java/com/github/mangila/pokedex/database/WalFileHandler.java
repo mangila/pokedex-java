@@ -37,8 +37,6 @@ public class WalFileHandler {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
-                } catch (IOException e) {
-                    LOGGER.error("Failed to flush WAL file", e);
                 }
             }
         });
@@ -68,7 +66,7 @@ public class WalFileHandler {
                 });
     }
 
-    public void flush() throws IOException {
+    public void flush() {
         if (walFile.status().compareAndSet(WalFileStatus.SHOULD_FLUSH, WalFileStatus.FLUSHING)) {
             LOGGER.info("Flushing WAL file {}", walFile.getPath());
             try {
@@ -81,7 +79,11 @@ public class WalFileHandler {
                     new QueueEntry(walTable)
             );
             walTable.clear();
-            walFile.delete();
+            try {
+                walFile.delete();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
