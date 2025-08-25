@@ -6,14 +6,7 @@ import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.concurrent.CompletableFuture;
 
-class DefaultEngine implements Engine {
-    private final FileManager fileManager;
-    private final Cache cache;
-
-    public DefaultEngine(FileManager fileManager, Cache cache) {
-        this.fileManager = fileManager;
-        this.cache = cache;
-    }
+record DefaultEngine(FileManager fileManager, Cache cache) implements Engine {
 
     @Override
     public CompletableFuture<Boolean> putAsync(String key, String field, byte[] value) {
