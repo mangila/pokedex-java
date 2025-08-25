@@ -16,10 +16,12 @@ class DefaultEngine implements Engine {
     }
 
     @Override
-    public CompletableFuture<Boolean> putAsync(Key key, Field field, Value value) {
+    public CompletableFuture<Boolean> putAsync(String key, String field, byte[] value) {
+        Key k = new Key(key);
+        Field f = new Field(field);
+        Value v = new Value(value);
         return fileManager.wal()
-                .putAsync(key, field, value)
+                .putAsync(k, f, v)
                 .copy();
     }
-
 }

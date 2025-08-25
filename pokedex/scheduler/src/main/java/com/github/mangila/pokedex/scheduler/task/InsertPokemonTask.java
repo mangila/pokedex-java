@@ -6,9 +6,6 @@ import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResp
 import com.github.mangila.pokedex.api.client.pokeapi.response.SpeciesResponse;
 import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
-import com.github.mangila.pokedex.database.model.Field;
-import com.github.mangila.pokedex.database.model.Key;
-import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
@@ -72,10 +69,9 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
                     .join();
             LOGGER.info("#{} {}", speciesResponse.id(), speciesResponse.name());
             database.instance().engine()
-                    .putAsync(
-                            new Key("pokemon::" + speciesResponse.id()),
-                            new Field("name"),
-                            new Value(speciesResponse.name().getBytes(Charset.defaultCharset())));
+                    .putAsync("pokemon::" + speciesResponse.id(),
+                            "name",
+                            speciesResponse.name().getBytes(Charset.defaultCharset()));
         } catch (Exception e) {
             LOGGER.error("ERR", e);
             if (queueEntry.equalsMaxRetries(3)) {

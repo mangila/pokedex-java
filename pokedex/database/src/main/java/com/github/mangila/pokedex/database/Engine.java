@@ -1,12 +1,8 @@
 package com.github.mangila.pokedex.database;
 
-import com.github.mangila.pokedex.database.model.Field;
-import com.github.mangila.pokedex.database.model.Key;
-import com.github.mangila.pokedex.database.model.Value;
-
 import java.util.concurrent.CompletableFuture;
 
 public interface Engine {
 
-    CompletableFuture<Boolean> putAsync(Key key, Field field, Value value);
+    CompletableFuture<Boolean> putAsync(String key, String field, byte[] value);
 }
