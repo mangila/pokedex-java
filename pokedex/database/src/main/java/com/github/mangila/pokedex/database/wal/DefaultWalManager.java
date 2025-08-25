@@ -15,7 +15,7 @@ import java.util.concurrent.*;
 public final class DefaultWalManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWalManager.class);
     private final WalTableHandler walTableHandler;
-    private final InsertBufferSubscriber insertBufferSubscriber;
+    private final WalTableFlusher walTableFlusher;
     private final WalTableAfterFlushCleanUpSubscriber walTableAfterFlushCleanUpSubscriber;
     private final CallbackItemPublisher callbackItemPublisher;
     private final SubmissionPublisher<List<Entry>> finishedFlushingPublisher;
@@ -23,18 +23,19 @@ public final class DefaultWalManager {
     private final FlushThread flushThread;
 
     public DefaultWalManager() {
-        Queue queue = QueueService.getInstance().createNewQueue(new QueueName("WAL_FLUSH_BUFFER"));
+        Queue queue = QueueService.getInstance()
+                .createNewQueue(new QueueName("WAL_FLUSH_BUFFER"));
         WalTable walTable = new WalTable(new ConcurrentHashMap<>());
         this.callbackItemPublisher = new CallbackItemPublisher();
         this.finishedFlushingPublisher = new SubmissionPublisher<>();
         this.flushThread = new FlushThread(queue, finishedFlushingPublisher);
-        this.insertBufferSubscriber = new InsertBufferSubscriber(queue);
+        this.walTableFlusher = new WalTableFlusher(queue);
         this.walTableAfterFlushCleanUpSubscriber = new WalTableAfterFlushCleanUpSubscriber(walTable);
         this.walTableHandler = new WalTableHandler(walTable, callbackItemPublisher);
     }
 
     public void open() {
-        callbackItemPublisher.subscribe(insertBufferSubscriber);
+        callbackItemPublisher.subscribe(walTableFlusher);
         finishedFlushingPublisher.subscribe(walTableAfterFlushCleanUpSubscriber);
         flushThreadExecutor.scheduleWithFixedDelay(
                 flushThread,
@@ -53,5 +54,4 @@ public final class DefaultWalManager {
     public CompletableFuture<Void> putAsync(Key key, Field field, Value value) {
         return walTableHandler.putAsync(key, field, value);
     }
-
 }
