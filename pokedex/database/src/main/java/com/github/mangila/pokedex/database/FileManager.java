@@ -1,17 +1,18 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
-import com.github.mangila.pokedex.database.wal.WalManager;
+import com.github.mangila.pokedex.database.wal.DefaultWalManager;
 
 class FileManager {
 
-    private final WalManager wal;
+    private final DefaultWalManager wal;
 
     FileManager(DatabaseConfig config) {
-        this.wal = new WalManager();
+        this.wal = new DefaultWalManager();
+        wal.open();
     }
 
-    WalManager wal() {
+    DefaultWalManager wal() {
         return wal;
     }
 }

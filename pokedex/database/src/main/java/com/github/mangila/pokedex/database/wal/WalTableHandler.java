@@ -5,16 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.SubmissionPublisher;
 
 class WalTableHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalTableHandler.class);
     private final WalTable walTable;
-    private final SubmissionPublisher<CallbackItem<Entry>> callbackItemPublisher;
+    private final CallbackItemPublisher callbackItemPublisher;
 
     WalTableHandler(WalTable walTable,
-                    SubmissionPublisher<CallbackItem<Entry>> callbackItemPublisher) {
+                    CallbackItemPublisher callbackItemPublisher) {
         this.walTable = walTable;
         this.callbackItemPublisher = callbackItemPublisher;
     }
