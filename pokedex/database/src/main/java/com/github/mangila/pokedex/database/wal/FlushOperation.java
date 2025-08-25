@@ -11,6 +11,7 @@ record FlushOperation(
     enum Reason {
         REPLAY,
         MANUAL,
+        THRESHOLD_SCHEDULED,
         THRESHOLD_LIMIT
     }
 }
