@@ -1,5 +1,6 @@
-package com.github.mangila.pokedex.database.model;
+package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.model.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +16,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class WalFileChannel {
+class WalFileChannel {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFileChannel.class);
     private final AsynchronousFileChannel channel;
     private final AtomicLong position;
     private final Phaser phaser;
 
-    public WalFileChannel(AsynchronousFileChannel channel) throws IOException {
+    WalFileChannel(AsynchronousFileChannel channel) throws IOException {
         this.channel = channel;
         this.position = new AtomicLong(size());
         this.phaser = new Phaser();
@@ -33,11 +34,11 @@ public class WalFileChannel {
         public void completed(Integer result, Attachment attachment) {
             if (result != attachment.bytesToWrite) {
                 // TODO retry read or write or throw exception for partial writes and discard write
-                attachment.future.complete(WalAppendStatus.FAILED);
+                attachment.future.complete(WalIoOperationStatus.FAILED);
                 return;
             }
             phaser.arriveAndDeregister();
-            attachment.future.complete(WalAppendStatus.SUCCESS);
+            attachment.future.complete(WalIoOperationStatus.SUCCESS);
         }
 
         @Override
@@ -59,10 +60,10 @@ public class WalFileChannel {
         public void completed(Integer result, Attachment attachment) {
             if (result != attachment.bytesToWrite) {
                 // TODO retry read or write or throw exception for partial writes and discard write
-                attachment.future.complete(WalAppendStatus.FAILED);
+                attachment.future.complete(WalIoOperationStatus.FAILED);
                 return;
             }
-            attachment.future.complete(WalAppendStatus.SUCCESS);
+            attachment.future.complete(WalIoOperationStatus.SUCCESS);
         }
 
         @Override
@@ -78,7 +79,7 @@ public class WalFileChannel {
         }
     };
 
-    public void write(Buffer writeBuffer, CompletableFuture<WalAppendStatus> future) {
+    void write(Buffer writeBuffer, CompletableFuture<WalIoOperationStatus> future) {
         int bytesToWrite = writeBuffer.remaining();
         var attachment = new WalFileChannel.Attachment(
                 future,
@@ -89,32 +90,40 @@ public class WalFileChannel {
         write(attachment);
     }
 
-    public record Attachment(CompletableFuture<WalAppendStatus> future,
-                             long position,
-                             int bytesToWrite,
-                             Buffer buffer) {
+    void truncate(long size) throws IOException {
+        channel.truncate(size);
+    }
+
+    record Attachment(CompletableFuture<WalIoOperationStatus> future,
+                      long position,
+                      int bytesToWrite,
+                      Buffer buffer) {
     }
 
 
-    public void write(Attachment attachment) {
+    void write(Attachment attachment) {
         phaser.register();
         channel.write(attachment.buffer.value(), attachment.position, attachment, WRITE_COMPLETION_HANDLER);
     }
 
-    public void read(Attachment attachment) {
+    void read(Attachment attachment) {
         channel.read(attachment.buffer.value(), attachment.position, attachment, READ_COMPLETION_HANDLER);
     }
 
-    public long size() throws IOException {
-        return channel.size();
+    long size() {
+        try {
+            return channel.size();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void close() throws IOException {
+    void close() throws IOException {
         position.set(0);
         channel.close();
     }
 
-    public boolean awaitInFlightWritesWithRetry(Duration timeout, int attempts) throws InterruptedException {
+    boolean awaitInFlightWritesWithRetry(Duration timeout, int attempts) throws InterruptedException {
         boolean success = false;
         do {
             try {

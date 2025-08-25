@@ -1,5 +1,9 @@
-package com.github.mangila.pokedex.database.model;
+package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.model.Buffer;
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
@@ -19,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WalFile {
+class WalFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFile.class);
     private static final Set<StandardOpenOption> OPEN_OPTIONS = Set.of(
@@ -32,13 +36,13 @@ public class WalFile {
     private WalFileChannel channel;
     private AtomicReference<WalFileStatus> status = new AtomicReference<>(WalFileStatus.CLOSED);
 
-    public WalFile(Path path) {
+    WalFile(Path path) {
         Ensure.notNull(path, "Path must not be null");
         this.path = path;
         this.walChannelExecutor = VirtualThreadFactory.newFixedThreadPool(10);
     }
 
-    public void open(WalTable walTable) throws IOException {
+    void open(WalTable walTable) throws IOException {
         LOGGER.info("Opening WAL file {}", path);
         if (!Files.exists(path)) {
             Files.createFile(path);
@@ -53,9 +57,9 @@ public class WalFile {
         load(walTable);
     }
 
-    private void load(WalTable walTable) throws IOException {
+    void load(WalTable walTable) throws IOException {
         Buffer readBuffer = Buffer.from((int) channel.size());
-        CompletableFuture<WalAppendStatus> readFuture = new CompletableFuture<>();
+        CompletableFuture<WalIoOperationStatus> readFuture = new CompletableFuture<>();
         channel.read(new WalFileChannel.Attachment(readFuture, 0, readBuffer.remaining(), readBuffer));
         readFuture.join();
         readBuffer.flip();
@@ -71,31 +75,38 @@ public class WalFile {
         LOGGER.info("Loaded WAL file {}", path);
     }
 
-    public void close() throws IOException {
+    void close() throws IOException {
         LOGGER.info("Closing WAL file {}", path);
         channel.close();
         VirtualThreadFactory.terminateGracefully(walChannelExecutor, Duration.ofSeconds(30));
         status.set(WalFileStatus.CLOSED);
     }
 
-    public void delete() throws IOException {
+    void delete() throws IOException {
         LOGGER.info("Deleting WAL file {}", path);
         Files.deleteIfExists(path);
+        status.set(WalFileStatus.DELETED);
     }
 
-    public WalFileChannel channel() {
+    void truncate() throws IOException {
+        LOGGER.info("Truncating WAL file {}", path);
+        channel.truncate(MAGIC_NUMBER.length);
+        status.set(WalFileStatus.OPEN);
+    }
+
+    WalFileChannel channel() {
         return channel;
     }
 
-    public AtomicReference<WalFileStatus> status() {
+    AtomicReference<WalFileStatus> status() {
         return status;
     }
 
-    public Path getPath() {
+    Path getPath() {
         return path;
     }
 
-    public long getRotation() {
+    long getRotation() {
         String name = path.getFileName().toString();
         Pattern p = Pattern.compile("\\d+");
         Matcher m = p.matcher(name.substring(name.lastIndexOf("-") + 1));

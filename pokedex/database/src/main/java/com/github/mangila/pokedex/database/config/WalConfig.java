@@ -1,4 +1,4 @@
 package com.github.mangila.pokedex.database.config;
 
-public record WalConfig() {
+public record WalConfig(long flushSizeThreshold) {
 }

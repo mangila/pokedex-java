@@ -1,25 +1,29 @@
-package com.github.mangila.pokedex.database.model;
+package com.github.mangila.pokedex.database.wal;
+
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public record WalTable(ConcurrentSkipListMap<Key, ConcurrentSkipListMap<Field, Value>> map) {
-    public void put(Key key, Field field, Value value) {
+record WalTable(ConcurrentSkipListMap<Key, ConcurrentSkipListMap<Field, Value>> map) {
+    void put(Key key, Field field, Value value) {
         var created = new ConcurrentSkipListMap<Field, Value>(Comparator.comparing(Field::value));
         var existing = map.putIfAbsent(key, created);
         var table = (existing != null) ? existing : created;
         table.put(field, value);
     }
 
-    public void clear() {
+    void clear() {
         map.clear();
     }
 
-    public int hashKeySize() {
+    int hashKeySize() {
         return map.size();
     }
 
-    public int fieldSize() {
+    int fieldSize() {
         return map.values()
                 .stream()
                 .mapToInt(ConcurrentSkipListMap::size)
