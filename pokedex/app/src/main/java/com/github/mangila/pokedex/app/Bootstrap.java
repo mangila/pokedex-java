@@ -28,7 +28,7 @@ public final class Bootstrap {
         List<Task> tasks = List.of(
                 new QueuePokemonsTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
                 new InsertCriesTask(pokeApiClient, queueService.getQueue(POKEMON_CRIES_QUEUE)),
-                new InsertPokemonTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
+                new InsertSpeciesResponseTaskTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
                 new InsertSpritesTask(pokeApiClient, queueService.getQueue(POKEMON_SPRITES_QUEUE)),
                 new ShutdownTask(queueService)
         );
@@ -42,6 +42,8 @@ public final class Bootstrap {
         queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
         queueService.createNewQueue(POKEMON_SPRITES_QUEUE);
         queueService.createNewQueue(POKEMON_CRIES_QUEUE);
+        queueService.createNewQueue(POKEMON_VARIETY_URL_QUEUE);
+        queueService.createNewQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE);
     }
 
 }

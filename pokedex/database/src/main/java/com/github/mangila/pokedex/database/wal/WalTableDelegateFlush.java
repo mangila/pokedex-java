@@ -76,8 +76,8 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
                                 FlushOperation.Reason.THRESHOLD_LIMIT,
                                 snapshot)
                         ));
-                        entries.clear();
                     }
+                    entries.clear();
                 } finally {
                     lock.unlock();
                 }

@@ -2,28 +2,26 @@ package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
-import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResponse;
 import com.github.mangila.pokedex.api.client.pokeapi.response.SpeciesResponse;
-import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
+import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public record InsertPokemonTask(PokeApiClient pokeApiClient,
-                                Queue queue,
-                                PokemonDatabase database) implements Task {
+public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
+                                            Queue queue,
+                                            PokemonDatabase database) implements Task {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertPokemonTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpeciesResponseTaskTask.class);
 
     private static final ScheduledExecutorService SCHEDULED_EXECUTOR_POOL = VirtualThreadFactory.newScheduledThreadPool(10);
 
@@ -59,14 +57,11 @@ public record InsertPokemonTask(PokeApiClient pokeApiClient,
             PokeApiUri uri = queueEntry.unwrapAs(PokeApiUri.class);
             SpeciesResponse speciesResponse = pokeApiClient.fetchPokemonSpecies(uri)
                     .join();
-            EvolutionChainResponse evolutionChainResponse = pokeApiClient.fetchEvolutionChain(speciesResponse.evolutionChainUrl())
-                    .join();
-            List<CompletableFuture<VarietyResponse>> varietyResponseFutures = speciesResponse.varietiesUrls()
-                    .stream()
-                    .map(pokeApiClient::fetchPokemonVariety)
-                    .toList();
-            CompletableFuture.allOf(varietyResponseFutures.toArray(CompletableFuture[]::new))
-                    .join();
+            QueueService.getInstance()
+                    .add(Config.POKEMON_EVOLUTION_CHAIN_URL_QUEUE, new QueueEntry(speciesResponse.evolutionChainUrl()));
+            speciesResponse.varietiesUrls()
+                    .forEach(url -> QueueService.getInstance()
+                            .add(Config.POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
             LOGGER.info("#{} {}", speciesResponse.id(), speciesResponse.name());
             database.instance().engine()
                     .putAsync("pokemon::" + speciesResponse.id(),
