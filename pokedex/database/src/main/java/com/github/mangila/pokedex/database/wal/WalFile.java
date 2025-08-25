@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,8 +96,39 @@ class WalFile {
         status.set(WalFileStatus.OPEN);
     }
 
-    WalFileChannel channel() {
-        return channel;
+    void write(Buffer writeBuffer, CompletableFuture<WalIoOperationStatus> future) {
+        int bytesToWrite = writeBuffer.remaining();
+        var attachment = new WalFileChannel.Attachment(
+                future,
+                channel.position().getAndAdd(bytesToWrite),
+                bytesToWrite,
+                writeBuffer
+        );
+        LOGGER.debug("Writing: {} - {}", attachment, path);
+        channel.write(attachment);
+    }
+
+    boolean awaitInFlightWritesWithRetry(Duration timeout, int attempts) throws InterruptedException {
+        boolean success = false;
+        do {
+            try {
+                channel.awaitInFlightWrites(timeout);
+                success = true;
+                break;
+            } catch (TimeoutException e) {
+                attempts--;
+                TimeUnit.SECONDS.sleep(1);
+            }
+        } while (attempts >= 0);
+        return success;
+    }
+
+    long size() {
+        try {
+            return channel.size();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     AtomicReference<WalFileStatus> status() {
@@ -106,10 +139,11 @@ class WalFile {
         return path;
     }
 
+    private static final Pattern FIND_ROTATION_PATTERN = Pattern.compile("\\d+");
+
     long getRotation() {
         String name = path.getFileName().toString();
-        Pattern p = Pattern.compile("\\d+");
-        Matcher m = p.matcher(name.substring(name.lastIndexOf("-") + 1));
+        Matcher m = FIND_ROTATION_PATTERN.matcher(name.substring(name.lastIndexOf("-") + 1));
         if (m.find()) {
             return Integer.parseInt(m.group());
         }

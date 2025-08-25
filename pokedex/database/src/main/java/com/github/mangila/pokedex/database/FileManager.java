@@ -9,15 +9,15 @@ class FileManager {
     private final WalFileManager wal;
     private final HashFileManager hash = new HashFileManager();
 
-    public FileManager(DatabaseConfig config) {
+    FileManager(DatabaseConfig config) {
         this.wal = new DefaultWalFileManager(config.databaseName(), config.walConfig());
     }
 
-    public WalFileManager wal() {
+    WalFileManager wal() {
         return wal;
     }
 
-    public HashFileManager hash() {
+    HashFileManager hash() {
         return hash;
     }
 }

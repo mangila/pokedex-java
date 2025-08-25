@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 record WalFlushThread(WalFileHandler walFileHandler) implements Runnable {
 
@@ -11,10 +12,10 @@ record WalFlushThread(WalFileHandler walFileHandler) implements Runnable {
 
     @Override
     public void run() {
-        var callback = walFileHandler.flushCallback();
+        CompletableFuture<Boolean> callback = walFileHandler.flushCallback();
         try {
             walFileHandler.flushLatch().await();
-            var walFile = walFileHandler.walFile();
+            WalFile walFile = walFileHandler.walFile();
             walFileHandler.flush().whenComplete((ok, throwable) -> {
                 if (throwable != null) {
                     callback.completeExceptionally(throwable);

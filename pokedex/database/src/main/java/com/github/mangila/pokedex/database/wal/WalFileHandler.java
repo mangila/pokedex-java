@@ -45,7 +45,7 @@ class WalFileHandler {
         writeBuffer.put(field);
         writeBuffer.put(value);
         writeBuffer.flip();
-        walFile.channel().write(writeBuffer, walAppendFuture);
+        walFile.write(writeBuffer, walAppendFuture);
         return walAppendFuture
                 .thenApply(status -> {
                     if (status == WalIoOperationStatus.SUCCESS) {
@@ -53,7 +53,7 @@ class WalFileHandler {
                     } else if (status == WalIoOperationStatus.FAILED) {
                         LOGGER.warn("Failed to write to WAL file");
                     }
-                    if (walFile.channel().size() >= walConfig.flushSizeThreshold() && shouldFlush()) {
+                    if (walFile.size() >= walConfig.flushSizeThreshold() && shouldFlush()) {
                         flushLatch.countDown();
                     }
                     return status;
@@ -92,7 +92,7 @@ class WalFileHandler {
 
     CompletableFuture<Boolean> flush() throws InterruptedException {
         CompletableFuture<Boolean> flushFuture = new CompletableFuture<>();
-        if (walFile.channel().awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
+        if (walFile.awaitInFlightWritesWithRetry(Duration.ofMinutes(1), 3)) {
             LOGGER.info("Flushing WAL file {}", walFile.getPath());
             // TODO: snapshot waltable and send to disk via future or smt
             walTable.clear();
