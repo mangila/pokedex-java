@@ -28,13 +28,15 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
         this.flushDelegateExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         flushDelegateExecutor.scheduleWithFixedDelay(
                 () -> {
-                    List<Entry> snapshot = List.copyOf(entries);
-                    LOGGER.info("Snapshot for flushing THRESHOLD_SCHEDULED {}", snapshot);
-                    queue.add(new QueueEntry(new FlushOperation(
-                            FlushOperation.Reason.THRESHOLD_SCHEDULED,
-                            snapshot)
-                    ));
-                    entries.removeAll(snapshot);
+                    if (!entries.isEmpty()) {
+                        List<Entry> snapshot = List.copyOf(entries);
+                        LOGGER.info("Snapshot for flushing THRESHOLD_SCHEDULED {}", snapshot);
+                        queue.add(new QueueEntry(new FlushOperation(
+                                FlushOperation.Reason.THRESHOLD_SCHEDULED,
+                                snapshot)
+                        ));
+                        entries.removeAll(snapshot);
+                    }
                 }, 1, 1, TimeUnit.MINUTES
         );
     }
@@ -56,17 +58,18 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
             item.callback().complete(null);
             return;
         }
-        if (entries.size() == 10) {
-            List<Entry> snapshot = List.copyOf(entries);
-            LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
-            queue.add(new QueueEntry(new FlushOperation(
-                    FlushOperation.Reason.THRESHOLD_LIMIT,
-                    snapshot)
-            ));
-            entries.removeAll(snapshot);
+        synchronized (entries) {
+            if (entries.size() >= 50) {
+                List<Entry> snapshot = List.copyOf(entries);
+                LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
+                queue.add(new QueueEntry(new FlushOperation(
+                        FlushOperation.Reason.THRESHOLD_LIMIT,
+                        snapshot)
+                ));
+                entries.clear();
+            }
+            entries.add(entry);
         }
-        entries.add(entry);
-        item.callback().complete(null);
     }
 
     @Override
