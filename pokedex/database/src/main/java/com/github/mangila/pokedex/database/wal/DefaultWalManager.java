@@ -43,6 +43,7 @@ public final class DefaultWalManager {
     }
 
     public void close() {
+        LOGGER.info("Closing WAL manager");
         callbackItemPublisher.close();
         finishedFlushingPublisher.close();
         VirtualThreadFactory.terminateGracefully(flushThreadExecutor, Duration.ofSeconds(30));
