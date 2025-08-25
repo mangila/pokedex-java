@@ -34,12 +34,14 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
                         try {
                             lock.lock();
                             List<Entry> snapshot = List.copyOf(entries);
-                            LOGGER.info("Snapshot for flushing THRESHOLD_SCHEDULED {}", snapshot);
-                            queue.add(new QueueEntry(new FlushOperation(
-                                    FlushOperation.Reason.THRESHOLD_SCHEDULED,
-                                    snapshot)
-                            ));
-                            entries.removeAll(snapshot);
+                            if (!snapshot.isEmpty()) {
+                                LOGGER.info("Snapshot for flushing THRESHOLD_SCHEDULED {}", snapshot);
+                                queue.add(new QueueEntry(new FlushOperation(
+                                        FlushOperation.Reason.THRESHOLD_SCHEDULED,
+                                        snapshot)
+                                ));
+                                entries.removeAll(snapshot);
+                            }
                         } finally {
                             lock.unlock();
                         }
@@ -68,12 +70,14 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
                 try {
                     lock.lock();
                     List<Entry> snapshot = List.copyOf(entries);
-                    LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
-                    queue.add(new QueueEntry(new FlushOperation(
-                            FlushOperation.Reason.THRESHOLD_LIMIT,
-                            snapshot)
-                    ));
-                    entries.clear();
+                    if (!snapshot.isEmpty()) {
+                        LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
+                        queue.add(new QueueEntry(new FlushOperation(
+                                FlushOperation.Reason.THRESHOLD_LIMIT,
+                                snapshot)
+                        ));
+                        entries.clear();
+                    }
                 } finally {
                     lock.unlock();
                 }
