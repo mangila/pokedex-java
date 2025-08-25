@@ -22,6 +22,17 @@ public record SpeciesResponse(BigInteger id,
     }
 
     public record Pedigree(boolean baby, boolean legendary, boolean mythical) {
+        public byte[] getBabyAsBytes() {
+            return new byte[]{(byte) (baby ? 1 : 0)};
+        }
+
+        public byte[] getLegendaryAsBytes() {
+            return new byte[]{(byte) (legendary ? 1 : 0)};
+        }
+
+        public byte[] getMythicalAsBytes() {
+            return new byte[]{(byte) (mythical ? 1 : 0)};
+        }
     }
 
     private static final class SpeciesResponseMapper implements JsonMapper<SpeciesResponse> {

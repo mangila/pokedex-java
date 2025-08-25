@@ -63,10 +63,35 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
                     .forEach(url -> QueueService.getInstance()
                             .add(Config.POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
             LOGGER.info("#{} {}", speciesResponse.id(), speciesResponse.name());
+            String key = "pokemon::".concat(speciesResponse.id().toString());
             database.instance().engine()
-                    .putAsync("pokemon::" + speciesResponse.id(),
+                    .putAsync(key,
                             "name",
                             speciesResponse.name().getBytes(Charset.defaultCharset()));
+            database.instance().engine()
+                    .putAsync(key,
+                            "color",
+                            speciesResponse.color().getBytes(Charset.defaultCharset()));
+            database.instance().engine()
+                    .putAsync(key,
+                            "description",
+                            speciesResponse.description().getBytes(Charset.defaultCharset()));
+            database.instance().engine()
+                    .putAsync(key,
+                            "genus",
+                            speciesResponse.genus().getBytes(Charset.defaultCharset()));
+            database.instance().engine()
+                    .putAsync(key,
+                            "baby",
+                            speciesResponse.pedigree().getBabyAsBytes());
+            database.instance().engine()
+                    .putAsync(key,
+                            "legendary",
+                            speciesResponse.pedigree().getLegendaryAsBytes());
+            database.instance().engine()
+                    .putAsync(key,
+                            "mythical",
+                            speciesResponse.pedigree().getMythicalAsBytes());
         } catch (Exception e) {
             LOGGER.error("ERR", e);
             if (queueEntry.equalsMaxRetries(3)) {
