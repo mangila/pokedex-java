@@ -56,19 +56,20 @@ class WalTableDelegateFlush implements Flow.Subscriber<CallbackItem<Entry>> {
                     List.of(entry)
             )));
             item.callback().complete(null);
-            return;
-        }
-        synchronized (entries) {
-            if (entries.size() >= 50) {
-                List<Entry> snapshot = List.copyOf(entries);
-                LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
-                queue.add(new QueueEntry(new FlushOperation(
-                        FlushOperation.Reason.THRESHOLD_LIMIT,
-                        snapshot)
-                ));
-                entries.clear();
+        } else {
+            synchronized (entries) {
+                if (entries.size() >= 50) {
+                    List<Entry> snapshot = List.copyOf(entries);
+                    LOGGER.info("Snapshot for flushing THRESHOLD_LIMIT {}", snapshot);
+                    queue.add(new QueueEntry(new FlushOperation(
+                            FlushOperation.Reason.THRESHOLD_LIMIT,
+                            snapshot)
+                    ));
+                    entries.clear();
+                }
+                entries.add(entry);
+                item.callback().complete(null);
             }
-            entries.add(entry);
         }
     }
 
