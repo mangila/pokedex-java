@@ -1,23 +1,18 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
-import com.github.mangila.pokedex.database.wal.DefaultWalFileManager;
-import com.github.mangila.pokedex.database.wal.WalFileManager;
+import com.github.mangila.pokedex.database.wal.DefaultWalManager;
 
 class FileManager {
 
-    private final WalFileManager wal;
-    private final HashFileManager hash = new HashFileManager();
+    private final DefaultWalManager wal;
 
     FileManager(DatabaseConfig config) {
-        this.wal = new DefaultWalFileManager(config.databaseName(), config.walConfig());
+        this.wal = new DefaultWalManager();
+        wal.open();
     }
 
-    WalFileManager wal() {
+    DefaultWalManager wal() {
         return wal;
-    }
-
-    HashFileManager hash() {
-        return hash;
     }
 }

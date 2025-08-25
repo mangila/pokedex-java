@@ -1,32 +1,44 @@
 package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Value;
 
-import java.util.Comparator;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-record WalTable(ConcurrentSkipListMap<Key, ConcurrentSkipListMap<Field, Value>> map) {
+record WalTable(Map<Key, Map<Field, Value>> table) {
     void put(Key key, Field field, Value value) {
-        var created = new ConcurrentSkipListMap<Field, Value>(Comparator.comparing(Field::value));
-        var existing = map.putIfAbsent(key, created);
-        var table = (existing != null) ? existing : created;
-        table.put(field, value);
+        table.compute(key, (k, fieldMap) -> {
+            if (fieldMap == null) {
+                fieldMap = new java.util.concurrent.ConcurrentHashMap<>();
+            }
+            fieldMap.put(field, value);
+            return fieldMap;
+        });
     }
 
-    void clear() {
-        map.clear();
+    public void remove(List<Entry> entries) {
+        entries.forEach(entry -> {
+            Key key = entry.key();
+            Field field = entry.field();
+            Value value = entry.value();
+            Map<Field, Value> fieldMap = table.get(key);
+            if (fieldMap != null) {
+                Value existingValue = fieldMap.get(field);
+                if (existingValue != null && Arrays.equals(existingValue.value(), value.value())) {
+                    fieldMap.remove(field);
+                    if (fieldMap.isEmpty()) {
+                        table.remove(key);
+                    }
+                }
+            }
+        });
     }
 
-    int hashKeySize() {
-        return map.size();
-    }
-
-    int fieldSize() {
-        return map.values()
-                .stream()
-                .mapToInt(ConcurrentSkipListMap::size)
-                .sum();
+    public void clear() {
+        table.clear();
     }
 }

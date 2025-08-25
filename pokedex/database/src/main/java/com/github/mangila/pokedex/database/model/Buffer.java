@@ -82,4 +82,12 @@ public record Buffer(ByteBuffer value) {
         putInt(value.length());
         put(value.value());
     }
+
+    public void put(Buffer b) {
+        value.put(b.value);
+    }
+
+    public Buffer duplicate() {
+        return new Buffer(ByteBuffer.wrap(value.array()));
+    }
 }
