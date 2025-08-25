@@ -4,5 +4,5 @@ import java.util.concurrent.CompletableFuture;
 
 public sealed interface Engine permits DefaultEngine {
 
-    CompletableFuture<Boolean> putAsync(String key, String field, byte[] value);
+    CompletableFuture<Void> putAsync(String key, String field, byte[] value);
 }

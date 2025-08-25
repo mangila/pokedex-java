@@ -6,7 +6,6 @@ import com.github.mangila.pokedex.database.wal.WalManager;
 class FileManager {
 
     private final WalManager wal;
-    private final HashFileManager hash = new HashFileManager();
 
     FileManager(DatabaseConfig config) {
         this.wal = new WalManager();
@@ -14,9 +13,5 @@ class FileManager {
 
     WalManager wal() {
         return wal;
-    }
-
-    HashFileManager hash() {
-        return hash;
     }
 }

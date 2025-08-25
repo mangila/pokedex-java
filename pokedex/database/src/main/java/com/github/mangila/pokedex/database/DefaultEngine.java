@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 record DefaultEngine(FileManager fileManager, Cache cache) implements Engine {
 
     @Override
-    public CompletableFuture<Boolean> putAsync(String key, String field, byte[] value) {
+    public CompletableFuture<Void> putAsync(String key, String field, byte[] value) {
         Key k = new Key(key);
         Field f = new Field(field);
         Value v = new Value(value);
