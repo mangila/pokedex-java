@@ -1,6 +1,8 @@
 package com.github.mangila.pokedex.api.client.pokeapi;
 
-import com.github.mangila.pokedex.api.client.pokeapi.response.*;
+import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResponse;
+import com.github.mangila.pokedex.api.client.pokeapi.response.PokeApiClientException;
+import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
 import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
@@ -66,11 +68,16 @@ public class PokeApiClient {
         return response;
     }
 
-    public CompletableFuture<SpeciesResponse> fetchPokemonSpecies(PokeApiUri uri) {
+    public CompletableFuture<JsonRoot> fetch(PokeApiUri uri) {
         return jsonClient.fetchAsync(uri.toGetRequest())
                 .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body)
-                .thenApply(SpeciesResponse::from);
+                .thenApply(JsonResponse::body);
+    }
+
+    public CompletableFuture<JsonRoot> fetchPokemonSpecies(PokeApiUri uri) {
+        return jsonClient.fetchAsync(uri.toGetRequest())
+                .handle(this::ensureSuccess)
+                .thenApply(JsonResponse::body);
     }
 
     public CompletableFuture<VarietyResponse> fetchPokemonVariety(PokeApiUri uri) {
@@ -85,13 +92,5 @@ public class PokeApiClient {
                 .handle(this::ensureSuccess)
                 .thenApply(JsonResponse::body)
                 .thenApply(EvolutionChainResponse::from);
-    }
-
-    public CompletableFuture<PokemonsResponse> fetchAllPokemons(int limit) {
-        PokeApiUri uri = PokeApiUri.from("https://pokeapi.co/api/v2/pokemon-species?limit=" + limit);
-        return jsonClient.fetchAsync(uri.toGetRequest())
-                .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body)
-                .thenApply(PokemonsResponse::from);
     }
 }

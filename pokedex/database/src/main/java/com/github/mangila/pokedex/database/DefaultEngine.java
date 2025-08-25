@@ -17,4 +17,10 @@ record DefaultEngine(FileManager fileManager, Cache cache) implements Engine {
                 .putAsync(k, f, v)
                 .copy();
     }
+
+    @Override
+    public void close() {
+        fileManager.wal().close();
+        cache.clear();
+    }
 }

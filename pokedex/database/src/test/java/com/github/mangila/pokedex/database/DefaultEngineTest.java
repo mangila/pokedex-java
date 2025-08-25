@@ -2,8 +2,10 @@ package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
 import com.github.mangila.pokedex.database.model.DatabaseName;
+import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
+import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,6 +14,7 @@ class DefaultEngineTest {
 
     @Test
     void abc() throws IOException, InterruptedException {
+        QueueService.getInstance().createNewQueue(Config.DATABASE_WAL_FLUSH_BUFFER_QUEUE);
         var e = new DefaultEngine(
                 new FileManager(DatabaseConfig.builder()
                         .databaseName(new DatabaseName("test"))

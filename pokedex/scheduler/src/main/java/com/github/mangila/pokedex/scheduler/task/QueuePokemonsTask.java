@@ -1,7 +1,9 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
-import com.github.mangila.pokedex.api.client.pokeapi.response.PokemonsResponse;
+import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
+import com.github.mangila.pokedex.shared.json.model.JsonRoot;
+import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public record QueuePokemonsTask(PokeApiClient pokeApiClient,
@@ -38,10 +41,21 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
 
     @Override
     public void run() {
-        pokeApiClient.fetchAllPokemons(pokemonLimit)
-                .thenApply(PokemonsResponse::uris)
+        PokeApiUri uri = PokeApiUri.from("https://pokeapi.co/api/v2/pokemon-species?limit=" + pokemonLimit);
+        pokeApiClient.fetch(uri)
+                .thenApply(QueuePokemonsTask::getUris)
                 .thenApply(list -> list.stream().map(QueueEntry::new).toList())
                 .thenAccept(queueEntries -> queueEntries.forEach(queue::add))
                 .join();
+    }
+
+    private static List<PokeApiUri> getUris(JsonRoot jsonRoot) {
+        return jsonRoot.getArray("results")
+                .values()
+                .stream()
+                .map(JsonValue::unwrapObject)
+                .map(jsonObject -> jsonObject.getString("url"))
+                .map(PokeApiUri::from)
+                .toList();
     }
 }

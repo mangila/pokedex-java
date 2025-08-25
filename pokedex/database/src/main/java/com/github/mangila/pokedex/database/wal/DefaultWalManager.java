@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.*;
+import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueName;
 import com.github.mangila.pokedex.shared.queue.QueueService;
@@ -22,8 +23,7 @@ public final class DefaultWalManager {
     private final FlushThread flushThread;
 
     public DefaultWalManager() {
-        Queue queue = QueueService.getInstance()
-                .createNewQueue(new QueueName("WAL_FLUSH_BUFFER"));
+        Queue queue = QueueService.getInstance().getQueue(Config.DATABASE_WAL_FLUSH_BUFFER_QUEUE);
         WalTable walTable = new WalTable(new ConcurrentHashMap<>());
         this.callbackItemPublisher = new CallbackItemPublisher();
         this.finishedFlushingPublisher = new SubmissionPublisher<>();

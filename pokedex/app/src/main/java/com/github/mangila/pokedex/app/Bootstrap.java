@@ -44,6 +44,7 @@ public final class Bootstrap {
         queueService.createNewQueue(POKEMON_CRIES_QUEUE);
         queueService.createNewQueue(POKEMON_VARIETY_URL_QUEUE);
         queueService.createNewQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE);
+        queueService.createNewQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
     }
 
 }
