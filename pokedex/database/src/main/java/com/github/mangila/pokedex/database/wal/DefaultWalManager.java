@@ -15,8 +15,7 @@ import java.util.concurrent.*;
 public final class DefaultWalManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWalManager.class);
     private final WalTableHandler walTableHandler;
-    private final WalTableFlusher walTableFlusher;
-    private final WalTableAfterFlushCleanUpSubscriber walTableAfterFlushCleanUpSubscriber;
+    private final WalTableDelegateFlush walTableDelegateFlush;
     private final CallbackItemPublisher callbackItemPublisher;
     private final SubmissionPublisher<List<Entry>> finishedFlushingPublisher;
     private final ScheduledExecutorService flushThreadExecutor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
@@ -29,14 +28,12 @@ public final class DefaultWalManager {
         this.callbackItemPublisher = new CallbackItemPublisher();
         this.finishedFlushingPublisher = new SubmissionPublisher<>();
         this.flushThread = new FlushThread(queue, finishedFlushingPublisher);
-        this.walTableFlusher = new WalTableFlusher(queue);
-        this.walTableAfterFlushCleanUpSubscriber = new WalTableAfterFlushCleanUpSubscriber(walTable);
+        this.walTableDelegateFlush = new WalTableDelegateFlush(queue);
         this.walTableHandler = new WalTableHandler(walTable, callbackItemPublisher);
     }
 
     public void open() {
-        callbackItemPublisher.subscribe(walTableFlusher);
-        finishedFlushingPublisher.subscribe(walTableAfterFlushCleanUpSubscriber);
+        callbackItemPublisher.subscribe(walTableDelegateFlush);
         flushThreadExecutor.scheduleWithFixedDelay(
                 flushThread,
                 0,

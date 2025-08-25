@@ -17,7 +17,6 @@ record FlushThread(Queue queue, SubmissionPublisher<List<Entry>> finishedFlushin
         QueueEntry queueEntry = queue.poll();
         if (queueEntry != null) {
             FlushOperation flushOperation = queueEntry.unwrapAs(FlushOperation.class);
-            LOGGER.info(flushOperation.toString());
             finishedFlushingPublisher.submit(flushOperation.entries());
         }
     }

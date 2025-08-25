@@ -12,6 +12,7 @@ record FlushOperation(
         REPLAY,
         MANUAL,
         THRESHOLD_SCHEDULED,
+        THRESHOLD_BIG_WRITE,
         THRESHOLD_LIMIT
     }
 }

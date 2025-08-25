@@ -8,4 +8,8 @@ public record Entry(Key key, Field field, Value value) {
         buffer.put(value);
         return buffer;
     }
+
+    public int bufferSize() {
+        return key.getBufferSize() + field.getBufferSize() + value.getBufferSize();
+    }
 }
