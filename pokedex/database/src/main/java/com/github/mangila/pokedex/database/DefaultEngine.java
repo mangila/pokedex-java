@@ -6,7 +6,17 @@ import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.concurrent.CompletableFuture;
 
-record DefaultEngine(FileManager fileManager, Cache cache) implements Engine {
+final class DefaultEngine implements Engine {
+
+    private volatile boolean open;
+    private final FileManager fileManager;
+    private final Cache cache;
+
+    DefaultEngine(FileManager fileManager, Cache cache) {
+        this.fileManager = fileManager;
+        this.cache = cache;
+        this.open = false;
+    }
 
     @Override
     public CompletableFuture<Void> putAsync(String key, String field, byte[] value) {
@@ -19,7 +29,19 @@ record DefaultEngine(FileManager fileManager, Cache cache) implements Engine {
     }
 
     @Override
+    public boolean isOpen() {
+        return open;
+    }
+
+    @Override
+    public void open() {
+        open = true;
+        fileManager.wal().open();
+    }
+
+    @Override
     public void close() {
+        open = false;
         fileManager.wal().close();
         cache.clear();
     }

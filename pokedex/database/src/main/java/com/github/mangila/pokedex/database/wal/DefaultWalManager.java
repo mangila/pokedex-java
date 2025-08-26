@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.config.WalConfig;
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Value;
@@ -13,16 +14,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.mangila.pokedex.shared.Config.DATABASE_WAL_FLUSH_BUFFER_QUEUE;
 
-public final class DefaultWalManager {
+public final class DefaultWalManager implements WalManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWalManager.class);
     private final WalTableHandler walTableHandler;
-    private WalFileHandler walFileHandler;
+    private final WalFileHandler walFileHandler;
     private final FlushDelegateSubscriber flushDelegateSubscriber;
     private final EntryPublisher entryPublisher;
     private final FlushFinishedPublisher flushFinishedPublisher;
     private final FlushThread flushThread;
 
-    public DefaultWalManager() {
+    public DefaultWalManager(WalConfig config) {
         Queue queue = QueueService.getInstance()
                 .getQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
         WalTable walTable = new WalTable(new ConcurrentHashMap<>());
@@ -34,6 +35,7 @@ public final class DefaultWalManager {
         this.walTableHandler = new WalTableHandler(walTable, entryPublisher);
     }
 
+    @Override
     public void open() {
         LOGGER.info("Opening WAL manager");
         walFileHandler.replay();
@@ -42,6 +44,7 @@ public final class DefaultWalManager {
         flushThread.schedule();
     }
 
+    @Override
     public void close() {
         LOGGER.info("Closing WAL manager");
         entryPublisher.close();
@@ -51,6 +54,7 @@ public final class DefaultWalManager {
         flushThread.shutdown();
     }
 
+    @Override
     public CompletableFuture<Void> putAsync(Key key, Field field, Value value) {
         return walTableHandler.putAsync(key, field, value);
     }

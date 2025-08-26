@@ -4,7 +4,11 @@ import java.util.concurrent.CompletableFuture;
 
 public sealed interface Engine permits DefaultEngine {
 
-    CompletableFuture<Void> putAsync(String key, String field, byte[] value);
+    boolean isOpen();
+
+    void open();
 
     void close();
+
+    CompletableFuture<Void> putAsync(String key, String field, byte[] value);
 }

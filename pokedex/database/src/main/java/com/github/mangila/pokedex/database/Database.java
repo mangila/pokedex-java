@@ -17,6 +17,18 @@ public class Database {
         Runtime.getRuntime().addShutdownHook(new Thread(engine::close));
     }
 
+    public boolean isOpen() {
+        return engine.isOpen();
+    }
+
+    public void open() {
+        engine.open();
+    }
+
+    public void close() {
+        engine.close();
+    }
+
     public Engine engine() {
         return engine;
     }

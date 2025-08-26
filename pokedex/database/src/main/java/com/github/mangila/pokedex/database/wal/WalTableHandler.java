@@ -19,7 +19,7 @@ class WalTableHandler implements Flow.Subscriber<EntryCollection> {
         this.entryPublisher = entryPublisher;
     }
 
-    public CompletableFuture<Void> putAsync(Key key, Field field, Value value) {
+    CompletableFuture<Void> putAsync(Key key, Field field, Value value) {
         walTable.put(key, field, value);
         return submitEntry(new Entry(key, field, value));
     }
