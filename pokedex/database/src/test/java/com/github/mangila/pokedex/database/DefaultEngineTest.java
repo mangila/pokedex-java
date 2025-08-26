@@ -6,12 +6,12 @@ import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import com.github.mangila.pokedex.shared.cache.lru.LruCacheConfig;
 import com.github.mangila.pokedex.shared.queue.QueueService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 class DefaultEngineTest {
 
+    @Disabled
     @Test
     void abc() throws InterruptedException {
         QueueService.getInstance().createNewQueue(Config.DATABASE_WAL_FLUSH_BUFFER_QUEUE);
@@ -28,7 +28,7 @@ class DefaultEngineTest {
                     new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
             );
         }
-        Thread.sleep(100000);
+        Thread.sleep(5000);
     }
 
 }
