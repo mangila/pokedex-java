@@ -26,7 +26,7 @@ public final class DefaultWalManager {
         Queue queue = QueueService.getInstance()
                 .getQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
         WalTable walTable = new WalTable(new ConcurrentHashMap<>());
-        this.walFileHandler = new WalFileHandler(new WalBufferPool());
+        this.walFileHandler = new WalFileHandler(new WalWriteBuffer());
         this.entryPublisher = new EntryPublisher();
         this.flushFinishedPublisher = new FlushFinishedPublisher();
         this.flushThread = new FlushThread(queue, flushFinishedPublisher, walFileHandler);

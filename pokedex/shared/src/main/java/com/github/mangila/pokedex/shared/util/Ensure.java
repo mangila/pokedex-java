@@ -12,7 +12,7 @@ public final class Ensure {
 
     public static void notNull(Object object) {
         if (object == null) {
-            throw new IllegalStateException("Object cannot be null");
+            throw new IllegalArgumentException("Object cannot be null");
         }
     }
 
@@ -42,21 +42,21 @@ public final class Ensure {
 
     public static void notEquals(int first, int second, String message) {
         if (first != second) {
-            throw new IllegalStateException(message);
+            throw new IllegalArgumentException(message);
         }
     }
 
     public static void equals(byte[] a, byte[] a2) {
         boolean equals = Arrays.equals(a, a2);
         if (!equals) {
-            throw new IllegalStateException("Arrays are not equal");
+            throw new IllegalArgumentException("Arrays are not equal");
         }
     }
 
     public static void equals(byte[] a, byte[] a2, String message) {
         boolean equals = Arrays.equals(a, a2);
         if (!equals) {
-            throw new IllegalStateException(message);
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -69,14 +69,14 @@ public final class Ensure {
     public static void notEmpty(Object[] array, Class<?> clazz) {
         notNull(array, clazz);
         if (array.length == 0) {
-            throw new IllegalStateException("%s cannot be empty".formatted(clazz.getSimpleName()));
+            throw new IllegalArgumentException("%s cannot be empty".formatted(clazz.getSimpleName()));
         }
     }
 
 
     public static void min(int min, int target) {
         if (target < min) {
-            throw new IllegalStateException("Target must be greater than or equal to %d but was %d"
+            throw new IllegalArgumentException("Target must be greater than or equal to %d but was %d"
                     .formatted(min, target)
             );
         }
@@ -84,7 +84,7 @@ public final class Ensure {
 
     public static void min(long min, long target) {
         if (target < min) {
-            throw new IllegalStateException("Target must be greater than or equal to %d but was %d"
+            throw new IllegalArgumentException("Target must be greater than or equal to %d but was %d"
                     .formatted(min, target)
             );
         }
@@ -92,7 +92,7 @@ public final class Ensure {
 
     public static void max(int max, int target) {
         if (target > max) {
-            throw new IllegalStateException("Target must be less than or equal to %d but was %d"
+            throw new IllegalArgumentException("Target must be less than or equal to %d but was %d"
                     .formatted(max, target)
             );
         }
@@ -100,14 +100,14 @@ public final class Ensure {
 
     public static void equals(Object object, Object another) {
         if (!Objects.equals(object, another)) {
-            throw new IllegalStateException("Objects are not equal: %s != %s".formatted(object, another));
+            throw new IllegalArgumentException("Objects are not equal: %s != %s".formatted(object, another));
         }
     }
 
     public static void notBlank(String value, String message) {
         notNull(value, message);
         if (value.isBlank()) {
-            throw new IllegalStateException(message);
+            throw new IllegalArgumentException(message);
         }
     }
 }

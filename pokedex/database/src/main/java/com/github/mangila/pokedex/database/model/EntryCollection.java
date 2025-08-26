@@ -3,9 +3,10 @@ package com.github.mangila.pokedex.database.model;
 import java.util.List;
 
 public record EntryCollection(List<Entry> collection) {
-    public int bufferSize() {
+
+    public int bufferLength() {
         return collection.stream()
-                .mapToInt(Entry::bufferSize)
+                .mapToInt(Entry::bufferLength)
                 .sum();
     }
 

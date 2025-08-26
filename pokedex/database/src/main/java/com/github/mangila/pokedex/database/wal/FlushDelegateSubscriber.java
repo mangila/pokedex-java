@@ -43,7 +43,7 @@ class FlushDelegateSubscriber implements Flow.Subscriber<CallbackItem<Entry>> {
     }
 
     private boolean isBigWriteThresholdReached(Entry entry) {
-        return entry.bufferSize() > 1024;
+        return entry.bufferLength() > 1024;
     }
 
     @Override
@@ -117,7 +117,7 @@ class FlushDelegateSubscriber implements Flow.Subscriber<CallbackItem<Entry>> {
                                 FlushOperation.Reason.THRESHOLD_SCHEDULED,
                                 new EntryCollection(snapshot))
                         ));
-                        entries.removeAll(snapshot);
+                        entries.clear();
                     }
                 } finally {
                     lock.unlock();

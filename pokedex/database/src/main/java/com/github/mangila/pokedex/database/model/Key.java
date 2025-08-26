@@ -10,8 +10,8 @@ public record Key(String value) {
     public static final short MAGIC_NUMBER = 1;
 
     public Key {
-        Ensure.notNull(value, "hashkey value must not be null");
-        Ensure.notBlank(value, "hashkey value must not be blank");
+        Ensure.notNull(value, "key value must not be null");
+        Ensure.notBlank(value, "key value must not be blank");
         Ensure.min(2, value.length());
         Ensure.max(100, value.length());
     }
@@ -20,7 +20,7 @@ public record Key(String value) {
         return getBytes().length;
     }
 
-    public int getBufferSize() {
+    public int bufferLength() {
         return Short.BYTES + Integer.BYTES + length();
     }
 
