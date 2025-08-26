@@ -1,12 +1,10 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.model.Entry;
-
-import java.util.List;
+import com.github.mangila.pokedex.database.model.EntryCollection;
 
 record FlushOperation(
         Reason reason,
-        List<Entry> entries
+        EntryCollection entries
 ) {
     enum Reason {
         REPLAY,

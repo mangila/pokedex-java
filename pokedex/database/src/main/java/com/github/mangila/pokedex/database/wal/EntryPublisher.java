@@ -9,12 +9,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
-class CallbackItemPublisher implements Flow.Publisher<CallbackItem<Entry>> {
+class EntryPublisher implements Flow.Publisher<CallbackItem<Entry>> {
 
     private final ExecutorService publisherExecutor = VirtualThreadFactory.newFixedThreadPool(10);
     private final SubmissionPublisher<CallbackItem<Entry>> publisher;
 
-    CallbackItemPublisher() {
+    EntryPublisher() {
         this.publisher = new SubmissionPublisher<>(publisherExecutor, Flow.defaultBufferSize());
     }
 

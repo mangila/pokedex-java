@@ -9,6 +9,12 @@ public record Entry(Key key, Field field, Value value) {
         return buffer;
     }
 
+    public void fill(Buffer buffer) {
+        buffer.put(key);
+        buffer.put(field);
+        buffer.put(value);
+    }
+
     public int bufferSize() {
         return key.getBufferSize() + field.getBufferSize() + value.getBufferSize();
     }

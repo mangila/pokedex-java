@@ -22,7 +22,7 @@ public record DatabaseConfig(
 
     public static class Builder {
         private DatabaseName databaseName;
-        private WalConfig walConfig = new WalConfig(1024);
+        private WalConfig walConfig = new WalConfig(1, 1, 1);
         private LruCacheConfig lruCacheConfig = new LruCacheConfig(100);
 
         private Builder() {
