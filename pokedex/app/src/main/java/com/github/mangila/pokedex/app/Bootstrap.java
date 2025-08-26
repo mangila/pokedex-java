@@ -25,6 +25,7 @@ public final class Bootstrap {
         QueueService queueService = QueueService.getInstance();
         PokeApiClient pokeApiClient = PokeApiClient.getInstance();
         PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
+        pokemonDatabase.instance().open();
         List<Task> tasks = List.of(
                 new QueuePokemonsTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
                 new InsertCriesTask(pokeApiClient, queueService.getQueue(POKEMON_CRIES_QUEUE)),

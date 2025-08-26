@@ -14,7 +14,7 @@ public class Database {
                 new FileManager(config),
                 new Cache(new LruCache<>(config.lruCacheConfig()))
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(engine::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
     public boolean isOpen() {
