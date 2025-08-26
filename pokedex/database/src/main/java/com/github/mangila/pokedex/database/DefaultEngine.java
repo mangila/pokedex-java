@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.database;
 
+import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Value;
@@ -23,9 +24,7 @@ final class DefaultEngine implements Engine {
         Key k = new Key(key);
         Field f = new Field(field);
         Value v = new Value(value);
-        return fileManager.wal()
-                .putAsync(k, f, v)
-                .copy();
+        return fileManager.wal().putAsync(new Entry(k, f, v));
     }
 
     @Override

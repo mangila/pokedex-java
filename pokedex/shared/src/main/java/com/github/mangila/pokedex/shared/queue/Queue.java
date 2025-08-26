@@ -26,7 +26,6 @@ public class Queue {
     public @Nullable QueueEntry poll() {
         return queue.poll();
     }
-
     public boolean addDlq(QueueEntry queueEntry) {
         return dlq.add(queueEntry);
     }

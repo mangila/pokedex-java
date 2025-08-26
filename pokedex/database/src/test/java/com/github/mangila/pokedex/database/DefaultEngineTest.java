@@ -21,12 +21,18 @@ class DefaultEngineTest {
                         .build()),
                 new Cache(new LruCache<>(new LruCacheConfig(100)))
         );
+        e.open();
         for (int i = 0; i < 1_000_000; i++) {
             e.putAsync(
                     "hash",
                     "hej" + i,
                     new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
-            );
+            ).whenComplete((r, t) -> {
+                if (t != null) {
+                    t.printStackTrace();
+                }
+                System.out.println("hejsan");
+            });
         }
         Thread.sleep(5000);
     }

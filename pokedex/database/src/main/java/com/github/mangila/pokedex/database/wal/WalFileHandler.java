@@ -25,13 +25,12 @@ class WalFileHandler {
         }
     }
 
-    void flush(FlushOperation flushOperation) throws IOException {
-        EntryCollection entries = flushOperation.entries();
-        int bufferLength = entries.bufferLength();
+    void flush(EntryCollection entryCollection) throws IOException {
+        int bufferLength = entryCollection.bufferLength();
         if (bufferLength == 0) {
             return;
         }
-        write(bufferLength, entries.collection());
+        write(bufferLength, entryCollection.toValues());
     }
 
     private void write(int len, List<Entry> entries) throws IOException {
@@ -49,7 +48,7 @@ class WalFileHandler {
             }
         } else {
             // todo: write to disk in chunks
-            throw new IllegalStateException("Buffer size exceeded");
+            throw new IllegalStateException("Buffer size exceeded %d".formatted(len));
         }
     }
 
