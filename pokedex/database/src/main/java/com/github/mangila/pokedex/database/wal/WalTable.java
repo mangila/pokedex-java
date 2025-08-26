@@ -27,7 +27,7 @@ record WalTable(ConcurrentHashMap<Key, ConcurrentHashMap<Field, Value>> table) {
                         if (existingValue != null) {
                             byte[] flushedValue = entry.value().value();
                             byte[] current = existingValue.value();
-                            // fixme: bottleneck
+                            // FIXME: bottleneck, use CRC32C?
                             if (Arrays.equals(current, flushedValue)) {
                                 return null;
                             }
