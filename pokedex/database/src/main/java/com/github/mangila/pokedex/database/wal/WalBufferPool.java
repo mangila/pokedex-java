@@ -5,6 +5,9 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * NOT THREAD SAFE
+ */
 class WalBufferPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(WalBufferPool.class);
 
