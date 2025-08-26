@@ -8,6 +8,11 @@ import com.github.mangila.pokedex.database.model.Value;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Staging table for WAL writes.
+ *
+ * Staged in memory until we have a durable write to the WAL file.
+ */
 record WalTable(ConcurrentHashMap<Key, ConcurrentHashMap<Field, Value>> table) {
     void put(Key key, Field field, Value value) {
         table.computeIfAbsent(key, k -> new ConcurrentHashMap<>())
@@ -22,6 +27,7 @@ record WalTable(ConcurrentHashMap<Key, ConcurrentHashMap<Field, Value>> table) {
                         if (existingValue != null) {
                             byte[] flushedValue = entry.value().value();
                             byte[] current = existingValue.value();
+                            // fixme: bottleneck
                             if (Arrays.equals(current, flushedValue)) {
                                 return null;
                             }

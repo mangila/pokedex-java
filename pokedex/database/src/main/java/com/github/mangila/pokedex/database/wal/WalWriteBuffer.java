@@ -29,8 +29,8 @@ class WalWriteBuffer {
             LOGGER.warn("Size is 0 will return Empty buffer");
             return EMPTY_BUFFER;
         }
-        int powerOfTwo = nextPowerOfTwo(len);
-        if (powerOfTwo <= bufferSize) {
+        len = nextPowerOfTwo(len);
+        if (len <= bufferSize) {
             return buffer;
         } else {
             LOGGER.debug("Length is over {}, value needs to be chunked", bufferSize);
