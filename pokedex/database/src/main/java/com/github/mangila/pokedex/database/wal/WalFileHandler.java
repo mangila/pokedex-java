@@ -25,32 +25,6 @@ class WalFileHandler {
         }
     }
 
-    void write(List<Entry> entries, Buffer buffer, int len, boolean shouldChunk) throws IOException {
-        if (!shouldChunk) {
-            for (Entry entry : entries) {
-                entry.fill(buffer);
-            }
-            buffer.flip();
-            try {
-                walFile.write(buffer);
-            } finally {
-                buffer.clear();
-            }
-        } else {
-            for (Entry entry : entries) {
-                entry.fill(buffer);
-                if (buffer.remaining() == 0) {
-                    buffer.flip();
-                    try {
-                        walFile.write(buffer);
-                    } finally {
-                        buffer.clear();
-                    }
-                }
-            }
-        }
-    }
-
     void flush(FlushOperation flushOperation) throws IOException {
         EntryCollection entries = flushOperation.entries();
         int bufferLength = entries.bufferLength();
