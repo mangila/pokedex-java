@@ -1,8 +1,8 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.CallbackItem;
-import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.database.model.CallbackItemCollection;
+import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.shared.SimpleBackgroundThread;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
@@ -73,7 +73,6 @@ class FlushThread implements SimpleBackgroundThread {
 
     @Override
     public void shutdown() {
-        LOGGER.info("FlushThread shutdown");
         executor.shutdown();
     }
 

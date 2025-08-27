@@ -1,17 +1,22 @@
 package com.github.mangila.pokedex.app;
 
-public class Application {
-    public static volatile boolean running = false;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-    public static void main(String[] args) {
-        running = true;
+public class Application {
+    public static final BlockingQueue<Boolean> SHUTDOWN_QUEUE = new ArrayBlockingQueue<>(1);
+
+    public static void main(String[] args) throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.configurePokemonDatabase();
         bootstrap.configurePokeApiClient();
         bootstrap.initQueues();
         bootstrap.initScheduler();
-        while (running) {
-            Thread.onSpinWait();
+        while (true) {
+            Boolean shutdown = SHUTDOWN_QUEUE.take();
+            if (shutdown) {
+                break;
+            }
         }
     }
 }

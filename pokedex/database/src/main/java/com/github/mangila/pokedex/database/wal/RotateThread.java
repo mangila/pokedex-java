@@ -40,7 +40,7 @@ class RotateThread implements SimpleBackgroundThread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                if (walFileHandler.size() > 100000000) {
+                if (walFileHandler.size() > 2500) {
                     try {
                         writeLock.lock();
                         walFileHandler.rotate(System.nanoTime() + ".wal");
