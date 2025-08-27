@@ -1,8 +1,7 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.Entry;
-
-import java.util.concurrent.CompletableFuture;
+import com.github.mangila.pokedex.database.model.WriteCallback;
 
 public sealed interface WalManager permits DefaultWalManager {
 
@@ -10,6 +9,6 @@ public sealed interface WalManager permits DefaultWalManager {
 
     void close();
 
-    CompletableFuture<Void> putAsync(Entry entry);
+    WriteCallback putAsync(Entry entry);
 
 }

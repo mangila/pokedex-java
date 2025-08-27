@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.database;
 
+import com.github.mangila.pokedex.database.model.WriteCallback;
+
 import java.util.concurrent.CompletableFuture;
 
 public sealed interface Engine permits DefaultEngine {
@@ -10,5 +12,5 @@ public sealed interface Engine permits DefaultEngine {
 
     void close();
 
-    CompletableFuture<Void> putAsync(String key, String field, byte[] value);
+    CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value);
 }

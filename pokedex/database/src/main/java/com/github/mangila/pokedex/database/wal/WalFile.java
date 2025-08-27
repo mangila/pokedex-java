@@ -4,26 +4,33 @@ import com.github.mangila.pokedex.database.model.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.GZIPOutputStream;
 
 class WalFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFile.class);
+
     private final Path path;
     private final WalFileChannel walFileChannel;
+    private final AtomicLong size;
 
     WalFile(Path path) throws IOException {
         this.path = path;
         this.walFileChannel = new WalFileChannel(FileChannel.open(
                 path,
+                StandardOpenOption.CREATE,
                 StandardOpenOption.WRITE,
-                StandardOpenOption.SYNC,
                 StandardOpenOption.APPEND,
-                StandardOpenOption.CREATE)
+                StandardOpenOption.SYNC)
         );
+        this.size = new AtomicLong(walFileChannel.size());
     }
 
     void write(Buffer buffer) throws IOException {
@@ -33,6 +40,15 @@ class WalFile {
             // TODO: write the missing bytes to the file
             throw new IllegalStateException("Not all bytes written: " + writtenBytes);
         }
+        size.addAndGet(writtenBytes);
+    }
+
+    public long size() {
+        return size.get();
+    }
+
+    public void compress() {
+
     }
 
     private static class WalFileChannel {
@@ -44,6 +60,10 @@ class WalFile {
 
         int write(Buffer buffer) throws IOException {
             return fileChannel.write(buffer.value());
+        }
+
+        long size() throws IOException {
+            return fileChannel.size();
         }
 
         void close() throws IOException {

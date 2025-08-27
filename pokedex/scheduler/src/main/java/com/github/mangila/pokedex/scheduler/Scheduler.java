@@ -41,11 +41,7 @@ public class Scheduler {
 
     private void shutdown(Task task) {
         String name = task.name();
-        boolean isShutdown = task.shutdown();
-        if (isShutdown) {
-            LOGGER.info("{} shutdown successfully", name);
-        } else {
-            LOGGER.warn("{} failed to shutdown", name);
-        }
+        LOGGER.info("Shutting down {}", name);
+        task.shutdown();
     }
 }

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 public record QueuePokemonsTask(PokeApiClient pokeApiClient,
-                                Queue queue,
+                                Queue defaultQueue,
                                 int pokemonLimit) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueuePokemonsTask.class);
@@ -33,10 +33,10 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
     }
 
     @Override
-    public boolean shutdown() {
+    public void shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateGracefully(EXECUTOR, duration);
+        VirtualThreadFactory.terminateGracefully(EXECUTOR, duration);
     }
 
     @Override
@@ -45,7 +45,7 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
         pokeApiClient.fetch(uri)
                 .thenApply(QueuePokemonsTask::getUris)
                 .thenApply(list -> list.stream().map(QueueEntry::new).toList())
-                .thenAccept(queueEntries -> queueEntries.forEach(queue::add))
+                .thenAccept(queueEntries -> queueEntries.forEach(defaultQueue::add))
                 .join();
     }
 

@@ -1,6 +1,11 @@
 package com.github.mangila.pokedex.scheduler.task;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public record InsertEvolutionChainResponse() implements Task {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertEvolutionChainResponse.class);
 
     @Override
     public String name() {
@@ -13,8 +18,8 @@ public record InsertEvolutionChainResponse() implements Task {
     }
 
     @Override
-    public boolean shutdown() {
-        return false;
+    public void shutdown() {
+        LOGGER.info("Shutting down {}", name());
     }
 
     @Override

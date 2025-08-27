@@ -18,6 +18,7 @@ public record EntryCollection(List<CallbackItem<Entry>> collection) {
     public void complete() {
         collection.stream()
                 .map(CallbackItem::callback)
+                .map(WriteCallback::future)
                 .forEach(future -> future.complete(null));
     }
 

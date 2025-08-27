@@ -34,6 +34,7 @@ class DefaultEngineTest {
                 System.out.println("hejsan");
             });
         }
+        e.close();
         Thread.sleep(5000);
     }
 

@@ -31,7 +31,7 @@ public class VirtualThreadFactory {
         return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }
 
-    public static boolean terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
+    public static void terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
         try {
             LOGGER.debug("Shutting down executor service {}", executorService);
             executorService.shutdown();
@@ -39,11 +39,10 @@ public class VirtualThreadFactory {
                 executorService.shutdownNow();
             }
             LOGGER.debug("Executor service {} terminated", executorService);
-            return executorService.isTerminated();
         } catch (InterruptedException e) {
             LOGGER.error("Interrupted while waiting for termination", e);
             Thread.currentThread().interrupt();
-            return false;
+            executorService.shutdownNow();
         }
     }
 }

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public record InsertCriesTask(
         PokeApiClient pokeApiClient,
-        Queue queue
+        Queue defaultQueue
 ) implements Task {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertCriesTask.class);
@@ -33,10 +33,10 @@ public record InsertCriesTask(
     }
 
     @Override
-    public boolean shutdown() {
+    public void shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR_POOL, duration);
+        VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR_POOL, duration);
     }
 
     @Override

@@ -27,10 +27,10 @@ public record ShutdownTask(QueueService queueService) implements Task {
     }
 
     @Override
-    public boolean shutdown() {
+    public void shutdown() {
         LOGGER.info("Shutting down {}", name());
         var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration);
+        VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration);
     }
 
     @Override

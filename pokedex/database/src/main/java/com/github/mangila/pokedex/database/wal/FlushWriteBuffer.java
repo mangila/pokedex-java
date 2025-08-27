@@ -8,19 +8,19 @@ import org.slf4j.LoggerFactory;
 /**
  * NOT THREAD SAFE
  */
-class WalWriteBuffer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WalWriteBuffer.class);
+class FlushWriteBuffer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushWriteBuffer.class);
     private static final Buffer EMPTY_BUFFER = Buffer.from(0);
     public static final int DEFAULT_BUFFER_SIZE = 8192;
     private final int bufferSize;
     private final Buffer buffer;
 
-    WalWriteBuffer(int bufferSize) {
+    FlushWriteBuffer(int bufferSize) {
         this.bufferSize = bufferSize;
         this.buffer = Buffer.from(bufferSize);
     }
 
-    WalWriteBuffer() {
+    FlushWriteBuffer() {
         this(DEFAULT_BUFFER_SIZE);
     }
 
