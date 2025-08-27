@@ -82,7 +82,11 @@ class FlushThread implements SimpleBackgroundThread {
             writeLock.lock();
             LOGGER.info("Flushing {} entries", list.size());
             walFileHandler.flush(flushWriteBuffer, collection);
-        } finally {
+        } catch (IOException e) {
+            LOGGER.error("ERR", e);
+            throw new RuntimeException(e);
+        }
+        finally {
             writeLock.unlock();
         }
         list.clear();

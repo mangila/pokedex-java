@@ -11,19 +11,25 @@ class FlushWriteBuffer {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlushWriteBuffer.class);
     public static final int DEFAULT_BUFFER_SIZE = 8192;
     private final int bufferSize;
-    private final Buffer buffer;
+    private final Buffer heapBuffer;
+    private final Buffer directBuffer;
 
     FlushWriteBuffer(int bufferSize) {
         this.bufferSize = bufferSize;
-        this.buffer = Buffer.from(bufferSize);
+        this.heapBuffer = Buffer.from(bufferSize);
+        this.directBuffer = Buffer.fromDirect(bufferSize);
     }
 
     FlushWriteBuffer() {
         this(DEFAULT_BUFFER_SIZE);
     }
 
-    Buffer get() {
-        return buffer;
+    Buffer getHeap() {
+        return heapBuffer;
+    }
+
+    Buffer getDirect() {
+        return directBuffer;
     }
 
     int bufferSize() {

@@ -10,6 +10,10 @@ public final class BufferUtils {
         return ByteBuffer.allocate(capacity);
     }
 
+    public static ByteBuffer newByteBufferDirect(int capacity) {
+        return ByteBuffer.allocateDirect(capacity);
+    }
+
     public static ByteArrayOutputStream newByteArrayOutputStream() {
         return new ByteArrayOutputStream();
     }

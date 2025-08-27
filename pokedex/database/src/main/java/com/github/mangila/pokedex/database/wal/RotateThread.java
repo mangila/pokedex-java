@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,7 @@ class RotateThread implements SimpleBackgroundThread {
                 if (walFileHandler.size() > 150_000) {
                     try {
                         writeLock.lock();
-                        walFileHandler.rotate(System.nanoTime() + ".wal");
+                        walFileHandler.rotate(Path.of(System.nanoTime() + ".wal"));
                     } finally {
                         writeLock.unlock();
                     }

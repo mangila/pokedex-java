@@ -32,15 +32,18 @@ class WalFileHandler {
             return;
         }
         if (bufferLength <= flushWriteBuffer.bufferSize()) {
-            Buffer buffer = flushWriteBuffer.get();
+            Buffer heap = flushWriteBuffer.getHeap();
+            Buffer direct = flushWriteBuffer.getDirect();
             for (Entry entry : callbackItemCollection.toValues()) {
-                entry.fill(buffer);
+                entry.fill(heap);
             }
-            buffer.flip();
             try {
-                walFile.write(buffer);
+                direct.put(heap);
+                direct.flip();
+                walFile.write(direct);
             } finally {
-                buffer.clear();
+                direct.clear();
+                heap.clear();
             }
         } else {
             // todo: write to disk in chunks
@@ -67,16 +70,16 @@ class WalFileHandler {
             for (Path path : files) {
                 LOGGER.info("Replaying {}", path);
                 this.walFile = new WalFile(path);
-                rotate(path.getFileName().toString());
+                rotate(Path.of(System.nanoTime() + ".wal"));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    void rotate(String name) throws IOException {
+    void rotate(Path newFileName) throws IOException {
         walFile.compress();
-        this.walFile = new WalFile(Path.of(name));
+        this.walFile = new WalFile(newFileName);
     }
 
     public long size() {

@@ -15,6 +15,10 @@ public record Buffer(ByteBuffer value) {
         return new Buffer(BufferUtils.newByteBuffer(capacity));
     }
 
+    public static Buffer fromDirect(int capacity) {
+        return new Buffer(BufferUtils.newByteBufferDirect(capacity));
+    }
+
     public int capacity() {
         return value.capacity();
     }
