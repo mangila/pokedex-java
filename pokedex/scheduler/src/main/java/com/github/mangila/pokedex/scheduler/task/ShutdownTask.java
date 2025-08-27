@@ -6,14 +6,12 @@ import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public record ShutdownTask(QueueService queueService) implements Task {
-
+public record ShutdownTask(QueueService queueService,
+                           TaskExecutor taskExecutor) implements Task {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownTask.class);
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR = VirtualThreadFactory.newSingleThreadScheduledExecutor();
 
     @Override
     public String name() {
@@ -21,23 +19,17 @@ public record ShutdownTask(QueueService queueService) implements Task {
     }
 
     @Override
-    public void schedule() {
-        LOGGER.info("Scheduling {}", name());
-        SCHEDULED_EXECUTOR.scheduleWithFixedDelay(this, 10, 30, TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void shutdown() {
-        LOGGER.info("Shutting down {}", name());
-        var duration = Duration.ofSeconds(30);
-        VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR, duration);
+    public void schedule(ScheduledExecutorService executor) {
+        executor.scheduleWithFixedDelay(this, 10, 30, TimeUnit.SECONDS);
     }
 
     @Override
     public void run() {
         if (queueService.allQueuesEmpty()) {
             LOGGER.info("All queues empty, shutting down Scheduler");
-            Scheduler.SHUTDOWN.set(Boolean.TRUE);
+            Scheduler.shutdown = true;
+            VirtualThreadFactory.newThread(taskExecutor::shutdown)
+                    .start();
         }
     }
 }

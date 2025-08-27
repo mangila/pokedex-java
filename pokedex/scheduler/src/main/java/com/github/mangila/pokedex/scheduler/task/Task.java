@@ -1,7 +1,9 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-import com.github.mangila.pokedex.shared.SimpleBackgroundThread;
+import java.util.concurrent.ScheduledExecutorService;
 
-public interface Task extends SimpleBackgroundThread {
+public interface Task extends Runnable {
     String name();
+
+    void schedule(ScheduledExecutorService executor);
 }

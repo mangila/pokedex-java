@@ -50,13 +50,12 @@ public final class DefaultWalManager implements WalManager {
     public void close() {
         LOGGER.info("Closing WAL manager");
         entryPublisher.close();
-        flushDelegateSubscriber.onComplete();
         rotateThread.shutdown();
         flushThreads.forEach(FlushThread::shutdown);
     }
 
     @Override
-    public WriteCallback putAsync(Entry entry) {
+    public WriteCallback put(Entry entry) {
         WriteCallback writeCallback = WriteCallback.newCallback();
         CallbackItem<Entry> callbackItem = new CallbackItem<>(entry, writeCallback);
         entryPublisher.submit(callbackItem);

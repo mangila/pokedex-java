@@ -35,6 +35,6 @@ class FlushDelegateSubscriber implements Flow.Subscriber<CallbackItem<Entry>> {
 
     @Override
     public void onComplete() {
-
+        // do nothing
     }
 }

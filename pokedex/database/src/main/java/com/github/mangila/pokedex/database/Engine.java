@@ -12,5 +12,7 @@ public sealed interface Engine permits DefaultEngine {
 
     void close();
 
+    WriteCallback put(String key, String field, byte[] value);
+
     CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value);
 }

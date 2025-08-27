@@ -6,6 +6,7 @@ import com.github.mangila.pokedex.scheduler.Scheduler;
 import com.github.mangila.pokedex.scheduler.SchedulerConfig;
 import com.github.mangila.pokedex.scheduler.task.*;
 import com.github.mangila.pokedex.shared.queue.QueueService;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 
 import java.util.List;
 
@@ -26,14 +27,19 @@ public final class Bootstrap {
         PokeApiClient pokeApiClient = PokeApiClient.getInstance();
         PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
         pokemonDatabase.instance().open();
-        List<Task> tasks = List.of(
-                new QueuePokemonsTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
-                new InsertCriesTask(pokeApiClient, queueService.getQueue(POKEMON_CRIES_QUEUE)),
-                new InsertSpeciesResponseTaskTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
-                new InsertSpritesTask(pokeApiClient, queueService.getQueue(POKEMON_SPRITES_QUEUE)),
-                new ShutdownTask(queueService)
+        TaskExecutor taskExecutor = new TaskExecutor(
+                VirtualThreadFactory.newScheduledThreadPool(64)
         );
-        Scheduler scheduler = new Scheduler(new SchedulerConfig(tasks));
+        List<Task> tasks = List.of(
+                new InsertCriesTask(pokeApiClient, queueService.getQueue(POKEMON_CRIES_QUEUE)),
+                new InsertEvolutionChainResponse(queueService.getQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE)),
+                new InsertSpeciesResponseTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
+                new InsertSpritesTask(pokeApiClient, queueService.getQueue(POKEMON_SPRITES_QUEUE)),
+                new InsertVarietyResponseTask(queueService.getQueue(POKEMON_VARIETY_URL_QUEUE)),
+                new QueuePokemonsTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
+                new ShutdownTask(queueService, taskExecutor)
+        );
+        Scheduler scheduler = new Scheduler(new SchedulerConfig(tasks, taskExecutor));
         scheduler.init();
         return scheduler;
     }

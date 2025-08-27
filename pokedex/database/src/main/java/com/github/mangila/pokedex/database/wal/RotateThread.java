@@ -5,6 +5,7 @@ import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,7 +33,7 @@ class RotateThread implements SimpleBackgroundThread {
 
     @Override
     public void shutdown() {
-
+        VirtualThreadFactory.terminateGracefully(executor, Duration.ofSeconds(30));
     }
 
     @Override

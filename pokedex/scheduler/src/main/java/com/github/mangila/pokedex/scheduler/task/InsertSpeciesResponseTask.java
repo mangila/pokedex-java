@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,14 +23,23 @@ import java.util.concurrent.TimeUnit;
 import static com.github.mangila.pokedex.shared.Config.POKEMON_EVOLUTION_CHAIN_URL_QUEUE;
 import static com.github.mangila.pokedex.shared.Config.POKEMON_VARIETY_URL_QUEUE;
 
-public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
-                                            Queue queue,
-                                            PokemonDatabase database) implements Task {
+public class InsertSpeciesResponseTask implements Task {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpeciesResponseTaskTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpeciesResponseTask.class);
 
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_POOL = VirtualThreadFactory.newScheduledThreadPool(10);
-    private static final ExecutorService WORKER_POOL = VirtualThreadFactory.newFixedThreadPool(10);
+    private final PokeApiClient pokeApiClient;
+    private final Queue queue;
+    private final PokemonDatabase database;
+    private final ExecutorService workerPool;
+
+    public InsertSpeciesResponseTask(PokeApiClient pokeApiClient,
+                                     Queue queue,
+                                     PokemonDatabase database) {
+        this.pokeApiClient = pokeApiClient;
+        this.queue = queue;
+        this.database = database;
+        this.workerPool = VirtualThreadFactory.newFixedThreadPool(10);
+    }
 
     @Override
     public String name() {
@@ -39,20 +47,11 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
     }
 
     @Override
-    public void schedule() {
-        LOGGER.info("Scheduling {}", name());
-        SCHEDULED_EXECUTOR_POOL.scheduleAtFixedRate(this,
-                100,
-                100,
-                TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public void shutdown() {
-        LOGGER.info("Shutting down {}", name());
-        var duration = Duration.ofSeconds(30);
-        VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR_POOL, duration);
-        VirtualThreadFactory.terminateGracefully(WORKER_POOL, duration);
+    public void schedule(ScheduledExecutorService executor) {
+        executor.scheduleAtFixedRate(this,
+                5,
+                1,
+                TimeUnit.SECONDS);
     }
 
     @Override
@@ -73,7 +72,7 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
                             .forEach(url -> QueueService.getInstance()
                                     .add(POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
                     insertFields(key, jsonRoot, database);
-                }, WORKER_POOL)
+                }, workerPool)
                 .exceptionally(throwable -> {
                     LOGGER.error("ERR", throwable);
                     if (queueEntry.equalsMaxRetries(3)) {

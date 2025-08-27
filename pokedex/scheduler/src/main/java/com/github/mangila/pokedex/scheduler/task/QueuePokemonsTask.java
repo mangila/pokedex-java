@@ -6,20 +6,14 @@ import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import com.github.mangila.pokedex.shared.json.model.JsonValue;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
-import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
-public record QueuePokemonsTask(PokeApiClient pokeApiClient,
-                                Queue defaultQueue,
-                                int pokemonLimit) implements Task {
-
+public record QueuePokemonsTask(PokeApiClient pokeApiClient, Queue defaultQueue, int pokemonLimit) implements Task {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueuePokemonsTask.class);
-    private static final ExecutorService EXECUTOR = VirtualThreadFactory.newSingleThreadExecutor();
 
     @Override
     public String name() {
@@ -27,16 +21,8 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient,
     }
 
     @Override
-    public void schedule() {
-        LOGGER.info("Scheduling {}", name());
-        EXECUTOR.submit(this);
-    }
-
-    @Override
-    public void shutdown() {
-        LOGGER.info("Shutting down {}", name());
-        var duration = Duration.ofSeconds(30);
-        VirtualThreadFactory.terminateGracefully(EXECUTOR, duration);
+    public void schedule(ScheduledExecutorService executor) {
+        executor.submit(this);
     }
 
     @Override

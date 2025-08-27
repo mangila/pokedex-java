@@ -22,11 +22,16 @@ final class DefaultEngine implements Engine {
     }
 
     @Override
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value) {
+    public WriteCallback put(String key, String field, byte[] value) {
         Key k = new Key(key);
         Field f = new Field(field);
         Value v = new Value(value);
-        return CompletableFuture.supplyAsync(() -> fileManager.wal().putAsync(new Entry(k, f, v)), executor);
+        return fileManager.wal().put(new Entry(k, f, v));
+    }
+
+    @Override
+    public CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value) {
+        return CompletableFuture.supplyAsync(() -> put(key, field, value), executor);
     }
 
     @Override
@@ -43,8 +48,8 @@ final class DefaultEngine implements Engine {
     @Override
     public void close() {
         open = false;
-        VirtualThreadFactory.terminateGracefully(executor, Duration.ofSeconds(30));
         fileManager.wal().close();
+        VirtualThreadFactory.terminateGracefully(executor, Duration.ofSeconds(30));
         cache.clear();
     }
 }

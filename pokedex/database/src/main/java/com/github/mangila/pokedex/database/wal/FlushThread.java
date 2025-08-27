@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.CallbackItem;
 import com.github.mangila.pokedex.database.model.Entry;
-import com.github.mangila.pokedex.database.model.EntryCollection;
+import com.github.mangila.pokedex.database.model.CallbackItemCollection;
 import com.github.mangila.pokedex.shared.SimpleBackgroundThread;
 import com.github.mangila.pokedex.shared.queue.Queue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
@@ -78,7 +78,7 @@ class FlushThread implements SimpleBackgroundThread {
     }
 
     private void flush() throws IOException {
-        EntryCollection collection = new EntryCollection(list);
+        CallbackItemCollection collection = new CallbackItemCollection(list);
         try {
             writeLock.lock();
             walFileHandler.flush(flushWriteBuffer, collection);

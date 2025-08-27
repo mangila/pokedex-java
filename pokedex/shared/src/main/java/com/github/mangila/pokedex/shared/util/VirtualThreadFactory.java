@@ -15,6 +15,10 @@ public class VirtualThreadFactory {
             .name(POKEDEX_VIRTUAL_THREAD_PREFIX, 1)
             .factory();
 
+    public static Thread newThread(Runnable runnable) {
+        return THREAD_FACTORY.newThread(runnable);
+    }
+
     public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
