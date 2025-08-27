@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.scheduler.Scheduler;
+import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ public record ShutdownTask(QueueService queueService,
             Scheduler.shutdown = true;
             VirtualThreadFactory.newThread(taskExecutor::shutdown)
                     .start();
+            // TODO: temp when just testing
+            Config.SHUTDOWN_QUEUE.add(true);
         }
     }
 }

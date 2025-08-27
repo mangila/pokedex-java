@@ -80,6 +80,7 @@ class FlushThread implements SimpleBackgroundThread {
         CallbackItemCollection collection = new CallbackItemCollection(list);
         try {
             writeLock.lock();
+            LOGGER.info("Flushing {} entries", list.size());
             walFileHandler.flush(flushWriteBuffer, collection);
         } finally {
             writeLock.unlock();

@@ -2,15 +2,19 @@ package com.github.mangila.pokedex.shared;
 
 import com.github.mangila.pokedex.shared.queue.QueueName;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 public final class Config {
     private Config() {
         throw new UnsupportedOperationException("Config class");
     }
 
+    public static final BlockingQueue<Boolean> SHUTDOWN_QUEUE = new ArrayBlockingQueue<>(1);
     public static final String POKEAPI_HOST = "pokeapi.co";
     public static final int POKEAPI_PORT = 443;
     // the max count is 1025
-    public static final int POKEMON_LIMIT = 1;
+    public static final int POKEMON_LIMIT = 1025;
     public static final QueueName POKEMON_SPECIES_URL_QUEUE = new QueueName("pokemon-species-url-queue");
     public static final QueueName POKEMON_VARIETY_URL_QUEUE = new QueueName("pokemon-variety-url-queue");
     public static final QueueName POKEMON_EVOLUTION_CHAIN_URL_QUEUE = new QueueName("pokemon-evolution-chain-url-queue");

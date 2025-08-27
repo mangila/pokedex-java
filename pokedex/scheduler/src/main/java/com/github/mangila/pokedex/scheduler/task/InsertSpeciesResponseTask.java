@@ -51,7 +51,7 @@ public class InsertSpeciesResponseTask implements Task {
         executor.scheduleAtFixedRate(this,
                 5,
                 1,
-                TimeUnit.SECONDS);
+                TimeUnit.MILLISECONDS);
     }
 
     @Override

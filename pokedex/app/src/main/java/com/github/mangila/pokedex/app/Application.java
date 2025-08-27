@@ -1,10 +1,9 @@
 package com.github.mangila.pokedex.app;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import com.github.mangila.pokedex.shared.Config;
 
 public class Application {
-    public static final BlockingQueue<Boolean> SHUTDOWN_QUEUE = new ArrayBlockingQueue<>(1);
+
 
     public static void main(String[] args) throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
@@ -13,7 +12,7 @@ public class Application {
         bootstrap.initQueues();
         bootstrap.initScheduler();
         while (true) {
-            Boolean shutdown = SHUTDOWN_QUEUE.take();
+            Boolean shutdown = Config.SHUTDOWN_QUEUE.take();
             if (shutdown) {
                 break;
             }
