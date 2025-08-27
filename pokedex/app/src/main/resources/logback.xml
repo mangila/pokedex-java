@@ -12,7 +12,7 @@
     <logger name="com.github.mangila.pokedex.shared.cache" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.https" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.json" level="INFO"/>
-    <logger name="com.github.mangila.pokedex.shared.queue" level="INFO"/>
+    <logger name="com.github.mangila.pokedex.shared.defaultQueue" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.tls" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.tls.pool" level="INFO"/>
     <logger name="com.github.mangila.pokedex.shared.util" level="INFO"/>

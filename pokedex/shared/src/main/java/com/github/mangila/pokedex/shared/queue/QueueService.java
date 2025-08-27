@@ -14,7 +14,6 @@ public class QueueService {
     private final Map<QueueName, Queue> queues;
 
     private QueueService() {
-        LOGGER.info("Initializing QueueService");
         this.queues = new ConcurrentHashMap<>();
     }
 
@@ -28,7 +27,13 @@ public class QueueService {
 
     public Queue createNewQueue(QueueName queueName) {
         LOGGER.info("Create new queue '{}'", queueName);
-        queues.put(queueName, new Queue(queueName));
+        queues.put(queueName, new DefaultQueue(queueName));
+        return queues.get(queueName);
+    }
+
+    public Queue createNewBlockingQueue(QueueName queueName) {
+        LOGGER.info("Create new blocking queue '{}'", queueName);
+        queues.put(queueName, new BlockingQueue(queueName));
         return queues.get(queueName);
     }
 
@@ -37,12 +42,10 @@ public class QueueService {
     }
 
     public boolean add(QueueName queueName, QueueEntry entry) {
-        LOGGER.debug("Add QueueEntry to {} - {}", queueName, entry);
         return queues.get(queueName).add(entry);
     }
 
     public @Nullable QueueEntry poll(QueueName queueName) {
-        LOGGER.debug("Poll QueueEntry from {}", queueName);
         Queue queue = queues.get(queueName);
         if (queue == null) {
             throw new QueueNotFoundException(queueName);

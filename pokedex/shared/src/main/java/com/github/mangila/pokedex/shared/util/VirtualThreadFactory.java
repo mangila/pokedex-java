@@ -15,6 +15,10 @@ public class VirtualThreadFactory {
             .name(POKEDEX_VIRTUAL_THREAD_PREFIX, 1)
             .factory();
 
+    public static Thread newThread(Runnable runnable) {
+        return THREAD_FACTORY.newThread(runnable);
+    }
+
     public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
@@ -31,7 +35,7 @@ public class VirtualThreadFactory {
         return Executors.newSingleThreadExecutor(THREAD_FACTORY);
     }
 
-    public static boolean terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
+    public static void terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
         try {
             LOGGER.debug("Shutting down executor service {}", executorService);
             executorService.shutdown();
@@ -39,11 +43,10 @@ public class VirtualThreadFactory {
                 executorService.shutdownNow();
             }
             LOGGER.debug("Executor service {} terminated", executorService);
-            return executorService.isTerminated();
         } catch (InterruptedException e) {
             LOGGER.error("Interrupted while waiting for termination", e);
             Thread.currentThread().interrupt();
-            return false;
+            executorService.shutdownNow();
         }
     }
 }

@@ -1,6 +1,15 @@
 package com.github.mangila.pokedex.scheduler.task;
 
-public record InsertVarietyResponseTask() implements Task {
+import com.github.mangila.pokedex.shared.queue.Queue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public record InsertVarietyResponseTask(Queue queue) implements Task {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertVarietyResponseTask.class);
 
     @Override
     public String name() {
@@ -8,17 +17,15 @@ public record InsertVarietyResponseTask() implements Task {
     }
 
     @Override
-    public void schedule() {
-
-    }
-
-    @Override
-    public boolean shutdown() {
-        return false;
+    public void schedule(ScheduledExecutorService executor) {
+        executor.scheduleAtFixedRate(this,
+                5,
+                1,
+                TimeUnit.SECONDS);
     }
 
     @Override
     public void run() {
-
+        queue.poll();
     }
 }

@@ -15,21 +15,31 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.mangila.pokedex.shared.Config.POKEMON_EVOLUTION_CHAIN_URL_QUEUE;
 import static com.github.mangila.pokedex.shared.Config.POKEMON_VARIETY_URL_QUEUE;
 
-public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
-                                            Queue queue,
-                                            PokemonDatabase database) implements Task {
+public class InsertSpeciesResponseTask implements Task {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpeciesResponseTaskTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertSpeciesResponseTask.class);
 
-    private static final ScheduledExecutorService SCHEDULED_EXECUTOR_POOL = VirtualThreadFactory.newScheduledThreadPool(10);
+    private final PokeApiClient pokeApiClient;
+    private final Queue queue;
+    private final PokemonDatabase database;
+    private final ExecutorService workerPool;
+
+    public InsertSpeciesResponseTask(PokeApiClient pokeApiClient,
+                                     Queue queue,
+                                     PokemonDatabase database) {
+        this.pokeApiClient = pokeApiClient;
+        this.queue = queue;
+        this.database = database;
+        this.workerPool = VirtualThreadFactory.newFixedThreadPool(10);
+    }
 
     @Override
     public String name() {
@@ -37,19 +47,11 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
     }
 
     @Override
-    public void schedule() {
-        LOGGER.info("Scheduling {}", name());
-        SCHEDULED_EXECUTOR_POOL.scheduleAtFixedRate(this,
-                100,
-                100,
+    public void schedule(ScheduledExecutorService executor) {
+        executor.scheduleAtFixedRate(this,
+                5,
+                1,
                 TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public boolean shutdown() {
-        LOGGER.info("Shutting down {}", name());
-        var duration = Duration.ofSeconds(30);
-        return VirtualThreadFactory.terminateGracefully(SCHEDULED_EXECUTOR_POOL, duration);
     }
 
     @Override
@@ -59,27 +61,28 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
             LOGGER.debug("Queue is empty");
             return;
         }
-        try {
-            PokeApiUri uri = queueEntry.unwrapAs(PokeApiUri.class);
-            JsonRoot jsonRoot = pokeApiClient.fetch(uri)
-                    .join();
-            String key = "pokemon::".concat(getId(jsonRoot).toString());
-            LOGGER.info("{}", key);
-            QueueService.getInstance()
-                    .add(POKEMON_EVOLUTION_CHAIN_URL_QUEUE, new QueueEntry(getEvolutionChainUrl(key, jsonRoot)));
-            getVarietiesUrls(key, jsonRoot)
-                    .forEach(url -> QueueService.getInstance()
-                            .add(POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
-            insertFields(key, jsonRoot, database);
-        } catch (Exception e) {
-            LOGGER.error("ERR", e);
-            if (queueEntry.equalsMaxRetries(3)) {
-                queue.addDlq(queueEntry);
-                return;
-            }
-            queueEntry.incrementFailCounter();
-            queue.add(queueEntry);
-        }
+        PokeApiUri uri = queueEntry.unwrapAs(PokeApiUri.class);
+        pokeApiClient.fetch(uri)
+                .thenAcceptAsync(jsonRoot -> {
+                    String key = "pokemon::".concat(getId(jsonRoot).toString());
+                    LOGGER.info("{}", key);
+                    QueueService.getInstance()
+                            .add(POKEMON_EVOLUTION_CHAIN_URL_QUEUE, new QueueEntry(getEvolutionChainUrl(key, jsonRoot)));
+                    getVarietiesUrls(key, jsonRoot)
+                            .forEach(url -> QueueService.getInstance()
+                                    .add(POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
+                    insertFields(key, jsonRoot, database);
+                }, workerPool)
+                .exceptionally(throwable -> {
+                    LOGGER.error("ERR", throwable);
+                    if (queueEntry.equalsMaxRetries(3)) {
+                        queue.addDlq(queueEntry);
+                        return null;
+                    }
+                    queueEntry.incrementFailCounter();
+                    queue.add(queueEntry);
+                    return null;
+                });
     }
 
     private static EvolutionChainUrl getEvolutionChainUrl(String key, JsonRoot jsonRoot) {
@@ -140,9 +143,7 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
                 .getString("flavor_text")
                 .getBytes(Charset.defaultCharset());
         database.instance().engine()
-                .putAsync(key,
-                        "description",
-                        englishDescription);
+                .putAsync(key, "description", englishDescription);
     }
 
     private static void insertGenus(JsonRoot jsonRoot, String key, PokemonDatabase database) {
@@ -159,27 +160,27 @@ public record InsertSpeciesResponseTaskTask(PokeApiClient pokeApiClient,
                 .putAsync(key, "genus", genus);
     }
 
+    private static final byte[] TRUE_BYTES = new byte[]{1};
+    private static final byte[] FALSE_BYTES = new byte[]{0};
+
     private static void insertBabyFlag(JsonRoot jsonRoot, String key, PokemonDatabase database) {
         boolean baby = jsonRoot.getBoolean("is_baby");
+        byte[] babyBytes = baby ? TRUE_BYTES : FALSE_BYTES;
         database.instance().engine()
-                .putAsync(key,
-                        "baby",
-                        new byte[]{baby ? (byte) 1 : (byte) 0});
+                .putAsync(key, "baby", babyBytes);
     }
 
     private static void insertLegendaryFlag(JsonRoot jsonRoot, String key, PokemonDatabase database) {
         boolean legendary = jsonRoot.getBoolean("is_legendary");
+        byte[] legendaryBytes = legendary ? TRUE_BYTES : FALSE_BYTES;
         database.instance().engine()
-                .putAsync(key,
-                        "legendary",
-                        new byte[]{legendary ? (byte) 1 : (byte) 0});
+                .putAsync(key, "legendary", legendaryBytes);
     }
 
     private static void insertMythicalFlag(JsonRoot jsonRoot, String key, PokemonDatabase database) {
         boolean mythical = jsonRoot.getBoolean("is_mythical");
+        byte[] mythicalBytes = mythical ? TRUE_BYTES : FALSE_BYTES;
         database.instance().engine()
-                .putAsync(key,
-                        "mythical",
-                        new byte[]{mythical ? (byte) 1 : (byte) 0});
+                .putAsync(key, "mythical", mythicalBytes);
     }
 }

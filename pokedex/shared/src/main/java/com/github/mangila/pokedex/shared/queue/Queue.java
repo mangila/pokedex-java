@@ -2,31 +2,15 @@ package com.github.mangila.pokedex.shared.queue;
 
 import org.jspecify.annotations.Nullable;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+public interface Queue {
 
-public class Queue {
-    private final QueueName name;
-    private final ConcurrentLinkedQueue<QueueEntry> queue;
-    private final ConcurrentLinkedQueue<QueueEntry> dlq;
+    boolean isEmpty();
 
-    public Queue(QueueName name) {
-        this.name = name;
-        this.queue = new ConcurrentLinkedQueue<>();
-        this.dlq = new ConcurrentLinkedQueue<>();
-    }
+    boolean add(QueueEntry entry);
 
-    public boolean isEmpty() {
-        return queue.isEmpty() && dlq.isEmpty();
-    }
+    @Nullable
+    QueueEntry poll();
 
-    public boolean add(QueueEntry entry) {
-        return queue.add(entry);
-    }
+    boolean addDlq(QueueEntry queueEntry);
 
-    public @Nullable QueueEntry poll() {
-        return queue.poll();
-    }
-    public boolean addDlq(QueueEntry queueEntry) {
-        return dlq.add(queueEntry);
-    }
 }
