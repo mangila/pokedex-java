@@ -26,7 +26,7 @@ public final class DefaultWalManager implements WalManager {
     private final ReentrantLock writeLock;
     private final RotateThread rotateThread;
     private final List<FlushLimitThread> flushLimitThreads;
-    private final CompressionThread compressionThread;
+    private final FlushCompressionThread flushCompressionThread;
 
     public DefaultWalManager(WalConfig config) {
         BlockingQueue queue = QueueService.getInstance()
@@ -36,7 +36,7 @@ public final class DefaultWalManager implements WalManager {
         this.writeLock = new ReentrantLock(true);
         this.rotateThread = new RotateThread(config.thresholdSize(), walFileHandler, writeLock);
         this.flushLimitThreads = new ArrayList<>();
-        this.compressionThread = new CompressionThread(
+        this.flushCompressionThread = new FlushCompressionThread(
                 QueueService.getInstance()
                         .getBlockingQueue(DATABASE_WAL_COMPRESSION_QUEUE)
         );
@@ -53,7 +53,7 @@ public final class DefaultWalManager implements WalManager {
         entryPublisher.subscribe(flushDelegateSubscriber);
         rotateThread.schedule();
         flushLimitThreads.forEach(FlushLimitThread::schedule);
-        compressionThread.schedule();
+        flushCompressionThread.schedule();
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class DefaultWalManager implements WalManager {
         entryPublisher.close();
         rotateThread.shutdown();
         flushLimitThreads.forEach(FlushLimitThread::shutdown);
-        compressionThread.shutdown();
+        flushCompressionThread.shutdown();
     }
 
     @Override

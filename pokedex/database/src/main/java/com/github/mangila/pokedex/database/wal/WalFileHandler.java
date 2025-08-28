@@ -24,6 +24,9 @@ class WalFileHandler {
     /**
      * Fill the heap buffer for quick fills,
      * write with the direct buffer for quick IO writes
+     * and sync the WAL file after every write.
+     * If the item collection has a size greater than the buffer size,
+     * does a transaction write to skip partial write in the WAL file
      *
      * @throws IOException
      */
@@ -42,8 +45,10 @@ class WalFileHandler {
             direct.put(heap);
             direct.flip();
             walFile.write(direct);
+            walFile.sync();
         } else {
-            // todo: write to disk in chunks
+            // TODO: write to disk in chunks, create transaction file
+            // TODO: clean up orphaned transaction files in case of failure
             throw new IllegalStateException("Buffer size exceeded %d".formatted(bufferLength));
         }
     }

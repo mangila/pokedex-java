@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -15,8 +16,8 @@ class WalFile {
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFile.class);
 
     private final Path path;
-    private final AtomicLong size;
     private final WalFileChannel walFileChannel;
+    private final AtomicLong size;
 
     WalFile(Path path) throws IOException {
         this.path = path;
@@ -24,8 +25,7 @@ class WalFile {
                 path,
                 StandardOpenOption.CREATE,
                 StandardOpenOption.WRITE,
-                StandardOpenOption.APPEND,
-                StandardOpenOption.SYNC)
+                StandardOpenOption.APPEND)
         );
         this.size = new AtomicLong(walFileChannel.size());
     }
@@ -52,10 +52,28 @@ class WalFile {
         walFileChannel.close();
     }
 
+    public void flush() throws IOException {
+      var m =   walFileChannel.fileChannel.map(null,0,0);
+      m.compact()
+        walFileChannel.flush();
+    }
+
+    public void sync() throws IOException {
+        walFileChannel.sync();
+    }
+
     private record WalFileChannel(FileChannel fileChannel) {
 
         int write(Buffer buffer) throws IOException {
             return fileChannel.write(buffer.value());
+        }
+
+        void flush() throws IOException {
+            fileChannel.force(false);
+        }
+
+        void sync() throws IOException {
+            fileChannel.force(true);
         }
 
         long size() throws IOException {

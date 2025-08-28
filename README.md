@@ -34,17 +34,15 @@ For more information, please see /docs (wip)
 - Time To Live(TTL) Cache
 - Last Recently Used(LRU) Cache
 - Scheduler
+- Internal Queue Service
 - HTTP Server
     - Serve RESTful JSON
     - Serve media files
     - HTTP/1.1
-- Key Value Database (Yet Another Key Value Store)
-    - Persist to disk
-    - Append only file
-    - `.yakvs` file format
-        - Binary format
-        - Index file
-        - Data file
+- Database
+    - Key → Dictionary (many field → value pairs)
+    - WAL file system
+    - (WIP)
 
 ## Contributing
 

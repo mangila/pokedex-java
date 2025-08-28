@@ -13,13 +13,13 @@ import java.nio.file.Path;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.zip.GZIPOutputStream;
 
-class CompressionThread implements SimpleBackgroundThread {
+class FlushCompressionThread implements SimpleBackgroundThread {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushCompressionThread.class);
     private final BlockingQueue queue;
     private final ScheduledExecutorService executor;
 
-    CompressionThread(BlockingQueue queue) {
+    FlushCompressionThread(BlockingQueue queue) {
         this.queue = queue;
         this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
     }

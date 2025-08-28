@@ -4,6 +4,8 @@ Documentation about the /pokedex/database module
 
 ## Database
 
+Redis Hash kind of database that persists to disk
+
 "Write first, read later" database.
 
 High throughput, low latency. With the cost of less durability and higher RAM usage.
