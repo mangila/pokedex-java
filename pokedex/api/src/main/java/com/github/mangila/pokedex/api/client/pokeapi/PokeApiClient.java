@@ -1,9 +1,6 @@
 package com.github.mangila.pokedex.api.client.pokeapi;
 
-import com.github.mangila.pokedex.api.client.pokeapi.response.EvolutionChainResponse;
 import com.github.mangila.pokedex.api.client.pokeapi.response.PokeApiClientException;
-import com.github.mangila.pokedex.api.client.pokeapi.response.VarietyResponse;
-import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClientConfig;
@@ -17,13 +14,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
+import static com.github.mangila.pokedex.shared.Config.*;
+
 public class PokeApiClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(PokeApiClient.class);
     private static final PokeApiClientConfig DEFAULT_CONFIG = new PokeApiClientConfig(
             new JsonClientConfig(
-                    Config.POKEAPI_HOST,
+                    POKEAPI_HOST,
                     JsonParser.DEFAULT,
-                    new TlsConnectionPoolConfig(Config.POKEAPI_HOST, Config.POKEAPI_PORT, 5),
+                    new TlsConnectionPoolConfig(POKEAPI_HOST, POKEAPI_PORT, MAX_CONNECTIONS),
                     TtlCacheConfig.defaultConfig()
             )
     );
@@ -62,35 +61,18 @@ public class PokeApiClient {
         if (throwable != null) {
             throw new PokeApiClientException("Request failed", throwable);
         }
+        if (response == null) {
+            throw new PokeApiClientException("Response is null");
+        }
         if (!response.isSuccess()) {
             throw new PokeApiClientException("%s".formatted(response.status()), response);
         }
         return response;
     }
 
-    public CompletableFuture<JsonRoot> fetch(PokeApiUri uri) {
+    public CompletableFuture<JsonRoot> fetchAsync(PokeApiUri uri) {
         return jsonClient.fetchAsync(uri.toGetRequest())
                 .handle(this::ensureSuccess)
                 .thenApply(JsonResponse::body);
-    }
-
-    public CompletableFuture<JsonRoot> fetchPokemonSpecies(PokeApiUri uri) {
-        return jsonClient.fetchAsync(uri.toGetRequest())
-                .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body);
-    }
-
-    public CompletableFuture<VarietyResponse> fetchPokemonVariety(PokeApiUri uri) {
-        return jsonClient.fetchAsync(uri.toGetRequest())
-                .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body)
-                .thenApply(VarietyResponse::from);
-    }
-
-    public CompletableFuture<EvolutionChainResponse> fetchEvolutionChain(PokeApiUri uri) {
-        return jsonClient.fetchAsync(uri.toGetRequest())
-                .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body)
-                .thenApply(EvolutionChainResponse::from);
     }
 }

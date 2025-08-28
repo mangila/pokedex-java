@@ -4,7 +4,6 @@ import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 
 public record TaskExecutor(ScheduledExecutorService scheduledPool) {
@@ -18,8 +17,7 @@ public record TaskExecutor(ScheduledExecutorService scheduledPool) {
 
     public void shutdown() {
         LOGGER.info("Shutting down TaskExecutor");
-        VirtualThreadFactory.terminateGracefully(scheduledPool, Duration.ofSeconds(30));
-        LOGGER.info("TaskExecutor shutdown complete");
+        VirtualThreadFactory.terminateGracefully(scheduledPool);
     }
 
 }

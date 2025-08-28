@@ -9,6 +9,8 @@ public sealed interface WalManager permits DefaultWalManager {
 
     void close();
 
+    void flush();
+
     WriteCallback put(Entry entry);
 
 }

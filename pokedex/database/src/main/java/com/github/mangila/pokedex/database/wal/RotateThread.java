@@ -15,12 +15,15 @@ class RotateThread implements SimpleBackgroundThread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RotateThread.class);
     private final ScheduledExecutorService executor;
+    private final long thresholdSize;
     private final WalFileHandler walFileHandler;
     private final ReentrantLock writeLock;
 
-    RotateThread(WalFileHandler walFileHandler,
+    RotateThread(long thresholdSize,
+                 WalFileHandler walFileHandler,
                  ReentrantLock writeLock) {
         this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+        this.thresholdSize = thresholdSize;
         this.walFileHandler = walFileHandler;
         this.writeLock = writeLock;
     }
@@ -39,19 +42,19 @@ class RotateThread implements SimpleBackgroundThread {
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                if (walFileHandler.size() > 150_000) {
-                    try {
-                        writeLock.lock();
-                        walFileHandler.rotate(Path.of(System.nanoTime() + ".wal"));
-                    } finally {
-                        writeLock.unlock();
-                    }
+        try {
+            if (walFileHandler.size() > thresholdSize) {
+                try {
+                    writeLock.lock();
+                    Path newFileName = Path.of(System.nanoTime() + ".wal");
+                    LOGGER.info("Rotating from: {} - to: {}", walFileHandler.path(), newFileName);
+                    walFileHandler.rotate(newFileName);
+                } finally {
+                    writeLock.unlock();
                 }
-            } catch (Exception e) {
-                LOGGER.error("ERR", e);
             }
+        } catch (Exception e) {
+            LOGGER.error("ERR", e);
         }
     }
 }

@@ -16,6 +16,11 @@ public class PokeApiClientException extends RuntimeException {
         this(message, cause, null);
     }
 
+    public PokeApiClientException(String message) {
+        this(message, null, null);
+    }
+
+
     public PokeApiClientException(String message, JsonResponse response) {
         this(message, null, response);
     }

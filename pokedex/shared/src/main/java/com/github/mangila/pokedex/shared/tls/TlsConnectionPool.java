@@ -31,7 +31,7 @@ public class TlsConnectionPool {
 
     public void offer(TlsConnectionHandler tlsConnectionHandler) {
         if (!queue.offer(tlsConnectionHandler)) {
-            LOGGER.warn("Queue is full, dropping tlsConnectionHandler");
+            LOGGER.warn("Queue is full, dropping connection");
             if (tlsConnectionHandler.connected()) {
                 tlsConnectionHandler.disconnect();
             }
@@ -73,6 +73,7 @@ public class TlsConnectionPool {
     }
 
     public void close() {
+        LOGGER.info("Closing connection pool");
         initialized = false;
         queue.forEach(TlsConnectionHandler::disconnect);
         queue.clear();
@@ -80,6 +81,7 @@ public class TlsConnectionPool {
     }
 
     private void init() {
+        LOGGER.info("Initializing connection pool");
         this.initialized = true;
         IntStream.range(1, maxConnections + 1)
                 .peek(value -> LOGGER.debug("Creating new connection - {} of {}", value, maxConnections))

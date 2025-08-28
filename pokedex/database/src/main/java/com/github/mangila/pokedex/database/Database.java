@@ -1,7 +1,10 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
+import com.github.mangila.pokedex.database.model.WriteCallback;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
+
+import java.util.concurrent.CompletableFuture;
 
 public class Database {
 
@@ -14,7 +17,14 @@ public class Database {
                 new FileManager(config),
                 new Cache(new LruCache<>(config.lruCacheConfig()))
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            flush();
+            close();
+        }));
+    }
+
+    private void flush() {
+        engine.flush();
     }
 
     public boolean isOpen() {
@@ -29,8 +39,8 @@ public class Database {
         engine.close();
     }
 
-    public Engine engine() {
-        return engine;
+    public CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value) {
+        return engine.putAsync(key, field, value);
     }
 
     public DatabaseConfig config() {

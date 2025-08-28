@@ -3,6 +3,9 @@ package com.github.mangila.pokedex.database.wal;
 import com.github.mangila.pokedex.database.model.Buffer;
 import com.github.mangila.pokedex.database.model.CallbackItemCollection;
 import com.github.mangila.pokedex.database.model.Entry;
+import com.github.mangila.pokedex.shared.Config;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
+import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +21,12 @@ class WalFileHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFileHandler.class);
     private WalFile walFile;
 
-    WalFileHandler(WalFile walFile) {
-        this.walFile = walFile;
-    }
-
-    WalFileHandler() {
-
-    }
-
+    /**
+     * Fill the heap buffer for quick fills,
+     * write with the direct buffer for quick IO writes
+     *
+     * @throws IOException
+     */
     void flush(FlushWriteBuffer flushWriteBuffer, CallbackItemCollection callbackItemCollection) throws IOException {
         int bufferLength = callbackItemCollection.bufferLength();
         if (bufferLength == 0) {
@@ -37,29 +38,20 @@ class WalFileHandler {
             for (Entry entry : callbackItemCollection.toValues()) {
                 entry.fill(heap);
             }
-            try {
-                direct.put(heap);
-                direct.flip();
-                walFile.write(direct);
-            } finally {
-                direct.clear();
-                heap.clear();
-            }
+            heap.flip();
+            direct.put(heap);
+            direct.flip();
+            walFile.write(direct);
         } else {
             // todo: write to disk in chunks
             throw new IllegalStateException("Buffer size exceeded %d".formatted(bufferLength));
         }
     }
 
-
-    void open() {
-
-    }
-
     void replay() {
         try (Stream<Path> stream = Files.find(
                 Paths.get("."),
-                1, // search depth
+                1,
                 (path, attrs) -> attrs.isRegularFile() && path.toString().endsWith(".wal")
         )) {
             List<Path> files = stream.toList();
@@ -78,11 +70,22 @@ class WalFileHandler {
     }
 
     void rotate(Path newFileName) throws IOException {
-        walFile.compress();
-        this.walFile = new WalFile(newFileName);
+        close();
+        Path source = path();
+        QueueService.getInstance()
+                .add(Config.DATABASE_WAL_COMPRESSION_QUEUE, new QueueEntry(source));
+        walFile = new WalFile(newFileName);
     }
 
     public long size() {
         return walFile.size();
+    }
+
+    public void close() throws IOException {
+        walFile.close();
+    }
+
+    public Path path() {
+        return walFile.path();
     }
 }

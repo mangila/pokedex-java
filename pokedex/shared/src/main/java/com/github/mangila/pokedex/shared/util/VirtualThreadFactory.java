@@ -31,15 +31,15 @@ public class VirtualThreadFactory {
         return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
     }
 
-    public static ExecutorService newSingleThreadExecutor() {
-        return Executors.newSingleThreadExecutor(THREAD_FACTORY);
+    public static void terminateGracefully(ExecutorService executorService) {
+        terminateGracefully(executorService, Duration.ofSeconds(5));
     }
 
-    public static void terminateGracefully(ExecutorService executorService, Duration awaitTermination) {
+    public static void terminateGracefully(ExecutorService executorService, Duration duration) {
         try {
             LOGGER.debug("Shutting down executor service {}", executorService);
             executorService.shutdown();
-            while (!executorService.awaitTermination(awaitTermination.toMillis(), TimeUnit.MILLISECONDS)) {
+            while (!executorService.awaitTermination(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                 executorService.shutdownNow();
             }
             LOGGER.debug("Executor service {} terminated", executorService);

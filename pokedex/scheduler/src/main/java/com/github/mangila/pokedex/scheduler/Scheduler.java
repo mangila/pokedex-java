@@ -10,18 +10,13 @@ import java.util.List;
 public class Scheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Scheduler.class);
-    public static volatile boolean shutdown = false;
     private final List<Task> tasks;
     private final TaskExecutor taskExecutor;
 
     public Scheduler(SchedulerConfig config) {
         this.tasks = config.tasks();
         this.taskExecutor = config.taskExecutor();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!shutdown) {
-                shutdown();
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     public void init() {
@@ -31,7 +26,6 @@ public class Scheduler {
 
     public void shutdown() {
         LOGGER.info("Shutting down Scheduler");
-        shutdown = true;
         taskExecutor.shutdown();
     }
 }

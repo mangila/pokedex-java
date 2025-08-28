@@ -1,4 +1,5 @@
 *.wal
+*.gz
 __pycache__
 .idea
 # Compiled class databaseFile

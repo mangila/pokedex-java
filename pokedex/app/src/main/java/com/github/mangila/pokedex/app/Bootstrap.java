@@ -22,36 +22,37 @@ public final class Bootstrap {
         PokeApiClient.configureDefaultSettings();
     }
 
+    public void initQueues() {
+        QueueService queueService = QueueService.getInstance();
+        queueService.createNewBlockingQueue(POKEMON_SPECIES_URL_QUEUE);
+        queueService.createNewBlockingQueue(POKEMON_SPRITES_QUEUE);
+        queueService.createNewBlockingQueue(POKEMON_CRIES_QUEUE);
+        queueService.createNewBlockingQueue(POKEMON_VARIETY_URL_QUEUE);
+        queueService.createNewBlockingQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE);
+        queueService.createNewBlockingQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
+        queueService.createNewBlockingQueue(DATABASE_WAL_COMPRESSION_QUEUE);
+    }
+
     public Scheduler initScheduler() {
         QueueService queueService = QueueService.getInstance();
         PokeApiClient pokeApiClient = PokeApiClient.getInstance();
         PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
         pokemonDatabase.instance().open();
         TaskExecutor taskExecutor = new TaskExecutor(
-                VirtualThreadFactory.newScheduledThreadPool(64)
+                VirtualThreadFactory.newScheduledThreadPool(256)
         );
         List<Task> tasks = List.of(
-                new InsertCriesTask(pokeApiClient, queueService.getQueue(POKEMON_CRIES_QUEUE)),
-                new InsertEvolutionChainResponse(queueService.getQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE)),
-                new InsertSpeciesResponseTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
-                new InsertSpritesTask(pokeApiClient, queueService.getQueue(POKEMON_SPRITES_QUEUE)),
-                new InsertVarietyResponseTask(queueService.getQueue(POKEMON_VARIETY_URL_QUEUE)),
-                new QueuePokemonsTask(pokeApiClient, queueService.getQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
-                new ShutdownTask(queueService, taskExecutor)
+                new InsertCriesTask(pokeApiClient, queueService.getBlockingQueue(POKEMON_CRIES_QUEUE), pokemonDatabase),
+                new InsertEvolutionChainResponse(queueService.getBlockingQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE), pokemonDatabase),
+                new InsertSpeciesResponseTask(pokeApiClient, queueService.getBlockingQueue(POKEMON_SPECIES_URL_QUEUE), pokemonDatabase),
+                new InsertSpritesTask(pokeApiClient, queueService.getBlockingQueue(POKEMON_SPRITES_QUEUE), pokemonDatabase),
+                new InsertVarietyResponseTask(queueService.getBlockingQueue(POKEMON_VARIETY_URL_QUEUE), pokemonDatabase),
+                new QueuePokemonsTask(pokeApiClient, queueService.getBlockingQueue(POKEMON_SPECIES_URL_QUEUE), POKEMON_LIMIT),
+                new ShutdownTask()
         );
         Scheduler scheduler = new Scheduler(new SchedulerConfig(tasks, taskExecutor));
         scheduler.init();
         return scheduler;
-    }
-
-    public void initQueues() {
-        QueueService queueService = QueueService.getInstance();
-        queueService.createNewQueue(POKEMON_SPECIES_URL_QUEUE);
-        queueService.createNewQueue(POKEMON_SPRITES_QUEUE);
-        queueService.createNewQueue(POKEMON_CRIES_QUEUE);
-        queueService.createNewQueue(POKEMON_VARIETY_URL_QUEUE);
-        queueService.createNewQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE);
-        queueService.createNewQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
     }
 
 }

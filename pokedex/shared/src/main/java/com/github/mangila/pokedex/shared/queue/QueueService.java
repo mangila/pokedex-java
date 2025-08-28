@@ -31,14 +31,18 @@ public class QueueService {
         return queues.get(queueName);
     }
 
-    public Queue createNewBlockingQueue(QueueName queueName) {
+    public BlockingQueue createNewBlockingQueue(QueueName queueName) {
         LOGGER.info("Create new blocking queue '{}'", queueName);
         queues.put(queueName, new BlockingQueue(queueName));
-        return queues.get(queueName);
+        return (BlockingQueue) queues.get(queueName);
     }
 
     public Queue getQueue(QueueName queueName) {
         return queues.get(queueName);
+    }
+
+    public BlockingQueue getBlockingQueue(QueueName queueName) {
+        return (BlockingQueue) queues.get(queueName);
     }
 
     public boolean add(QueueName queueName, QueueEntry entry) {

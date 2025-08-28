@@ -4,22 +4,19 @@ import com.github.mangila.pokedex.database.model.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.zip.GZIPOutputStream;
 
 class WalFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WalFile.class);
 
     private final Path path;
-    private final WalFileChannel walFileChannel;
     private final AtomicLong size;
+    private final WalFileChannel walFileChannel;
 
     WalFile(Path path) throws IOException {
         this.path = path;
@@ -47,16 +44,15 @@ class WalFile {
         return size.get();
     }
 
-    public void compress() {
-
+    public Path path() {
+        return path;
     }
 
-    private static class WalFileChannel {
-        private final FileChannel fileChannel;
+    public void close() throws IOException {
+        walFileChannel.close();
+    }
 
-        WalFileChannel(FileChannel fileChannel) {
-            this.fileChannel = fileChannel;
-        }
+    private record WalFileChannel(FileChannel fileChannel) {
 
         int write(Buffer buffer) throws IOException {
             return fileChannel.write(buffer.value());

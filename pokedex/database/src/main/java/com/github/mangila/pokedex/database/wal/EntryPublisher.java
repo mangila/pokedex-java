@@ -11,7 +11,7 @@ import java.util.concurrent.SubmissionPublisher;
 
 class EntryPublisher implements Flow.Publisher<CallbackItem<Entry>> {
 
-    private final ExecutorService publisherExecutor = VirtualThreadFactory.newFixedThreadPool(10);
+    private final ExecutorService publisherExecutor = VirtualThreadFactory.newFixedThreadPool(256);
     private final SubmissionPublisher<CallbackItem<Entry>> publisher;
 
     EntryPublisher() {
@@ -29,6 +29,6 @@ class EntryPublisher implements Flow.Publisher<CallbackItem<Entry>> {
 
     void close() {
         publisher.close();
-        VirtualThreadFactory.terminateGracefully(publisherExecutor, Duration.ofSeconds(30));
+        VirtualThreadFactory.terminateGracefully(publisherExecutor);
     }
 }

@@ -5,7 +5,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,14 +59,12 @@ public class TtlCache<K, V> {
         return cache.containsKey(key);
     }
 
-    public boolean isEvictionThreadShutdown() {
-        return evictionThread.isShutdown();
+    public void shutdownEvictionThread() {
+        log.info("Shutting down TTL cache eviction thread");
+        VirtualThreadFactory.terminateGracefully(evictionThread);
     }
 
-    public void shutdownEvictionThread() {
-        VirtualThreadFactory.terminateGracefully(
-                evictionThread,
-                Duration.ofSeconds(10)
-        );
+    public void clear() {
+        cache.clear();
     }
 }

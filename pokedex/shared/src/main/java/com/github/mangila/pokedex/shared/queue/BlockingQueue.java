@@ -19,7 +19,12 @@ public class BlockingQueue implements Queue {
 
     @Override
     public boolean isEmpty() {
-        return queue.isEmpty() && dlq.isEmpty();
+        return queue.isEmpty();
+    }
+
+    @Override
+    public boolean isDlqEmpty() {
+        return dlq.isEmpty();
     }
 
     @Override
@@ -36,9 +41,19 @@ public class BlockingQueue implements Queue {
         return queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
 
+    public QueueEntry take() throws InterruptedException {
+        return queue.take();
+    }
+
     @Override
     public boolean addDlq(QueueEntry queueEntry) {
         return dlq.add(queueEntry);
+    }
+
+    @Override
+    public void clear() {
+        queue.clear();
+        dlq.clear();
     }
 
 }

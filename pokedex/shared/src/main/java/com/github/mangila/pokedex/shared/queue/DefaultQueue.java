@@ -17,7 +17,12 @@ public class DefaultQueue implements Queue {
 
     @Override
     public boolean isEmpty() {
-        return queue.isEmpty() && dlq.isEmpty();
+        return queue.isEmpty();
+    }
+
+    @Override
+    public boolean isDlqEmpty() {
+        return dlq.isEmpty();
     }
 
     @Override
@@ -33,5 +38,11 @@ public class DefaultQueue implements Queue {
     @Override
     public boolean addDlq(QueueEntry queueEntry) {
         return dlq.add(queueEntry);
+    }
+
+    @Override
+    public void clear() {
+        queue.clear();
+        dlq.clear();
     }
 }

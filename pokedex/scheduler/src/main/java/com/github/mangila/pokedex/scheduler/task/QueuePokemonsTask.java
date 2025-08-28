@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
-public record QueuePokemonsTask(PokeApiClient pokeApiClient, Queue defaultQueue, int pokemonLimit) implements Task {
+public record QueuePokemonsTask(PokeApiClient pokeApiClient, Queue queue, int pokemonLimit) implements Task {
     private static final Logger LOGGER = LoggerFactory.getLogger(QueuePokemonsTask.class);
 
     @Override
@@ -27,12 +27,19 @@ public record QueuePokemonsTask(PokeApiClient pokeApiClient, Queue defaultQueue,
 
     @Override
     public void run() {
-        PokeApiUri uri = PokeApiUri.from("https://pokeapi.co/api/v2/pokemon-species?limit=" + pokemonLimit);
-        pokeApiClient.fetch(uri)
-                .thenApply(QueuePokemonsTask::getUris)
-                .thenApply(list -> list.stream().map(QueueEntry::new).toList())
-                .thenAccept(queueEntries -> queueEntries.forEach(defaultQueue::add))
-                .join();
+        try {
+            if (pokemonLimit < 1) {
+                throw new IllegalArgumentException("Pokemon limit must be greater than 0");
+            }
+            PokeApiUri uri = PokeApiUri.from("https://pokeapi.co/api/v2/pokemon-species?limit=" + pokemonLimit);
+            pokeApiClient.fetchAsync(uri)
+                    .thenApply(QueuePokemonsTask::getUris)
+                    .thenApply(uriList -> uriList.stream().map(QueueEntry::new).toList())
+                    .thenAccept(queueEntries -> queueEntries.forEach(queue::add))
+                    .join();
+        } catch (Exception e) {
+            LOGGER.error("Failed to queue pokemons", e);
+        }
     }
 
     private static List<PokeApiUri> getUris(JsonRoot jsonRoot) {

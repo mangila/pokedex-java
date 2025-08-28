@@ -4,13 +4,15 @@ import com.github.mangila.pokedex.database.model.WriteCallback;
 
 import java.util.concurrent.CompletableFuture;
 
-public sealed interface Engine permits DefaultEngine {
+sealed interface Engine permits DefaultEngine {
 
     boolean isOpen();
 
     void open();
 
     void close();
+
+    void flush();
 
     WriteCallback put(String key, String field, byte[] value);
 

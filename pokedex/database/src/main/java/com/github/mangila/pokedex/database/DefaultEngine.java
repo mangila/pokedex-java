@@ -3,7 +3,6 @@ package com.github.mangila.pokedex.database;
 import com.github.mangila.pokedex.database.model.*;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -18,7 +17,7 @@ final class DefaultEngine implements Engine {
         this.open = false;
         this.fileManager = fileManager;
         this.cache = cache;
-        this.executor = VirtualThreadFactory.newFixedThreadPool(64);
+        this.executor = VirtualThreadFactory.newFixedThreadPool(256);
     }
 
     @Override
@@ -49,7 +48,12 @@ final class DefaultEngine implements Engine {
     public void close() {
         open = false;
         fileManager.wal().close();
-        VirtualThreadFactory.terminateGracefully(executor, Duration.ofSeconds(30));
+        VirtualThreadFactory.terminateGracefully(executor);
         cache.clear();
+    }
+
+    @Override
+    public void flush() {
+        fileManager.wal().flush();
     }
 }

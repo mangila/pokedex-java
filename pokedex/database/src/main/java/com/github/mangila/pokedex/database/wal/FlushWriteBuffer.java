@@ -4,9 +4,6 @@ import com.github.mangila.pokedex.database.model.Buffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * NOT THREAD SAFE
- */
 class FlushWriteBuffer {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlushWriteBuffer.class);
     public static final int DEFAULT_BUFFER_SIZE = 8192;
@@ -25,10 +22,12 @@ class FlushWriteBuffer {
     }
 
     Buffer getHeap() {
+        heapBuffer.clear();
         return heapBuffer;
     }
 
     Buffer getDirect() {
+        directBuffer.clear();
         return directBuffer;
     }
 

@@ -6,6 +6,8 @@ public interface Queue {
 
     boolean isEmpty();
 
+    boolean isDlqEmpty();
+
     boolean add(QueueEntry entry);
 
     @Nullable
@@ -13,4 +15,5 @@ public interface Queue {
 
     boolean addDlq(QueueEntry queueEntry);
 
+    void clear();
 }

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 public class JsonClient {
 
@@ -30,6 +31,7 @@ public class JsonClient {
     private final HttpHeaderReader headerReader;
     private final HttpBodyReader httpBodyReader;
     private final JsonParser jsonParser;
+    private final ExecutorService executor;
 
     public JsonClient(JsonClientConfig config) {
         this.host = config.host();
@@ -39,10 +41,17 @@ public class JsonClient {
         this.statusReader = new HttpStatusReader();
         this.headerReader = new HttpHeaderReader();
         this.httpBodyReader = new HttpBodyReader();
+        this.executor = VirtualThreadFactory.newFixedThreadPool(256);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            pool.close();
+            responseTtlCache.shutdownEvictionThread();
+            responseTtlCache.clear();
+            VirtualThreadFactory.terminateGracefully(executor);
+        }));
     }
 
     public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadFactory.newSingleThreadExecutor());
+        return CompletableFuture.supplyAsync(() -> this.fetch(request), executor);
     }
 
     public @Nullable JsonResponse fetch(GetRequest request) {
