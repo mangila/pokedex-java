@@ -45,17 +45,17 @@ class CompressionThread implements SimpleBackgroundThread {
                 Thread.currentThread().interrupt();
                 break;
             }
+            Path source = queueEntry.unwrapAs(Path.class);
             try {
-                Path source = queueEntry.unwrapAs(Path.class);
                 LOGGER.info("Compressing {}", source);
                 Path target = Path.of(source.toString().concat(".gz"));
                 try (var in = Files.newInputStream(source);
                      var out = new GZIPOutputStream(Files.newOutputStream(target))) {
                     in.transferTo(out);
-                    Files.deleteIfExists(source);
                 }
+                Files.deleteIfExists(source);
             } catch (IOException e) {
-                LOGGER.error("ERR", e);
+                LOGGER.error("Failed to compress file {}", source, e);
                 if (queueEntry.equalsMaxRetries(3)) {
                     queue.addDlq(queueEntry);
                 } else {

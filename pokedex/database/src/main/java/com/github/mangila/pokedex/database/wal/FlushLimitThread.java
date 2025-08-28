@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
-class FlushThread implements SimpleBackgroundThread {
+class FlushLimitThread implements SimpleBackgroundThread {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlushThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushLimitThread.class);
 
     private final ScheduledExecutorService executor;
     private final long thresholdLimit;
@@ -28,10 +28,10 @@ class FlushThread implements SimpleBackgroundThread {
     private final List<CallbackItem<Entry>> items;
     private final ReentrantLock writeLock;
 
-    FlushThread(long thresholdLimit,
-                BlockingQueue queue,
-                WalFileHandler walFileHandler,
-                ReentrantLock writeLock) {
+    FlushLimitThread(long thresholdLimit,
+                     BlockingQueue queue,
+                     WalFileHandler walFileHandler,
+                     ReentrantLock writeLock) {
         this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
         this.thresholdLimit = thresholdLimit;
         this.queue = queue;

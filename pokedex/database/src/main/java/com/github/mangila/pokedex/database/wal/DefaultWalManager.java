@@ -25,7 +25,7 @@ public final class DefaultWalManager implements WalManager {
     private final EntryPublisher entryPublisher;
     private final ReentrantLock writeLock;
     private final RotateThread rotateThread;
-    private final List<FlushThread> flushThreads;
+    private final List<FlushLimitThread> flushLimitThreads;
     private final CompressionThread compressionThread;
 
     public DefaultWalManager(WalConfig config) {
@@ -35,13 +35,13 @@ public final class DefaultWalManager implements WalManager {
         this.entryPublisher = new EntryPublisher();
         this.writeLock = new ReentrantLock(true);
         this.rotateThread = new RotateThread(config.thresholdSize(), walFileHandler, writeLock);
-        this.flushThreads = new ArrayList<>();
+        this.flushLimitThreads = new ArrayList<>();
         this.compressionThread = new CompressionThread(
                 QueueService.getInstance()
                         .getBlockingQueue(DATABASE_WAL_COMPRESSION_QUEUE)
         );
         for (int i = 0; i < 3; i++) {
-            flushThreads.add(new FlushThread(config.thresholdLimit(), queue, walFileHandler, writeLock));
+            flushLimitThreads.add(new FlushLimitThread(config.thresholdLimit(), queue, walFileHandler, writeLock));
         }
         this.flushDelegateSubscriber = new FlushDelegateSubscriber(queue);
     }
@@ -52,7 +52,7 @@ public final class DefaultWalManager implements WalManager {
         walFileHandler.replay();
         entryPublisher.subscribe(flushDelegateSubscriber);
         rotateThread.schedule();
-        flushThreads.forEach(FlushThread::schedule);
+        flushLimitThreads.forEach(FlushLimitThread::schedule);
         compressionThread.schedule();
     }
 
@@ -66,14 +66,14 @@ public final class DefaultWalManager implements WalManager {
         }
         entryPublisher.close();
         rotateThread.shutdown();
-        flushThreads.forEach(FlushThread::shutdown);
+        flushLimitThreads.forEach(FlushLimitThread::shutdown);
         compressionThread.shutdown();
     }
 
     @Override
     public void flush() {
-        for (FlushThread flushThread : flushThreads) {
-            List<CallbackItem<Entry>> items = flushThread.items();
+        for (FlushLimitThread flushLimitThread : flushLimitThreads) {
+            List<CallbackItem<Entry>> items = flushLimitThread.items();
             try {
                 walFileHandler.flush(new FlushWriteBuffer(), new CallbackItemCollection(items));
             } catch (IOException e) {
