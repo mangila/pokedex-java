@@ -20,6 +20,10 @@ public class VirtualThreadFactory {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
 
+    public static ExecutorService newThreadPerTaskExecutor() {
+        return Executors.newThreadPerTaskExecutor(THREAD_FACTORY);
+    }
+
     /**
      * Creates a new virtual thread pool with the given number of threads.
      * <br>
