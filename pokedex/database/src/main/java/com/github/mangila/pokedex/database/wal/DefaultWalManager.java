@@ -40,12 +40,16 @@ public final class DefaultWalManager implements WalManager {
 
     @Override
     public void close() {
-
+        LOGGER.info("Closing WAL Manager");
+        entryPublisher.close();
+        writeThreads.forEach(WriteThread::shutdown);
+        flush();
     }
 
     @Override
     public void flush() {
-
+        LOGGER.info("Flushing WAL Manager");
+        walFileHandle.flush();
     }
 
     @Override

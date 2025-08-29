@@ -44,6 +44,10 @@ public class WalTable implements ReadOps, WriteOps {
                 .toList();
     }
 
+    public void flush() {
+        mappedBuffer.sync();
+    }
+
     private record Read(WalTable walTable) {
         @Nullable
         ByteBuffer get(Key key, Field field) {

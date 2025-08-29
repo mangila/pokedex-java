@@ -38,6 +38,7 @@ class WriteThread implements SimpleBackgroundThread {
 
     @Override
     public void shutdown() {
+        LOGGER.info("Shutting down write thread");
         VirtualThreadFactory.terminateGracefully(executor);
     }
 

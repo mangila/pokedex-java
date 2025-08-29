@@ -17,4 +17,8 @@ class WalFileHandle {
         this.walFile = new WalFile(path, size);
         this.walTable = new WalTable(new ConcurrentHashMap<>(), walFile.getMappedBuffer());
     }
+
+    public void flush() {
+        walTable.flush();
+    }
 }

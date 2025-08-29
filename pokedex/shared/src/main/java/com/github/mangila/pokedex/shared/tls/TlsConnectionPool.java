@@ -11,6 +11,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+/**
+ * HTTP 1.1 connection pool for TLS connections.
+ * <p>
+ * This is the solution to achieve concurrency using HTTP 1.1.
+ * <p>
+ * If using HTTP 2.0, a connection pool is not needed.
+ * HTTP 2.0 concurrency is handled by the protocol itself.
+ */
+// TODO: add metrics, lazy connections
 public class TlsConnectionPool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsConnectionPool.class);

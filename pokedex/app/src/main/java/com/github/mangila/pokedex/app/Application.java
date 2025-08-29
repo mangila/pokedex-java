@@ -18,7 +18,6 @@ public class Application {
             //TODO: try catch or run in separate thread
             PokeApiClient.getInstance().shutdown();
             scheduler.shutdown();
-            PokemonDatabase.getInstance().instance().flush();
             PokemonDatabase.getInstance().instance().close();
         }));
         while (true) {

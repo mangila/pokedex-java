@@ -69,6 +69,8 @@ public class MappedBuffer {
     }
 
     /**
+     * Runs 'fsync()' or 'fdatasync()' on the underlying storage device.
+     * <br>
      * Forces any changes made to the mapped byte buffer to be written to the
      * underlying storage device. This ensures data consistency by making
      * sure that all modifications to the buffer are persisted to disk.
