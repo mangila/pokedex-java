@@ -58,8 +58,9 @@ public class InsertSpeciesResponseTask implements Task {
             PokeApiUri uri = queueEntry.unwrapAs(PokeApiUri.class);
             pokeApiClient.fetchAsync(uri)
                     .thenAcceptAsync(jsonRoot -> {
+                        BigInteger id = (BigInteger) jsonRoot.getNumber("id");
                         String key = jsonRoot.getString("name");
-                        LOGGER.info("{}", key);
+                        LOGGER.info("#{} {}", id, key);
                         QueueService.getInstance()
                                 .add(POKEMON_EVOLUTION_CHAIN_URL_QUEUE, new QueueEntry(getEvolutionChainUrl(key, jsonRoot)));
                         getVarietiesUrls(key, jsonRoot)
