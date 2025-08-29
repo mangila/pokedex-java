@@ -19,5 +19,4 @@ public record TaskExecutor(ScheduledExecutorService scheduledPool) {
         LOGGER.info("Shutting down TaskExecutor");
         VirtualThreadFactory.terminateGracefully(scheduledPool);
     }
-
 }

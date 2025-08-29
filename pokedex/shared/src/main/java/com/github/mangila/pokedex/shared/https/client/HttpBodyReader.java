@@ -50,24 +50,24 @@ public class HttpBodyReader {
 
     private static class GzipBodyReader {
         private static Body read(InputStream inputStream, int contentLength) throws IOException {
-            Content compressedContent = readContentLength(inputStream, contentLength);
-            Content contentDecompressed = decompress(compressedContent);
-            return Body.from(contentDecompressed.value);
+            Content gzipBody = readContentLength(inputStream, contentLength);
+            Content decompressed = decompress(gzipBody);
+            return Body.from(decompressed.value);
         }
 
         private static Body readChunked(InputStream inputStream) throws IOException {
-            Content compressedContent = readAllChunks(inputStream);
-            Content contentDecompressed = decompress(compressedContent);
-            return Body.from(contentDecompressed.value);
+            Content gzipBody = readAllChunks(inputStream);
+            Content decompressed = decompress(gzipBody);
+            return Body.from(decompressed.value);
         }
 
         private static Content decompress(Content compressedContent) throws IOException {
-            byte[] content = compressedContent.value;
-            LOGGER.debug("Compressed {} bytes", content.length);
-            ByteArrayInputStream inputStream = BufferUtils.newByteArrayInputStream(content);
-            byte[] decompressed = new GZIPInputStream(inputStream).readAllBytes();
-            LOGGER.debug("Decompressed {} bytes", decompressed.length);
-            return new Content(decompressed);
+            byte[] compressedBytes = compressedContent.value;
+            LOGGER.debug("Compressed {} bytes", compressedBytes.length);
+            ByteArrayInputStream compressedStream = BufferUtils.newByteArrayInputStream(compressedBytes);
+            byte[] decompressedBytes = new GZIPInputStream(compressedStream).readAllBytes();
+            LOGGER.debug("Decompressed {} bytes", decompressedBytes.length);
+            return new Content(decompressedBytes);
         }
     }
 

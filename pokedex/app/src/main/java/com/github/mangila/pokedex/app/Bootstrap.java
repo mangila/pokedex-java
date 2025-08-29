@@ -29,7 +29,8 @@ public final class Bootstrap {
         queueService.createNewBlockingQueue(POKEMON_CRIES_QUEUE);
         queueService.createNewBlockingQueue(POKEMON_VARIETY_URL_QUEUE);
         queueService.createNewBlockingQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE);
-        queueService.createNewBlockingQueue(DATABASE_WAL_FLUSH_BUFFER_QUEUE);
+        queueService.createNewBlockingQueue(DATABASE_WAL_WRITE_QUEUE);
+        queueService.createNewBlockingQueue(DATABASE_WAL_WRITE_BIG_OBJECT_QUEUE);
         queueService.createNewBlockingQueue(DATABASE_WAL_COMPRESSION_QUEUE);
     }
 
@@ -38,9 +39,7 @@ public final class Bootstrap {
         PokeApiClient pokeApiClient = PokeApiClient.getInstance();
         PokemonDatabase pokemonDatabase = PokemonDatabase.getInstance();
         pokemonDatabase.instance().open();
-        TaskExecutor taskExecutor = new TaskExecutor(
-                VirtualThreadFactory.newScheduledThreadPool(256)
-        );
+        TaskExecutor taskExecutor = new TaskExecutor(VirtualThreadFactory.newScheduledThreadPool(32));
         List<Task> tasks = List.of(
                 new InsertCriesTask(pokeApiClient, queueService.getBlockingQueue(POKEMON_CRIES_QUEUE), pokemonDatabase),
                 new InsertEvolutionChainResponse(queueService.getBlockingQueue(POKEMON_EVOLUTION_CHAIN_URL_QUEUE), pokemonDatabase),

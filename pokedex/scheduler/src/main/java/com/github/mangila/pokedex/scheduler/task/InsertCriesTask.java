@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
-import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.scheduler.KeyUriPair;
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
@@ -42,7 +41,6 @@ public class InsertCriesTask implements Task {
                 queueEntry = queue.take();
             } catch (InterruptedException e) {
                 LOGGER.info("{} interrupted", name());
-                //   VirtualThreadFactory.terminateGracefully(workerPool);
                 Thread.currentThread().interrupt();
                 break;
             }

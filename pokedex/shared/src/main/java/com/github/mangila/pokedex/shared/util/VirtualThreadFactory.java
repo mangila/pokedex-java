@@ -15,20 +15,28 @@ public class VirtualThreadFactory {
             .name(POKEDEX_VIRTUAL_THREAD_PREFIX, 1)
             .factory();
 
-    public static Thread newThread(Runnable runnable) {
-        return THREAD_FACTORY.newThread(runnable);
-    }
-
     public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
 
-    public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
-        return Executors.newScheduledThreadPool(corePoolSize, THREAD_FACTORY);
-    }
-
-    public static ExecutorService newFixedThreadPool(int nThreads) {
-        return Executors.newFixedThreadPool(nThreads, THREAD_FACTORY);
+    /**
+     * Creates a new virtual thread pool with the given number of threads.
+     * Virtual Thread pools are said to be an antipattern,
+     * but you need them if you want to create a bound for Virtual-threads to actually be spawned.
+     * <br>
+     * <code>
+     * for (int i = 0; i < Long.MAX_VALUE; i++) {
+     * startThread();
+     * }
+     * </code>
+     * <br>
+     * Could easily return OutOfMemoryError if you don't limit the number of threads.
+     * Virtual Threads are not for free, so you should consider how many to spawn
+     *
+     * @param nThreads the number of threads
+     */
+    public static ScheduledExecutorService newScheduledThreadPool(int nThreads) {
+        return Executors.newScheduledThreadPool(nThreads, THREAD_FACTORY);
     }
 
     public static void terminateGracefully(ExecutorService executorService) {

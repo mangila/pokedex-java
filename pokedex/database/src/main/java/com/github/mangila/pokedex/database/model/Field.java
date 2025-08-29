@@ -9,8 +9,8 @@ public record Field(String value) {
     public static final short MAGIC_NUMBER = 2;
 
     public Field {
-        Ensure.notNull(value, "field value must not be null");
-        Ensure.notBlank(value, "field value must not be blank");
+        Ensure.notNull(value, "field entry must not be null");
+        Ensure.notBlank(value, "field entry must not be blank");
         Ensure.min(2, value.length());
         Ensure.max(100, value.length());
     }

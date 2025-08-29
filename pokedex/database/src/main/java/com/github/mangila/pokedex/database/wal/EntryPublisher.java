@@ -1,34 +1,32 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.model.CallbackItem;
-import com.github.mangila.pokedex.database.model.Entry;
+import com.github.mangila.pokedex.database.model.WriteCallbackItem;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
-class EntryPublisher implements Flow.Publisher<CallbackItem<Entry>> {
+class EntryPublisher implements Flow.Publisher<WriteCallbackItem> {
 
-    private final ExecutorService publisherExecutor = VirtualThreadFactory.newFixedThreadPool(256);
-    private final SubmissionPublisher<CallbackItem<Entry>> publisher;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntryPublisher.class);
+    private final SubmissionPublisher<WriteCallbackItem> publisher;
 
     EntryPublisher() {
-        this.publisher = new SubmissionPublisher<>(publisherExecutor, Flow.defaultBufferSize());
+        this.publisher = new SubmissionPublisher<>(VirtualThreadFactory.newSingleThreadScheduledExecutor(), Flow.defaultBufferSize());
     }
 
     @Override
-    public void subscribe(Flow.Subscriber<? super CallbackItem<Entry>> subscriber) {
+    public void subscribe(Flow.Subscriber<? super WriteCallbackItem> subscriber) {
         publisher.subscribe(subscriber);
     }
 
-    void submit(CallbackItem<Entry> callbackItem) {
-        publisher.submit(callbackItem);
+    void submit(WriteCallbackItem writeCallbackItem) {
+        publisher.submit(writeCallbackItem);
     }
 
     void close() {
         publisher.close();
-        VirtualThreadFactory.terminateGracefully(publisherExecutor);
     }
 }

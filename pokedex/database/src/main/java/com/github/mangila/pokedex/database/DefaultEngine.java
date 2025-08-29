@@ -4,20 +4,20 @@ import com.github.mangila.pokedex.database.model.*;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 final class DefaultEngine implements Engine {
 
     private volatile boolean open;
     private final FileManager fileManager;
     private final Cache cache;
-    private final ExecutorService executor;
+    private final ScheduledExecutorService executor;
 
     DefaultEngine(FileManager fileManager, Cache cache) {
         this.open = false;
         this.fileManager = fileManager;
         this.cache = cache;
-        this.executor = VirtualThreadFactory.newFixedThreadPool(256);
+        this.executor = VirtualThreadFactory.newScheduledThreadPool(1024);
     }
 
     @Override
@@ -48,7 +48,6 @@ final class DefaultEngine implements Engine {
     public void close() {
         open = false;
         fileManager.wal().close();
-        VirtualThreadFactory.terminateGracefully(executor);
         cache.clear();
     }
 

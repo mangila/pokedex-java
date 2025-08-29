@@ -14,7 +14,7 @@ class DefaultEngineTest {
     @Disabled
     @Test
     void abc() throws InterruptedException {
-        QueueService.getInstance().createNewQueue(Config.DATABASE_WAL_FLUSH_BUFFER_QUEUE);
+        QueueService.getInstance().createNewQueue(Config.DATABASE_WAL_WRITE_QUEUE);
         var e = new DefaultEngine(
                 new FileManager(DatabaseConfig.builder()
                         .databaseName(new DatabaseName("test"))

@@ -1,7 +1,6 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.model.Entry;
-import com.github.mangila.pokedex.database.model.WriteCallback;
+import com.github.mangila.pokedex.database.model.*;
 
 public sealed interface WalManager permits DefaultWalManager {
 
@@ -13,4 +12,5 @@ public sealed interface WalManager permits DefaultWalManager {
 
     WriteCallback put(Entry entry);
 
+    Value get(Key key, Field field);
 }

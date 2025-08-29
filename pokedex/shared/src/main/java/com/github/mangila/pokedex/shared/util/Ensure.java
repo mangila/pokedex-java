@@ -110,4 +110,10 @@ public final class Ensure {
             throw new IllegalArgumentException(message);
         }
     }
+
+    public static void hasLength(int targetLength, byte[] a, Supplier<RuntimeException> ex) {
+        if (targetLength != a.length) {
+            throw ex.get();
+        }
+    }
 }

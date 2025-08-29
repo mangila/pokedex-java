@@ -2,11 +2,11 @@ package com.github.mangila.pokedex.database.model;
 
 import java.util.List;
 
-public record CallbackItemCollection(List<CallbackItem<Entry>> value) {
+public record CallbackItemCollection(List<WriteCallbackItem> value) {
 
     public int bufferLength() {
         return value.stream()
-                .map(CallbackItem::value)
+                .map(WriteCallbackItem::entry)
                 .mapToInt(Entry::bufferLength)
                 .sum();
     }
@@ -17,14 +17,14 @@ public record CallbackItemCollection(List<CallbackItem<Entry>> value) {
 
     public void complete() {
         value.stream()
-                .map(CallbackItem::callback)
+                .map(WriteCallbackItem::callback)
                 .map(WriteCallback::future)
                 .forEach(future -> future.complete(null));
     }
 
     public List<Entry> toValues() {
         return value.stream()
-                .map(CallbackItem::value)
+                .map(WriteCallbackItem::entry)
                 .toList();
     }
 }

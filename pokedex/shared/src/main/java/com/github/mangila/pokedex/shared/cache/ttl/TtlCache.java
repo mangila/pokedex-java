@@ -10,17 +10,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
+
 public class TtlCache<K, V> {
 
     private static final Logger log = LoggerFactory.getLogger(TtlCache.class);
     private final Map<K, TtlEntry> cache = new ConcurrentHashMap<>();
     private final TtlCacheConfig config;
-    private final ScheduledExecutorService evictionThread;
+
+    private final ScheduledExecutorService executor;
 
     public TtlCache(TtlCacheConfig config) {
         this.config = config;
-        this.evictionThread = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        evictionThread.scheduleWithFixedDelay(() -> {
+        this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
+        executor.scheduleWithFixedDelay(() -> {
                     log.debug("Running eviction thread");
                     cache.entrySet()
                             .removeIf(entry -> {
@@ -59,12 +61,11 @@ public class TtlCache<K, V> {
         return cache.containsKey(key);
     }
 
-    public void shutdownEvictionThread() {
-        log.info("Shutting down TTL cache eviction thread");
-        VirtualThreadFactory.terminateGracefully(evictionThread);
-    }
-
     public void clear() {
         cache.clear();
+    }
+
+    public void shutdown() {
+        executor.shutdown();
     }
 }

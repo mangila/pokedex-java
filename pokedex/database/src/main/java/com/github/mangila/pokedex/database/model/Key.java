@@ -10,8 +10,8 @@ public record Key(String value) {
     public static final short MAGIC_NUMBER = 1;
 
     public Key {
-        Ensure.notNull(value, "key value must not be null");
-        Ensure.notBlank(value, "key value must not be blank");
+        Ensure.notNull(value, "key entry must not be null");
+        Ensure.notBlank(value, "key entry must not be blank");
         Ensure.min(2, value.length());
         Ensure.max(100, value.length());
     }

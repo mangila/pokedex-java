@@ -31,8 +31,8 @@ For more information, please see /docs (wip)
     - Connection Pool
     - SSL/TLS
 - Json Parser
-- Time To Live(TTL) Cache
-- Last Recently Used(LRU) Cache
+- TTL Time To Live Cache
+- LRU Last Recently Used Cache
 - Scheduler
 - Internal Queue Service
 - HTTP Server
@@ -40,8 +40,10 @@ For more information, please see /docs (wip)
     - Serve media files
     - HTTP/1.1
 - Database
-    - Key → Dictionary (many field → value pairs)
+    - MultiMap database
     - WAL file system
+    - Memory mapped file system
+    - Bloom filter
     - (WIP)
 
 ## Contributing
