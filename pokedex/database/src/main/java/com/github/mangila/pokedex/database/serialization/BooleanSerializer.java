@@ -20,8 +20,12 @@ final class BooleanSerializer implements Serializer<Boolean> {
     public Boolean deserialize(byte[] bytes) {
         Ensure.notNull(bytes, () -> new SerializationException("Cannot deserialize null bytes"));
         Ensure.hasLength(1, bytes, () -> new SerializationException("Cannot deserialize to Boolean"));
-        if (Arrays.equals(TRUE_BYTES, bytes)) return true;
-        if (Arrays.equals(FALSE_BYTES, bytes)) return false;
+        if (Arrays.equals(TRUE_BYTES, bytes)) {
+            return true;
+        }
+        if (Arrays.equals(FALSE_BYTES, bytes)) {
+            return false;
+        }
         throw new SerializationException("Cannot deserialize to Boolean");
     }
 }

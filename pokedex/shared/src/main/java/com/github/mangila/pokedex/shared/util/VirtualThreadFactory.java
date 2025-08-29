@@ -13,6 +13,7 @@ public class VirtualThreadFactory {
 
     private static final ThreadFactory THREAD_FACTORY = Thread.ofVirtual()
             .name(POKEDEX_VIRTUAL_THREAD_PREFIX, 1)
+            .uncaughtExceptionHandler((t, e) -> LOGGER.error("Uncaught exception in thread {}", t.getName(), e))
             .factory();
 
     public static ScheduledExecutorService newSingleThreadScheduledExecutor() {

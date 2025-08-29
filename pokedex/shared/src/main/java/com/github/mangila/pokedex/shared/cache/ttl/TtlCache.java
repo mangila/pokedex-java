@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class TtlCache<K, V> {
 
-    private static final Logger log = LoggerFactory.getLogger(TtlCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TtlCache.class);
     private final Map<K, TtlEntry> cache = new ConcurrentHashMap<>();
     private final TtlCacheConfig config;
 
@@ -33,14 +33,14 @@ public class TtlCache<K, V> {
     public @Nullable V get(K key) {
         var entry = cache.get(key);
         if (entry == null) {
-            log.debug("Cache miss for key {}", key);
+            LOGGER.debug("Cache miss for key {}", key);
             return null;
         }
         if (TtlCacheUtils.isExpired(entry, config.ttl())) {
-            log.debug("Cache entry {} is expired", key);
+            LOGGER.debug("Cache entry {} is expired", key);
             return null;
         }
-        log.debug("Cache hit for key {}", key);
+        LOGGER.debug("Cache hit for key {}", key);
         return (V) entry.value();
     }
 
@@ -53,17 +53,19 @@ public class TtlCache<K, V> {
     }
 
     public void shutdown() {
+        LOGGER.info("Shutting down Ttl Cache");
+        clear();
         executor.shutdown();
     }
 
     private void scheduleTtlEvictionThread() {
         executor.scheduleWithFixedDelay(() -> {
-                    log.debug("Running eviction thread");
+                    LOGGER.debug("Running eviction thread");
                     cache.entrySet()
                             .removeIf(entry -> {
                                 boolean isExpired = TtlCacheUtils.isExpired(entry.getValue(), config.ttl());
                                 if (isExpired) {
-                                    log.debug("Evicting entry: {}", entry.getKey());
+                                    LOGGER.debug("Evicting entry: {}", entry.getKey());
                                 }
                                 return isExpired;
                             });

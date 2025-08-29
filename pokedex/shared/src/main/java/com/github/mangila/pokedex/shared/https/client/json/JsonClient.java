@@ -44,7 +44,6 @@ public class JsonClient {
     public void shutdown() {
         pool.close();
         responseTtlCache.shutdown();
-        responseTtlCache.clear();
     }
 
     public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
