@@ -13,9 +13,10 @@ public final class Config {
     public static final BlockingQueue<Boolean> SHUTDOWN_QUEUE = new ArrayBlockingQueue<>(1);
     public static final String POKEAPI_HOST = "pokeapi.co";
     public static final int POKEAPI_PORT = 443;
-    public static final int MAX_CONNECTIONS = 25;
+    public static final int TLS_POOL_MAX_CONNECTIONS = 25;
     // the max count is 1025
     public static final int POKEMON_LIMIT = 1025;
+    public static final QueueName TLS_CONNECTION_POOL_QUEUE = new QueueName("tls-connection-pool-queue");
     public static final QueueName POKEMON_SPECIES_URL_QUEUE = new QueueName("pokemon-species-url-queue");
     public static final QueueName POKEMON_VARIETY_URL_QUEUE = new QueueName("pokemon-variety-url-queue");
     public static final QueueName POKEMON_EVOLUTION_CHAIN_URL_QUEUE = new QueueName("pokemon-evolution-chain-url-queue");

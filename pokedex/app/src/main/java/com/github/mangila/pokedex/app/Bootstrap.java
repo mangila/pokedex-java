@@ -24,6 +24,7 @@ public final class Bootstrap {
 
     public void initQueues() {
         QueueService queueService = QueueService.getInstance();
+        queueService.createNewBlockingQueue(TLS_CONNECTION_POOL_QUEUE, TLS_POOL_MAX_CONNECTIONS);
         queueService.createNewBlockingQueue(POKEMON_SPECIES_URL_QUEUE);
         queueService.createNewBlockingQueue(POKEMON_SPRITES_QUEUE);
         queueService.createNewBlockingQueue(POKEMON_CRIES_QUEUE);

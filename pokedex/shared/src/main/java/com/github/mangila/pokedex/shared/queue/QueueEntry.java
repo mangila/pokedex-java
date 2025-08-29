@@ -14,6 +14,10 @@ public record QueueEntry(Object data,
         this(data, new AtomicInteger(0));
     }
 
+    public static QueueEntry of(Object data) {
+        return new QueueEntry(data);
+    }
+
     public void incrementFailCounter() {
         failCounter.incrementAndGet();
     }

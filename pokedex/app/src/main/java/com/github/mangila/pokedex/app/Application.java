@@ -10,9 +10,9 @@ public class Application {
 
     public static void main(String[] args) throws InterruptedException {
         Bootstrap bootstrap = new Bootstrap();
+        bootstrap.initQueues();
         bootstrap.configurePokemonDatabase();
         bootstrap.configurePokeApiClient();
-        bootstrap.initQueues();
         Scheduler scheduler = bootstrap.initScheduler();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             //TODO: try catch or run in separate thread

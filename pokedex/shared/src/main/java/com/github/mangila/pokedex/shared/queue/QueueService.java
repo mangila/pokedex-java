@@ -32,8 +32,12 @@ public class QueueService {
     }
 
     public BlockingQueue createNewBlockingQueue(QueueName queueName) {
+        return createNewBlockingQueue(queueName, 0);
+    }
+
+    public BlockingQueue createNewBlockingQueue(QueueName queueName, int capacity) {
         LOGGER.info("Create new blocking queue '{}'", queueName);
-        queues.put(queueName, new BlockingQueue(queueName));
+        queues.put(queueName, new BlockingQueue(queueName, capacity));
         return (BlockingQueue) queues.get(queueName);
     }
 

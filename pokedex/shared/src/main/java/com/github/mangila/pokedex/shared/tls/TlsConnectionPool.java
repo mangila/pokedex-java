@@ -1,53 +1,47 @@
 package com.github.mangila.pokedex.shared.tls;
 
+import com.github.mangila.pokedex.shared.queue.BlockingQueue;
+import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 /**
  * HTTP 1.1 connection pool for TLS connections.
  * <p>
- * This is the solution to achieve concurrency using HTTP 1.1.
+ * This is the solution to achieve concurrency with HTTP 1.1.
  * <p>
  * If using HTTP 2.0, a connection pool is not needed.
  * HTTP 2.0 concurrency is handled by the protocol itself.
  */
-// TODO: add metrics, lazy connections
-public class TlsConnectionPool {
+// TODO: add metrics
+public class TlsConnectionPool implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsConnectionPool.class);
 
     private final TlsConnectionPoolConfig config;
-    private final int maxConnections;
-    private final BlockingQueue<TlsConnectionHandler> queue;
-    private final AtomicInteger availableConnections;
-    private volatile boolean initialized;
+    private final BlockingQueue queue;
 
     public TlsConnectionPool(TlsConnectionPoolConfig config) {
         this.config = config;
-        this.maxConnections = config.maxConnections();
-        this.availableConnections = new AtomicInteger(0);
-        this.queue = new ArrayBlockingQueue<>(maxConnections, true);
-        this.initialized = false;
+        this.queue = config.queue();
+        LOGGER.info("Creating new tls connection pool with {} connections", queue.remainingCapacity());
+        for (int i = 0; i <= queue.remainingCapacity(); i++) {
+            TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
+            offer(handler);
+        }
     }
 
     public void offer(TlsConnectionHandler tlsConnectionHandler) {
-        if (!queue.offer(tlsConnectionHandler)) {
+        if (!queue.offer(QueueEntry.of(tlsConnectionHandler))) {
             LOGGER.warn("Queue is full, dropping connection");
             if (tlsConnectionHandler.connected()) {
                 tlsConnectionHandler.disconnect();
             }
         } else {
-            tlsConnectionHandler.reconnectIfUnHealthy();
-            availableConnections.incrementAndGet();
-            LOGGER.debug("Connection brought back to the pool - availableConnections = {}", availableConnections.get());
+            LOGGER.debug("Connection brought back to the pool");
         }
     }
 
@@ -62,9 +56,6 @@ public class TlsConnectionPool {
     }
 
     public @Nullable TlsConnectionHandler borrow(Duration timeout) {
-        if (!initialized) {
-            init();
-        }
         return poll(timeout);
     }
 
@@ -73,40 +64,24 @@ public class TlsConnectionPool {
         offer(handler);
     }
 
-    public boolean isInitialized() {
-        return initialized;
-    }
-
-    public int availableConnections() {
-        return availableConnections.get();
-    }
-
+    @Override
     public void close() {
         LOGGER.info("Closing connection pool");
-        initialized = false;
-        queue.forEach(TlsConnectionHandler::disconnect);
+        queue.queueIterator().forEachRemaining(queueEntry -> queueEntry.unwrapAs(TlsConnectionHandler.class)
+                .disconnect());
         queue.clear();
-        availableConnections.set(0);
-    }
-
-    private void init() {
-        LOGGER.info("Initializing connection pool");
-        this.initialized = true;
-        IntStream.range(1, maxConnections + 1)
-                .peek(value -> LOGGER.debug("Creating new connection - {} of {}", value, maxConnections))
-                .forEach(unused -> offerNewConnection());
     }
 
     private @Nullable TlsConnectionHandler poll(Duration timeout) {
         try {
-            TlsConnectionHandler tlsConnectionHandler = queue.poll(timeout.toMillis(), TimeUnit.MILLISECONDS);
-            if (tlsConnectionHandler == null) {
+            QueueEntry queueEntry = queue.poll(timeout);
+            if (queueEntry == null) {
                 LOGGER.debug("No connection available after timeout - {}", timeout);
                 return null;
             }
-            availableConnections.decrementAndGet();
-            LOGGER.debug("Connection borrowed from the pool - availableConnections = {}", availableConnections.get());
-            return tlsConnectionHandler.reconnectIfUnHealthy();
+            LOGGER.debug("Connection borrowed from the pool");
+            return queueEntry.unwrapAs(TlsConnectionHandler.class)
+                    .reconnectIfUnHealthy();
         } catch (InterruptedException e) {
             LOGGER.error("ERR", e);
             Thread.currentThread().interrupt();
