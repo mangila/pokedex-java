@@ -21,10 +21,6 @@ public class Database {
                 new FileManager(config),
                 new Cache(new LruCache<>(config.lruCacheConfig()))
         );
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            flush();
-            close();
-        }));
     }
 
     public CompletableFuture<WriteCallback> putAsync(String key, String field, String value) {
@@ -43,7 +39,7 @@ public class Database {
         return engine.putAsync(key, field, value);
     }
 
-    private void flush() {
+    public void flush() {
         engine.flush();
     }
 

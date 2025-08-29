@@ -16,7 +16,6 @@ public class Scheduler {
     public Scheduler(SchedulerConfig config) {
         this.tasks = config.tasks();
         this.taskExecutor = config.taskExecutor();
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
     }
 
     public void init() {

@@ -21,6 +21,7 @@ public class VirtualThreadFactory {
 
     /**
      * Creates a new virtual thread pool with the given number of threads.
+     * <br>
      * Virtual Thread pools are said to be an antipattern,
      * but you need them if you want to create a bound for Virtual-threads to actually be spawned.
      * <br>

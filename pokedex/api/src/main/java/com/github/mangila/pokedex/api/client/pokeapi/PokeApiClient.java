@@ -75,4 +75,8 @@ public class PokeApiClient {
                 .handle(this::ensureSuccess)
                 .thenApply(JsonResponse::body);
     }
+
+    public void shutdown() {
+        jsonClient.shutdown();
+    }
 }

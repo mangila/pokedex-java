@@ -22,20 +22,7 @@ public class TtlCache<K, V> {
     public TtlCache(TtlCacheConfig config) {
         this.config = config;
         this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(() -> {
-                    log.debug("Running eviction thread");
-                    cache.entrySet()
-                            .removeIf(entry -> {
-                                boolean isExpired = TtlCacheUtils.isExpired(entry.getValue(), config.ttl());
-                                if (isExpired) {
-                                    log.debug("Evicting entry: {}", entry.getKey());
-                                }
-                                return isExpired;
-                            });
-                },
-                config.evictionConfig().initialDelay(),
-                config.evictionConfig().delay(),
-                config.evictionConfig().timeUnit());
+        scheduleTtlEvictionThread();
     }
 
     public void put(K key, V value) {
@@ -67,5 +54,22 @@ public class TtlCache<K, V> {
 
     public void shutdown() {
         executor.shutdown();
+    }
+
+    private void scheduleTtlEvictionThread() {
+        executor.scheduleWithFixedDelay(() -> {
+                    log.debug("Running eviction thread");
+                    cache.entrySet()
+                            .removeIf(entry -> {
+                                boolean isExpired = TtlCacheUtils.isExpired(entry.getValue(), config.ttl());
+                                if (isExpired) {
+                                    log.debug("Evicting entry: {}", entry.getKey());
+                                }
+                                return isExpired;
+                            });
+                },
+                config.evictionConfig().initialDelay(),
+                config.evictionConfig().delay(),
+                config.evictionConfig().timeUnit());
     }
 }

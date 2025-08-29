@@ -39,11 +39,12 @@ public class JsonClient {
         this.statusReader = new HttpStatusReader();
         this.headerReader = new HttpHeaderReader();
         this.httpBodyReader = new HttpBodyReader();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            pool.close();
-            responseTtlCache.shutdown();
-            responseTtlCache.clear();
-        }));
+    }
+
+    public void shutdown() {
+        pool.close();
+        responseTtlCache.shutdown();
+        responseTtlCache.clear();
     }
 
     public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
