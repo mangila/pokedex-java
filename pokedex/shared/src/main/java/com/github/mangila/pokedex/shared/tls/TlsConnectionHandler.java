@@ -3,10 +3,10 @@ package com.github.mangila.pokedex.shared.tls;
 import java.io.IOException;
 
 public class TlsConnectionHandler {
-    private TlsConnection connection;
+    private TlsConnection tlsConnection;
 
-    private TlsConnectionHandler(TlsConnection connection) {
-        this.connection = connection;
+    private TlsConnectionHandler(TlsConnection tlsConnection) {
+        this.tlsConnection = tlsConnection;
     }
 
     public static TlsConnectionHandler create(String host, int port) {
@@ -23,26 +23,26 @@ public class TlsConnectionHandler {
     }
 
     public void reconnect() {
-        String host = connection.getHost();
-        int port = connection.getPort();
-        connection = TlsConnection.create(host, port);
-        connection.connect();
+        String host = tlsConnection.getHost();
+        int port = tlsConnection.getPort();
+        tlsConnection = TlsConnection.create(host, port);
+        tlsConnection.connect();
     }
 
     public void writeAndFlush(byte[] bytes) throws IOException {
-        connection.getOutputStream().write(bytes);
-        connection.getOutputStream().flush();
+        tlsConnection.getOutputStream().write(bytes);
+        tlsConnection.getOutputStream().flush();
     }
 
     public void disconnect() {
-        connection.disconnect();
+        tlsConnection.disconnect();
     }
 
-    public TlsConnection getConnection() {
-        return connection;
+    public TlsConnection getTlsConnection() {
+        return tlsConnection;
     }
 
     public boolean connected() {
-        return connection.connected();
+        return tlsConnection.connected();
     }
 }

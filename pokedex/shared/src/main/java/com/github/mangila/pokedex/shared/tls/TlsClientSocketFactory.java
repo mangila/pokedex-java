@@ -29,7 +29,8 @@ public class TlsClientSocketFactory {
         //   System.setProperty("javax.net.debug", "all");
         try {
             CONTEXT = SSLContext.getInstance("TLS");
-            // Default Java Keystore with some well-known certificates
+            // Default Java Keystore with some well-known root CA certificates
+            // If a certificate chains back to one of these root CAs, it’s trusted.
             CONTEXT.init(null, null, SecureRandom.getInstanceStrong());
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new RuntimeException(e);
@@ -58,7 +59,8 @@ public class TlsClientSocketFactory {
             TlsConfig tlsConfig
     ) {
         try {
-            var socket = (SSLSocket) CONTEXT.getSocketFactory().createSocket();
+            // TODO: add more comments for config and smarter config wiring
+            SSLSocket socket = (SSLSocket) CONTEXT.getSocketFactory().createSocket();
             socket.setKeepAlive(tlsSocketConfig.keepAlive().active());
             socket.setSendBufferSize(tlsSocketConfig.bufferSize().send());
             socket.setReceiveBufferSize(tlsSocketConfig.bufferSize().receive());

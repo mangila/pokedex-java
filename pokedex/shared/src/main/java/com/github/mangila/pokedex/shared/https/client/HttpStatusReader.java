@@ -16,7 +16,7 @@ public class HttpStatusReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpStatusReader.class);
 
     public Status read(TlsConnectionHandler tlsConnectionHandler) throws IOException {
-        InputStream inputStream = tlsConnectionHandler.getConnection().getInputStream();
+        InputStream inputStream = tlsConnectionHandler.getTlsConnection().getInputStream();
         return readStatusLine(inputStream);
     }
 

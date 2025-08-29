@@ -17,7 +17,7 @@ public class HttpHeaderReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpHeaderReader.class);
 
     public ResponseHeaders read(TlsConnectionHandler tlsConnectionHandler) throws IOException {
-        InputStream inputStream = tlsConnectionHandler.getConnection().getInputStream();
+        InputStream inputStream = tlsConnectionHandler.getTlsConnection().getInputStream();
         return readHeaders(inputStream);
     }
 

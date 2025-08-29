@@ -19,7 +19,7 @@ public class HttpBodyReader {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpBodyReader.class);
 
     public Body read(ResponseHeaders responseHeaders, TlsConnectionHandler tlsConnectionHandler) throws IOException {
-        InputStream inputStream = tlsConnectionHandler.getConnection().getInputStream();
+        InputStream inputStream = tlsConnectionHandler.getTlsConnection().getInputStream();
         if (responseHeaders.isChunked()) {
             LOGGER.debug("Chunked Transfer Encoding detected");
             if (responseHeaders.isGzip()) {
