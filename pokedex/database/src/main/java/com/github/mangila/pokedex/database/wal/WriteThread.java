@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.locks.ReentrantLock;
 
 class WriteThread implements SimpleBackgroundThread {
 
@@ -17,16 +16,15 @@ class WriteThread implements SimpleBackgroundThread {
     private final int writeLimitThreshold;
     private final WalFileHandle walFileHandle;
     private final BlockingQueue queue;
-    private final ReentrantLock writeLock;
     private final ScheduledExecutorService executor;
 
-    WriteThread(WalFileHandle walFileHandle,
-                BlockingQueue queue,
-                ReentrantLock writeLock) {
-        this.writeLimitThreshold = 50;
+    WriteThread(
+            int writeLimitThreshold,
+            WalFileHandle walFileHandle,
+            BlockingQueue queue) {
+        this.writeLimitThreshold = writeLimitThreshold;
         this.walFileHandle = walFileHandle;
         this.queue = queue;
-        this.writeLock = writeLock;
         this.executor = VirtualThreadFactory.newSingleThreadScheduledExecutor();
     }
 
@@ -57,17 +55,18 @@ class WriteThread implements SimpleBackgroundThread {
             }
             WriteCallbackItem item = queueEntry.unwrapAs(WriteCallbackItem.class);
             try {
+                // TODO: buffer check, rotation
                 walFileHandle.walTable()
                         .writeOps()
                         .put(item.entry());
                 writeCount = writeCount + 1;
                 item.callback().future().complete(null);
-                LOGGER.info("Wrote {} entries", writeCount);
                 if (writeCount == writeLimitThreshold) {
                     LOGGER.info("Limit reached, flushing");
                     walFileHandle.walTable()
                             .mappedBuffer
                             .sync();
+                    writeCount = 0;
                 }
             } catch (Exception e) {
                 LOGGER.error("err", e);

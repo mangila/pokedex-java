@@ -19,6 +19,7 @@ class EntryPublisher implements Flow.Publisher<WriteCallbackItem> {
 
     @Override
     public void subscribe(Flow.Subscriber<? super WriteCallbackItem> subscriber) {
+        LOGGER.info("Starting EntryPublisher");
         publisher.subscribe(subscriber);
     }
 
@@ -27,6 +28,7 @@ class EntryPublisher implements Flow.Publisher<WriteCallbackItem> {
     }
 
     void close() {
+        LOGGER.info("Shutting down EntryPublisher");
         publisher.close();
     }
 }

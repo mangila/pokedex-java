@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.github.mangila.pokedex.shared.Config.DATABASE_WAL_WRITE_BIG_OBJECT_QUEUE;
 import static com.github.mangila.pokedex.shared.Config.DATABASE_WAL_WRITE_QUEUE;
@@ -18,28 +17,28 @@ public final class DefaultWalManager implements WalManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWalManager.class);
 
+    private final WalConfig config;
     private final EntryPublisher entryPublisher;
     private final WriteSubscriber writeSubscriber;
     private final WalFileHandle walFileHandle;
     private final WriteThread writeThread;
-    private final ReentrantLock writeLock;
 
     public DefaultWalManager(WalConfig config) {
         // TODO: snappy compression??
+        this.config = config;
         BlockingQueue writeQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_QUEUE);
         BlockingQueue bigObjectWriteQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_BIG_OBJECT_QUEUE);
-        this.writeLock = new ReentrantLock(true);
         this.entryPublisher = new EntryPublisher();
         this.writeSubscriber = new WriteSubscriber(writeQueue, bigObjectWriteQueue);
         this.walFileHandle = new WalFileHandle();
-        this.writeThread = new WriteThread(walFileHandle, writeQueue, writeLock);
+        this.writeThread = new WriteThread(config.thresholdWriteLimit(), walFileHandle, writeQueue);
     }
 
     @Override
     public void open() {
         LOGGER.info("Opening WAL Manager");
         try {
-            walFileHandle.setWalFile(Path.of("hej.wal"), 1024*8);
+            walFileHandle.setWalFile(Path.of("hej.wal"), config.walFileSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
