@@ -16,7 +16,6 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 public class JsonClient {
@@ -48,14 +47,12 @@ public class JsonClient {
 
     /**
      * This is the hot code path for the JsonClient when doing GET requests to a remote service.
+     * Content-Type: application/json header must be present in the response.
      */
     public @Nullable JsonResponse fetch(GetRequest request) {
         try {
             Ensure.notNull(request, GetRequest.class);
-            TlsConnectionHandler tlsConnectionHandler = pool.borrowWithRetry(Duration.ofSeconds(30), 3);
-            if (tlsConnectionHandler == null) {
-                throw new IllegalStateException("No connection available");
-            }
+            TlsConnectionHandler tlsConnectionHandler = pool.borrow();
             String rawHttpRequest = request.toRawHttp(host);
             LOGGER.debug("{}", rawHttpRequest);
             tlsConnectionHandler.writeAndFlush(rawHttpRequest.getBytes());
@@ -67,6 +64,10 @@ public class JsonClient {
             Body body = httpBodyReader.read(responseHeaders, tlsConnectionHandler);
             pool.offer(tlsConnectionHandler);
             return JsonResponse.from(status, responseHeaders, body, jsonParser);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            pool.offerNewConnection();
+            return null;
         } catch (Exception e) {
             LOGGER.error("ERR", e);
             pool.offerNewConnection();

@@ -2,11 +2,8 @@ package com.github.mangila.pokedex.shared.tls;
 
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
 
 /**
  * HTTP 1.1 connection pool for TLS connections.
@@ -29,9 +26,13 @@ public class TlsConnectionPool implements AutoCloseable {
         this.queue = config.queue();
         LOGGER.info("Creating new tls connection pool with {} connections", queue.remainingCapacity());
         for (int i = 0; i <= queue.remainingCapacity(); i++) {
-            TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
-            offer(handler);
+            offerNewConnection();
         }
+    }
+
+    public void offerNewConnection() {
+        TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
+        offer(handler);
     }
 
     public void offer(TlsConnectionHandler tlsConnectionHandler) {
@@ -45,23 +46,10 @@ public class TlsConnectionPool implements AutoCloseable {
         }
     }
 
-    public @Nullable TlsConnectionHandler borrowWithRetry(Duration timeout, int attempts) {
-        TlsConnectionHandler tlsConnectionHandler;
-        int retries = attempts;
-        do {
-            tlsConnectionHandler = borrow(timeout);
-            retries--;
-        } while (retries > 0 && tlsConnectionHandler == null);
-        return tlsConnectionHandler;
-    }
-
-    public @Nullable TlsConnectionHandler borrow(Duration timeout) {
-        return poll(timeout);
-    }
-
-    public void offerNewConnection() {
-        TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
-        offer(handler);
+    public TlsConnectionHandler borrow() throws InterruptedException {
+        return queue.take()
+                .unwrapAs(TlsConnectionHandler.class)
+                .reconnectIfUnHealthy();
     }
 
     @Override
@@ -70,22 +58,5 @@ public class TlsConnectionPool implements AutoCloseable {
         queue.queueIterator().forEachRemaining(queueEntry -> queueEntry.unwrapAs(TlsConnectionHandler.class)
                 .disconnect());
         queue.clear();
-    }
-
-    private @Nullable TlsConnectionHandler poll(Duration timeout) {
-        try {
-            QueueEntry queueEntry = queue.poll(timeout);
-            if (queueEntry == null) {
-                LOGGER.debug("No connection available after timeout - {}", timeout);
-                return null;
-            }
-            LOGGER.debug("Connection borrowed from the pool");
-            return queueEntry.unwrapAs(TlsConnectionHandler.class)
-                    .reconnectIfUnHealthy();
-        } catch (InterruptedException e) {
-            LOGGER.error("ERR", e);
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
     }
 }
