@@ -47,7 +47,7 @@ public class JsonClient {
     }
 
     public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
-        return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadFactory.newThreadPerTaskExecutor());
+        return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR);
     }
 
     public @Nullable JsonResponse fetch(GetRequest request) {

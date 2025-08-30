@@ -4,6 +4,7 @@ import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
 import com.github.mangila.pokedex.scheduler.Scheduler;
 import com.github.mangila.pokedex.shared.Config;
+import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
 
 public class Application {
 
@@ -19,6 +20,7 @@ public class Application {
             PokeApiClient.getInstance().shutdown();
             scheduler.shutdown();
             PokemonDatabase.getInstance().instance().close();
+            VirtualThreadFactory.terminateGracefully(VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR);
         }));
         while (true) {
             Boolean shutdown = Config.SHUTDOWN_QUEUE.take();

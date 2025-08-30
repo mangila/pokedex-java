@@ -67,7 +67,7 @@ public class InsertSpeciesResponseTask implements Task {
                                 .forEach(url -> QueueService.getInstance()
                                         .add(POKEMON_VARIETY_URL_QUEUE, new QueueEntry(url)));
                         insertFieldsToDatabase(key, jsonRoot, database);
-                    }, VirtualThreadFactory.newThreadPerTaskExecutor())
+                    }, VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR)
                     .exceptionallyAsync(throwable -> {
                         LOGGER.error("ERR", throwable);
                         if (queueEntry.equalsMaxRetries(3)) {
@@ -77,7 +77,7 @@ public class InsertSpeciesResponseTask implements Task {
                         queueEntry.incrementFailCounter();
                         queue.add(queueEntry);
                         return null;
-                    }, VirtualThreadFactory.newThreadPerTaskExecutor());
+                    }, VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR);
         }
     }
 

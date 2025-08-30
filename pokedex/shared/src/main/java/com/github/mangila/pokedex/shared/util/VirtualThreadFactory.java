@@ -16,30 +16,34 @@ public class VirtualThreadFactory {
             .uncaughtExceptionHandler((t, e) -> LOGGER.error("Uncaught exception in thread {}", t.getName(), e))
             .factory();
 
+    /**
+     * An {@link ExecutorService} that creates a new virtual thread for each task submitted.
+     * This executor is suitable for workloads where tasks are short-lived and highly concurrent,
+     * leveraging the efficient resource handling of virtual threads.
+     */
+    public static final ExecutorService THREAD_PER_TASK_EXECUTOR = Executors.newThreadPerTaskExecutor(THREAD_FACTORY);
+
+    /**
+     * Creates a single-threaded scheduled executor service using a virtual thread factory.
+     * The returned executor is suitable for tasks that require a single worker thread
+     * that executes tasks sequentially in a scheduled manner.
+     *
+     * @return a ScheduledExecutorService that uses a single virtual thread for executing tasks
+     */
     public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
         return Executors.newSingleThreadScheduledExecutor(THREAD_FACTORY);
     }
 
-    public static ExecutorService newThreadPerTaskExecutor() {
-        return Executors.newThreadPerTaskExecutor(THREAD_FACTORY);
-    }
 
     /**
-     * Creates a new virtual thread pool with the given number of threads.
-     * <br>
-     * Virtual Thread pools are said to be an antipattern,
-     * but you need them if you want to create a bound for Virtual-threads to actually be spawned.
-     * <br>
-     * <code>
-     * for (int i = 0; i < Long.MAX_VALUE; i++) {
-     * startThread();
-     * }
-     * </code>
-     * <br>
-     * Could easily return OutOfMemoryError if you don't limit the number of threads.
-     * Virtual Threads are not for free, so you should consider how many to spawn
+     * Creates a scheduled thread pool with a specified number of virtual threads.
+     * <p>
+     * This is considered an antipattern,
+     * but sometimes you need some kind of bound for the thread spawning
+     * </p>
      *
-     * @param nThreads the number of threads
+     * @param nThreads the number of threads in the pool
+     * @return a ScheduledExecutorService backed by a thread pool with the specified number of threads
      */
     public static ScheduledExecutorService newScheduledThreadPool(int nThreads) {
         return Executors.newScheduledThreadPool(nThreads, THREAD_FACTORY);

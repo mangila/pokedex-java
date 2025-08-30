@@ -14,7 +14,7 @@ class EntryPublisher implements Flow.Publisher<WriteCallbackItem> {
     private final SubmissionPublisher<WriteCallbackItem> publisher;
 
     EntryPublisher() {
-        this.publisher = new SubmissionPublisher<>(VirtualThreadFactory.newThreadPerTaskExecutor(), Flow.defaultBufferSize());
+        this.publisher = new SubmissionPublisher<>(VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR, Flow.defaultBufferSize());
     }
 
     @Override
