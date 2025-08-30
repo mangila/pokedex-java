@@ -1,7 +1,7 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.WriteCallbackItem;
-import com.github.mangila.pokedex.shared.queue.Queue;
+import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,11 @@ import java.util.concurrent.Flow;
 class WriteSubscriber implements Flow.Subscriber<WriteCallbackItem> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WriteSubscriber.class);
-    private final Queue writeQueue;
-    private final Queue bigObjectWriteQueue;
+    private final BlockingQueue writeQueue;
+    private final BlockingQueue bigObjectWriteQueue;
 
-    WriteSubscriber(Queue writeQueue,
-                    Queue bigObjectWriteQueue) {
+    WriteSubscriber(BlockingQueue writeQueue,
+                    BlockingQueue bigObjectWriteQueue) {
         this.writeQueue = writeQueue;
         this.bigObjectWriteQueue = bigObjectWriteQueue;
     }
@@ -29,18 +29,18 @@ class WriteSubscriber implements Flow.Subscriber<WriteCallbackItem> {
 
     @Override
     public void onNext(WriteCallbackItem item) {
-        int len = item.entry().bufferLength();
+        int len = item.bufferLength();
         QueueEntry queueEntry = new QueueEntry(item);
-        if (len >= _64KB) {
-            bigObjectWriteQueue.add(queueEntry);
-        } else {
+        if (len < _64KB) {
             writeQueue.add(queueEntry);
+        } else {
+            bigObjectWriteQueue.add(queueEntry);
         }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        LOGGER.error("ERR", throwable);
+        LOGGER.error("Error in WriteSubscriber", throwable);
     }
 
     @Override

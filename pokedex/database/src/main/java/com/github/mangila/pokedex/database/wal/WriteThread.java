@@ -9,13 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 class WriteThread implements SimpleBackgroundThread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WriteThread.class);
-    private static final AtomicInteger LIMIT_THRESHOLD = new AtomicInteger(0);
+    private final int writeLimitThreshold;
     private final WalFileHandle walFileHandle;
     private final BlockingQueue queue;
     private final ReentrantLock writeLock;
@@ -24,6 +23,7 @@ class WriteThread implements SimpleBackgroundThread {
     WriteThread(WalFileHandle walFileHandle,
                 BlockingQueue queue,
                 ReentrantLock writeLock) {
+        this.writeLimitThreshold = 50;
         this.walFileHandle = walFileHandle;
         this.queue = queue;
         this.writeLock = writeLock;
@@ -45,6 +45,7 @@ class WriteThread implements SimpleBackgroundThread {
     @SuppressWarnings("unchecked")
     @Override
     public void run() {
+        int writeCount = 0;
         while (!Thread.currentThread().isInterrupted()) {
             QueueEntry queueEntry;
             try {
@@ -55,6 +56,22 @@ class WriteThread implements SimpleBackgroundThread {
                 break;
             }
             WriteCallbackItem item = queueEntry.unwrapAs(WriteCallbackItem.class);
+            try {
+                walFileHandle.walTable()
+                        .writeOps()
+                        .put(item.entry());
+                writeCount = writeCount + 1;
+                item.callback().future().complete(null);
+                LOGGER.info("Wrote {} entries", writeCount);
+                if (writeCount == writeLimitThreshold) {
+                    LOGGER.info("Limit reached, flushing");
+                    walFileHandle.walTable()
+                            .mappedBuffer
+                            .sync();
+                }
+            } catch (Exception e) {
+                LOGGER.error("err", e);
+            }
 //            try {
 //                writeLock.lock();
 //                if (walFileHandle.putIfHasRemaining(item.entry())) {

@@ -12,6 +12,8 @@ sealed interface Engine permits DefaultEngine {
 
     void close();
 
+    void truncate();
+
     void flush();
 
     WriteCallback put(String key, String field, byte[] value);

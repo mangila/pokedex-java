@@ -16,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
 public class JsonClient {
@@ -55,7 +56,7 @@ public class JsonClient {
             TlsConnectionHandler tlsConnectionHandler = pool.borrow();
             String rawHttpRequest = request.toRawHttp(host);
             LOGGER.debug("{}", rawHttpRequest);
-            tlsConnectionHandler.writeAndFlush(rawHttpRequest.getBytes());
+            tlsConnectionHandler.writeAndFlush(rawHttpRequest.getBytes(StandardCharsets.UTF_8));
             Status status = statusReader.read(tlsConnectionHandler);
             ResponseHeaders responseHeaders = headerReader.read(tlsConnectionHandler);
             if (!responseHeaders.isJson()) {
