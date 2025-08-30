@@ -38,6 +38,7 @@ public final class DefaultWalManager implements WalManager {
     public void open() {
         LOGGER.info("Opening WAL Manager");
         try {
+            // TEMP: do replay here
             walFileHandle.setWalFile(Path.of("hej.wal"), config.walFileSize());
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,7 @@
 package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.ReadOps;
+import com.github.mangila.pokedex.database.WriteOps;
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Metadata;
