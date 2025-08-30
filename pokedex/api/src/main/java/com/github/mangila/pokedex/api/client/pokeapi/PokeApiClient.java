@@ -1,6 +1,7 @@
 package com.github.mangila.pokedex.api.client.pokeapi;
 
 import com.github.mangila.pokedex.api.client.pokeapi.response.PokeApiClientException;
+import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.cache.ttl.TtlCacheConfig;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClient;
 import com.github.mangila.pokedex.shared.https.client.json.JsonClientConfig;
@@ -37,9 +38,8 @@ public class PokeApiClient {
                         POKEAPI_HOST,
                         JsonParser.DEFAULT,
                         new TlsConnectionPoolConfig(POKEAPI_HOST, QueueService.getInstance()
-                                .getBlockingQueue(TLS_CONNECTION_POOL_QUEUE), POKEAPI_PORT),
-                        TtlCacheConfig.defaultConfig()
-                ));
+                                .getBlockingQueue(TLS_CONNECTION_POOL_QUEUE), POKEAPI_PORT)
+                ), TtlCacheConfig.defaultConfig());
         configure(config);
     }
 
@@ -53,9 +53,11 @@ public class PokeApiClient {
     }
 
     private final JsonClient jsonClient;
+    private final TtlCache<PokeApiUri, JsonRoot> ttlCache;
 
     private PokeApiClient(PokeApiClientConfig config) {
         this.jsonClient = new JsonClient(config.jsonClientConfig());
+        this.ttlCache = new TtlCache<>(config.cacheConfig());
     }
 
     public JsonResponse ensureSuccess(JsonResponse response, Throwable throwable) {
@@ -72,12 +74,20 @@ public class PokeApiClient {
     }
 
     public CompletableFuture<JsonRoot> fetchAsync(PokeApiUri uri) {
+        if (ttlCache.hasKey(uri)) {
+            return CompletableFuture.completedFuture(ttlCache.get(uri));
+        }
         return jsonClient.fetchAsync(uri.toGetRequest())
                 .handle(this::ensureSuccess)
-                .thenApply(JsonResponse::body);
+                .thenApply(jsonResponse -> {
+                    JsonRoot jsonRoot = jsonResponse.body();
+                    ttlCache.put(uri, jsonRoot);
+                    return jsonRoot;
+                });
     }
 
     public void shutdown() {
         jsonClient.shutdown();
+        ttlCache.shutdown();
     }
 }

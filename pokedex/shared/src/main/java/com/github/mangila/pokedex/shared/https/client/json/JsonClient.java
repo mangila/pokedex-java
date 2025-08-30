@@ -1,6 +1,5 @@
 package com.github.mangila.pokedex.shared.https.client.json;
 
-import com.github.mangila.pokedex.shared.cache.ttl.TtlCache;
 import com.github.mangila.pokedex.shared.https.client.HttpBodyReader;
 import com.github.mangila.pokedex.shared.https.client.HttpHeaderReader;
 import com.github.mangila.pokedex.shared.https.client.HttpStatusReader;
@@ -25,7 +24,6 @@ public class JsonClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonClient.class);
     private final String host;
     private final TlsConnectionPool pool;
-    private final TtlCache<String, JsonResponse> responseTtlCache;
     private final HttpStatusReader statusReader;
     private final HttpHeaderReader headerReader;
     private final HttpBodyReader httpBodyReader;
@@ -35,7 +33,6 @@ public class JsonClient {
         this.host = config.host();
         this.jsonParser = config.jsonParser();
         this.pool = new TlsConnectionPool(config.poolConfig());
-        this.responseTtlCache = new TtlCache<>(config.ttlCacheConfig());
         this.statusReader = new HttpStatusReader();
         this.headerReader = new HttpHeaderReader();
         this.httpBodyReader = new HttpBodyReader();
@@ -43,20 +40,18 @@ public class JsonClient {
 
     public void shutdown() {
         pool.close();
-        responseTtlCache.shutdown();
     }
 
     public CompletableFuture<@Nullable JsonResponse> fetchAsync(GetRequest request) {
         return CompletableFuture.supplyAsync(() -> this.fetch(request), VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR);
     }
 
+    /**
+     * This is the hot code path for the JsonClient when doing GET requests to a remote service.
+     */
     public @Nullable JsonResponse fetch(GetRequest request) {
         try {
             Ensure.notNull(request, GetRequest.class);
-            String path = request.path();
-            if (responseTtlCache.hasKey(path)) {
-                return responseTtlCache.get(path);
-            }
             TlsConnectionHandler tlsConnectionHandler = pool.borrowWithRetry(Duration.ofSeconds(30), 3);
             if (tlsConnectionHandler == null) {
                 throw new IllegalStateException("No connection available");
@@ -71,11 +66,7 @@ public class JsonClient {
             }
             Body body = httpBodyReader.read(responseHeaders, tlsConnectionHandler);
             pool.offer(tlsConnectionHandler);
-            JsonResponse response = JsonResponse.from(status, responseHeaders, body, jsonParser);
-            if (response.isSuccess()) {
-                responseTtlCache.put(path, response);
-            }
-            return response;
+            return JsonResponse.from(status, responseHeaders, body, jsonParser);
         } catch (Exception e) {
             LOGGER.error("ERR", e);
             pool.offerNewConnection();
