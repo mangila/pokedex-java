@@ -40,7 +40,6 @@ class WriteThread implements SimpleBackgroundThread {
         VirtualThreadFactory.terminateGracefully(executor);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void run() {
         int writeCount = 0;
@@ -62,7 +61,6 @@ class WriteThread implements SimpleBackgroundThread {
                 writeCount = writeCount + 1;
                 item.callback().future().complete(null);
                 if (writeCount == writeLimitThreshold) {
-                    LOGGER.info("Limit reached, flushing");
                     walFileHandle.walTable()
                             .mappedBuffer
                             .sync();

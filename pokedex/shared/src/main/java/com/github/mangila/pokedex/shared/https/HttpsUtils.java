@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.util;
+package com.github.mangila.pokedex.shared.https;
 
 import java.util.regex.Pattern;
 

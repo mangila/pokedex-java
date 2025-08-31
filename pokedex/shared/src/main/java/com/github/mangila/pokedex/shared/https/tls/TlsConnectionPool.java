@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.tls;
+package com.github.mangila.pokedex.shared.https.tls;
 
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
@@ -31,31 +31,32 @@ public class TlsConnectionPool implements AutoCloseable {
     }
 
     public void offerNewConnection() {
-        TlsConnectionHandler handler = TlsConnectionHandler.create(config.host(), config.port());
+        TlsConnectionHandle handler = TlsConnectionHandle.create(config.host(), config.port());
         offer(handler);
     }
 
-    public void offer(TlsConnectionHandler tlsConnectionHandler) {
-        if (!queue.offer(QueueEntry.of(tlsConnectionHandler))) {
+    public void offer(TlsConnectionHandle tlsConnectionHandle) {
+        if (!queue.offer(QueueEntry.of(tlsConnectionHandle))) {
             LOGGER.warn("Queue is full, dropping connection");
-            if (tlsConnectionHandler.connected()) {
-                tlsConnectionHandler.disconnect();
+            if (tlsConnectionHandle.isConnected()) {
+                tlsConnectionHandle.disconnect();
             }
         } else {
             LOGGER.debug("Connection brought back to the pool");
         }
     }
 
-    public TlsConnectionHandler borrow() throws InterruptedException {
+    public TlsConnectionHandle borrow() throws InterruptedException {
         return queue.take()
-                .unwrapAs(TlsConnectionHandler.class)
+                .unwrapAs(TlsConnectionHandle.class)
                 .reconnectIfUnHealthy();
     }
 
     @Override
     public void close() {
         LOGGER.info("Closing connection pool");
-        queue.queueIterator().forEachRemaining(queueEntry -> queueEntry.unwrapAs(TlsConnectionHandler.class)
+        queue.queueIterator()
+                .forEachRemaining(queueEntry -> queueEntry.unwrapAs(TlsConnectionHandle.class)
                 .disconnect());
         queue.clear();
     }

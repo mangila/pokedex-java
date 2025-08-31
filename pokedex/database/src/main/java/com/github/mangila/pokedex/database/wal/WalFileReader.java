@@ -14,7 +14,7 @@ public record WalFileReader(WalTable walTable) implements ReadOps {
     @Override
     public Value get(Key key, Field field) {
         Map<Field, Metadata> fieldToMetadata = walTable.offsets.get(key);
-        if (field == null) {
+        if (fieldToMetadata == null) {
             return null;
         }
         Metadata metadata = fieldToMetadata.get(field);

@@ -72,6 +72,8 @@ public final class DefaultWalManager implements WalManager {
 
     @Override
     public Value get(Key key, Field field) {
-        return null;
+        return walFileHandle.walTable()
+                .readOps()
+                .get(key, field);
     }
 }

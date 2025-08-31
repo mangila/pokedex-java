@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.https.client.json;
+package com.github.mangila.pokedex.shared.https.http.json;
 
 import com.github.mangila.pokedex.shared.https.model.Body;
 import com.github.mangila.pokedex.shared.https.model.ResponseHeaders;

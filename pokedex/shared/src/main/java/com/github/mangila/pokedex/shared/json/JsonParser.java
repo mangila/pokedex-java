@@ -113,12 +113,23 @@ public class JsonParser {
     }
 
     private Number parseNumber(JsonTokenQueue queue) {
+        JsonToken token = queue.peek();
+        if (token == null || token.type() != JsonType.NUMBER) {
+            throw new NotValidJsonException("Expected number not found");
+        }
         StringBuilder sb = new StringBuilder();
-        while (queue.peek().type() == JsonType.NUMBER) {
-            JsonToken token = queue.poll();
+        while (true) {
+            token = queue.peek();
+            if (token == null || token.type() != JsonType.NUMBER) {
+                break;
+            }
+            token = queue.expect(JsonType.NUMBER);
             sb.append(token.value());
         }
         String number = sb.toString();
+        if (number.isEmpty()) {
+            throw new NotValidJsonException("Number is empty");
+        }
         try {
             // TODO: check -Infinity and NaN
             if (number.contains(".") || number.contains("e") || number.contains("E")) {

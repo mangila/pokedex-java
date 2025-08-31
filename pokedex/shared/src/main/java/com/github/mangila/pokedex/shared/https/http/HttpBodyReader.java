@@ -1,10 +1,10 @@
-package com.github.mangila.pokedex.shared.https.client;
+package com.github.mangila.pokedex.shared.https.http;
 
+import com.github.mangila.pokedex.shared.https.HttpsUtils;
 import com.github.mangila.pokedex.shared.https.model.Body;
 import com.github.mangila.pokedex.shared.https.model.ResponseHeaders;
-import com.github.mangila.pokedex.shared.tls.TlsConnectionHandler;
+import com.github.mangila.pokedex.shared.https.tls.TlsConnectionHandle;
 import com.github.mangila.pokedex.shared.util.BufferUtils;
-import com.github.mangila.pokedex.shared.util.HttpsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-public class HttpBodyReader {
+public final class HttpBodyReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpBodyReader.class);
 
-    public Body read(ResponseHeaders responseHeaders, TlsConnectionHandler tlsConnectionHandler) throws IOException {
-        InputStream inputStream = tlsConnectionHandler.getTlsConnection().getInputStream();
+    public static Body read(ResponseHeaders responseHeaders, TlsConnectionHandle tlsConnectionHandle) throws IOException {
+        InputStream inputStream = tlsConnectionHandle.inputStream();
         if (responseHeaders.isChunked()) {
             LOGGER.debug("Chunked Transfer Encoding detected");
             if (responseHeaders.isGzip()) {
@@ -81,17 +81,17 @@ public class HttpBodyReader {
     }
 
     private static Content readAllChunks(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream chunkLineBuffer = BufferUtils.newByteArrayOutputStream();
         ByteArrayOutputStream chunkBuffer = BufferUtils.newByteArrayOutputStream(1024);
+        ByteArrayOutputStream lineBuffer = BufferUtils.newByteArrayOutputStream();
         int previous = -1;
         while (true) {
             int current = inputStream.read();
             if (current == HttpsUtils.END_OF_STREAM) {
                 break;
             }
-            chunkLineBuffer.write(current);
+            lineBuffer.write(current);
             if (HttpsUtils.isCrLf(previous, current)) {
-                String chunkLine = chunkLineBuffer.toString().trim();
+                String chunkLine = lineBuffer.toString().trim();
                 if (chunkLine.equals("0")) {
                     LOGGER.debug("End of Chunks");
                     inputStream.skipNBytes(inputStream.available());
@@ -101,7 +101,7 @@ public class HttpBodyReader {
                     LOGGER.debug("Chunk size: {} - Hex: {}", chunkSize, chunkLine);
                     chunkBuffer.write(inputStream.readNBytes(chunkSize));
                 }
-                chunkLineBuffer.reset();
+                lineBuffer.reset();
             }
             previous = current;
         }

@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.shared.tls;
+package com.github.mangila.pokedex.shared.https.tls;
 
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.util.Ensure;
