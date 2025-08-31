@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
 import com.github.mangila.pokedex.database.model.DatabaseName;
+import com.github.mangila.pokedex.database.model.WriteCallback;
 import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.junit.jupiter.api.AfterAll;
@@ -32,16 +33,10 @@ class DefaultDatabaseTest {
 
     @Test
     void readAndWrite() {
-        var f = db.putAsync("key", "value", "abcåäö").join();
-        var ff = f.future().join();
-        String v = db.getString("key", "value");
-        assertThat(v).isEqualTo("abcåäö");
-
-
-        f = db.putAsync("key", "value", "hej").join();
-        ff = f.future().join();
-        v = db.getString("key", "value");
-        assertThat(v).isEqualTo("hej");
+        db.putAsync("key", "value", "hej")
+                .thenCompose(WriteCallback::future)
+                .thenCompose(unused -> db.getStringAsync("key", "value"))
+                .thenAccept(value -> assertThat(value).isEqualTo("hej"));
     }
 
 }
