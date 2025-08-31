@@ -3,7 +3,7 @@ package com.github.mangila.pokedex.scheduler.task;
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
-import com.github.mangila.pokedex.scheduler.KeyUriPair;
+import com.github.mangila.pokedex.shared.Pair;
 import com.github.mangila.pokedex.shared.json.model.JsonRoot;
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
@@ -81,20 +81,20 @@ public class InsertSpeciesResponseTask implements Task {
         }
     }
 
-    private static KeyUriPair getEvolutionChainUrl(String key, JsonRoot jsonRoot) {
+    private static Pair<String, PokeApiUri> getEvolutionChainUrl(String key, JsonRoot jsonRoot) {
         String url = jsonRoot.getObject("evolution_chain")
                 .getString("url");
-        return new KeyUriPair(key, PokeApiUri.from(url));
+        return new Pair<>(key, PokeApiUri.from(url));
     }
 
-    private static List<KeyUriPair> getVarietiesUrls(String key, JsonRoot jsonRoot) {
+    private static List<Pair<String, PokeApiUri>> getVarietiesUrls(String key, JsonRoot jsonRoot) {
         return jsonRoot.getArray("varieties")
                 .values()
                 .stream()
                 .map(variety -> PokeApiUri.from(variety.unwrapObject()
                         .getObject("pokemon")
                         .getString("url")))
-                .map(uri -> new KeyUriPair(key, uri))
+                .map(uri -> new Pair<>(key, uri))
                 .toList();
     }
 

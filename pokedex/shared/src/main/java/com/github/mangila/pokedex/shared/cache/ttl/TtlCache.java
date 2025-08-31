@@ -53,7 +53,6 @@ public class TtlCache<K, V> {
     }
 
     public void shutdown() {
-        LOGGER.info("Shutting down Ttl Cache");
         clear();
         executor.shutdown();
     }

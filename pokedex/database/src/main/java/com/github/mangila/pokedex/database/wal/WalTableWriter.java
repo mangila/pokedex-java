@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.WriteOps;
+import com.github.mangila.pokedex.database.engine.WriteOps;
 import com.github.mangila.pokedex.database.model.*;
 
 import java.util.HashMap;
@@ -33,11 +33,16 @@ public record WalTableWriter(WalTable walTable) implements WriteOps {
 
     @Override
     public void delete(Key key) {
-
+        // TODO: iterate over fields and set tombstone flag in metadata and in buffer
     }
 
     @Override
     public void delete(Key key, Field field) {
-
+        // TODO: set tombstone flag in metadata and in buffer
+        walTable.keys.computeIfPresent(key, (k, v) -> {
+            var f = v.get(field);
+            f.setTombstone(true);
+            return v.isEmpty() ? null : v;
+        });
     }
 }

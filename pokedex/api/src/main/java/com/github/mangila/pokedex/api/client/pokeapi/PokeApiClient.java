@@ -87,6 +87,7 @@ public class PokeApiClient {
     }
 
     public void shutdown() {
+        LOGGER.info("Shutting down PokeApiClient");
         jsonClient.shutdown();
         ttlCache.shutdown();
     }

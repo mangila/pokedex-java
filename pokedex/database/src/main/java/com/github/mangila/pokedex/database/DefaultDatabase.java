@@ -1,11 +1,15 @@
 package com.github.mangila.pokedex.database;
 
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
+import com.github.mangila.pokedex.database.engine.Cache;
+import com.github.mangila.pokedex.database.engine.DefaultEngine;
+import com.github.mangila.pokedex.database.engine.Engine;
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Key;
 import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.database.model.WriteCallback;
 import com.github.mangila.pokedex.database.serialization.DefaultSerializer;
+import com.github.mangila.pokedex.database.wal.DefaultWalManager;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 import com.github.mangila.pokedex.shared.util.Ensure;
 import com.github.mangila.pokedex.shared.util.VirtualThreadFactory;
@@ -19,18 +23,19 @@ import java.util.concurrent.ScheduledExecutorService;
 public final class DefaultDatabase implements Database {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDatabase.class);
-    private volatile boolean open = false;
+    private volatile boolean open;
     private final DatabaseConfig config;
     private final ScheduledExecutorService executorPool;
     private final DefaultSerializer serializer;
     private final Engine engine;
 
     public DefaultDatabase(DatabaseConfig config) {
+        this.open = false;
         this.config = config;
         this.executorPool = VirtualThreadFactory.newScheduledThreadPool(1024);
         this.serializer = new DefaultSerializer();
         this.engine = new DefaultEngine(
-                new FileManager(config),
+                new DefaultWalManager(config.databaseName(), config.walConfig()),
                 new Cache(new LruCache<>(config.lruCacheConfig()))
         );
     }

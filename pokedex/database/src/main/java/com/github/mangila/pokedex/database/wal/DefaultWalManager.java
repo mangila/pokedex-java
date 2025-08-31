@@ -66,16 +66,33 @@ public final class DefaultWalManager implements WalManager {
     }
 
     @Override
-    public WriteCallback put(Entry entry) {
-        WriteCallback callback = WriteCallback.newCallback();
-        entryPublisher.submit(new WriteCallbackItem(entry, callback));
-        return callback;
-    }
-
-    @Override
     public Value get(Key key, Field field) {
         return walFileHandle.walTable()
                 .readOps()
                 .get(key, field);
+    }
+
+    @Override
+    public WriteCallback put(Key key, Field field, Value value) {
+        Entry entry = new Entry(key, field, value);
+        WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.PUT);
+        entryPublisher.submit(item);
+        return item.callback();
+    }
+
+    @Override
+    public WriteCallback delete(Key key, Field field) {
+        Entry entry = new Entry(key, field, Value.EMPTY);
+        WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.DELETE_FIELD);
+        entryPublisher.submit(item);
+        return item.callback();
+    }
+
+    @Override
+    public WriteCallback delete(Key key) {
+        Entry entry = new Entry(key, Field.EMPTY, Value.EMPTY);
+        WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.DELETE_KEY);
+        entryPublisher.submit(item);
+        return item.callback();
     }
 }

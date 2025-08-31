@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.database.wal;
 
+import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.database.model.WriteCallbackItem;
 import com.github.mangila.pokedex.shared.SimpleBackgroundThread;
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
@@ -53,11 +54,14 @@ class WriteThread implements SimpleBackgroundThread {
                 break;
             }
             WriteCallbackItem item = queueEntry.unwrapAs(WriteCallbackItem.class);
+            Entry entry = item.entry();
             try {
                 // TODO: buffer check, rotation
-                walFileHandle.walTable()
-                        .writeOps()
-                        .put(item.entry());
+                switch (item.operation()) {
+                    case PUT -> walFileHandle.walTable().writeOps().put(entry);
+                    case DELETE_FIELD -> walFileHandle.walTable().writeOps().delete(entry.key(), entry.field());
+                    case DELETE_KEY -> walFileHandle.walTable().writeOps().delete(entry.key());
+                }
                 writeCount = writeCount + 1;
                 item.callback().future().complete(null);
                 if (writeCount == writeLimitThreshold) {
@@ -68,7 +72,7 @@ class WriteThread implements SimpleBackgroundThread {
                     writeCount = 0;
                 }
             } catch (Exception e) {
-                LOGGER.error("err", e);
+                LOGGER.error("Error when writing {}", entry, e);
             }
 //            try {
 //                writeLock.lock();

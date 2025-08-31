@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.ReadOps;
+import com.github.mangila.pokedex.database.engine.ReadOps;
 import com.github.mangila.pokedex.database.model.*;
 
 import java.util.List;

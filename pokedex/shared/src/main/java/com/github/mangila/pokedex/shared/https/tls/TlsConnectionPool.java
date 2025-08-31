@@ -54,7 +54,6 @@ public class TlsConnectionPool implements AutoCloseable {
 
     @Override
     public void close() {
-        LOGGER.info("Closing connection pool");
         queue.queueIterator()
                 .forEachRemaining(queueEntry -> queueEntry.unwrapAs(TlsConnectionHandle.class)
                 .disconnect());

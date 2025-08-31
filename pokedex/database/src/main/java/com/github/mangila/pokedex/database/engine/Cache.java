@@ -1,10 +1,10 @@
-package com.github.mangila.pokedex.database;
+package com.github.mangila.pokedex.database.engine;
 
 import com.github.mangila.pokedex.database.model.Field;
 import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 
-record Cache(LruCache<Field, Value> cache) {
+public record Cache(LruCache<Field, Value> cache) {
     Value getOrEmpty(Field field) {
         Value value = cache.get(field);
         if (value == null) {

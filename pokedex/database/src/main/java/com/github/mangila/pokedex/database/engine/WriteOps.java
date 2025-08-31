@@ -1,4 +1,4 @@
-package com.github.mangila.pokedex.database;
+package com.github.mangila.pokedex.database.engine;
 
 import com.github.mangila.pokedex.database.model.Entry;
 import com.github.mangila.pokedex.database.model.Field;

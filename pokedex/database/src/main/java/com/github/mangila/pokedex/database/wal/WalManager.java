@@ -1,6 +1,9 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.model.*;
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
+import com.github.mangila.pokedex.database.model.WriteCallback;
 
 public sealed interface WalManager permits DefaultWalManager {
 
@@ -10,7 +13,11 @@ public sealed interface WalManager permits DefaultWalManager {
 
     void flush();
 
-    WriteCallback put(Entry entry);
-
     Value get(Key key, Field field);
+
+    WriteCallback put(Key key, Field field, Value value);
+
+    WriteCallback delete(Key key, Field field);
+
+    WriteCallback delete(Key key);
 }

@@ -1,8 +1,9 @@
 package com.github.mangila.pokedex.scheduler.task;
 
 import com.github.mangila.pokedex.api.client.pokeapi.PokeApiClient;
+import com.github.mangila.pokedex.api.client.pokeapi.PokeApiUri;
 import com.github.mangila.pokedex.api.db.PokemonDatabase;
-import com.github.mangila.pokedex.scheduler.KeyUriPair;
+import com.github.mangila.pokedex.shared.Pair;
 import com.github.mangila.pokedex.shared.queue.BlockingQueue;
 import com.github.mangila.pokedex.shared.queue.QueueEntry;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ public class InsertCriesTask implements Task {
         executor.submit(this);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
@@ -44,7 +46,7 @@ public class InsertCriesTask implements Task {
                 Thread.currentThread().interrupt();
                 break;
             }
-            KeyUriPair uri = queueEntry.unwrapAs(KeyUriPair.class);
+            Pair<String, PokeApiUri> uri = queueEntry.unwrapAs(Pair.class);
         }
     }
 }
