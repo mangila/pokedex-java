@@ -27,8 +27,8 @@ public record WalTableWriter(WalTable walTable) implements WriteOps {
                 EntryMetadata.BoundaryType.VALUE, new OffsetBoundary(fieldEndPosition, valueEndPosition),
                 EntryMetadata.BoundaryType.TOMBSTONE, new OffsetBoundary(valueEndPosition, end)
         );
-        walTable.keys.computeIfAbsent(entry.key(), key -> new ConcurrentHashMap<>()).put(entry.field(),
-                new EntryMetadata(new HashMap<>(boundaries), false));
+        walTable.keys.computeIfAbsent(entry.key(), key -> new ConcurrentHashMap<>())
+                .put(entry.field(), new EntryMetadata(new HashMap<>(boundaries), false));
     }
 
     @Override

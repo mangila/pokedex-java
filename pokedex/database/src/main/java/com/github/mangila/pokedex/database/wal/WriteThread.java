@@ -61,6 +61,7 @@ class WriteThread implements SimpleBackgroundThread {
                 writeCount = writeCount + 1;
                 item.callback().future().complete(null);
                 if (writeCount == writeLimitThreshold) {
+                    LOGGER.info("Write limit reached, flushing");
                     walFileHandle.walTable()
                             .mappedBuffer
                             .sync();

@@ -1,5 +1,6 @@
 package com.github.mangila.pokedex.api.db;
 
+import com.github.mangila.pokedex.database.Database;
 import com.github.mangila.pokedex.database.DefaultDatabase;
 import com.github.mangila.pokedex.database.config.DatabaseConfig;
 import com.github.mangila.pokedex.database.model.DatabaseName;
@@ -38,13 +39,13 @@ public class PokemonDatabase {
         PokemonDatabase.config = config;
     }
 
-    private final DefaultDatabase instance;
+    private final Database instance;
 
     private PokemonDatabase(DatabaseConfig config) {
         this.instance = new DefaultDatabase(config);
     }
 
-    public DefaultDatabase instance() {
+    public Database instance() {
         return instance;
     }
 }
