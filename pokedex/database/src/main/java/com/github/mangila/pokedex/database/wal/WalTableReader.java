@@ -6,7 +6,7 @@ import com.github.mangila.pokedex.database.model.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record WalFileReader(WalTable walTable) implements ReadOps {
+public record WalTableReader(WalTable walTable) implements ReadOps {
 
     @Override
     public Value get(Key key, Field field) {

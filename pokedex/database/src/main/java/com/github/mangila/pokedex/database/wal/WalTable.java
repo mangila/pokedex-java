@@ -12,15 +12,15 @@ public class WalTable {
 
     final ConcurrentHashMap<Key, ConcurrentHashMap<Field, EntryMetadata>> keys;
     final MappedBuffer mappedBuffer;
-    private final WalFileReader read;
-    private final WalFileWriter write;
+    private final WalTableReader read;
+    private final WalTableWriter write;
 
     public WalTable(ConcurrentHashMap<Key, ConcurrentHashMap<Field, EntryMetadata>> keys,
                     MappedBuffer mappedBuffer) {
         this.keys = keys;
         this.mappedBuffer = mappedBuffer;
-        this.read = new WalFileReader(this);
-        this.write = new WalFileWriter(this);
+        this.read = new WalTableReader(this);
+        this.write = new WalTableWriter(this);
     }
 
     ReadOps readOps() {

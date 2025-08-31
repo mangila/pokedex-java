@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public record WalFileWriter(WalTable walTable) implements WriteOps {
+public record WalTableWriter(WalTable walTable) implements WriteOps {
 
     @Override
     public void put(Entry entry) {
