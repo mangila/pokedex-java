@@ -17,14 +17,16 @@ public final class DefaultWalManager implements WalManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultWalManager.class);
 
+    private final DatabaseName databaseName;
     private final WalConfig config;
     private final EntryPublisher entryPublisher;
     private final WriteSubscriber writeSubscriber;
     private final WalFileHandle walFileHandle;
     private final WriteThread writeThread;
 
-    public DefaultWalManager(WalConfig config) {
+    public DefaultWalManager(DatabaseName databaseName, WalConfig config) {
         // TODO: snappy compression??
+        this.databaseName = databaseName;
         this.config = config;
         BlockingQueue writeQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_QUEUE);
         BlockingQueue bigObjectWriteQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_BIG_OBJECT_QUEUE);
@@ -39,7 +41,7 @@ public final class DefaultWalManager implements WalManager {
         LOGGER.info("Opening WAL Manager");
         try {
             // TEMP: do replay here
-            walFileHandle.setWalFile(Path.of("hej.wal"), config.walFileSize());
+            walFileHandle.setWalFile(Path.of(databaseName.value().concat(".wal")), config.walFileSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

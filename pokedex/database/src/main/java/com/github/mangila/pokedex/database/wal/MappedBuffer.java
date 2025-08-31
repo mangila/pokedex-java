@@ -95,17 +95,10 @@ public class MappedBuffer {
         return inner.position();
     }
 
-    public void fill(Entry entry) {
-        put(entry.key());
-        put(entry.field());
-        put(entry.value());
-        put((byte) 0);
-    }
-
-    public ByteBuffer get(OffsetBoundary boundary) {
+    public Buffer get(OffsetBoundary boundary) {
         ByteBuffer dup = inner.duplicate();
         dup.position(boundary.start());
         dup.limit(boundary.end());
-        return dup.slice();
+        return Buffer.from(dup.slice());
     }
 }

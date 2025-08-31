@@ -1,12 +1,11 @@
 package com.github.mangila.pokedex.database;
 
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 import com.github.mangila.pokedex.database.model.WriteCallback;
 
-import java.util.concurrent.CompletableFuture;
-
 sealed interface Engine permits DefaultEngine {
-
-    boolean isOpen();
 
     void open();
 
@@ -16,7 +15,7 @@ sealed interface Engine permits DefaultEngine {
 
     void flush();
 
-    WriteCallback put(String key, String field, byte[] value);
+    Value get(Key key, Field field);
 
-    CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value);
+    WriteCallback put(Key key, Field field, Value value);
 }

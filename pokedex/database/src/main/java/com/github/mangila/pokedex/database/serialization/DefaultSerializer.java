@@ -24,4 +24,16 @@ public class DefaultSerializer {
     public byte[] serialize(String s) {
         return stringUtf8Serializer.serialize(s);
     }
+
+    public BigInteger deserializeBigInteger(byte[] bytes) {
+        return bigIntegerSerializer.deserialize(bytes);
+    }
+
+    public Boolean deserializeBoolean(byte[] bytes) {
+        return booleanSerializer.deserialize(bytes);
+    }
+
+    public String deserializeString(byte[] bytes) {
+        return stringUtf8Serializer.deserialize(bytes);
+    }
 }

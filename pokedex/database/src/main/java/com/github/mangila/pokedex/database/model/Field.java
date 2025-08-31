@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.database.model;
 
 import com.github.mangila.pokedex.shared.util.Ensure;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public record Field(String value) {
     public static final Field EMPTY = new Field("EMPTY");
@@ -24,6 +24,6 @@ public record Field(String value) {
     }
 
     public byte[] getBytes() {
-        return value.getBytes(Charset.defaultCharset());
+        return value.getBytes(StandardCharsets.UTF_8);
     }
 }

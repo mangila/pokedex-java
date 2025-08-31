@@ -1,61 +1,31 @@
 package com.github.mangila.pokedex.database;
 
-import com.github.mangila.pokedex.database.config.DatabaseConfig;
 import com.github.mangila.pokedex.database.model.WriteCallback;
-import com.github.mangila.pokedex.database.serialization.DefaultSerializer;
-import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 
 import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
 
-public class Database {
+public sealed interface Database permits DefaultDatabase {
 
-    private final DatabaseConfig config;
-    private final DefaultSerializer serializer;
-    private final Engine engine;
+    void open();
 
-    public Database(DatabaseConfig config) {
-        this.config = config;
-        this.serializer = new DefaultSerializer();
-        this.engine = new DefaultEngine(
-                new FileManager(config),
-                new Cache(new LruCache<>(config.lruCacheConfig()))
-        );
-    }
+    boolean isOpen();
 
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, String value) {
-        return engine.putAsync(key, field, serializer.serialize(value));
-    }
+    void close();
 
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, Boolean value) {
-        return engine.putAsync(key, field, serializer.serialize(value));
-    }
+    void flush();
 
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, BigInteger value) {
-        return engine.putAsync(key, field, serializer.serialize(value));
-    }
+    String getString(String key, String field);
 
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value) {
-        return engine.putAsync(key, field, value);
-    }
+    CompletableFuture<String> getStringAsync(String key, String field);
 
-    public void flush() {
-        engine.flush();
-    }
+    WriteCallback put(String key, String field, byte[] value);
 
-    public boolean isOpen() {
-        return engine.isOpen();
-    }
+    CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value);
 
-    public void open() {
-        engine.open();
-    }
+    CompletableFuture<WriteCallback> putAsync(String key, String field, String value);
 
-    public void close() {
-        engine.close();
-    }
+    CompletableFuture<WriteCallback> putAsync(String key, String field, Boolean value);
 
-    public DatabaseConfig config() {
-        return config;
-    }
+    CompletableFuture<WriteCallback> putAsync(String key, String field, BigInteger value);
 }

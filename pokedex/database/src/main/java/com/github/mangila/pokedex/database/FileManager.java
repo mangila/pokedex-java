@@ -9,7 +9,7 @@ class FileManager {
     private final WalManager wal;
 
     FileManager(DatabaseConfig config) {
-        this.wal = new DefaultWalManager(config.walConfig());
+        this.wal = new DefaultWalManager(config.databaseName(), config.walConfig());
     }
 
     WalManager wal() {

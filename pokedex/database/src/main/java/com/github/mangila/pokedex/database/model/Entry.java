@@ -9,6 +9,6 @@ public record Entry(Key key, Field field, Value value) {
      * @return the total buffer length of this entry
      */
     public int bufferLength() {
-        return key.bufferLength() + field.getBufferSize() + value.getBufferSize() + 1;
+        return key.bufferSize() + field.getBufferSize() + value.getBufferSize() + 1;
     }
 }

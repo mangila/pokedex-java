@@ -2,7 +2,7 @@ package com.github.mangila.pokedex.database.model;
 
 import com.github.mangila.pokedex.shared.util.Ensure;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public record Key(String value) {
 
@@ -20,11 +20,11 @@ public record Key(String value) {
         return getBytes().length;
     }
 
-    public int bufferLength() {
+    public int bufferSize() {
         return Short.BYTES + Integer.BYTES + length();
     }
 
     public byte[] getBytes() {
-        return value.getBytes(Charset.defaultCharset());
+        return value.getBytes(StandardCharsets.UTF_8);
     }
 }

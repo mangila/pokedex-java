@@ -1,45 +1,35 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.ReadOps;
-import com.github.mangila.pokedex.database.model.Field;
-import com.github.mangila.pokedex.database.model.Key;
-import com.github.mangila.pokedex.database.model.Metadata;
-import com.github.mangila.pokedex.database.model.Value;
+import com.github.mangila.pokedex.database.model.*;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public record WalFileReader(WalTable walTable) implements ReadOps {
 
     @Override
     public Value get(Key key, Field field) {
-        Map<Field, Metadata> fieldToMetadata = walTable.offsets.get(key);
-        if (fieldToMetadata == null) {
-            return null;
+        ConcurrentHashMap<Field, EntryMetadata> fields = walTable.keys.get(key);
+        if (fields == null) {
+            return Value.EMPTY;
         }
-        Metadata metadata = fieldToMetadata.get(field);
+        EntryMetadata metadata = fields.get(field);
         if (metadata == null) {
-            return null;
+            return Value.EMPTY;
         }
-        if (metadata.tombstone()) {
-            return null;
-        }
-        walTable.mappedBuffer.get(metadata.boundary());
-        return Value.EMPTY;
+        Buffer buffer = walTable.mappedBuffer.get(metadata.getBoundary(EntryMetadata.BoundaryType.VALUE));
+        byte[] bytes = buffer.getValue();
+        return new Value(bytes);
     }
 
     @Override
     public List<Key> keys() {
-        return walTable.offsets.keySet()
-                .stream()
-                .toList();
+        return List.copyOf(walTable.keys.keySet());
     }
 
     @Override
     public List<Field> fields(Key key) {
-        return walTable.offsets.get(key)
-                .keySet()
-                .stream()
-                .toList();
+        return List.of();
     }
 }
