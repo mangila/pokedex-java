@@ -9,7 +9,7 @@ import java.nio.file.Path;
 
 class WalFile {
     private static final int DEFAULT_SIZE = 1024 * 32;
-    // 2GB is the max size for mmap, but we want to avoid OOMs.
+    // 2GB is the max size for Java Memory Mapped File, but we want to avoid OOMs.
     private static final int MAX_SIZE_ONE_GB = 1024 * 1024 * 1024;
     private final Path path;
     private final int totalSize;
