@@ -33,10 +33,12 @@ class DefaultDatabaseTest {
 
     @Test
     void readAndWrite() {
-        db.putAsync("key", "value", "hej")
-                .thenCompose(WriteCallback::future)
-                .thenCompose(unused -> db.getStringAsync("key", "value"))
-                .thenAccept(value -> assertThat(value).isEqualTo("hej"));
+        for (int i = 0; i < 100; i++) {
+            db.putAsync("key", "value", "hej")
+                    .thenCompose(WriteCallback::future)
+                    .thenCompose(unused -> db.getStringAsync("key", "value"))
+                    .thenAccept(value -> assertThat(value).isEqualTo("hej"));
+        }
     }
 
 }

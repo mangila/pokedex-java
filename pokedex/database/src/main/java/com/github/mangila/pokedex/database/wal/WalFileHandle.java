@@ -13,7 +13,7 @@ class WalFileHandle {
     private WalFile walFile;
     private WalTable walTable;
 
-    void setWalFile(Path path, long size) throws IOException {
+    void setWalFile(Path path, int size) throws IOException {
         this.walFile = new WalFile(path, size);
         this.walTable = new WalTable(new ConcurrentHashMap<>(), walFile.getMappedBuffer());
     }

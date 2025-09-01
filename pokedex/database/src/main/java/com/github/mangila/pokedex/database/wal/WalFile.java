@@ -8,16 +8,19 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 
 class WalFile {
-    private static final long DEFAULT_SIZE = 1024 * 32;
+    private static final int DEFAULT_SIZE = 1024 * 32;
+    // Actually, 2GB is the max size for mmap, but we want to avoid OOMs.
+    private static final int MAX_SIZE_ONE_GB = 1024 * 1024 * 1024;
     private final Path path;
-    private final long totalSize;
+    private final int totalSize;
     private final RandomAccessFile file;
     private final FileChannel fileChannel;
     private final MappedBuffer mappedBuffer;
 
-    WalFile(Path path, long totalSize) throws IOException {
+    WalFile(Path path, int totalSize) throws IOException {
         Ensure.notNull(path);
         Ensure.min(0, totalSize);
+        Ensure.max(MAX_SIZE_ONE_GB, totalSize);
         this.path = path;
         this.totalSize = totalSize;
         this.file = new RandomAccessFile(path.toFile(), "rw");
