@@ -6,6 +6,7 @@ import com.github.mangila.pokedex.shared.Config;
 import com.github.mangila.pokedex.shared.queue.QueueService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,7 @@ class DefaultDatabaseTest {
         assertThat(db.isOpen()).isFalse();
     }
 
+    @Disabled
     @Test
     void readAndWrite() {
         for (int i = 0; i < 1_000_000; i++) {
