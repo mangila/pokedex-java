@@ -1,6 +1,6 @@
 package com.github.mangila.pokedex.api.client.pokeapi.response;
 
-import com.github.mangila.pokedex.shared.https.client.json.JsonResponse;
+import com.github.mangila.pokedex.shared.https.http.json.JsonResponse;
 import org.jspecify.annotations.Nullable;
 
 public class PokeApiClientException extends RuntimeException {

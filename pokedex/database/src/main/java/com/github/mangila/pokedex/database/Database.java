@@ -1,49 +1,31 @@
 package com.github.mangila.pokedex.database;
 
-import com.github.mangila.pokedex.database.config.DatabaseConfig;
 import com.github.mangila.pokedex.database.model.WriteCallback;
-import com.github.mangila.pokedex.shared.cache.lru.LruCache;
 
+import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
 
-public class Database {
+public sealed interface Database permits DefaultDatabase {
 
-    private final DatabaseConfig config;
-    private final Engine engine;
+    void open();
 
-    public Database(DatabaseConfig config) {
-        this.config = config;
-        this.engine = new DefaultEngine(
-                new FileManager(config),
-                new Cache(new LruCache<>(config.lruCacheConfig()))
-        );
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            flush();
-            close();
-        }));
-    }
+    boolean isOpen();
 
-    private void flush() {
-        engine.flush();
-    }
+    void close();
 
-    public boolean isOpen() {
-        return engine.isOpen();
-    }
+    void flush();
 
-    public void open() {
-        engine.open();
-    }
+    String getString(String key, String field);
 
-    public void close() {
-        engine.close();
-    }
+    CompletableFuture<String> getStringAsync(String key, String field);
 
-    public CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value) {
-        return engine.putAsync(key, field, value);
-    }
+    WriteCallback put(String key, String field, byte[] value);
 
-    public DatabaseConfig config() {
-        return config;
-    }
+    CompletableFuture<WriteCallback> putAsync(String key, String field, byte[] value);
+
+    CompletableFuture<WriteCallback> putAsync(String key, String field, String value);
+
+    CompletableFuture<WriteCallback> putAsync(String key, String field, Boolean value);
+
+    CompletableFuture<WriteCallback> putAsync(String key, String field, BigInteger value);
 }

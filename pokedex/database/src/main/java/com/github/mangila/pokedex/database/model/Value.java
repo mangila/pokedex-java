@@ -8,7 +8,7 @@ public record Value(byte[] value) {
     public static final short MAGIC_NUMBER = 3;
 
     public Value {
-        Ensure.notNull(value, "value must not be null");
+        Ensure.notNull(value, "entry must not be null");
     }
 
     public int getBufferSize() {

@@ -1,4 +1,5 @@
 package com.github.mangila.pokedex.database.config;
 
-public record WalConfig(long thresholdLimit, long thresholdSize) {
+public record WalConfig(int thresholdWriteLimit,
+                        int walFileSize) {
 }

@@ -2,6 +2,7 @@ package com.github.mangila.pokedex.shared.queue;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultQueue implements Queue {
@@ -13,6 +14,11 @@ public class DefaultQueue implements Queue {
         this.name = name;
         this.queue = new ConcurrentLinkedQueue<>();
         this.dlq = new ConcurrentLinkedQueue<>();
+    }
+
+    @Override
+    public QueueName name() {
+        return name;
     }
 
     @Override
@@ -44,5 +50,10 @@ public class DefaultQueue implements Queue {
     public void clear() {
         queue.clear();
         dlq.clear();
+    }
+
+    @Override
+    public Iterator<QueueEntry> queueIterator() {
+        return queue.iterator();
     }
 }

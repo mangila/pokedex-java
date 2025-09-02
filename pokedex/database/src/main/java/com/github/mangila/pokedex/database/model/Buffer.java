@@ -15,6 +15,10 @@ public record Buffer(ByteBuffer value) {
         return new Buffer(BufferUtils.newByteBuffer(capacity));
     }
 
+    public static Buffer from(ByteBuffer buffer) {
+        return new Buffer(buffer);
+    }
+
     public static Buffer fromDirect(int capacity) {
         return new Buffer(BufferUtils.newByteBufferDirect(capacity));
     }
@@ -29,6 +33,10 @@ public record Buffer(ByteBuffer value) {
 
     public boolean isEmpty() {
         return remaining() == 0;
+    }
+
+    public short getShort() {
+        return value.getShort();
     }
 
     public int getInt() {
@@ -75,16 +83,44 @@ public record Buffer(ByteBuffer value) {
         put(key.getBytes());
     }
 
+    public byte get() {
+        return value.get();
+    }
+
+    public byte[] get(Key key) {
+        int magic = getShort();
+        Ensure.isTrue(magic == Key.MAGIC_NUMBER, "Not valid Key magic number");
+        int len = getInt();
+        Ensure.isTrue(len == key.length(), "Key length does not match");
+        return getArray(len);
+    }
+
     public void put(Field field) {
         putShort(Field.MAGIC_NUMBER);
         putInt(field.length());
         put(field.getBytes());
     }
 
+    public byte[] get(Field field) {
+        int magic = getShort();
+        Ensure.isTrue(magic == Field.MAGIC_NUMBER, "Not valid Field magic number");
+        int len = getInt();
+        Ensure.isTrue(len == field.length(), "Field length does not match");
+        return getArray(len);
+    }
+
     public void put(Value value) {
         putShort(Value.MAGIC_NUMBER);
         putInt(value.length());
         put(value.value());
+    }
+
+    public byte[] getValue() {
+        int magic = getShort();
+        Ensure.isTrue(magic == Value.MAGIC_NUMBER, "Not valid Value magic number");
+        int len = getInt();
+        Ensure.isTrue(len == value.remaining(), "Value length does not match");
+        return getArray(len);
     }
 
     public void put(Buffer b) {

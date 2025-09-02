@@ -1,70 +1,55 @@
 package com.github.mangila.pokedex.database.wal;
 
-import com.github.mangila.pokedex.database.model.Buffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.concurrent.atomic.AtomicLong;
 
 class WalFile {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(WalFile.class);
-
+    private static final int DEFAULT_SIZE = 1024 * 32;
+    // 2GB is the max size for Java Memory Mapped File, but we want to avoid OOMs.
+    private static final int MAX_SIZE_ONE_GB = 1024 * 1024 * 1024;
     private final Path path;
-    private final AtomicLong size;
-    private final WalFileChannel walFileChannel;
+    private final int totalSize;
+    private final RandomAccessFile file;
+    private final FileChannel fileChannel;
+    private final MappedBuffer mappedBuffer;
 
-    WalFile(Path path) throws IOException {
+    WalFile(Path path, int totalSize) throws IOException {
+        Ensure.notNull(path);
+        Ensure.min(0, totalSize);
+        Ensure.max(MAX_SIZE_ONE_GB, totalSize);
         this.path = path;
-        this.walFileChannel = new WalFileChannel(FileChannel.open(
-                path,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE,
-                StandardOpenOption.APPEND,
-                StandardOpenOption.SYNC)
-        );
-        this.size = new AtomicLong(walFileChannel.size());
+        this.totalSize = totalSize;
+        this.file = new RandomAccessFile(path.toFile(), "rw");
+        file.setLength(totalSize);
+        this.fileChannel = file.getChannel();
+        this.mappedBuffer = new MappedBuffer(fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalSize));
     }
 
-    void write(Buffer buffer) throws IOException {
-        int writtenBytes = walFileChannel.write(buffer);
-        if (buffer.remaining() != 0) {
-            LOGGER.error("Not all bytes written: {} bytes written, {} bytes remaining", writtenBytes, buffer.remaining());
-            // TODO: write the missing bytes to the file
-            throw new IllegalStateException("Not all bytes written: " + writtenBytes);
-        }
-        size.addAndGet(writtenBytes);
+    public WalFile(Path path) throws IOException {
+        this(path, DEFAULT_SIZE);
     }
 
-    public long size() {
-        return size.get();
-    }
-
-    public Path path() {
+    public Path getPath() {
         return path;
     }
 
-    public void close() throws IOException {
-        walFileChannel.close();
+    public long getTotalSize() {
+        return totalSize;
     }
 
-    private record WalFileChannel(FileChannel fileChannel) {
-
-        int write(Buffer buffer) throws IOException {
-            return fileChannel.write(buffer.value());
-        }
-
-        long size() throws IOException {
-            return fileChannel.size();
-        }
-
-        void close() throws IOException {
-            fileChannel.close();
-        }
+    public RandomAccessFile getFile() {
+        return file;
     }
 
+    public FileChannel getFileChannel() {
+        return fileChannel;
+    }
+
+    public MappedBuffer getMappedBuffer() {
+        return mappedBuffer;
+    }
 }

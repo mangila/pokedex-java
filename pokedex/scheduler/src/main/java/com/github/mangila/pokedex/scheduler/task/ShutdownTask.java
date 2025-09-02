@@ -13,7 +13,7 @@ public record ShutdownTask() implements Task {
 
     @Override
     public void schedule(ScheduledExecutorService executor) {
-        executor.schedule(this, 3, TimeUnit.MINUTES);
+        executor.schedule(this, 20, TimeUnit.SECONDS);
     }
 
     @Override
