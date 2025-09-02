@@ -43,7 +43,7 @@ class WriteThread implements SimpleBackgroundThread {
 
     @Override
     public void run() {
-        int writeCount = 0;
+        int writeLimit = 0;
         while (!Thread.currentThread().isInterrupted()) {
             QueueEntry queueEntry;
             try {
@@ -55,50 +55,20 @@ class WriteThread implements SimpleBackgroundThread {
             }
             WriteCallbackItem item = queueEntry.unwrapAs(WriteCallbackItem.class);
             Entry entry = item.entry();
+            walFileHandle.walTable().writeOps().put(entry);
             try {
-                // TODO: buffer check, rotation
-                switch (item.operation()) {
-                    case PUT -> walFileHandle.walTable().writeOps().put(entry);
-                    case DELETE_FIELD -> walFileHandle.walTable().writeOps().delete(entry.key(), entry.field());
-                    case DELETE_KEY -> walFileHandle.walTable().writeOps().delete(entry.key());
-                }
-                writeCount = writeCount + 1;
                 item.callback().future().complete(null);
-                if (writeCount == writeLimitThreshold) {
+                writeLimit += entry.bufferLength();
+                if (writeLimit == writeLimitThreshold) {
                     LOGGER.info("Write limit reached, flushing");
                     walFileHandle.walTable()
                             .mappedBuffer
                             .sync();
-                    writeCount = 0;
+                    writeLimit = 0;
                 }
             } catch (Exception e) {
                 LOGGER.error("Error when writing {}", entry, e);
             }
-//            try {
-//                writeLock.lock();
-//                if (walFileHandle.putIfHasRemaining(item.entry())) {
-//                    item.callback().future().complete(null);
-//                    if (LIMIT_THRESHOLD.incrementAndGet() == 50) {
-//                        LOGGER.info("Limit reached, flushing");
-//                        syncThread.submit(() -> walFile.sync());
-//                        LIMIT_THRESHOLD.set(0);
-//                    }
-//                } else {
-//                    walFile.sync();
-//                    String name = walFile.path().getFileName().toString();
-//                    walFile.mark();
-//                    walFile.close();
-//                    walFile = new WalFile(Path.of("active-".concat(name)), walFile.totalSize());
-//                    walFile.open();
-//                    walFile.put(item.entry());
-//                    item.callback().future().complete(null);
-//                }
-//            } catch (Exception e) {
-//                LOGGER.error("Failed to insert to {}", walFile.path(), e);
-//                item.callback().future().completeExceptionally(e);
-//            } finally {
-//                writeLock.unlock();
-//            }
         }
     }
 }

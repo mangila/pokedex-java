@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
-class EntryPublisher implements Flow.Publisher<WriteCallbackItem> {
+class WritePublisher implements Flow.Publisher<WriteCallbackItem> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntryPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WritePublisher.class);
     private final SubmissionPublisher<WriteCallbackItem> publisher;
 
-    EntryPublisher() {
+    WritePublisher() {
         this.publisher = new SubmissionPublisher<>(VirtualThreadFactory.THREAD_PER_TASK_EXECUTOR, Flow.defaultBufferSize());
     }
 

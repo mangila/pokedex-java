@@ -1,7 +1,10 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.engine.ReadOps;
-import com.github.mangila.pokedex.database.model.*;
+import com.github.mangila.pokedex.database.model.EntryMetadata;
+import com.github.mangila.pokedex.database.model.Field;
+import com.github.mangila.pokedex.database.model.Key;
+import com.github.mangila.pokedex.database.model.Value;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +21,7 @@ public record WalTableReader(WalTable walTable) implements ReadOps {
         if (metadata == null) {
             return Value.EMPTY;
         }
-        Buffer buffer = walTable.mappedBuffer.get(metadata.getBoundary(EntryMetadata.BoundaryType.VALUE));
+        MappedBuffer buffer = walTable.mappedBuffer.get(metadata.getBoundary(EntryMetadata.BoundaryType.VALUE));
         byte[] bytes = buffer.getValue();
         return new Value(bytes);
     }

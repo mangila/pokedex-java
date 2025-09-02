@@ -15,7 +15,7 @@ public final class Config {
     public static final int POKEAPI_PORT = 443;
     public static final int TLS_POOL_MAX_CONNECTIONS = 25;
     // the max count is 1025
-    public static final int POKEMON_LIMIT = 9;
+    public static final int POKEMON_LIMIT = 1025;
     public static final QueueName TLS_CONNECTION_POOL_QUEUE = new QueueName("tls-connection-pool-queue");
     public static final QueueName POKEMON_SPECIES_URL_QUEUE = new QueueName("pokemon-species-url-queue");
     public static final QueueName POKEMON_VARIETY_URL_QUEUE = new QueueName("pokemon-variety-url-queue");

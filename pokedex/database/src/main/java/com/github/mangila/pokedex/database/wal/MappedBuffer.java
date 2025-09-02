@@ -1,9 +1,9 @@
 package com.github.mangila.pokedex.database.wal;
 
 import com.github.mangila.pokedex.database.model.*;
+import com.github.mangila.pokedex.shared.util.Ensure;
 
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 
 public class MappedBuffer {
@@ -91,14 +91,41 @@ public class MappedBuffer {
         inner.load();
     }
 
+    public byte[] getValue() {
+        int magic = getShort();
+        Ensure.isTrue(magic == Value.MAGIC_NUMBER, "Not valid Value magic number");
+        int len = getInt();
+        Ensure.isTrue(len == inner.remaining(), "Value length does not match");
+        return getArray(len);
+    }
+
+    private byte[] getArray(int len) {
+        byte[] array = new byte[len];
+        inner.get(array);
+        return array;
+    }
+
+    private int getInt() {
+        return inner.getInt();
+    }
+
+    private short getShort() {
+        return inner.getShort();
+    }
+
     public int position() {
         return inner.position();
     }
 
-    public Buffer get(OffsetBoundary boundary) {
-        ByteBuffer dup = inner.duplicate();
-        dup.position(boundary.start());
-        dup.limit(boundary.end());
-        return Buffer.from(dup.slice());
+    public MappedBuffer get(OffsetBoundary boundary) {
+        return slice(boundary);
+
+    }
+
+    public MappedBuffer slice(OffsetBoundary boundary) {
+        return new MappedBuffer(inner.duplicate()
+                .position(boundary.start())
+                .limit(boundary.end())
+                .slice());
     }
 }

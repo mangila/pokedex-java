@@ -19,7 +19,7 @@ public final class DefaultWalManager implements WalManager {
 
     private final DatabaseName databaseName;
     private final WalConfig config;
-    private final EntryPublisher entryPublisher;
+    private final WritePublisher writePublisher;
     private final WriteSubscriber writeSubscriber;
     private final WalFileHandle walFileHandle;
     private final WriteThread writeThread;
@@ -30,7 +30,7 @@ public final class DefaultWalManager implements WalManager {
         this.config = config;
         BlockingQueue writeQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_QUEUE);
         BlockingQueue bigObjectWriteQueue = QueueService.getInstance().getBlockingQueue(DATABASE_WAL_WRITE_BIG_OBJECT_QUEUE);
-        this.entryPublisher = new EntryPublisher();
+        this.writePublisher = new WritePublisher();
         this.writeSubscriber = new WriteSubscriber(writeQueue, bigObjectWriteQueue);
         this.walFileHandle = new WalFileHandle();
         this.writeThread = new WriteThread(config.thresholdWriteLimit(), walFileHandle, writeQueue);
@@ -45,14 +45,15 @@ public final class DefaultWalManager implements WalManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        entryPublisher.subscribe(writeSubscriber);
+        walFileHandle.walTable().mappedBuffer.load();
+        writePublisher.subscribe(writeSubscriber);
         writeThread.schedule();
     }
 
     @Override
     public void close() {
         LOGGER.info("Closing WAL Manager");
-        entryPublisher.close();
+        writePublisher.close();
         writeThread.shutdown();
         flush();
     }
@@ -76,7 +77,7 @@ public final class DefaultWalManager implements WalManager {
     public WriteCallback put(Key key, Field field, Value value) {
         Entry entry = new Entry(key, field, value);
         WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.PUT);
-        entryPublisher.submit(item);
+        writePublisher.submit(item);
         return item.callback();
     }
 
@@ -84,7 +85,7 @@ public final class DefaultWalManager implements WalManager {
     public WriteCallback delete(Key key, Field field) {
         Entry entry = new Entry(key, field, Value.EMPTY);
         WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.DELETE_FIELD);
-        entryPublisher.submit(item);
+        writePublisher.submit(item);
         return item.callback();
     }
 
@@ -92,7 +93,7 @@ public final class DefaultWalManager implements WalManager {
     public WriteCallback delete(Key key) {
         Entry entry = new Entry(key, Field.EMPTY, Value.EMPTY);
         WriteCallbackItem item = WriteCallbackItem.newItem(entry, WriteOperation.DELETE_KEY);
-        entryPublisher.submit(item);
+        writePublisher.submit(item);
         return item.callback();
     }
 }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 public interface Queue {
 
     QueueName name();
+
     boolean isEmpty();
 
     boolean isDlqEmpty();
