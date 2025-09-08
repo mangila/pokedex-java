@@ -1,11 +1,20 @@
 # Pokedex App
 
-Documentation about the /pokedex/app module
+The app module is the production entry point for the Pokedex application. It wires all other modules together and owns the runtime lifecycle.
 
-The app module is the main entry point for the Pokedex application.
+What it does:
+- Initializes named blocking queues used across modules.
+- Configures singletons: PokemonDatabase and PokeApiClient with default settings.
+- Starts the Scheduler and registers domain tasks.
+- Blocks the main thread until a shutdown signal is enqueued.
+- Registers a JVM shutdown hook to cleanup resources.
 
-It bootstraps all the necessary parts and starts the application.
+Key classes:
+- com.github.mangila.pokedex.app.Application (main)
+- com.github.mangila.pokedex.app.Bootstrap
 
-It uses an infinite while loop to keep the application running with a parked thread, to not burn CPU cycles.
-
-Runs a JVM shutdown hook to clean up resources.
+Shutdown order:
+1) PokeApiClient.shutdown()
+2) Scheduler.shutdown()
+3) PokemonDatabase.instance().close()
+4) VirtualThreadFactory.terminateGracefully(...)

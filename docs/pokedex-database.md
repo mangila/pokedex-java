@@ -1,19 +1,30 @@
 # Pokedex Database
 
-Documentation about the /pokedex/database module
+The Database module implements a lightweight, embedded MultiMap key -> field -> value store with high throughput and low latency, inspired by RocksDB and Redis Hash.
 
-## Database
+Characteristics:
+- Write-Ahead Log (WAL) per table with memory-mapped files for fast IO.
+- Append-only WAL writes, with background compression of big objects.
+- In-memory indexes and caches backed by off-heap buffers.
+- Event-driven write pipeline with publisher/subscriber threads.
 
-Inspired by [RocksDB](https://rocksdb.org/) and [Redis Hash](https://redis.io/glossary/redis-hashes/)
+Key packages:
+- com.github.mangila.pokedex.database (Database, DefaultDatabase)
+- com.github.mangila.pokedex.database.engine (Engine, ReadOps, WriteOps, Cache)
+- com.github.mangila.pokedex.database.model (Key, Field, Value, Entry, Metadata, etc.)
+- com.github.mangila.pokedex.database.wal (WalManager, WalTableReader/Writer, MappedBuffer, WalFileHandle, etc.)
+- com.github.mangila.pokedex.database.config (DatabaseConfig, WalConfig)
 
-High throughput, low latency. With the cost of less durability and higher RAM usage.
+Lifecycle:
+- Database.open() initializes the engine and WAL tables.
+- Database.close() flushes outstanding writes and closes mapped files.
 
-### PUT flow
+Typical flows (high-level):
+- PUT: enqueue WriteOperation -> WAL append -> in-memory index update.
+- GET: locate Key/Field in index -> read from cache or WAL region via MappedBuffer.
+- DELETE: mark tombstone in WAL -> index eviction handled by engine.
+- KEYS/FIELDS: iterate index structures and stream results.
 
-### GET flow
-
-### DELETE flow
-
-### GET KEYS flow
-
-### GET FIELDS flow
+Caveats:
+- Optimized for read/write throughput; durability depends on WAL flush policies and OS page cache.
+- Larger objects are compressed through a dedicated queue to keep append path fast.
